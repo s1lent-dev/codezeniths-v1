@@ -1,0 +1,28 @@
+model Notification {
+  id        String             @id @default(uuid(7)) @db.Uuid
+  userId    String?            @db.Uuid
+  type      String
+  title     String
+  message   String
+  read      Boolean            @default(false)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  user      User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reads     NotificationRead[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("notification")
+}
+
+model NotificationRead {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  userId         String       @db.Uuid
+  notificationId String       @db.Uuid
+  readAt         DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, notificationId])
+  @@map("notification_read")
+}

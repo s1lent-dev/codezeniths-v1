@@ -1,0 +1,14 @@
+model Tag {
+  id          String       @id @default(uuid(7)) @db.Uuid
+  name        String
+  slug        String       @unique
+  description String?
+  level       Level?
+  moduleId    String       @db.Uuid
+  module      Module       @relation(fields: [moduleId], references: [id])
+  problems    ProblemTag[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("tag")
+}

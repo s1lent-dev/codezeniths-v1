@@ -1,0 +1,26 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="56" height="56" fill="url(#paint0_linear_605_49291)"/>
+<rect x="9.25" y="6.25" width="37.5" height="9.5" rx="1.75" fill="#9A67FF" fill-opacity="0.5"/>
+<rect x="9.25" y="6.25" width="37.5" height="9.5" rx="1.75" stroke="#9C74F4" stroke-width="0.5"/>
+<circle cx="14" cy="11" r="2" fill="#9A67FF" fill-opacity="0.5"/>
+<rect x="33" y="9" width="12" height="4" rx="1" fill="#9A67FF"/>
+<rect x="9.25" y="18.25" width="37.5" height="9.5" rx="1.75" fill="#7C34FC" fill-opacity="0.5"/>
+<rect x="9.25" y="18.25" width="37.5" height="9.5" rx="1.75" stroke="#7B47EF" stroke-width="0.5"/>
+<circle cx="14" cy="23" r="2" fill="#9444F4" fill-opacity="0.5"/>
+<rect x="33" y="21" width="12" height="4" rx="1" fill="#7C34FC"/>
+<rect x="9.25" y="30.25" width="37.5" height="7" rx="1.75" stroke="#7A37FF" stroke-opacity="0.75" stroke-width="0.5" stroke-dasharray="3 3"/>
+<circle cx="14" cy="34" r="1" fill="#9444F4" fill-opacity="0.5"/>
+<circle cx="23" cy="34" r="1" fill="#9444F4" fill-opacity="0.5"/>
+<circle cx="32" cy="34" r="1" fill="#9444F4" fill-opacity="0.5"/>
+<circle cx="41" cy="34" r="1" fill="#9444F4" fill-opacity="0.5"/>
+<rect x="9.25" y="39.75" width="37.5" height="9.5" rx="1.75" fill="#7C34FC" fill-opacity="0.5"/>
+<rect x="9.25" y="39.75" width="37.5" height="9.5" rx="1.75" stroke="#7B47EF" stroke-width="0.5"/>
+<circle cx="14" cy="45" r="2" fill="#9444F4" fill-opacity="0.5"/>
+<rect x="33" y="43" width="12" height="4" rx="1" fill="#7C34FC"/>
+<defs>
+<linearGradient id="paint0_linear_605_49291" x1="56" y1="0" x2="0" y2="56" gradientUnits="userSpaceOnUse">
+<stop offset="0.5" stop-color="#9C74F4" stop-opacity="0.2"/>
+<stop offset="1" stop-color="#7C3CFC" stop-opacity="0.2"/>
+</linearGradient>
+</defs>
+</svg>

@@ -1,0 +1,190 @@
+@layer background {
+  @theme inline {
+
+      /* ─────────────────────────────────────────────────────
+       * Retro Grid — scrolling perspective animation
+       * ───────────────────────────────────────────────────── */
+      --animate-grid: grid 15s linear infinite;
+
+      @keyframes grid {
+          0% {
+              transform: translateY(-50%);
+          }
+          100% {
+              transform: translateY(0);
+          }
+      }
+
+
+      /* ─────────────────────────────────────────────────────
+       * Ripple — concentric circle pulse
+       * ───────────────────────────────────────────────────── */
+      --animate-ripple: ripple var(--duration, 2s) ease calc(var(--i, 0) * 0.2s) infinite;
+
+      @keyframes ripple {
+          0%,
+          100% {
+              transform: translate(-50%, -50%) scale(1);
+          }
+          50% {
+              transform: translate(-50%, -50%) scale(0.9);
+          }
+      }
+
+
+      /* ─────────────────────────────────────────────────────
+       * Background Ripple Effect — interactive cell ripple
+       * ───────────────────────────────────────────────────── */
+      --animate-cell-ripple: cell-ripple var(--duration, 200ms) ease-out none 1 var(--delay, 0ms);
+
+      @keyframes cell-ripple {
+          0% {
+              opacity: 0.4;
+          }
+          50% {
+              opacity: 0.8;
+          }
+          100% {
+              opacity: 0.4;
+          }
+      }
+
+
+      /* ─────────────────────────────────────────────────────
+       * Spotlight — fade-in entrance used by MaskContainer
+       * ───────────────────────────────────────────────────── */
+      --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
+
+      @keyframes spotlight {
+          0% {
+              opacity: 0;
+              transform: translate(-72%, -62%) scale(0.5);
+          }
+          100% {
+              opacity: 1;
+              transform: translate(-50%, -40%) scale(1);
+          }
+      }
+
+
+      /* ─────────────────────────────────────────────────────
+       * Light Rays — subtle shimmer pulse for ray containers
+       * ───────────────────────────────────────────────────── */
+      --animate-ray-pulse: ray-pulse 6s ease-in-out infinite;
+
+      @keyframes ray-pulse {
+          0%,
+          100% {
+              opacity: 0.6;
+          }
+          50% {
+              opacity: 1;
+          }
+      }
+
+
+      /* ─────────────────────────────────────────────────────
+       * Firefly float — subtle idle drift
+       * ───────────────────────────────────────────────────── */
+      --animate-firefly-float: firefly-float 4s ease-in-out infinite alternate;
+
+      @keyframes firefly-float {
+          0% {
+              transform: translateY(0px) translateX(0px);
+          }
+          100% {
+              transform: translateY(-8px) translateX(4px);
+          }
+      }
+
+
+      /* ─────────────────────────────────────────────────────
+       * Star Warp — entrance zoom (decorative utility)
+       * ───────────────────────────────────────────────────── */
+      --animate-warp-enter: warp-enter 1.2s ease-out forwards;
+
+      @keyframes warp-enter {
+          0% {
+              opacity: 0;
+              transform: scale(0.85);
+          }
+          100% {
+              opacity: 1;
+              transform: scale(1);
+          }
+      }
+
+
+      /* ─────────────────────────────────────────────────────
+       * Particle drift — gentle ambient movement utility
+       * ───────────────────────────────────────────────────── */
+      --animate-particle-drift: particle-drift 8s ease-in-out infinite alternate;
+
+      @keyframes particle-drift {
+          0% {
+              transform: translate(0, 0);
+          }
+          100% {
+              transform: translate(10px, -10px);
+          }
+      }
+
+
+      /* ─────────────────────────────────────────────────────
+       * Dot Glow Pulse — used as a utility class fallback
+       * ───────────────────────────────────────────────────── */
+      --animate-dot-glow: dot-glow 3s ease-in-out infinite;
+
+      @keyframes dot-glow {
+          0%,
+          100% {
+              opacity: 0.25;
+              transform: scale(1);
+          }
+          50% {
+              opacity: 0.8;
+              transform: scale(1.5);
+          }
+      }
+
+
+      /* ─────────────────────────────────────────────────────
+       * Beam slide — decorative background beam travel
+       * ───────────────────────────────────────────────────── */
+      --animate-beam-slide: beam-slide 12s linear infinite;
+
+      @keyframes beam-slide {
+          0% {
+              transform: translateX(-100%) skewX(-15deg);
+              opacity: 0;
+          }
+          10% {
+              opacity: 1;
+          }
+          90% {
+              opacity: 1;
+          }
+          100% {
+              transform: translateX(200%) skewX(-15deg);
+              opacity: 0;
+          }
+      }
+
+
+      /* ─────────────────────────────────────────────────────
+       * Retro grid fade — utility for fading in retro grid
+       * ───────────────────────────────────────────────────── */
+      --animate-retro-fade: retro-fade 1s ease-out forwards;
+
+      @keyframes retro-fade {
+          from {
+              opacity: 0;
+              transform: perspective(200px) rotateX(5deg);
+          }
+          to {
+              opacity: 1;
+              transform: perspective(200px) rotateX(0deg);
+          }
+      }
+  }
+}

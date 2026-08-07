@@ -1,0 +1,77 @@
+@layer spinner {
+    @theme inline {
+
+        /* Animation shorthands */
+        --animate-spinner-circle: spinner-spin var(--speed) linear infinite;
+        --animate-spinner-pinwheel: spinner-spin var(--speed) ease-in-out infinite;
+        --animate-spinner-pulse: spinner-pulse var(--speed) ease-out infinite;
+        --animate-spinner-bar: spinner-bar var(--speed) ease-in-out infinite;
+        --animate-spinner-dot-wave: spinner-dot-wave var(--speed) ease-in-out infinite;
+        --animate-spinner-dot-shimmer: spinner-dot-shimmer var(--speed) ease-in-out infinite;
+    }
+
+    /* Keyframes */
+    @keyframes spinner-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes spinner-pulse {
+        0% {
+            transform: scale(0.6);
+            opacity: 0.85;
+        }
+
+        50% {
+            transform: scale(1.15);
+            opacity: 0.4;
+        }
+
+        100% {
+            transform: scale(1.6);
+            opacity: 0;
+        }
+    }
+
+    @keyframes spinner-bar {
+
+        0%,
+        100% {
+            transform: scaleY(0.4);
+            opacity: 0.5;
+        }
+
+        50% {
+            transform: scaleY(1.15);
+            opacity: 1;
+        }
+    }
+
+    @keyframes spinner-dot-wave {
+
+        0%,
+        60%,
+        100% {
+            transform: translateY(0);
+            opacity: 0.95;
+        }
+
+        30% {
+            transform: translateY(-0.5rem);
+            opacity: 0.50;
+        }
+    }
+
+    @keyframes spinner-dot-shimmer {
+
+        0%,
+        100% {
+            opacity: 0.4;
+        }
+
+        50% {
+            opacity: 1;
+        }
+    }
+}

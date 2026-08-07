@@ -1,0 +1,80 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
+import {
+    GetNotificationsTRPCInputSchema,
+    GetNotificationsTRPCOutputSchema,
+    MarkAsReadTRPCInputSchema,
+    MarkAsReadTRPCOutputSchema,
+    MarkAllAsReadTRPCOutputSchema,
+    UpsertDeviceTokenTRPCInputSchema,
+    UpsertDeviceTokenTRPCOutputSchema,
+    RemoveDeviceTokenTRPCInputSchema,
+    RemoveDeviceTokenTRPCOutputSchema,
+} from '@/schemas/trpc';
+import { z } from 'zod';
+import type { INotificationQueryService } from '../interfaces';
+
+export class NotificationQueryService implements INotificationQueryService {
+
+    getNotifications(input?: z.infer<typeof GetNotificationsTRPCInputSchema>) {
+        const validatedInput = GetNotificationsTRPCInputSchema.parse(input);
+        return useQuery({
+            queryKey: ['notifications', validatedInput],
+            queryFn: async () => {
+                const raw = await trpcClient.notification.getNotifications.query(validatedInput);
+                return GetNotificationsTRPCOutputSchema.parse(raw);
+            },
+            refetchInterval: 15000, // Poll every 15 seconds
+            refetchOnWindowFocus: true,
+        });
+    }
+
+    markAsRead() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (variables: z.infer<typeof MarkAsReadTRPCInputSchema>) => {
+                const validatedInput = MarkAsReadTRPCInputSchema.parse(variables);
+                const raw = await trpcClient.notification.markAsRead.mutate(validatedInput);
+                return MarkAsReadTRPCOutputSchema.parse(raw);
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            },
+        });
+    }
+
+    markAllAsRead() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async () => {
+                const raw = await trpcClient.notification.markAllAsRead.mutate();
+                return MarkAllAsReadTRPCOutputSchema.parse(raw);
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            },
+        });
+    }
+
+    upsertDeviceToken() {
+        return useMutation({
+            mutationFn: async (variables: z.infer<typeof UpsertDeviceTokenTRPCInputSchema>) => {
+                const validatedInput = UpsertDeviceTokenTRPCInputSchema.parse(variables);
+                const raw = await trpcClient.notification.upsertDeviceToken.mutate(validatedInput);
+                return UpsertDeviceTokenTRPCOutputSchema.parse(raw);
+            },
+        });
+    }
+
+    removeDeviceToken() {
+        return useMutation({
+            mutationFn: async (variables: z.infer<typeof RemoveDeviceTokenTRPCInputSchema>) => {
+                const validatedInput = RemoveDeviceTokenTRPCInputSchema.parse(variables);
+                const raw = await trpcClient.notification.removeDeviceToken.mutate(validatedInput);
+                return RemoveDeviceTokenTRPCOutputSchema.parse(raw);
+            },
+        });
+    }
+}
+
+export const notificationQueryService = new NotificationQueryService();

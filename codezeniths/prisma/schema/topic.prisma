@@ -1,0 +1,15 @@
+model Topic {
+  id          String     @id @default(uuid(7)) @db.Uuid
+  moduleId    String     @db.Uuid
+  module      Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  slug        String     @unique
+  level       Level?
+  order       Int        @default(0)
+  problems    Problem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("topic")
+}

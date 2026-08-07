@@ -1,0 +1,107 @@
+@layer card {
+    @theme inline {
+
+        /* ─────────────────────────────────────────────────────
+         * Float Effect — gentle vertical idle drift
+         * ───────────────────────────────────────────────────── */
+        --animate-card-float: card-float var(--float-duration, 3s) ease-in-out infinite alternate;
+
+        @keyframes card-float {
+            0% {
+                transform: translateY(0px);
+                filter: drop-shadow(0 var(--float-shadow-y, 8px) var(--float-shadow-blur, 16px) var(--float-shadow-color, rgba(106, 124, 255, 0.2)));
+            }
+            100% {
+                transform: translateY(calc(var(--float-amount, 10) * -1px));
+                filter: drop-shadow(0 calc(var(--float-shadow-y, 8px) + var(--float-amount, 10px)) calc(var(--float-shadow-blur, 16px) + 8px) var(--float-shadow-color, rgba(106, 124, 255, 0.25)));
+            }
+        }
+
+
+        /* ─────────────────────────────────────────────────────
+         * Aurora Background — slow shifting gradient orbs
+         * ───────────────────────────────────────────────────── */
+        --animate-aurora-1: aurora-1 var(--aurora-duration, 8s) ease-in-out infinite alternate;
+        --animate-aurora-2: aurora-2 calc(var(--aurora-duration, 8s) * 1.3) ease-in-out infinite alternate;
+        --animate-aurora-3: aurora-3 calc(var(--aurora-duration, 8s) * 0.8) ease-in-out infinite alternate;
+
+        @keyframes aurora-1 {
+            0% {
+                transform: translate(0%, 0%) scale(1);
+                opacity: var(--aurora-opacity, 0.5);
+            }
+            50% {
+                transform: translate(10%, -15%) scale(1.1);
+                opacity: calc(var(--aurora-opacity, 0.5) * 0.8);
+            }
+            100% {
+                transform: translate(-8%, 10%) scale(0.95);
+                opacity: var(--aurora-opacity, 0.5);
+            }
+        }
+
+        @keyframes aurora-2 {
+            0% {
+                transform: translate(0%, 0%) scale(1);
+                opacity: calc(var(--aurora-opacity, 0.5) * 0.7);
+            }
+            50% {
+                transform: translate(-12%, 8%) scale(1.15);
+                opacity: var(--aurora-opacity, 0.5);
+            }
+            100% {
+                transform: translate(15%, -5%) scale(0.9);
+                opacity: calc(var(--aurora-opacity, 0.5) * 0.6);
+            }
+        }
+
+        @keyframes aurora-3 {
+            0% {
+                transform: translate(0%, 0%) scale(1.05);
+                opacity: calc(var(--aurora-opacity, 0.5) * 0.6);
+            }
+            50% {
+                transform: translate(8%, 12%) scale(0.95);
+                opacity: calc(var(--aurora-opacity, 0.5) * 0.9);
+            }
+            100% {
+                transform: translate(-10%, -8%) scale(1.1);
+                opacity: var(--aurora-opacity, 0.5);
+            }
+        }
+
+
+        /* ─────────────────────────────────────────────────────
+         * Border Beam — traveling dot along offset-path
+         * (referenced from magic-ui, needs to be in scope)
+         * ───────────────────────────────────────────────────── */
+        --animate-card-beam-orbit: card-beam-orbit var(--beam-duration, 6s) linear infinite;
+
+        @keyframes card-beam-orbit {
+            0% {
+                offset-distance: 0%;
+            }
+            100% {
+                offset-distance: 100%;
+            }
+        }
+
+
+        /* ─────────────────────────────────────────────────────
+         * Shine Border — rotating conic gradient border
+         * ───────────────────────────────────────────────────── */
+        --animate-card-shine: card-shine var(--shine-duration, 14s) infinite linear;
+
+        @keyframes card-shine {
+            0% {
+                background-position: 0% 0%;
+            }
+            50% {
+                background-position: 100% 100%;
+            }
+            to {
+                background-position: 0% 0%;
+            }
+        }
+    }
+}

@@ -1,0 +1,30 @@
+model Problem {
+  id             String            @id @default(uuid(7)) @db.Uuid
+  topicId        String            @db.Uuid
+  topic          Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  title          String
+  slug           String            @unique
+  difficulty     Difficulty
+  articleUrl     String?
+  problemUrl     String?
+  favouriteCount Int               @default(0)
+  order          Int               @default(0)
+  tags           ProblemTag[]
+  progresses     ProblemProgress[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@map("problem")
+}
+
+model ProblemTag {
+  id        String  @id @default(uuid(7)) @db.Uuid
+  problemId String  @db.Uuid
+  tagId     String  @db.Uuid
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([problemId, tagId])
+  @@index([problemId, tagId])
+  @@map("problem_tag")
+}

@@ -1,0 +1,276 @@
+@layer typography {
+    :root {
+        --aurora-c1: var(--color-primary-shade3);
+        --aurora-c2: var(--color-purple-shade3);
+        --aurora-c3: var(--color-info-shade3);
+        --aurora-c4: var(--color-blue-shade3);
+        --gradient-from-default: var(--color-warning-shade2);
+        --gradient-to-default:   var(--color-purple-shade2);
+    }
+    .dark, [data-theme="dark"] {
+        --aurora-c1: var(--color-primary);
+        --aurora-c2: var(--color-purple);
+        --aurora-c3: var(--color-info);
+        --aurora-c4: var(--color-blue);
+        --gradient-from-default: var(--color-warning);
+        --gradient-to-default:   var(--color-purple);
+    }
+
+    @theme inline {
+
+        /* Aurora Effect Animation */
+
+        --animate-aurora: aurora 8s ease-in-out infinite alternate;
+
+        @keyframes aurora {
+            0% {
+                background-position: 0% 50%;
+                transform: rotate(-5deg) scale(0.9);
+            }
+
+            25% {
+                background-position: 50% 100%;
+                transform: rotate(5deg) scale(1.1);
+            }
+
+            50% {
+                background-position: 100% 50%;
+                transform: rotate(-3deg) scale(0.95);
+            }
+
+            75% {
+                background-position: 50% 0%;
+                transform: rotate(3deg) scale(1.05);
+            }
+
+            100% {
+                background-position: 0% 50%;
+                transform: rotate(-5deg) scale(0.9);
+            }
+        }
+
+
+        /* Shiny Text Animation */
+        --animate-shiny-text: shiny-text 8s infinite;
+
+        @keyframes shiny-text {
+
+            0%,
+            90%,
+            100% {
+                background-position: calc(-100% - var(--shiny-width)) 0;
+            }
+
+            30%,
+            60% {
+                background-position: calc(100% + var(--shiny-width)) 0;
+            }
+        }
+
+        /* Gradient Animation */
+        --animate-gradient: gradient 8s linear infinite;
+ 
+        @keyframes gradient {
+            to {
+            background-position: var(--bg-size, 300%) 0;
+            }
+        }
+
+        /* Cursor Blink Animation */
+        --animate-blink-cursor: blink-cursor 1s step-end infinite;
+
+        @keyframes blink-cursor {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Text Reveal Animation */
+        --animate-text-reveal: text-reveal 1.5s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+
+        @keyframes text-reveal {
+            0% {
+                clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%);
+            }
+
+            100% {
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            }
+        }
+
+        /* Shimmer Effect for Text */
+        --animate-text-shimmer: text-shimmer 3s ease-in-out infinite;
+
+        @keyframes text-shimmer {
+            0% {
+                background-position: -500%;
+            }
+
+            100% {
+                background-position: 500%;
+            }
+        }
+
+        /* Glitch Effect */
+        --animate-text-glitch: text-glitch 2s infinite;
+
+        @keyframes text-glitch {
+            0% {
+                text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                    -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                    -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+
+            14% {
+                text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                    -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                    -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+
+            15% {
+                text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                    0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                    -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+
+            49% {
+                text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                    0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                    -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+
+            50% {
+                text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                    0.05em 0 0 rgba(0, 255, 0, 0.75),
+                    0 -0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+
+            99% {
+                text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                    0.05em 0 0 rgba(0, 255, 0, 0.75),
+                    0 -0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+
+            100% {
+                text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
+                    -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+                    -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+        }
+
+        /* Flicker Animation */
+        --animate-text-flicker: text-flicker 3s linear infinite;
+
+        @keyframes text-flicker {
+
+            0%,
+            19.999%,
+            22%,
+            62.999%,
+            64%,
+            64.999%,
+            70%,
+            100% {
+                opacity: 0.99;
+            }
+
+            20%,
+            21.999%,
+            63%,
+            63.999%,
+            65%,
+            69.999% {
+                opacity: 0.4;
+            }
+        }
+
+        /* Slide In From Top */
+        --animate-slide-in-top: slide-in-top 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+
+        @keyframes slide-in-top {
+            0% {
+                transform: translateY(-1000px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Slide In From Bottom */
+        --animate-slide-in-bottom: slide-in-bottom 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+
+        @keyframes slide-in-bottom {
+            0% {
+                transform: translateY(1000px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Bounce In */
+        --animate-bounce-in: bounce-in 1.1s both;
+
+        @keyframes bounce-in {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Tracking In Expand */
+        --animate-tracking-in-expand: tracking-in-expand 0.7s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
+
+        @keyframes tracking-in-expand {
+            0% {
+                letter-spacing: -0.5em;
+                opacity: 0;
+            }
+
+            40% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Focus In Expand */
+        --animate-focus-in-expand: focus-in-expand 0.8s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+
+        @keyframes focus-in-expand {
+            0% {
+                letter-spacing: -0.5em;
+                filter: blur(12px);
+                opacity: 0;
+            }
+
+            100% {
+                filter: blur(0px);
+                opacity: 1;
+            }
+        }
+    }
+}

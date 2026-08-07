@@ -1,0 +1,1526 @@
+@import url("https://fonts.googleapis.com/css2?family=Andika&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Gowun+Batang&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Geist+Mono:ital,wght@0,100..900;1,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=New+Rocker&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+@custom-variant dark (&:where(.dark, .dark *));
+
+body {
+  @apply m-0;
+  font-family: var(--font-sans);
+}
+
+@theme {
+  /* Color Palette */
+  --color-primary: #6a7cff;
+  --color-primary-shade1: #8a98ff;
+  --color-primary-shade2: #6366f1;
+  --color-primary-shade3: #4d5ccc;
+
+  --color-secondary: #565f89;
+  --color-secondary-shade1: #49516f;
+  --color-secondary-shade2: #3c4356;
+  --color-secondary-shade3: #2f3640;
+
+  --color-background-dark: #181c31;
+  --color-background-dark-shade1: #1d223d;
+  --color-background-dark-shade2: #222847;
+  --color-background-dark-shade3: #272e50;
+
+  --color-foreground-dark: #1c2136;
+  --color-foreground-dark-shade1: #252a42;
+  --color-foreground-dark-shade2: #1a1e32;
+  --color-foreground-dark-shade3: #2b2f4c;
+
+  --color-background-light: #f2eeff;
+  --color-background-light-shade1: #ece8ff;
+  --color-background-light-shade2: #e5e0ff;
+  --color-background-light-shade3: #ddd8ff;
+
+  --color-foreground-light: #f7f6ff;
+  --color-foreground-light-shade1: #f2efff;
+  --color-foreground-light-shade2: #eae7fc;
+  --color-foreground-light-shade3: #e1def7;
+
+  --color-heading-dark: #95a3fa;
+  --color-heading-dark-shade1: #a0aefc;
+  --color-heading-dark-shade2: #8c9bfb;
+  --color-heading-dark-shade3: #7f90f7;
+
+  --color-heading-light: #6a70c2;
+  --color-heading-light-shade1: #5f65b3;
+  --color-heading-light-shade2: #545aa4;
+  --color-heading-light-shade3: #494f95;
+
+  --color-body-dark: #a9b1d6;
+  --color-body-dark-shade1: #9aa3c9;
+  --color-body-dark-shade2: #8b95bc;
+  --color-body-dark-shade3: #7c87af;
+
+  --color-muted-dark: #828bb8;
+  --color-muted-dark-shade1: #767fad;
+  --color-muted-dark-shade2: #6a739f;
+  --color-muted-dark-shade3: #5e678f;
+
+  --color-body-light: #3b3f63;
+  --color-body-light-shade1: #32365a;
+  --color-body-light-shade2: #2a2e4f;
+  --color-body-light-shade3: #222644;
+
+  --color-muted-light: #6b7394;
+  --color-muted-light-shade1: #5e6687;
+  --color-muted-light-shade2: #515978;
+  --color-muted-light-shade3: #444c69;
+
+  --color-destructive: #ff4655;
+  --color-destructive-shade1: #ff6b7a;
+  --color-destructive-shade2: #cc3845;
+  --color-destructive-shade3: #992a35;
+
+  --color-success: #00ffb2;
+  --color-success-shade1: #00cc8f;
+  --color-success-shade2: #009973;
+  --color-success-shade3: #00664d;
+
+  --color-warning: #e0af68;
+  --color-warning-shade1: #eabf8a;
+  --color-warning-shade2: #c8964a;
+  --color-warning-shade3: #b07d32;
+
+  --color-teal: #73daca;
+  --color-teal-shade1: #92e5d8;
+  --color-teal-shade2: #58c2b2;
+  --color-teal-shade3: #3eaa9a;
+
+  --color-blue: #7aa2f7;
+  --color-blue-shade1: #9ab9ff;
+  --color-blue-shade2: #5e8ae3;
+  --color-blue-shade3: #4672cc;
+
+  --color-purple: #bb9af7;
+  --color-purple-shade1: #cbb0ff;
+  --color-purple-shade2: #a17de3;
+  --color-purple-shade3: #8865cc;
+
+  --color-info: #7dcfff;
+  --color-info-shade1: #9ad9ff;
+  --color-info-shade2: #5eb8e8;
+  --color-info-shade3: #409fd1;
+
+  --color-azure: #2ac3de;
+  --color-azure-shade1: #4fd3eb;
+  --color-azure-shade2: #1aa8c2;
+  --color-azure-shade3: #088ea8;
+
+  --color-pink: #f7768e;
+  --color-pink-shade1: #f48da6;
+  --color-pink-shade2: #d95b7a;
+  --color-pink-shade3: #c2415f;
+
+  --color-olive: #9ece6a;
+  --color-olive-shade1: #b3d98c;
+  --color-olive-shade2: #85b44a;
+  --color-olive-shade3: #6b9c38;
+
+  /* Font Families */
+  --font-sans: "Andika", system-ui, sans-serif;
+  --font-serif: "Gowun Batang", serif;
+  --font-mono: "Fira Code", monospace;
+  --font-geist-mono: "Geist Mono", monospace;
+  --font-logo: "New Rocker", cursive;
+
+  /* Font Sizes and Typography */
+  --text-h1: 3rem;
+  --text-h1--line-height: 3.25rem;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h1--font-weight: 500;
+
+  --text-h2: 2.5rem;
+  --text-h2--line-height: 3rem;
+  --text-h2--letter-spacing: -0.015em;
+  --text-h2--font-weight: 500;
+
+  --text-h3: 2.25rem;
+  --text-h3--line-height: 2.75rem;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h3--font-weight: 500;
+
+  --text-h4: 1.5rem;
+  --text-h4--line-height: 2rem;
+  --text-h4--letter-spacing: 0;
+  --text-h4--font-weight: 500;
+
+  --text-h5: 1.125rem;
+  --text-h5--line-height: 1.75rem;
+  --text-h5--letter-spacing: 0.01em;
+  --text-h5--font-weight: 400;
+
+  --text-h6: 1rem;
+  --text-h6--line-height: 1.5rem;
+  --text-h6--letter-spacing: 0.01em;
+  --text-h6--font-weight: 400;
+
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-base--letter-spacing: 0.01em;
+  --text-base--font-weight: 400;
+
+  --text-p: 0.875rem;
+  --text-p--line-height: 1.25rem;
+  --text-p--letter-spacing: 0.01em;
+  --text-p--font-weight: 400;
+
+  --text-span: 0.75rem;
+  --text-span--line-height: 1rem;
+  --text-span--letter-spacing: 0.02em;
+  --text-span--font-weight: 400;
+
+  --text-small: 0.625rem;
+  --text-small--line-height: 1rem;
+  --text-small--letter-spacing: 0.02em;
+  --text-small--font-weight: 400;
+
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.25rem;
+  --text-label--letter-spacing: 0.01em;
+  --text-label--font-weight: 500;
+
+  /* Font Weights */
+  --font-weight-extrathin: 50;
+  --font-weight-thin: 100;
+  --font-weight-extralight: 200;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-superbold: 900;
+
+  /* Spacing Scale */
+  --spacing-xs-1: 0rem;
+  --spacing-xs-2: 0.125rem;
+  --spacing-sm-1: 0.25rem;
+  --spacing-sm-2: 0.5rem;
+  --spacing-md-1: 0.75rem;
+  --spacing-md-2: 1rem;
+  --spacing-lg-1: 1.5rem;
+  --spacing-lg-2: 2rem;
+  --spacing-xl-1: 2.5rem;
+  --spacing-xl-2: 3rem;
+  --spacing-xxl-1: 3.75rem;
+  --spacing-xxl-2: 4rem;
+  --spacing-xxxl-1: 5rem;
+  --spacing-xxxl-2: 6rem;
+
+  /* Border Radius */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-xxl: 1.5rem;
+
+  /* Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-xxl: 1536px;
+  --breakpoint-xxxl: 1920px;
+}
+
+/* Define custom utilities for typography */
+@utility typography-h1 {
+  font-size: var(--text-h1);
+  line-height: var(--text-h1--line-height);
+  letter-spacing: var(--text-h1--letter-spacing);
+  font-weight: var(--text-h1--font-weight);
+}
+
+@utility typography-h2 {
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+  letter-spacing: var(--text-h2--letter-spacing);
+  font-weight: var(--text-h2--font-weight);
+}
+
+@utility typography-h3 {
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
+  letter-spacing: var(--text-h3--letter-spacing);
+  font-weight: var(--text-h3--font-weight);
+}
+
+@utility typography-h4 {
+  font-size: var(--text-h4);
+  line-height: var(--text-h4--line-height);
+  letter-spacing: var(--text-h4--letter-spacing);
+  font-weight: var(--text-h4--font-weight);
+}
+
+@utility typography-h5 {
+  font-size: var(--text-h5);
+  line-height: var(--text-h5--line-height);
+  letter-spacing: var(--text-h5--letter-spacing);
+  font-weight: var(--text-h5--font-weight);
+}
+
+@utility typography-h6 {
+  font-size: var(--text-h6);
+  line-height: var(--text-h6--line-height);
+  letter-spacing: var(--text-h6--letter-spacing);
+  font-weight: var(--text-h6--font-weight);
+}
+
+@utility typography-base {
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+  letter-spacing: var(--text-base--letter-spacing);
+  font-weight: var(--text-base--font-weight);
+}
+
+@utility typography-p {
+  font-size: var(--text-p);
+  line-height: var(--text-p--line-height);
+  letter-spacing: var(--text-p--letter-spacing);
+  font-weight: var(--text-p--font-weight);
+}
+
+@utility typography-span {
+  font-size: var(--text-span);
+  line-height: var(--text-span--line-height);
+  letter-spacing: var(--text-span--letter-spacing);
+  font-weight: var(--text-span--font-weight);
+}
+
+@utility typography-caption {
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  letter-spacing: var(--text-small--letter-spacing);
+  font-weight: var(--text-small--font-weight);
+}
+
+@utility typography-label {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+}
+
+/* Button Layer Styles */
+
+@layer button {
+  @theme inline {
+    /* Rippling Effect */
+    --animate-rippling: rippling var(--duration, 600ms) ease-out forwards;
+
+    @keyframes rippling {
+      to {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+    /* Shimmer Effect */
+    --animate-shimmer-slide: shimmer-slide var(--speed, 3s) ease-in-out infinite
+      alternate;
+
+    @keyframes shimmer-slide {
+      to {
+        transform: translate(calc(100cqw - 100%), 0);
+      }
+    }
+
+    --animate-spin-around: spin-around calc(var(--speed, 3s) * 2) infinite
+      linear;
+
+    @keyframes spin-around {
+      0% {
+        transform: translateZ(0) rotate(0deg);
+      }
+
+      15%,
+      35% {
+        transform: translateZ(0) rotate(90deg);
+      }
+
+      65%,
+      85% {
+        transform: translateZ(0) rotate(270deg);
+      }
+
+      100% {
+        transform: translateZ(0) rotate(360deg);
+      }
+    }
+
+    /* Pulsating Effect */
+    --animate-pulse: pulse var(--duration) ease-out infinite;
+
+    @keyframes pulse {
+      from {
+        box-shadow: 0 0 0 0 var(--pulse-color, rgba(99, 102, 241, 0.4));
+        opacity: 1;
+      }
+
+      60% {
+        box-shadow: 0 0 0 8px var(--pulse-color, rgba(99, 102, 241, 0.4));
+        opacity: 1;
+      }
+
+      to {
+        box-shadow: 0 0 0 12px transparent;
+        opacity: 1;
+      }
+    }
+  }
+}
+
+/* Typography Layer Styles */
+
+@layer typography {
+  @theme inline {
+    /* Aurora Effect Animation */
+
+    --animate-aurora: aurora 8s ease-in-out infinite alternate;
+
+    @keyframes aurora {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      25% {
+        background-position: 50% 100%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      75% {
+        background-position: 50% 0%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* Shiny Text Animation */
+    --animate-shiny-text: shiny-text 8s infinite;
+
+    @keyframes shiny-text {
+      0%,
+      90%,
+      100% {
+        background-position: calc(-100% - var(--shiny-width)) 0;
+      }
+
+      30%,
+      60% {
+        background-position: calc(100% + var(--shiny-width)) 0;
+      }
+    }
+
+    /* Gradient Animation */
+    --animate-gradient: gradient 8s linear infinite;
+
+    @keyframes gradient {
+      to {
+        background-position: var(--bg-size, 300%) 0;
+      }
+    }
+
+    /* Cursor Blink Animation */
+    --animate-blink-cursor: blink-cursor 1s step-end infinite;
+
+    @keyframes blink-cursor {
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+    }
+
+    /* Text Reveal Animation */
+    --animate-text-reveal: text-reveal 1.5s cubic-bezier(0.77, 0, 0.175, 1)
+      forwards;
+
+    @keyframes text-reveal {
+      0% {
+        clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%);
+      }
+
+      100% {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+      }
+    }
+
+    /* Shimmer Effect for Text */
+    --animate-text-shimmer: text-shimmer 3s ease-in-out infinite;
+
+    @keyframes text-shimmer {
+      0% {
+        background-position: -500%;
+      }
+
+      100% {
+        background-position: 500%;
+      }
+    }
+
+    /* Glitch Effect */
+    --animate-text-glitch: text-glitch 2s infinite;
+
+    @keyframes text-glitch {
+      0% {
+        text-shadow:
+          0.05em 0 0 rgba(255, 0, 0, 0.75),
+          -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+          -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+      }
+
+      14% {
+        text-shadow:
+          0.05em 0 0 rgba(255, 0, 0, 0.75),
+          -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+          -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+      }
+
+      15% {
+        text-shadow:
+          -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+          0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+          -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+      }
+
+      49% {
+        text-shadow:
+          -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+          0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+          -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+      }
+
+      50% {
+        text-shadow:
+          0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+          0.05em 0 0 rgba(0, 255, 0, 0.75),
+          0 -0.05em 0 rgba(0, 0, 255, 0.75);
+      }
+
+      99% {
+        text-shadow:
+          0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+          0.05em 0 0 rgba(0, 255, 0, 0.75),
+          0 -0.05em 0 rgba(0, 0, 255, 0.75);
+      }
+
+      100% {
+        text-shadow:
+          -0.025em 0 0 rgba(255, 0, 0, 0.75),
+          -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+          -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+      }
+    }
+
+    /* Flicker Animation */
+    --animate-text-flicker: text-flicker 3s linear infinite;
+
+    @keyframes text-flicker {
+      0%,
+      19.999%,
+      22%,
+      62.999%,
+      64%,
+      64.999%,
+      70%,
+      100% {
+        opacity: 0.99;
+      }
+
+      20%,
+      21.999%,
+      63%,
+      63.999%,
+      65%,
+      69.999% {
+        opacity: 0.4;
+      }
+    }
+
+    /* Slide In From Top */
+    --animate-slide-in-top: slide-in-top 0.6s
+      cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+
+    @keyframes slide-in-top {
+      0% {
+        transform: translateY(-1000px);
+        opacity: 0;
+      }
+
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Slide In From Bottom */
+    --animate-slide-in-bottom: slide-in-bottom 0.6s
+      cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+
+    @keyframes slide-in-bottom {
+      0% {
+        transform: translateY(1000px);
+        opacity: 0;
+      }
+
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Bounce In */
+    --animate-bounce-in: bounce-in 1.1s both;
+
+    @keyframes bounce-in {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Tracking In Expand */
+    --animate-tracking-in-expand: tracking-in-expand 0.7s
+      cubic-bezier(0.215, 0.61, 0.355, 1) both;
+
+    @keyframes tracking-in-expand {
+      0% {
+        letter-spacing: -0.5em;
+        opacity: 0;
+      }
+
+      40% {
+        opacity: 0.6;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* Focus In Expand */
+    --animate-focus-in-expand: focus-in-expand 0.8s
+      cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+
+    @keyframes focus-in-expand {
+      0% {
+        letter-spacing: -0.5em;
+        filter: blur(12px);
+        opacity: 0;
+      }
+
+      100% {
+        filter: blur(0px);
+        opacity: 1;
+      }
+    }
+  }
+}
+
+/* Card Layer Styles */
+
+@layer card {
+  @theme inline {
+    /* ─────────────────────────────────────────────────────
+         * Float Effect — gentle vertical idle drift
+         * ───────────────────────────────────────────────────── */
+    --animate-card-float: card-float var(--float-duration, 3s) ease-in-out
+      infinite alternate;
+
+    @keyframes card-float {
+      0% {
+        transform: translateY(0px);
+        filter: drop-shadow(
+          0 var(--float-shadow-y, 8px) var(--float-shadow-blur, 16px)
+            var(--float-shadow-color, rgba(106, 124, 255, 0.2))
+        );
+      }
+      100% {
+        transform: translateY(calc(var(--float-amount, 10) * -1px));
+        filter: drop-shadow(
+          0 calc(var(--float-shadow-y, 8px) + var(--float-amount, 10px))
+            calc(var(--float-shadow-blur, 16px) + 8px)
+            var(--float-shadow-color, rgba(106, 124, 255, 0.25))
+        );
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+         * Aurora Background — slow shifting gradient orbs
+         * ───────────────────────────────────────────────────── */
+    --animate-aurora-1: aurora-1 var(--aurora-duration, 8s) ease-in-out infinite
+      alternate;
+    --animate-aurora-2: aurora-2 calc(var(--aurora-duration, 8s) * 1.3)
+      ease-in-out infinite alternate;
+    --animate-aurora-3: aurora-3 calc(var(--aurora-duration, 8s) * 0.8)
+      ease-in-out infinite alternate;
+
+    @keyframes aurora-1 {
+      0% {
+        transform: translate(0%, 0%) scale(1);
+        opacity: var(--aurora-opacity, 0.5);
+      }
+      50% {
+        transform: translate(10%, -15%) scale(1.1);
+        opacity: calc(var(--aurora-opacity, 0.5) * 0.8);
+      }
+      100% {
+        transform: translate(-8%, 10%) scale(0.95);
+        opacity: var(--aurora-opacity, 0.5);
+      }
+    }
+
+    @keyframes aurora-2 {
+      0% {
+        transform: translate(0%, 0%) scale(1);
+        opacity: calc(var(--aurora-opacity, 0.5) * 0.7);
+      }
+      50% {
+        transform: translate(-12%, 8%) scale(1.15);
+        opacity: var(--aurora-opacity, 0.5);
+      }
+      100% {
+        transform: translate(15%, -5%) scale(0.9);
+        opacity: calc(var(--aurora-opacity, 0.5) * 0.6);
+      }
+    }
+
+    @keyframes aurora-3 {
+      0% {
+        transform: translate(0%, 0%) scale(1.05);
+        opacity: calc(var(--aurora-opacity, 0.5) * 0.6);
+      }
+      50% {
+        transform: translate(8%, 12%) scale(0.95);
+        opacity: calc(var(--aurora-opacity, 0.5) * 0.9);
+      }
+      100% {
+        transform: translate(-10%, -8%) scale(1.1);
+        opacity: var(--aurora-opacity, 0.5);
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+         * Border Beam — traveling dot along offset-path
+         * (referenced from magic-ui, needs to be in scope)
+         * ───────────────────────────────────────────────────── */
+    --animate-card-beam-orbit: card-beam-orbit var(--beam-duration, 6s) linear
+      infinite;
+
+    @keyframes card-beam-orbit {
+      0% {
+        offset-distance: 0%;
+      }
+      100% {
+        offset-distance: 100%;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+         * Shine Border — rotating conic gradient border
+         * ───────────────────────────────────────────────────── */
+    --animate-card-shine: card-shine var(--shine-duration, 14s) infinite linear;
+
+    @keyframes card-shine {
+      0% {
+        background-position: 0% 0%;
+      }
+      50% {
+        background-position: 100% 100%;
+      }
+      to {
+        background-position: 0% 0%;
+      }
+    }
+  }
+}
+
+/* Background Layer Styles */
+
+@layer background {
+  @theme inline {
+    /* ─────────────────────────────────────────────────────
+       * Retro Grid — scrolling perspective animation
+       * ───────────────────────────────────────────────────── */
+    --animate-grid: grid 15s linear infinite;
+
+    @keyframes grid {
+      0% {
+        transform: translateY(-50%);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+       * Ripple — concentric circle pulse
+       * ───────────────────────────────────────────────────── */
+    --animate-ripple: ripple var(--duration, 2s) ease calc(var(--i, 0) * 0.2s)
+      infinite;
+
+    @keyframes ripple {
+      0%,
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(0.9);
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+       * Background Ripple Effect — interactive cell ripple
+       * ───────────────────────────────────────────────────── */
+    --animate-cell-ripple: cell-ripple var(--duration, 200ms) ease-out none 1
+      var(--delay, 0ms);
+
+    @keyframes cell-ripple {
+      0% {
+        opacity: 0.4;
+      }
+      50% {
+        opacity: 0.8;
+      }
+      100% {
+        opacity: 0.4;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+       * Spotlight — fade-in entrance used by MaskContainer
+       * ───────────────────────────────────────────────────── */
+    --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
+
+    @keyframes spotlight {
+      0% {
+        opacity: 0;
+        transform: translate(-72%, -62%) scale(0.5);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -40%) scale(1);
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+       * Light Rays — subtle shimmer pulse for ray containers
+       * ───────────────────────────────────────────────────── */
+    --animate-ray-pulse: ray-pulse 6s ease-in-out infinite;
+
+    @keyframes ray-pulse {
+      0%,
+      100% {
+        opacity: 0.6;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+       * Firefly float — subtle idle drift
+       * ───────────────────────────────────────────────────── */
+    --animate-firefly-float: firefly-float 4s ease-in-out infinite alternate;
+
+    @keyframes firefly-float {
+      0% {
+        transform: translateY(0px) translateX(0px);
+      }
+      100% {
+        transform: translateY(-8px) translateX(4px);
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+       * Star Warp — entrance zoom (decorative utility)
+       * ───────────────────────────────────────────────────── */
+    --animate-warp-enter: warp-enter 1.2s ease-out forwards;
+
+    @keyframes warp-enter {
+      0% {
+        opacity: 0;
+        transform: scale(0.85);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+       * Particle drift — gentle ambient movement utility
+       * ───────────────────────────────────────────────────── */
+    --animate-particle-drift: particle-drift 8s ease-in-out infinite alternate;
+
+    @keyframes particle-drift {
+      0% {
+        transform: translate(0, 0);
+      }
+      100% {
+        transform: translate(10px, -10px);
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+       * Dot Glow Pulse — used as a utility class fallback
+       * ───────────────────────────────────────────────────── */
+    --animate-dot-glow: dot-glow 3s ease-in-out infinite;
+
+    @keyframes dot-glow {
+      0%,
+      100% {
+        opacity: 0.25;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(1.5);
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+       * Beam slide — decorative background beam travel
+       * ───────────────────────────────────────────────────── */
+    --animate-beam-slide: beam-slide 12s linear infinite;
+
+    @keyframes beam-slide {
+      0% {
+        transform: translateX(-100%) skewX(-15deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(200%) skewX(-15deg);
+        opacity: 0;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────
+       * Retro grid fade — utility for fading in retro grid
+       * ───────────────────────────────────────────────────── */
+    --animate-retro-fade: retro-fade 1s ease-out forwards;
+
+    @keyframes retro-fade {
+      from {
+        opacity: 0;
+        transform: perspective(200px) rotateX(5deg);
+      }
+      to {
+        opacity: 1;
+        transform: perspective(200px) rotateX(0deg);
+      }
+    }
+  }
+}
+
+/* Loader Layer Styles */
+
+@layer loader {
+  @theme inline {
+    /* ── Sizing & Timing Primitives ── */
+    --loader-square: 28px;
+    --loader-offset: 40px;
+    --loader-duration: 2.4s;
+    --loader-delay: 0.2s;
+    --loader-in-duration: 0.5s;
+    --loader-in-delay: 0.1s;
+    --loader-timing: cubic-bezier(0.65, 0, 0.35, 1);
+    --loader-in-timing: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* ── Color Primitives (from globals.css) ── */
+    --loader-color-base: #6a7cff;
+    --loader-color-accent: #6366f1;
+    --loader-color-glow: rgba(106, 124, 255, 0.7);
+    --loader-color-highlight: rgba(200, 210, 255, 0.9);
+
+    /* ── Animation tokens ── */
+    --animate-square1:
+      square1 var(--loader-duration) var(--loader-delay) var(--loader-timing)
+        infinite,
+      squarefadein var(--loader-in-duration) calc(1 * var(--loader-in-delay))
+        var(--loader-in-timing) both;
+
+    --animate-square2:
+      square2 var(--loader-duration) var(--loader-delay) var(--loader-timing)
+        infinite,
+      squarefadein var(--loader-in-duration) calc(2 * var(--loader-in-delay))
+        var(--loader-in-timing) both;
+
+    --animate-square3:
+      square3 var(--loader-duration) var(--loader-delay) var(--loader-timing)
+        infinite,
+      squarefadein var(--loader-in-duration) calc(3 * var(--loader-in-delay))
+        var(--loader-in-timing) both;
+
+    --animate-square4:
+      square4 var(--loader-duration) var(--loader-delay) var(--loader-timing)
+        infinite,
+      squarefadein var(--loader-in-duration) calc(4 * var(--loader-in-delay))
+        var(--loader-in-timing) both;
+
+    --animate-square5:
+      square5 var(--loader-duration) var(--loader-delay) var(--loader-timing)
+        infinite,
+      squarefadein var(--loader-in-duration) calc(5 * var(--loader-in-delay))
+        var(--loader-in-timing) both;
+
+    /* ── Keyframes ── */
+    @keyframes squarefadein {
+      0% {
+        transform: scale(0.4) rotateY(-90deg);
+        opacity: 0;
+      }
+      60% {
+        transform: scale(1.12) rotateY(10deg);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1) rotateY(0deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes square1 {
+      0% {
+        left: calc(0 * var(--loader-offset));
+        top: calc(0 * var(--loader-offset));
+      }
+      8.333% {
+        left: calc(0 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      100% {
+        left: calc(0 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+    }
+
+    @keyframes square2 {
+      0% {
+        left: calc(0 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      8.333% {
+        left: calc(0 * var(--loader-offset));
+        top: calc(2 * var(--loader-offset));
+      }
+      16.67% {
+        left: calc(1 * var(--loader-offset));
+        top: calc(2 * var(--loader-offset));
+      }
+      25.00% {
+        left: calc(1 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      83.33% {
+        left: calc(1 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      91.67% {
+        left: calc(1 * var(--loader-offset));
+        top: calc(0 * var(--loader-offset));
+      }
+      100% {
+        left: calc(0 * var(--loader-offset));
+        top: calc(0 * var(--loader-offset));
+      }
+    }
+
+    @keyframes square3 {
+      0%,
+      100% {
+        left: calc(1 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      16.67% {
+        left: calc(1 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      25.00% {
+        left: calc(1 * var(--loader-offset));
+        top: calc(0 * var(--loader-offset));
+      }
+      33.33% {
+        left: calc(2 * var(--loader-offset));
+        top: calc(0 * var(--loader-offset));
+      }
+      41.67% {
+        left: calc(2 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      66.67% {
+        left: calc(2 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      75.00% {
+        left: calc(2 * var(--loader-offset));
+        top: calc(2 * var(--loader-offset));
+      }
+      83.33% {
+        left: calc(1 * var(--loader-offset));
+        top: calc(2 * var(--loader-offset));
+      }
+      91.67% {
+        left: calc(1 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+    }
+
+    @keyframes square4 {
+      0% {
+        left: calc(2 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      33.33% {
+        left: calc(2 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      41.67% {
+        left: calc(2 * var(--loader-offset));
+        top: calc(2 * var(--loader-offset));
+      }
+      50.00% {
+        left: calc(3 * var(--loader-offset));
+        top: calc(2 * var(--loader-offset));
+      }
+      58.33% {
+        left: calc(3 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      100% {
+        left: calc(3 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+    }
+
+    @keyframes square5 {
+      0% {
+        left: calc(3 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      50.00% {
+        left: calc(3 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      58.33% {
+        left: calc(3 * var(--loader-offset));
+        top: calc(0 * var(--loader-offset));
+      }
+      66.67% {
+        left: calc(2 * var(--loader-offset));
+        top: calc(0 * var(--loader-offset));
+      }
+      75.00% {
+        left: calc(2 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+      100% {
+        left: calc(2 * var(--loader-offset));
+        top: calc(1 * var(--loader-offset));
+      }
+    }
+  }
+
+  /* ── Loader Container ── */
+  .loader {
+    width: calc(3 * var(--loader-offset) + var(--loader-square));
+    height: calc(2 * var(--loader-offset) + var(--loader-square));
+    margin: auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transform-style: preserve-3d;
+    perspective: 600px;
+  }
+
+  /* ── Square Base Styles ── */
+  .loader div {
+    display: inline-block;
+    width: var(--loader-square);
+    height: var(--loader-square);
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    border-radius: 4px;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    background:
+      linear-gradient(
+        135deg,
+        var(--loader-color-highlight) 0%,
+        transparent 40%
+      ),
+      linear-gradient(
+        160deg,
+        #8a98ff 0%,
+        var(--loader-color-base) 40%,
+        var(--loader-color-accent) 75%,
+        #3d3fa8 100%
+      );
+    box-shadow:
+      0 0 8px 2px var(--loader-color-glow),
+      0 0 22px 5px rgba(106, 124, 255, 0.3),
+      0 4px 12px rgba(20, 10, 60, 0.5),
+      inset 0 1px 1px rgba(255, 255, 255, 0.35),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(180, 190, 255, 0.25);
+    will-change: transform, left, top;
+  }
+
+  /* ── Right face ── */
+  .loader div::before {
+    content: "";
+    position: absolute;
+    right: -6px;
+    top: 3px;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      rgba(50, 60, 180, 0.85),
+      rgba(20, 25, 100, 0.95)
+    );
+    border-radius: 0 2px 2px 0;
+    transform: skewY(-3deg);
+    transform-origin: left center;
+  }
+
+  /* ── Top face ── */
+  .loader div::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: 3px;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(
+      to right,
+      rgba(180, 190, 255, 0.95),
+      rgba(120, 130, 220, 0.7)
+    );
+    border-radius: 2px 2px 0 0;
+    transform: skewX(-3deg);
+    transform-origin: bottom center;
+  }
+
+  /* ── Per-square classes consuming @theme tokens ── */
+  .square1 {
+    left: calc(0 * var(--loader-offset));
+    top: calc(0 * var(--loader-offset));
+    animation: var(--animate-square1);
+  }
+
+  .square2 {
+    left: calc(0 * var(--loader-offset));
+    top: calc(1 * var(--loader-offset));
+    animation: var(--animate-square2);
+  }
+
+  .square3 {
+    left: calc(1 * var(--loader-offset));
+    top: calc(1 * var(--loader-offset));
+    animation: var(--animate-square3);
+  }
+
+  .square4 {
+    left: calc(2 * var(--loader-offset));
+    top: calc(1 * var(--loader-offset));
+    animation: var(--animate-square4);
+  }
+
+  .square5 {
+    left: calc(3 * var(--loader-offset));
+    top: calc(1 * var(--loader-offset));
+    animation: var(--animate-square5);
+  }
+}
+
+/* Spinner Layer Styles */
+
+@layer spinner {
+  @theme inline {
+    /* Animation shorthands */
+    --animate-spinner-circle: spinner-spin var(--speed) linear infinite;
+    --animate-spinner-pinwheel: spinner-spin var(--speed) ease-in-out infinite;
+    --animate-spinner-pulse: spinner-pulse var(--speed) ease-out infinite;
+    --animate-spinner-bar: spinner-bar var(--speed) ease-in-out infinite;
+    --animate-spinner-dot-wave: spinner-dot-wave var(--speed) ease-in-out
+      infinite;
+    --animate-spinner-dot-shimmer: spinner-dot-shimmer var(--speed) ease-in-out
+      infinite;
+  }
+
+  /* Keyframes */
+  @keyframes spinner-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spinner-pulse {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.85;
+    }
+
+    50% {
+      transform: scale(1.15);
+      opacity: 0.4;
+    }
+
+    100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+
+  @keyframes spinner-bar {
+    0%,
+    100% {
+      transform: scaleY(0.4);
+      opacity: 0.5;
+    }
+
+    50% {
+      transform: scaleY(1.15);
+      opacity: 1;
+    }
+  }
+
+  @keyframes spinner-dot-wave {
+    0%,
+    60%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.95;
+    }
+
+    30% {
+      transform: translateY(-0.5rem);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes spinner-dot-shimmer {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
+@layer carousel {
+  /* ── Embla base reset ───────────────────────────── */
+  .embla {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .embla__viewport {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
+  .embla__container {
+    display: flex;
+    touch-action: pan-y pinch-zoom;
+    margin-left: calc(var(--embla-gap, 0px) * -1);
+    height: 100%;
+    width: 100%;
+  }
+  .embla__slide {
+    transform: translate3d(0, 0, 0); /* GPU layer promotion */
+    flex: 0 0 var(--slide-size, 100%);
+    min-width: 0;
+    padding-left: var(--embla-gap, 0px);
+    position: relative;
+    height: 100%;
+  }
+  .embla__slide__inner {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    user-select: none;
+    will-change: transform; /* promote to GPU for 3D effects */
+    transform-style: preserve-3d;
+  }
+
+  /* ── Cube effect base ───────────────────────────── */
+  [data-effect="cube"] .embla__viewport {
+    overflow: visible;
+    perspective: 1200px;
+  }
+  [data-effect="cube"] .embla__slide {
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+  }
+
+  /* ── Panorama effect base ───────────────────────── */
+  [data-effect="panorama"] .embla__container {
+    transform-style: preserve-3d;
+    perspective: 800px;
+  }
+
+  /* ── Coverflow / Carousel3D base ────────────────── */
+  [data-effect="coverflow"] .embla__container,
+  [data-effect="carousel_3d"] .embla__container {
+    transform-style: preserve-3d;
+    perspective: 1200px;
+  }
+
+  /* ── Slide shadow gradients (coverflow, carousel3d) */
+  .embla__slide-shadow-left {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.5), transparent);
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.1s ease-out;
+  }
+  .embla__slide-shadow-right {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.5), transparent);
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.1s ease-out;
+  }
+
+  /* ── Cube shadows ───────────────────────────────── */
+  .embla__cube-shadow {
+    position: absolute;
+    left: 0;
+    bottom: -20px;
+    right: 0;
+    pointer-events: none;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    filter: blur(10px);
+    transform-origin: bottom center;
+    transition: opacity 0.3s;
+    z-index: -1;
+  }
+
+  /* ── Bullets pagination ─────────────────────────── */
+  .carousel-bullet-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background-color: hsl(var(--foreground) / 0.3);
+    transition:
+      transform 300ms ease,
+      background-color 300ms ease;
+    cursor: pointer;
+  }
+  .carousel-bullet-dot[data-active="true"] {
+    background-color: hsl(var(--foreground));
+    transform: scale(1.5);
+  }
+  .carousel-bullet-pill {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: hsl(var(--foreground) / 0.3);
+    transition:
+      width 300ms ease,
+      background-color 300ms ease;
+    cursor: pointer;
+  }
+  .carousel-bullet-pill[data-active="true"] {
+    width: 24px;
+    background-color: hsl(var(--foreground));
+  }
+
+  /* ── Progress bar pagination ────────────────────── */
+  .carousel-progressbar {
+    height: 3px;
+    background: hsl(var(--foreground) / 0.1);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .carousel-progressbar__fill {
+    height: 100%;
+    background: hsl(var(--primary));
+    border-radius: 9999px;
+    transition: width 100ms linear;
+    will-change: width;
+  }
+
+  /* ── Reduced motion ─────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .embla__slide__inner {
+      transition: none !important;
+    }
+    .carousel-bullet-dot,
+    .carousel-bullet-pill,
+    .carousel-progressbar__fill {
+      transition: none !important;
+    }
+  }
+}
+
+@layer toast {
+  @keyframes toast-progress {
+    from {
+      width: 0%;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  .cn-toast::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background-color: currentColor;
+    animation: toast-progress var(--toast-duration, 4000ms) linear forwards;
+    opacity: 0.6;
+  }
+}
+

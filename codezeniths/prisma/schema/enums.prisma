@@ -1,0 +1,92 @@
+enum ProgressStatus {
+  solved
+  revisit
+  not_solved
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+enum Level {
+  beginner
+  intermediate
+  advanced
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum ProfileVisibility {
+  public
+  private
+}
+
+enum Gender {
+  male
+  female
+  non_binary
+  prefer_not_to_say
+}
+
+enum ProficiencyLevel {
+  beginner
+  intermediate
+  advanced
+  expert
+}
+
+enum ExperienceLevel {
+  student
+  early_career
+  mid_career
+  senior
+}
+
+enum UserType {
+  student
+  working_professional
+  job_seeker
+  educator
+  mentor
+  recruiter
+  org_admin
+  university_rep
+}
+
+enum LearningGoal {
+  interview_prep             // "Interview Preparation"
+  competitive_programming    // "Competitive Programming"
+  cs_fundamentals            // "Learn CS Fundamentals"
+  practice_dsa               // "Practice DSA"
+  system_design              // "Master System Design"
+  machine_coding             // "Practice Machine Coding"
+  structured_learning        // "Structured Courses & Certifications"
+  reference_reading          // "Read Reference Content & Articles"
+  visualize_concepts         // "Visualize Concepts"
+  community_engagement       // "Community Discussions"
+  hire_candidates            // "Hire & Evaluate Candidates"
+  teach_mentor               // "Teach or Mentor"
+  explore_platform           // "Explore & Be Curious"
+  career_growth              // "Upskill for Career Growth"
+}
+
+enum LearningStyle {
+  reading_articles           // "Reading articles/docs"
+  video_explanations         // "Video explanations"
+  interactive_visualizations // "Interactive visualizations/simulations"
+  hands_on_coding            // "Hands-on coding practice"
+  timed_contests             // "Timed contests/challenges"
+  structured_courses         // "Structured courses with milestones"
+  peer_discussion            // "Peer discussion/community"
+}
+
+enum DevicePlatform {
+  web
+  android
+  ios
+}

@@ -1,0 +1,21 @@
+export {
+    Background,
+    BackgroundVariant,
+    backgroundPresets,
+    GridPattern,
+    RetroGrid,
+    AnimatedGridPattern,
+    DotPattern,
+    FlickeringGrid,
+    StripedPattern,
+    BackgroundBeams,
+    Spotlight,
+    Ripple,
+    LightRays,
+    BackgroundRippleEffect,
+    DottedGlowBackground,
+    CanvasRevealEffect,
+    MaskContainer,
+    ParticlesBackground,
+} from './background';
+export type { BackgroundProps } from './background.types';

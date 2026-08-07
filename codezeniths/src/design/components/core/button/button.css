@@ -1,0 +1,65 @@
+@layer button {
+    @theme inline {
+
+        /* Rippling Effect */
+        --animate-rippling: rippling var(--duration, 600ms) ease-out forwards;
+
+        @keyframes rippling {
+            to {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* Shimmer Effect */
+        --animate-shimmer-slide: shimmer-slide var(--speed, 3s) ease-in-out infinite alternate;
+
+        @keyframes shimmer-slide {
+            to {
+                transform: translate(calc(100cqw - 100%), 0);
+            }
+        }
+
+        --animate-spin-around: spin-around calc(var(--speed, 3s) * 2) infinite linear;
+
+        @keyframes spin-around {
+            0% {
+                transform: translateZ(0) rotate(0deg);
+            }
+
+            15%,
+            35% {
+                transform: translateZ(0) rotate(90deg);
+            }
+
+            65%,
+            85% {
+                transform: translateZ(0) rotate(270deg);
+            }
+
+            100% {
+                transform: translateZ(0) rotate(360deg);
+            }
+        }
+
+        /* Pulsating Effect */
+        --animate-pulse: pulse var(--duration) ease-out infinite;
+
+        @keyframes pulse {
+            from {
+                box-shadow: 0 0 0 0 var(--pulse-color, rgba(99, 102, 241, 0.4));
+                opacity: 1;
+            }
+
+            60% {
+                box-shadow: 0 0 0 8px var(--pulse-color, rgba(99, 102, 241, 0.4));
+                opacity: 1;
+            }
+
+            to {
+                box-shadow: 0 0 0 12px transparent;
+                opacity: 1;
+            }
+        }
+    }
+}

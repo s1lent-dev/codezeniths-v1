@@ -1,0 +1,27 @@
+
+export enum ErrorCode {
+    BAD_REQUEST = 'BAD_REQUEST',
+    UNAUTHORIZED = 'UNAUTHORIZED',
+    FORBIDDEN = 'FORBIDDEN',
+    NOT_FOUND = 'NOT_FOUND',
+    CONFLICT = 'CONFLICT',
+    VALIDATION_ERROR = 'VALIDATION_ERROR',
+    DB_ERROR = 'DB_ERROR',
+    MICROSERVICE_ERROR = 'MICROSERVICE_ERROR',
+    INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
+    TIMEOUT = 'TIMEOUT',
+}
+
+export const HTTP_STATUS_MAP: Record<ErrorCode, number> = {
+    [ErrorCode.BAD_REQUEST]: 400,
+    [ErrorCode.UNAUTHORIZED]: 401,
+    [ErrorCode.FORBIDDEN]: 403,
+    [ErrorCode.NOT_FOUND]: 404,
+    [ErrorCode.CONFLICT]: 409,
+    [ErrorCode.VALIDATION_ERROR]: 422,
+    [ErrorCode.DB_ERROR]: 500,
+    [ErrorCode.MICROSERVICE_ERROR]: 502,
+    [ErrorCode.INTERNAL_SERVER_ERROR]: 500,
+    [ErrorCode.TIMEOUT]: 504,
+};
+
