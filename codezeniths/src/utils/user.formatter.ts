@@ -2,9 +2,10 @@ import { redisService } from '@/lib/redis';
 import { storageService } from '@/service/storage';
 import { createCache } from '@/hooks/performance-hooks/cache/cache';
 import { logger } from '@/service/logging';
+import { ENV_CONFIG } from '@/config/config';
 
 /**
- * Multi-Tiered Stampede-Safe Cache for Signed Media URLs (Profile Images + Resumes).
+ * Multi-Tiered Stampede-Safe Cache for Signed Media URLs (Resumes & Private Docs).
  *
  * Architecture:
  *  1. Adaptive L1 Memory Cache (via useCache / AdaptiveCache)
@@ -45,13 +46,31 @@ const l1MemoryCache = createCache<string>({
 const inFlightPromises = new Map<string, Promise<string>>();
 
 /**
+ * Resolves a raw image storage key into a direct public R2 CDN URL.
+ * If already an absolute HTTP/HTTPS URL (e.g. OAuth avatar), returns as-is.
+ */
+export function resolvePublicImageUrl(storageKey: string): string {
+    const cleanKey = storageKey.trim();
+    if (!cleanKey) return storageKey;
+
+    if (cleanKey.startsWith('http://') || cleanKey.startsWith('https://')) {
+        return cleanKey;
+    }
+
+    const publicBaseUrl = (ENV_CONFIG.R2_PUBLIC_ENDPOINT || ENV_CONFIG.R2_ENDPOINT || '').replace(/\/+$/, '');
+    const normalizedPath = cleanKey.replace(/^\/+/, '');
+
+    return publicBaseUrl ? `${publicBaseUrl}/${normalizedPath}` : cleanKey;
+}
+
+/**
  * Resolves a raw storage key to a presigned URL using Adaptive L1 + L2 Redis + In-Flight + Lock.
  */
 async function resolveSignedUrl(storageKey: string): Promise<string> {
     const cleanKey = storageKey.trim();
     if (!cleanKey) return storageKey;
 
-    if (cleanKey.startsWith('http')) {
+    if (cleanKey.startsWith('http://') || cleanKey.startsWith('https://')) {
         logger.info('User formatter URL resolved', {
             storageKey: cleanKey,
             tier: 'BYPASS_DIRECT_HTTP',
@@ -180,11 +199,12 @@ async function resolveSignedUrl(storageKey: string): Promise<string> {
 }
 
 /**
- * Formats a single user object by resolving raw storage keys into signed URLs.
- * Both `image` and `resume` are formatted identically.
+ * Formats a single user object by resolving image paths via public R2 CDN prefix
+ * and private documents (resumes) via secure signed URLs.
  *
  *  - If already a full URL (starts with "http" or "https"), left as-is.
- *  - Otherwise resolved via multi-tier Adaptive L1 + L2 + In-Flight + Lock cache.
+ *  - Images: Prepend R2 public endpoint for instant 0 ms CDN delivery.
+ *  - Resumes: Resolved via multi-tier Adaptive L1 + L2 + In-Flight + Lock cache.
  */
 export async function formatUserProfile<T extends { image?: string | null; resume?: string | null }>(user: T): Promise<T>;
 export async function formatUserProfile<T extends { image?: string | null; resume?: string | null }>(user: null): Promise<null>;
@@ -196,12 +216,12 @@ export async function formatUserProfile<T extends { image?: string | null; resum
 
     const formattedUser = { ...user };
 
-    // 1. IMAGE
+    // 1. IMAGE: Fast, public R2 CDN prefix (0 ms, permanent CDN URL)
     if (formattedUser.image && !formattedUser.image.startsWith('http')) {
-        formattedUser.image = await resolveSignedUrl(formattedUser.image);
+        formattedUser.image = resolvePublicImageUrl(formattedUser.image);
     }
 
-    // 2. RESUME
+    // 2. RESUME: Private PDF document (secure presigned URL)
     if (formattedUser.resume && !formattedUser.resume.startsWith('http')) {
         formattedUser.resume = await resolveSignedUrl(formattedUser.resume);
     }

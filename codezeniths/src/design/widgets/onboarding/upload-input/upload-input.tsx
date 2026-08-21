@@ -248,7 +248,7 @@ export const UploadInput: React.FC<UploadInputProps> = ({
                         <Typography variant={TypographyVariant.H5} className="font-bold text-sm sm:text-base text-foreground">
                             {title}
                         </Typography>
-                        <Typography variant={TypographyVariant.SPAN} className="text-xs text-muted-foreground block leading-relaxed">
+                        <Typography variant={TypographyVariant.SPAN} className="text-xs text-body-light dark:text-body-dark block leading-relaxed">
                             {description}
                         </Typography>
                     </div>
@@ -294,7 +294,7 @@ export const UploadInput: React.FC<UploadInputProps> = ({
 
             {/* Helper Text */}
             {helperText && !errorMessage && (
-                <Typography variant={TypographyVariant.SPAN} className="text-xs text-muted-foreground block px-1">
+                <Typography variant={TypographyVariant.SPAN} className="text-xs text-body-light dark:text-body-dark block px-1">
                     {helperText}
                 </Typography>
             )}

@@ -124,6 +124,29 @@ export const progressProblemSolvedConsumer = createConsumer(
     { queue: MqQueue.PROGRESS_PROBLEM_SOLVED }
 );
 
+export const progressProblemUnsolvedConsumer = createConsumer(
+    'progress.problem.unsolved',
+    async (payload: PayloadOf<'progress.problem.unsolved'>, context: MessageContext) => {
+        try {
+            logger.info('Processing problem unsolved event', { payload });
+
+            // Publish to user's real-time WebSocket channel in Redis
+            const channel = `user:${payload.userId}:progress`;
+            await redisService.pubsub.publish(channel, {
+                type: 'PROBLEM_UNSOLVED',
+                problemId: payload.problemId,
+                timestamp: payload.unsolvedAt || new Date().toISOString(),
+            });
+
+            context.ack();
+        } catch (error) {
+            logger.error('[progress:problem_unsolved] Failed to process problem unsolved event', error);
+            context.nack(false);
+        }
+    },
+    { queue: MqQueue.PROGRESS_PROBLEM_UNSOLVED }
+);
+
 export const progressModuleMasteredConsumer = createConsumer(
     'progress.module.mastered',
     async (payload: PayloadOf<'progress.module.mastered'>, context: MessageContext) => {
@@ -245,10 +268,11 @@ export const progressRankPromotedConsumer = createConsumer(
 export async function startProgressConsumers(): Promise<void> {
     await Promise.all([
         progressProblemSolvedConsumer.start(),
+        progressProblemUnsolvedConsumer.start(),
         progressModuleMasteredConsumer.start(),
         progressStreakMilestoneConsumer.start(),
         progressWeeklyDigestConsumer.start(),
         progressRankPromotedConsumer.start(),
     ]);
-    logger.info('[progress:consumers] All 5 Progress consumers initialized successfully.');
+    logger.info('[progress:consumers] All 6 Progress consumers initialized successfully.');
 }

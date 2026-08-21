@@ -10,7 +10,7 @@ export const CarouselPagination: React.FC<{ type?: 'bullets' | 'fraction' | 'pro
 
   if (type === 'fraction') {
     return (
-      <div className={cn("text-sm text-muted-foreground text-center", className)}>
+      <div className={cn("text-sm text-body-light dark:text-body-dark text-center", className)}>
         {selectedIndex + 1} / {scrollSnapCount}
       </div>
     );

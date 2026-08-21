@@ -103,24 +103,24 @@ export const InCardLayout: Story = {
     render: () => (
         <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm">
             <h3 className="text-lg font-semibold">Account Settings</h3>
-            <p className="text-sm text-muted-foreground">Manage your account preferences</p>
+            <p className="text-sm text-body-light dark:text-body-dark">Manage your account preferences</p>
 
             <Separator className="my-5" />
 
             <div className="space-y-4">
                 <div className="flex justify-between">
                     <span>Email notifications</span>
-                    <span className="text-muted-foreground">On</span>
+                    <span className="text-body-light dark:text-body-dark">On</span>
                 </div>
                 <Separator className="bg-muted/60" />
                 <div className="flex justify-between">
                     <span>Two-factor authentication</span>
-                    <span className="text-muted-foreground">Off</span>
+                    <span className="text-body-light dark:text-body-dark">Off</span>
                 </div>
                 <Separator className="bg-muted/60" />
                 <div className="flex justify-between">
                     <span>Session timeout</span>
-                    <span className="text-muted-foreground">30 minutes</span>
+                    <span className="text-body-light dark:text-body-dark">30 minutes</span>
                 </div>
             </div>
         </div>

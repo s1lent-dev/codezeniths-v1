@@ -139,8 +139,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 <div className={cn(
                     "p-2.5 rounded-sm transition-colors shrink-0",
                     isSelected
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "bg-primary/5 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                        ? "bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
+                        : "bg-primary/5 text-body-light dark:text-body-dark group-hover:bg-primary/10 group-hover:text-primary"
                 )}>
                     <IconComponent className="w-5 h-5" />
                 </div>
@@ -150,7 +150,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
                         {option.label}
                     </h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {option.description}
                     </p>
                 </div>
@@ -160,7 +160,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     className={cn(
                         "rounded-xs size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
                         isSelected
-                            ? "bg-primary border-primary text-primary-foreground shadow-xs"
+                            ? "bg-primary border-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                             : "border-muted-light/70 dark:border-muted-dark/70 bg-primary/5 group-hover:border-primary/50"
                     )}
                 >
@@ -276,7 +276,7 @@ const RenderActiveQuestion: React.FC<RenderActiveQuestionProps> = ({
                             <div className="p-8 border border-dashed border-warning/50 bg-warning/5 rounded-xl flex flex-col items-center justify-center text-center gap-2">
                                 <AlertCircle className="w-8 h-8 text-warning" />
                                 <p className="text-sm font-semibold text-warning">Session Upload Limit Reached</p>
-                                <p className="text-xs text-muted-foreground">You have reached the maximum of 3 resume uploads for this session. Please proceed with manually editing your skills below.</p>
+                                <p className="text-xs text-body-light dark:text-body-dark">You have reached the maximum of 3 resume uploads for this session. Please proceed with manually editing your skills below.</p>
                             </div>
                         ) : (
                             <FileInput
@@ -336,7 +336,7 @@ const RenderActiveQuestion: React.FC<RenderActiveQuestionProps> = ({
                                                 ? 'Skill Capacity Full (15/15)'
                                                 : 'Auto-Extract Skills with AI'}
                                         </p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-xs text-body-light dark:text-body-dark">
                                             {hasAlreadyExtracted
                                                 ? 'Skills have been extracted and added to your list below.'
                                                 : isSkillsFull
@@ -390,7 +390,7 @@ const RenderActiveQuestion: React.FC<RenderActiveQuestionProps> = ({
                             <Label className="text-sm font-medium">
                                 Skills & Tech Stack <span className="text-destructive">*</span>
                             </Label>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-body-light dark:text-body-dark">
                                 {currentSkills.length} / 15 selected
                             </span>
                         </div>
@@ -405,7 +405,7 @@ const RenderActiveQuestion: React.FC<RenderActiveQuestionProps> = ({
                                 onKeyDown={handleKeyDownAdd}
                                 className="pr-10!"
                             />
-                            <Search className="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10 cursor-pointer" />
+                            <Search className="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-body-light dark:text-body-dark pointer-events-none z-10 cursor-pointer" />
                         </div>
 
                         {/* Dropdown Suggestions */}
@@ -420,7 +420,7 @@ const RenderActiveQuestion: React.FC<RenderActiveQuestionProps> = ({
                                             className="w-full text-left px-3 py-1.5 rounded-sm hover:bg-muted text-xs flex items-center justify-between cursor-pointer"
                                         >
                                             <span>{skill.title}</span>
-                                            <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+                                            <Plus className="w-3.5 h-3.5 text-body-light dark:text-body-dark" />
                                         </button>
                                     ))
                                 ) : (
@@ -455,7 +455,7 @@ const RenderActiveQuestion: React.FC<RenderActiveQuestionProps> = ({
                                     </Badge>
                                 ))
                             ) : (
-                                <p className="text-xs text-muted-foreground self-center">
+                                <p className="text-xs text-body-light dark:text-body-dark self-center">
                                     No skills added yet. Search and select skills above.
                                 </p>
                             )}
@@ -736,7 +736,7 @@ export const Step2RoleAndSkills: React.FC<Step2Props> = ({
                         Next Question
                     </Button>
                 ) : (
-                    <span className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+                    <span className="text-xs text-body-light dark:text-body-dark font-medium flex items-center gap-1.5">
                         <Check className="w-3.5 h-3.5 text-primary stroke-3" />
                         Questionnaire complete! Click &quot;Continue&quot; below to proceed.
                     </span>

@@ -115,6 +115,7 @@ export const MqQueue = {
 
     // ── Progress Queues ───────────────────────────────────────────
     PROGRESS_PROBLEM_SOLVED:        'q.progress.problem_solved',
+    PROGRESS_PROBLEM_UNSOLVED:      'q.progress.problem_unsolved',
     PROGRESS_MODULE_MASTERED:       'q.progress.module_mastered',
     PROGRESS_STREAK_MILESTONE:      'q.progress.streak_milestone',
     PROGRESS_WEEKLY_DIGEST:         'q.progress.weekly_digest',
@@ -180,6 +181,7 @@ export const MqRoutingKey = {
 
     // ── Progress Routing Keys ─────────────────────────────────────
     PROGRESS_PROBLEM_SOLVED:        'progress.problem.solved',
+    PROGRESS_PROBLEM_UNSOLVED:      'progress.problem.unsolved',
     PROGRESS_MODULE_MASTERED:       'progress.module.mastered',
     PROGRESS_STREAK_MILESTONE:      'progress.streak.milestone',
     PROGRESS_WEEKLY_DIGEST:         'progress.weekly.digest',

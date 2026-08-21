@@ -247,22 +247,24 @@ export const NotificationsInfiniteList: React.FC<NotificationsInfiniteListProps>
         return (
             <Card
                 variant={CardVariant.FLAT}
-                className="w-full py-16 px-6 text-center flex flex-col items-center justify-center gap-3 border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark rounded-md"
+                className="w-full py-16 px-6 border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark rounded-md"
             >
-                <div className="size-14 rounded-full bg-secondary/10 flex items-center justify-center text-muted-light dark:text-muted-dark">
-                    <Inbox className="size-7 stroke-[1.5]" />
-                </div>
-                <div className="space-y-1">
-                    <Typography variant={TypographyVariant.H6} className="text-sm font-bold text-heading-light dark:text-heading-dark">
-                        No notifications found
-                    </Typography>
-                    <Typography variant={TypographyVariant.MUTED} className="text-xs text-muted-light dark:text-muted-dark max-w-sm">
-                        {search
-                            ? `No alerts matching "${search}". Try adjusting your search or filters.`
-                            : status === 'unread'
-                            ? "You're all caught up! No unread notifications right now."
-                            : 'You have no notifications in this category.'}
-                    </Typography>
+                <div className="w-full flex flex-col items-center justify-center text-center gap-3">
+                    <div className="size-14 rounded-full bg-secondary/10 flex items-center justify-center text-muted-light dark:text-muted-dark shrink-0 mx-auto">
+                        <Inbox className="size-7 stroke-[1.5]" />
+                    </div>
+                    <div className="space-y-1.5 flex flex-col items-center justify-center text-center max-w-md mx-auto">
+                        <Typography variant={TypographyVariant.H6} className="text-sm sm:text-base font-bold text-heading-light dark:text-heading-dark text-center">
+                            No notifications found
+                        </Typography>
+                        <Typography variant={TypographyVariant.MUTED} className="text-xs text-muted-light dark:text-muted-dark text-center leading-relaxed">
+                            {search
+                                ? `No alerts matching "${search}". Try adjusting your search or filters.`
+                                : status === 'unread'
+                                ? "You're all caught up! No unread notifications right now."
+                                : 'You have no notifications in this category.'}
+                        </Typography>
+                    </div>
                 </div>
             </Card>
         );

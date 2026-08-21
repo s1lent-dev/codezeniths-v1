@@ -94,8 +94,8 @@ const ThemeCard: React.FC<ThemeCardProps> = ({
                 <div className={cn(
                     "p-3 rounded-sm transition-colors shrink-0",
                     isSelected
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "bg-primary/5 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                        ? "bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
+                        : "bg-primary/5 text-body-light dark:text-body-dark group-hover:bg-primary/10 group-hover:text-primary"
                 )}>
                     <IconComponent className="w-5 h-5" />
                 </div>
@@ -105,7 +105,7 @@ const ThemeCard: React.FC<ThemeCardProps> = ({
                     <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
                         {title}
                     </h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {description}
                     </p>
                 </div>
@@ -115,7 +115,7 @@ const ThemeCard: React.FC<ThemeCardProps> = ({
                     className={cn(
                         "rounded-xs size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
                         isSelected
-                            ? "bg-primary border-primary text-primary-foreground shadow-xs"
+                            ? "bg-primary border-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                             : "border-muted-light/70 dark:border-muted-dark/70 bg-primary/5 group-hover:border-primary/50"
                     )}
                 >
@@ -166,8 +166,8 @@ const VisibilityCard: React.FC<VisibilityCardProps> = ({
                 <div className={cn(
                     "p-3 rounded-sm transition-colors shrink-0",
                     isSelected
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "bg-primary/5 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                        ? "bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
+                        : "bg-primary/5 text-body-light dark:text-body-dark group-hover:bg-primary/10 group-hover:text-primary"
                 )}>
                     <IconComponent className="w-5 h-5" />
                 </div>
@@ -177,7 +177,7 @@ const VisibilityCard: React.FC<VisibilityCardProps> = ({
                     <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
                         {label}
                     </h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {description}
                     </p>
                 </div>
@@ -187,7 +187,7 @@ const VisibilityCard: React.FC<VisibilityCardProps> = ({
                     className={cn(
                         "rounded-xs size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
                         isSelected
-                            ? "bg-primary border-primary text-primary-foreground shadow-xs"
+                            ? "bg-primary border-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                             : "border-muted-light/70 dark:border-muted-dark/70 bg-primary/5 group-hover:border-primary/50"
                     )}
                 >
@@ -238,8 +238,8 @@ const NotificationToggleCard: React.FC<NotificationToggleCardProps> = ({
                 <div className={cn(
                     "p-3 rounded-sm transition-colors shrink-0",
                     checked
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "bg-primary/5 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                        ? "bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
+                        : "bg-primary/5 text-body-light dark:text-body-dark group-hover:bg-primary/10 group-hover:text-primary"
                 )}>
                     <IconComponent className="w-5 h-5" />
                 </div>
@@ -256,7 +256,7 @@ const NotificationToggleCard: React.FC<NotificationToggleCardProps> = ({
                             </span>
                         )}
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {description}
                     </p>
                 </div>
@@ -512,7 +512,7 @@ export const Step4Preferences: React.FC<Step4Props> = ({ form }) => {
             </div>
 
             {/* Bottom Complete Note */}
-            <div className="pt-2 flex items-center justify-center text-xs text-muted-foreground font-medium gap-1.5">
+            <div className="pt-2 flex items-center justify-center text-xs text-body-light dark:text-body-dark font-medium gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-primary" />
                 <span>Preferences set! Click &quot;Complete Profile&quot; below to finish onboarding.</span>
             </div>
@@ -541,7 +541,7 @@ export const Step4Preferences: React.FC<Step4Props> = ({ form }) => {
                         </AlertDialogCancel>
                         <Button
                             onClick={handleAcceptPushPermission}
-                            className="w-full sm:w-1/2 bg-primary text-primary-foreground font-semibold"
+                            className="w-full sm:w-1/2 bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 font-semibold"
                         >
                             Allow Notifications
                         </Button>

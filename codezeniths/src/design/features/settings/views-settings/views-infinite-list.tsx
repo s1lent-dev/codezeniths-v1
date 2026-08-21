@@ -111,18 +111,20 @@ export const ViewsInfiniteList: React.FC<ViewsInfiniteListProps> = ({
         return (
             <Card
                 variant={CardVariant.FLAT}
-                className="w-full py-16 px-6 text-center flex flex-col items-center justify-center gap-3 border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark rounded-md"
+                className="w-full py-16 px-6 border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark rounded-md"
             >
-                <div className="size-14 rounded-full bg-teal/10 flex items-center justify-center text-teal">
-                    <Users className="size-7 stroke-[1.5]" />
-                </div>
-                <div className="space-y-1">
-                    <Typography variant={TypographyVariant.H6} className="text-sm font-bold text-heading-light dark:text-heading-dark">
-                        No profile viewers yet
-                    </Typography>
-                    <Typography variant={TypographyVariant.MUTED} className="text-xs text-muted-light dark:text-muted-dark max-w-sm">
-                        When other developers and peers visit your profile, their activity will be displayed here.
-                    </Typography>
+                <div className="w-full flex flex-col items-center justify-center text-center gap-3">
+                    <div className="size-14 rounded-full bg-teal/10 flex items-center justify-center text-teal shrink-0 mx-auto">
+                        <Users className="size-7 stroke-[1.5]" />
+                    </div>
+                    <div className="space-y-1.5 flex flex-col items-center justify-center text-center max-w-md mx-auto">
+                        <Typography variant={TypographyVariant.H6} className="text-sm sm:text-base font-bold text-heading-light dark:text-heading-dark text-center">
+                            No profile viewers yet
+                        </Typography>
+                        <Typography variant={TypographyVariant.MUTED} className="text-xs text-muted-light dark:text-muted-dark text-center leading-relaxed">
+                            When other developers and peers visit your profile, their activity will be displayed here.
+                        </Typography>
+                    </div>
                 </div>
             </Card>
         );

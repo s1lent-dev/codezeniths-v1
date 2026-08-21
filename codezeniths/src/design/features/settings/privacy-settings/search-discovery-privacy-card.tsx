@@ -73,7 +73,7 @@ const DiscoveryToggleItem: React.FC<DiscoveryToggleItemProps> = ({
                             </span>
                         )}
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {description}
                     </p>
                 </div>

@@ -189,6 +189,15 @@ export const messageRegistry = {
         isFirstSolve: z.boolean().default(true),
         streakCount: z.number().optional(),
     }),
+    'progress.problem.unsolved': z.object({
+        correlationId,
+        userId: z.string(),
+        problemId: z.string(),
+        problemTitle: z.string(),
+        difficulty: z.string().optional(),
+        module: z.string().optional(),
+        unsolvedAt: z.string().optional(),
+    }),
     'progress.module.mastered': z.object({
         correlationId,
         userId: z.string(),

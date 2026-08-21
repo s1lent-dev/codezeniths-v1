@@ -208,7 +208,7 @@ export const EditBillingAddressModal: React.FC<EditBillingAddressModalProps> = (
                             size={ButtonSize.SM}
                             disabled={isSubmitting}
                             leftIcon={isSubmitting ? <Loader2 className="size-3.5 animate-spin" /> : null}
-                            className="text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-primary-foreground"
+                            className="text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-foreground-dark-shade3 dark:text-foreground-light-shade3"
                         >
                             {isSubmitting ? 'Saving...' : 'Save Billing Details'}
                         </Button>

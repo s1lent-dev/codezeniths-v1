@@ -107,7 +107,7 @@ export const ProfileVisibilitySettings: React.FC<ProfileVisibilitySettingsProps>
                                     <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
                                         {opt.label}
                                     </h4>
-                                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                                         {opt.description}
                                     </p>
                                 </div>
@@ -117,7 +117,7 @@ export const ProfileVisibilitySettings: React.FC<ProfileVisibilitySettingsProps>
                                     className={cn(
                                         "rounded-xs size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
                                         isSelected
-                                            ? "bg-primary border-primary text-primary-foreground shadow-xs"
+                                            ? "bg-primary border-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                                             : "border-muted-light/70 dark:border-muted-dark/70 bg-primary/5 group-hover:border-primary/50"
                                     )}
                                 >
@@ -157,7 +157,7 @@ export const ProfileVisibilitySettings: React.FC<ProfileVisibilitySettingsProps>
                         onClick={onConfirmVisibility}
                         isLoading={isUpdatingVisibility}
                         loadingText="Saving..."
-                        className="text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-primary-foreground self-end sm:self-center shrink-0 min-w-28 px-4 py-2"
+                        className="text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-foreground-dark-shade3 dark:text-foreground-light-shade3 self-end sm:self-center shrink-0 min-w-28 px-4 py-2"
                     >
                         Confirm Change
                     </Button>

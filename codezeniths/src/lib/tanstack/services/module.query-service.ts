@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
 import { queryKeys } from '../query-keys';
 import { CACHE_TIERS } from '../cache-config';
+import { CacheInvalidationService } from '../cache-invalidation.service';
 import type { IModuleQueryService } from '../interfaces';
 import {
     GetModulesTRPCOutputSchema,
@@ -85,8 +86,8 @@ export class ModuleQueryService implements IModuleQueryService {
             mutationFn: async (input: z.infer<typeof ToggleModuleBookmarkTRPCInputSchema>) => {
                 return await trpcClient.module.toggleModuleBookmark.mutate(input);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['module'] });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnModuleBookmarkChange(queryClient);
             },
         });
     }
@@ -97,9 +98,8 @@ export class ModuleQueryService implements IModuleQueryService {
             mutationFn: async (input: z.infer<typeof ToggleTopicBookmarkTRPCInputSchema>) => {
                 return await trpcClient.module.toggleTopicBookmark.mutate(input);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['module'] });
-                queryClient.invalidateQueries({ queryKey: ['topic'] });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnModuleBookmarkChange(queryClient);
             },
         });
     }

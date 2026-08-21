@@ -73,7 +73,8 @@ export const EnvConfigSchema = z.object({
     R2_SECRET_ACCESS_KEY: z.string(),
     R2_BUCKET_NAME: z.string(),
     R2_API_TOKEN: z.string().optional(),
-    R2_ENDPOINT: z.string().url().optional(),
+    R2_ENDPOINT: z.url().optional(),
+    R2_PUBLIC_ENDPOINT: z.url().optional(),
 
     // Cloudflare Turnstile Configuration
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string(),

@@ -397,5 +397,215 @@ export async function recordProblemSolvedAndSyncStreak({
     }
 }
 
+/**
+ * Computes the historical longest consecutive problem-solving streak for a user from their daily activity ledger.
+ */
+export async function calculateHistoricalLongestStreak(userId: string): Promise<number> {
+    try {
+        const activities = await prisma.userDailyActivity.findMany({
+            where: {
+                userId,
+                problemsSolved: { gt: 0 },
+            },
+            select: {
+                date: true,
+            },
+            orderBy: {
+                date: 'asc',
+            },
+        });
+
+        if (activities.length === 0) return 0;
+
+        let maxStreak = 1;
+        let currentRun = 1;
+
+        for (let i = 1; i < activities.length; i++) {
+            const prev = normalizeToUtcMidnight(activities[i - 1].date);
+            const curr = normalizeToUtcMidnight(activities[i].date);
+
+            const diffDays = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                currentRun += 1;
+                if (currentRun > maxStreak) {
+                    maxStreak = currentRun;
+                }
+            } else if (diffDays > 1) {
+                currentRun = 1;
+            }
+        }
+
+        return maxStreak;
+    } catch (err) {
+        logger.error('Failed to calculate historical longest streak', { err, userId });
+        return 0;
+    }
+}
+
+/**
+ * Atomically reverts problem solved activity and rolls back UserStreak problem solving streak if applicable.
+ */
+export async function revertProblemSolvedAndSyncStreak({
+    userId,
+    date = new Date(),
+    pointsEarned = 10,
+    problemsSolved = 1,
+}: {
+    userId: string;
+    date?: Date;
+    pointsEarned?: number;
+    problemsSolved?: number;
+}): Promise<EvaluatedStreakState> {
+    const targetDate = normalizeToUtcMidnight(date);
+
+    try {
+        // 1. Fetch current UserDailyActivity for targetDate
+        const existingActivity = await prisma.userDailyActivity.findUnique({
+            where: {
+                userId_date: {
+                    userId,
+                    date: targetDate,
+                },
+            },
+        });
+
+        if (!existingActivity) {
+            const currentStreak = await prisma.userStreak.findUnique({ where: { userId } });
+            if (!currentStreak) {
+                throw new Error('User streak record not found');
+            }
+            return evaluateStreakState(currentStreak, targetDate);
+        }
+
+        const remainingSolved = Math.max(0, existingActivity.problemsSolved - problemsSolved);
+        const remainingPoints = Math.max(0, existingActivity.pointsEarned - pointsEarned);
+
+        // Update UserDailyActivity
+        await prisma.userDailyActivity.update({
+            where: {
+                userId_date: {
+                    userId,
+                    date: targetDate,
+                },
+            },
+            data: {
+                problemsSolved: remainingSolved,
+                pointsEarned: remainingPoints,
+            },
+        });
+
+        // 2. Fetch UserStreak
+        let streak = await prisma.userStreak.findUnique({
+            where: { userId },
+        });
+
+        if (!streak) {
+            throw new Error('User streak record not found');
+        }
+
+        // 3. If there are still solved problems on targetDate, the streak remains intact!
+        if (remainingSolved > 0) {
+            const evaluated = evaluateStreakState(streak, targetDate);
+            return {
+                ...streak,
+                isSolvedToday: true,
+                isCheckedInToday: evaluated.isCheckedInToday,
+                isDirty: false,
+                bestStreak: streak.longestStreak,
+                activeDaysCount: streak.totalActiveDays,
+            };
+        }
+
+        // 4. If remainingSolved is 0, check if targetDate was the lastProblemSolvedDate
+        const lastSolvedTime = streak.lastProblemSolvedDate
+            ? normalizeToUtcMidnight(streak.lastProblemSolvedDate).getTime()
+            : 0;
+
+        const isTargetDateLastSolved = lastSolvedTime === targetDate.getTime();
+
+        if (!isTargetDateLastSolved) {
+            const evaluated = evaluateStreakState(streak, targetDate);
+            return {
+                ...streak,
+                isSolvedToday: evaluated.isSolvedToday,
+                isCheckedInToday: evaluated.isCheckedInToday,
+                isDirty: false,
+                bestStreak: streak.longestStreak,
+                activeDaysCount: streak.totalActiveDays,
+            };
+        }
+
+        // 5. Query the previous active solve day before targetDate
+        const previousActiveDay = await prisma.userDailyActivity.findFirst({
+            where: {
+                userId,
+                date: { lt: targetDate },
+                problemsSolved: { gt: 0 },
+            },
+            orderBy: {
+                date: 'desc',
+            },
+        });
+
+        let newLastProblemSolvedDate: Date | null = previousActiveDay ? previousActiveDay.date : null;
+        let newCurrentStreak = 0;
+
+        if (previousActiveDay) {
+            const prevDate = normalizeToUtcMidnight(previousActiveDay.date);
+            const diffMs = targetDate.getTime() - prevDate.getTime();
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                // The previous solved day was yesterday! Streak decrements by 1.
+                newCurrentStreak = Math.max(0, streak.currentStreak - 1);
+            } else {
+                // The previous solve day was older (> 1 day ago)
+                newCurrentStreak = 0;
+            }
+        } else {
+            // No other solved problems in user's history
+            newCurrentStreak = 0;
+            newLastProblemSolvedDate = null;
+        }
+
+        // 6. Recalculate longestStreak if today's streak was the sole peak
+        let newLongestStreak = streak.longestStreak;
+        if (streak.longestStreak === streak.currentStreak && streak.currentStreak > newCurrentStreak) {
+            newLongestStreak = await calculateHistoricalLongestStreak(userId);
+        }
+
+        // 7. Update UserStreak in database
+        const updatedStreak = await prisma.userStreak.update({
+            where: { userId },
+            data: {
+                currentStreak: newCurrentStreak,
+                longestStreak: newLongestStreak,
+                lastProblemSolvedDate: newLastProblemSolvedDate,
+            },
+        });
+
+        logger.info('Successfully rolled back user problem solving streak on unsolve', {
+            userId,
+            currentStreak: updatedStreak.currentStreak,
+            longestStreak: updatedStreak.longestStreak,
+            lastProblemSolvedDate: updatedStreak.lastProblemSolvedDate,
+        });
+
+        const evaluated = evaluateStreakState(updatedStreak, targetDate);
+        return {
+            ...updatedStreak,
+            isSolvedToday: evaluated.isSolvedToday,
+            isCheckedInToday: evaluated.isCheckedInToday,
+            isDirty: false,
+            bestStreak: updatedStreak.longestStreak,
+            activeDaysCount: updatedStreak.totalActiveDays,
+        };
+    } catch (error: any) {
+        logger.error('Failed to revert user problem streak on unsolve', { error: error?.message, userId });
+        throw error;
+    }
+}
+
 // Backward compatibility alias
 export const recordUserActivityAndSyncStreak = recordProblemSolvedAndSyncStreak;

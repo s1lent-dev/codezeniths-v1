@@ -91,7 +91,7 @@ const AutomationSwitchItem: React.FC<AutomationSwitchItemProps> = ({
                             </span>
                         )}
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {description}
                     </p>
                 </div>
@@ -200,7 +200,7 @@ export const BillingPreferencesCard: React.FC<BillingPreferencesCardProps> = ({
                                             Predictable
                                         </span>
                                     </div>
-                                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                                         Pay a fixed rate at the start of each month. All ZenLab compute hours and CodeFlow quotas renew instantly.
                                     </p>
                                 </div>
@@ -209,7 +209,7 @@ export const BillingPreferencesCard: React.FC<BillingPreferencesCardProps> = ({
                                     className={cn(
                                         'rounded-xs size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none',
                                         paymentTimingModel === 'prepaid'
-                                            ? 'bg-primary border-primary text-primary-foreground shadow-xs'
+                                            ? 'bg-primary border-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs'
                                             : 'border-muted-light/70 dark:border-muted-dark/70 bg-primary/5 group-hover:border-primary/50'
                                     )}
                                 >
@@ -258,7 +258,7 @@ export const BillingPreferencesCard: React.FC<BillingPreferencesCardProps> = ({
                                             Metered
                                         </span>
                                     </div>
-                                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                                         Pay baseline plan upfront + automatic metered billing at month-end for on-demand GPU clusters and extra interview credits.
                                     </p>
                                 </div>
@@ -267,7 +267,7 @@ export const BillingPreferencesCard: React.FC<BillingPreferencesCardProps> = ({
                                     className={cn(
                                         'rounded-xs size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none',
                                         paymentTimingModel === 'pay_as_you_go'
-                                            ? 'bg-primary border-primary text-primary-foreground shadow-xs'
+                                            ? 'bg-primary border-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs'
                                             : 'border-muted-light/70 dark:border-muted-dark/70 bg-primary/5 group-hover:border-primary/50'
                                     )}
                                 >

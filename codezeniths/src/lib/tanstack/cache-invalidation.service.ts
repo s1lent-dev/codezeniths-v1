@@ -33,11 +33,12 @@ export class CacheInvalidationService {
         if (queryClient) {
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: ['user', 'onboardingProfile'] }),
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() }),
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() }),
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.avatar() }),
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.socials() }),
+                queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
                 queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
+                queryClient.invalidateQueries({ queryKey: ['user', 'settings'] }),
+                queryClient.invalidateQueries({ queryKey: ['user', 'avatar'] }),
+                queryClient.invalidateQueries({ queryKey: ['user', 'socials'] }),
+                queryClient.invalidateQueries({ queryKey: ['user', 'availability'] }),
                 queryClient.invalidateQueries({ queryKey: queryKeys.auth.session() }),
             ]);
         }
@@ -57,16 +58,16 @@ export class CacheInvalidationService {
     }
 
     /**
-     * 3. Triggered on user profile, avatar, or settings update.
+     * 3. Triggered on user profile, bio, skills, resume, or avatar update.
      * Invalidates TanStack profile queries & re-syncs Better-Auth session nanostore for UI components.
      */
     static async invalidateOnProfileChange(queryClient: QueryClient) {
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
-            queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() }),
-            queryClient.invalidateQueries({ queryKey: queryKeys.user.avatar() }),
-            queryClient.invalidateQueries({ queryKey: queryKeys.user.socials() }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'settings'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'avatar'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'socials'] }),
             queryClient.invalidateQueries({ queryKey: ['leaderboard'] }),
             queryClient.invalidateQueries({ queryKey: ['playlist'] }),
         ]);
@@ -74,7 +75,36 @@ export class CacheInvalidationService {
     }
 
     /**
-     * 4. Triggered on user follow or unfollow mutations.
+     * 4. Triggered on core account changes (username, email, phone number, password).
+     * Refetches auth session, purges availability checks, and refreshes profile & settings caches.
+     */
+    static async invalidateOnAccountSettingsChange(queryClient: QueryClient) {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['user', 'availability'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'settings'] }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.auth.session() }),
+            queryClient.invalidateQueries({ queryKey: ['leaderboard'] }),
+        ]);
+        return await refetchAuthSession();
+    }
+
+    /**
+     * 5. Triggered on user preferences update (theme, notification channels, profile visibility).
+     * Refetches auth session and invalidates settings queries.
+     */
+    static async invalidateOnPreferencesChange(queryClient: QueryClient) {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['user', 'settings'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
+        ]);
+        return await refetchAuthSession();
+    }
+
+    /**
+     * 6. Triggered on user follow or unfollow mutations.
      * Invalidates follow statistics, follower lists, following lists, profile headers, and scoped leaderboards.
      */
     static async invalidateOnFollowChange(queryClient: QueryClient, targetUserId?: string) {
@@ -89,8 +119,8 @@ export class CacheInvalidationService {
     }
 
     /**
-     * 5. Triggered on recording a profile view.
-     * Invalidates profile view count & recent viewers modal list.
+     * 7. Triggered on recording a profile view.
+     * Invalidates profile view count, recent viewers list, and infinite viewers query.
      */
     static async invalidateOnProfileView(queryClient: QueryClient) {
         await Promise.all([
@@ -101,38 +131,45 @@ export class CacheInvalidationService {
     }
 
     /**
-     * 6. Triggered on onboarding step completion (Steps 0 through 3).
+     * 8. Triggered on onboarding step completion (Steps 0 through 3).
      * Invalidates onboarding state & re-syncs Better-Auth session so user.isOnboardingComplete updates in useAuth().
      */
     static async invalidateOnOnboardingStepChange(queryClient: QueryClient) {
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: ['user', 'onboardingProfile'] }),
-            queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() }),
-            queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'settings'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'availability'] }),
         ]);
         return await refetchAuthSession();
     }
 
     /**
-     * 7. Triggered on notification mark as read or mark all as read.
+     * 9. Triggered on notification mark as read or mark all as read.
+     * Invalidates all notification lists, infinite queries, and unread badges.
      */
     static async invalidateOnNotificationsRead(queryClient: QueryClient) {
-        await queryClient.invalidateQueries({ queryKey: ['notifications'] });
-    }
-
-    /**
-     * 8. Triggered on user skill upsert or deletion.
-     */
-    static async invalidateOnSkillsChange(queryClient: QueryClient) {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['skill'] }),
+            queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+            queryClient.invalidateQueries({ queryKey: ['notification'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
         ]);
     }
 
     /**
-     * 9. Triggered on check-in or streak changes.
+     * 10. Triggered on user skill upsert or deletion.
+     */
+    static async invalidateOnSkillsChange(queryClient: QueryClient) {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['skill'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
+        ]);
+    }
+
+    /**
+     * 11. Triggered on check-in or streak changes.
      */
     static async invalidateOnStreakChange(queryClient: QueryClient) {
         await Promise.all([
@@ -141,6 +178,7 @@ export class CacheInvalidationService {
             queryClient.invalidateQueries({ queryKey: ['user', 'yearlyActivity'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'monthlyActivity'] }),
             queryClient.invalidateQueries({ queryKey: ['leaderboard'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
         ]);
     }
 
@@ -149,20 +187,31 @@ export class CacheInvalidationService {
     }
 
     /**
-     * 10. Triggered on search history recording, deletion, or clear.
+     * 12. Triggered on search history recording, deletion, or clear.
      */
     static async invalidateSearchHistory(queryClient: QueryClient) {
         await queryClient.invalidateQueries({ queryKey: ['search', 'history'] });
     }
 
     /**
-     * 11. Triggered on playlist creation, update, deletion, or bookmark toggle.
+     * 13. Triggered on playlist creation, update, deletion, or bookmark toggle.
      */
     static async invalidateOnPlaylistChange(queryClient: QueryClient) {
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: ['playlist'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileViews'] }),
+        ]);
+    }
+
+    /**
+     * 14. Triggered on module or topic bookmark toggle.
+     */
+    static async invalidateOnModuleBookmarkChange(queryClient: QueryClient) {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['module'] }),
+            queryClient.invalidateQueries({ queryKey: ['topic'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
         ]);
     }
 }

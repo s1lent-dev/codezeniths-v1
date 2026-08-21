@@ -1,0 +1,547 @@
+// // ==========================================
+// // USER METADATA & PROFILE INFORMATION
+// // ==========================================
+
+// model UserMetadata {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   userId String @unique @db.Uuid
+
+//   // ── Onboarding & Platform Lifecycle ──
+//   isOnboardingComplete Boolean @default(false)
+//   onBoardingStep       Int     @default(0)
+//   isActive             Boolean @default(true)
+//   isBanned             Boolean @default(false)
+//   isSuspended          Boolean @default(false)
+
+//   // ── 3-Month Rate Limiting & Audit Timestamps ──
+//   lastEmailChanged       DateTime?
+//   lastPhoneNumberChanged DateTime?
+//   lastUsernameChanged    DateTime?
+//   lastPasswordChanged    DateTime?
+
+//   // ── Resume & Skills Extraction Tracking ──
+//   extractedResumeSkillsCount Int       @default(0)
+//   lastResumeUploadedAt       DateTime?
+//   resumeParsedAt             DateTime?
+
+//   // ── Security & Authentication Health ──
+//   lastLoginAt         DateTime?
+//   lastLoginIp         String?
+//   failedLoginAttempts Int       @default(0)
+//   lockedUntil         DateTime?
+
+//   // ── Profile Completeness & Compliance ──
+//   profileCompletionScore Int       @default(0) // 0 to 100 percentage
+//   termsAcceptedAt        DateTime?
+//   privacyAcceptedAt      DateTime?
+//   marketingOptInAt       DateTime?
+
+//   // ── Relations & Timestamps ──
+//   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@map("user_metadata")
+// }
+
+// model UserInfo {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   userId String @unique @db.Uuid
+
+//   // ── Basic Information ──
+//   name   String
+//   image  String?
+//   banner String?
+//   resume String?
+//   dob    DateTime? @db.Date
+//   about  String?   @db.Text
+//   gender Gender?
+
+//   // ── Address & Location ──
+//   location    String?
+//   country     String?
+//   countryCode String?
+//   city        String?
+//   state       String?
+//   address     String?
+
+//   // ── Preferences & Personas ──
+//   hobbies         String[]
+//   persona         UserPersona[]    @default([])
+//   userType        UserType?        @default(student)
+//   experienceLevel ExperienceLevel?
+
+//   // ── Analytics & Metrics ──
+//   profileViewsCount Int @default(0)
+
+//   // ── Relations & Timestamps ──
+//   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@map("user_info")
+// }
+
+// model UserSocial {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   userId String @unique @db.Uuid
+
+//   // Developer & Coding Platforms
+//   github     String?
+//   linkedin   String?
+//   leetcode   String?
+//   codeforces String?
+//   twitter    String?
+//   website    String?
+
+//   // Relations & Timestamps
+//   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@map("user_socials")
+// }
+
+// // ==========================================
+// // WORK EXPERIENCE & DOCUMENTS
+// // ==========================================
+
+// model UserExperience {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   userId String @db.Uuid
+
+//   // Position Details
+//   jobTitle       String
+//   companyName    String
+//   companyWebsite String?
+//   companyLogo    String?
+
+//   // Employment Attributes
+//   employmentType EmploymentType @default(FULL_TIME)
+//   workMode       WorkMode       @default(ON_SITE)
+
+//   // Location
+//   location String?
+//   country  String?
+
+//   // Timeline
+//   startDate DateTime  @db.Date
+//   endDate   DateTime? @db.Date // NULL means currently working here
+//   isCurrent Boolean   @default(false)
+
+//   // Details & Achievements
+//   description      String?  @db.Text
+//   workAchievements String[]
+
+//   // Relations
+//   user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   documents    UserExperienceDocument[]
+//   skills       UsedExperienceSkill[]
+//   projects     UserProject[]
+//   achievements UserAchievement[]
+//   certificates UserCertificate[]
+
+//   // Timestamps
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@map("user_experiences")
+// }
+
+// model UserExperienceDocument {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   experienceId String @db.Uuid
+
+//   // Document Details
+//   title      String
+//   file       String
+//   fileType   String?
+//   fileSize   Int?
+//   docType    ExperienceDocType
+//   isVerified Boolean           @default(false)
+
+//   // Relations
+//   experience UserExperience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+//   // Timestamps
+//   uploadedAt DateTime @default(now())
+
+//   @@map("user_experience_documents")
+// }
+
+// model UsedExperienceSkill {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   experienceId String @db.Uuid
+//   skillId      String @db.Uuid
+
+//   // Attributes
+//   proficiency SkillProficiency? @default(INTERMEDIATE)
+//   yearsOfExp  Int?
+//   isFeatured  Boolean           @default(false)
+
+//   // Relations
+//   experience UserExperience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+//   skill      Skill          @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+//   // Timestamps
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@unique([experienceId, skillId])
+//   @@map("used_experience_skills")
+// }
+
+// // ==========================================
+// // EDUCATION & ACADEMIC DOCUMENTS
+// // ==========================================
+
+// model UserEducation {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   userId String @db.Uuid
+
+//   // Institution Details
+//   institutionName  String
+//   institutionEmail String?
+//   studentId        String?
+
+//   // Academic Level & Focus
+//   tier         EducationTier
+//   degree       String?
+//   fieldOfStudy String?
+
+//   // Timeline
+//   startDate DateTime  @db.Date
+//   endDate   DateTime? @db.Date
+//   isCurrent Boolean   @default(false)
+
+//   // Performance
+//   grade     String?
+//   gradeType GradeType?
+
+//   // Details & Achievements
+//   description String?  @db.Text
+//   learnings   String[]
+
+//   // Relations
+//   user         User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   documents    UserEducationDocument[]
+//   projects     UserProject[]
+//   achievements UserAchievement[]
+//   certificates UserCertificate[]
+
+//   // Timestamps
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@map("user_educations")
+// }
+
+// model UserEducationDocument {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   educationId String @db.Uuid
+
+//   // Document Details
+//   title      String
+//   file       String
+//   fileType   String?
+//   fileSize   Int?
+//   docType    EducationDocType
+//   isVerified Boolean          @default(false)
+
+//   // Relations
+//   education UserEducation @relation(fields: [educationId], references: [id], onDelete: Cascade)
+
+//   // Timestamps
+//   uploadedAt DateTime @default(now())
+
+//   @@map("user_education_documents")
+// }
+
+// // ==========================================
+// // PROJECTS & ATTACHMENTS
+// // ==========================================
+
+// model UserProject {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   userId       String  @db.Uuid
+//   educationId  String? @db.Uuid
+//   experienceId String? @db.Uuid
+
+//   // Project Details
+//   title       String
+//   tagline     String?
+//   description String?      @db.Text
+//   type        ProjectType  @default(PERSONAL)
+//   role        ProjectRole? @default(SOLO_DEVELOPER)
+
+//   // Timeline
+//   startDate DateTime  @db.Date
+//   endDate   DateTime? @db.Date
+//   isCurrent Boolean   @default(false)
+
+//   // External Links & Media
+//   githubUrl    String?
+//   liveUrl      String?
+//   demoVideoUrl String?
+
+//   // Flags
+//   isFeatured Boolean @default(false)
+
+//   // Relations
+//   user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   education  UserEducation?        @relation(fields: [educationId], references: [id], onDelete: SetNull)
+//   experience UserExperience?       @relation(fields: [experienceId], references: [id], onDelete: SetNull)
+//   skills     UsedProjectSkill[]
+//   documents  UserProjectDocument[]
+
+//   // Timestamps
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@map("user_projects")
+// }
+
+// model UsedProjectSkill {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   projectId String @db.Uuid
+//   skillId   String @db.Uuid
+
+//   // Attributes
+//   proficiency SkillProficiency? @default(INTERMEDIATE)
+//   isFeatured  Boolean           @default(false)
+
+//   // Relations
+//   project UserProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+//   skill   Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+//   // Timestamps
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@unique([projectId, skillId])
+//   @@map("used_project_skills")
+// }
+
+// model UserProjectDocument {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   projectId String @db.Uuid
+
+//   // Document Details
+//   title    String
+//   file     String
+//   fileType String?
+//   fileSize Int?
+//   docType  ProjectDocType @default(SCREENSHOT)
+
+//   // Relations
+//   project UserProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+//   // Timestamps
+//   uploadedAt DateTime @default(now())
+
+//   @@map("user_project_documents")
+// }
+
+// // ==========================================
+// // ACHIEVEMENTS & AWARDS
+// // ==========================================
+
+// model UserAchievement {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   userId       String  @db.Uuid
+//   educationId  String? @db.Uuid
+//   experienceId String? @db.Uuid
+
+//   // Achievement Details
+//   title         String
+//   issuer        String
+//   category      AchievementCategory @default(HACKATHON)
+//   positionRank  String?
+//   issueDate     DateTime            @db.Date
+//   credentialUrl String?
+//   description   String?             @db.Text
+
+//   // Flags
+//   isFeatured Boolean @default(false)
+
+//   // Relations
+//   user       User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   education  UserEducation?            @relation(fields: [educationId], references: [id], onDelete: SetNull)
+//   experience UserExperience?           @relation(fields: [experienceId], references: [id], onDelete: SetNull)
+//   skills     UsedAchievementSkill[]
+//   documents  UserAchievementDocument[]
+
+//   // Timestamps
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@map("user_achievements")
+// }
+
+// model UsedAchievementSkill {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   achievementId String @db.Uuid
+//   skillId       String @db.Uuid
+
+//   // Relations
+//   achievement UserAchievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+//   skill       Skill           @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+//   // Timestamps
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@unique([achievementId, skillId])
+//   @@map("used_achievement_skills")
+// }
+
+// model UserAchievementDocument {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   achievementId String @db.Uuid
+
+//   // Document Details
+//   title      String
+//   file       String
+//   fileType   String?
+//   fileSize   Int?
+//   docType    AchievementDocType @default(WINNER_CERTIFICATE)
+//   isVerified Boolean            @default(false)
+
+//   // Relations
+//   achievement UserAchievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+//   // Timestamps
+//   uploadedAt DateTime @default(now())
+
+//   @@map("user_achievement_documents")
+// }
+
+// // ==========================================
+// // CERTIFICATIONS & CREDENTIALS
+// // ==========================================
+
+// model UserCertificate {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   userId       String  @db.Uuid
+//   educationId  String? @db.Uuid
+//   experienceId String? @db.Uuid
+
+//   // Certificate Details
+//   title               String
+//   issuingOrganization String
+//   credentialId        String?
+//   credentialUrl       String?
+
+//   // Timeline & Status
+//   issueDate      DateTime  @db.Date
+//   expirationDate DateTime? @db.Date
+//   doesNotExpire  Boolean   @default(false)
+
+//   // Verification & Performance
+//   score       String?
+//   description String? @db.Text
+//   isVerified  Boolean @default(false)
+//   isFeatured  Boolean @default(false)
+
+//   // Relations
+//   user       User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   education  UserEducation?            @relation(fields: [educationId], references: [id], onDelete: SetNull)
+//   experience UserExperience?           @relation(fields: [experienceId], references: [id], onDelete: SetNull)
+//   skills     UsedCertificateSkill[]
+//   documents  UserCertificateDocument[]
+
+//   // Timestamps
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@map("user_certificates")
+// }
+
+// model UsedCertificateSkill {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   certificateId String @db.Uuid
+//   skillId       String @db.Uuid
+
+//   // Relations
+//   certificate UserCertificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+//   skill       Skill           @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+//   // Timestamps
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@unique([certificateId, skillId])
+//   @@map("used_certificate_skills")
+// }
+
+// model UserCertificateDocument {
+//   // Primary Key
+//   id String @id @default(uuid(7)) @db.Uuid
+
+//   // Foreign Keys
+//   certificateId String @db.Uuid
+
+//   // Document Details
+//   title      String
+//   file       String
+//   fileType   String?
+//   fileSize   Int?
+//   docType    CertificateDocType @default(CERTIFICATE_PDF)
+//   isVerified Boolean            @default(false)
+
+//   // Relations
+//   certificate UserCertificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+
+//   // Timestamps
+//   uploadedAt DateTime @default(now())
+
+//   @@map("user_certificate_documents")
+// }

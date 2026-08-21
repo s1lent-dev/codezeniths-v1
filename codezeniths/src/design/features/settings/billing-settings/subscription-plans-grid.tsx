@@ -256,7 +256,7 @@ const PlanCardItem: React.FC<{
                         isCurrentPlan
                             ? 'bg-primary/10 hover:bg-primary/15 text-heading-light dark:text-heading-dark'
                             : plan.popular
-                            ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs'
+                            ? 'bg-primary hover:bg-primary/90 text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs'
                             : 'bg-primary/10 hover:bg-primary/15 text-heading-light dark:text-heading-dark'
                     )}
                 >

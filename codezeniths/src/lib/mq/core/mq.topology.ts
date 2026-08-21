@@ -95,6 +95,7 @@ export async function assertTopology(channel: amqp.Channel): Promise<void> {
 
     // ── Progress queues (topic exchange — declare once, bind to multiple patterns) ──
     await channel.assertQueue(MqQueue.PROGRESS_PROBLEM_SOLVED,   DURABLE);
+    await channel.assertQueue(MqQueue.PROGRESS_PROBLEM_UNSOLVED, DURABLE);
     await channel.assertQueue(MqQueue.PROGRESS_MODULE_MASTERED,  DURABLE);
     await channel.assertQueue(MqQueue.PROGRESS_STREAK_MILESTONE, DURABLE);
     await channel.assertQueue(MqQueue.PROGRESS_WEEKLY_DIGEST,    DURABLE);
@@ -102,6 +103,7 @@ export async function assertTopology(channel: amqp.Channel): Promise<void> {
 
     // Exact bindings — each queue receives only its own routing key
     await channel.bindQueue(MqQueue.PROGRESS_PROBLEM_SOLVED,   MqExchange.PROGRESS, MqRoutingKey.PROGRESS_PROBLEM_SOLVED);
+    await channel.bindQueue(MqQueue.PROGRESS_PROBLEM_UNSOLVED, MqExchange.PROGRESS, MqRoutingKey.PROGRESS_PROBLEM_UNSOLVED);
     await channel.bindQueue(MqQueue.PROGRESS_MODULE_MASTERED,  MqExchange.PROGRESS, MqRoutingKey.PROGRESS_MODULE_MASTERED);
     await channel.bindQueue(MqQueue.PROGRESS_STREAK_MILESTONE, MqExchange.PROGRESS, MqRoutingKey.PROGRESS_STREAK_MILESTONE);
     await channel.bindQueue(MqQueue.PROGRESS_WEEKLY_DIGEST,    MqExchange.PROGRESS, MqRoutingKey.PROGRESS_WEEKLY_DIGEST);

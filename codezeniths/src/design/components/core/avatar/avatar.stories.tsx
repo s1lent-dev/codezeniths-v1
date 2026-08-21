@@ -54,7 +54,7 @@ export const Default: Story = {
 
             <div className="flex flex-col items-center gap-2">
                 <Avatar className="size-10 border-2 border-background ring-2 ring-ring ring-offset-2">
-                    <AvatarFallback className="bg-primary text-primary-foreground">AB</AvatarFallback>
+                    <AvatarFallback className="bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3">AB</AvatarFallback>
                 </Avatar>
                 <span className="text-sm text-muted-light-shade1 dark:text-muted-dark-shade1">With ring</span>
             </div>

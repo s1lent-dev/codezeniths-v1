@@ -96,6 +96,7 @@ export class TagQueryService implements ITagQueryService {
                     queryClient.invalidateQueries({ queryKey: queryKeys.tag.single(key) });
                 }
                 queryClient.invalidateQueries({ queryKey: ['tag'] });
+                queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] });
             },
         });
     }

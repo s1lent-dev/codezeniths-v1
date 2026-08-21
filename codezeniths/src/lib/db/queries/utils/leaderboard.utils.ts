@@ -61,7 +61,7 @@ export async function processScoreTransition({
     const countDelta = isTransitioningToSolved ? 1 : -1;
 
     try {
-        const rankUpNotification = await prisma.$transaction(async (tx) => {
+        const txResult = await prisma.$transaction(async (tx) => {
             // 1. Fetch existing UserGlobalStats
             const globalStats = await tx.userGlobalStats.findUnique({
                 where: { userId },
@@ -119,6 +119,7 @@ export async function processScoreTransition({
             });
 
             // 3. Upsert UserModuleStats if moduleId is present
+            let newModScore: number | undefined;
             if (moduleId) {
                 const moduleStats = await tx.userModuleStats.findUnique({
                     where: { userId_moduleId: { userId, moduleId } },
@@ -130,7 +131,7 @@ export async function processScoreTransition({
                 const currentModMedium = moduleStats?.mediumSolved ?? 0;
                 const currentModHard = moduleStats?.hardSolved ?? 0;
 
-                const newModScore = Math.max(0, currentModScore + scoreDelta);
+                newModScore = Math.max(0, currentModScore + scoreDelta);
                 const newModCount = Math.max(0, currentModCount + countDelta);
                 const newModEasy = Math.max(0, currentModEasy + (difficulty === 'easy' ? countDelta : 0));
                 const newModMedium = Math.max(0, currentModMedium + (difficulty === 'medium' ? countDelta : 0));
@@ -160,22 +161,36 @@ export async function processScoreTransition({
                 });
             }
 
-            return rankTransition;
+            return {
+                rankTransition,
+                newGlobalScore,
+                newModScore,
+            };
         });
 
         // 4. Update Redis ZSETs & publish rank promotion via Progress MQ Producer
         void (async () => {
             try {
-                await redisService.sortedList.incrBy('leaderboard:global', scoreDelta, userId);
-                if (moduleId) {
-                    await redisService.sortedList.incrBy(`leaderboard:module:${moduleId}`, scoreDelta, userId);
+                if (txResult.newGlobalScore <= 0) {
+                    await redisService.sortedList.remove('leaderboard:global', userId);
+                } else {
+                    await redisService.sortedList.add('leaderboard:global', txResult.newGlobalScore, userId);
                 }
-                if (rankUpNotification) {
+
+                if (moduleId && txResult.newModScore !== undefined) {
+                    if (txResult.newModScore <= 0) {
+                        await redisService.sortedList.remove(`leaderboard:module:${moduleId}`, userId);
+                    } else {
+                        await redisService.sortedList.add(`leaderboard:module:${moduleId}`, txResult.newModScore, userId);
+                    }
+                }
+
+                if (txResult.rankTransition) {
                     await progressProducer.rankPromoted({
                         userId,
-                        oldRank: rankUpNotification.oldRank,
-                        newRank: rankUpNotification.newRank,
-                        division: rankUpNotification.division,
+                        oldRank: txResult.rankTransition.oldRank,
+                        newRank: txResult.rankTransition.newRank,
+                        division: txResult.rankTransition.division,
                     });
                 }
             } catch (rErr) {

@@ -32,7 +32,7 @@ import {
 } from '@codezeniths/schemas/db';
 import { IProblemQueries } from './interfaces/problem.queries.interface';
 import { Prisma } from '@prisma/client';
-import { recordProblemSolvedAndSyncStreak } from './utils/streak.utils';
+import { recordProblemSolvedAndSyncStreak, revertProblemSolvedAndSyncStreak } from './utils/streak.utils';
 
 import { processScoreTransition } from './utils/leaderboard.utils';
 import { countBy } from 'lodash';
@@ -386,6 +386,9 @@ export class ProblemQueries implements IProblemQueries {
             const isTransitioningToSolved =
                 status === 'solved' && (!existingProgress || existingProgress.status !== 'solved');
 
+            const isTransitioningFromSolved =
+                previousStatus === 'solved' && status !== 'solved';
+
             const solvedAt = status === 'solved' ? new Date() : null;
 
             const progress = await prisma.problemProgress.upsert({
@@ -497,6 +500,27 @@ export class ProblemQueries implements IProblemQueries {
                         }
                     } catch (notifErr) {
                         logger.error('Failed to publish problem/module completion MQ events', { error: notifErr, userId });
+                    }
+                })();
+            } else if (isTransitioningFromSolved) {
+                const points = problemExists.difficulty === 'easy' ? 10 : problemExists.difficulty === 'medium' ? 20 : 30;
+                await revertProblemSolvedAndSyncStreak({ userId, pointsEarned: points, problemsSolved: 1 });
+                logger.info('Reverted user problem solved activity and synced streak', { userId, points });
+
+                // Publish problem-unsolved domain event to MQ
+                void (async () => {
+                    try {
+                        const module = problemExists.topic?.module?.title || 'algorithms';
+                        await progressProducer.problemUnsolved({
+                            userId,
+                            problemId,
+                            problemTitle: problemExists.title,
+                            difficulty: problemExists.difficulty,
+                            module,
+                            unsolvedAt: new Date().toISOString(),
+                        });
+                    } catch (unsolveErr) {
+                        logger.error('Failed to publish problem unsolved MQ event', { error: unsolveErr, userId });
                     }
                 })();
             }

@@ -600,7 +600,7 @@ export class UserQueryService implements IUserQueryService {
                 return UpdateUsernameOutputSchema.parse(raw);
             },
             onSuccess: async () => {
-                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
+                await CacheInvalidationService.invalidateOnAccountSettingsChange(queryClient);
             },
         });
     }
@@ -614,7 +614,7 @@ export class UserQueryService implements IUserQueryService {
                 return UpdateEmailOutputSchema.parse(raw);
             },
             onSuccess: async () => {
-                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
+                await CacheInvalidationService.invalidateOnAccountSettingsChange(queryClient);
             },
         });
     }
@@ -628,7 +628,7 @@ export class UserQueryService implements IUserQueryService {
                 return UpdateUserPhoneNumberOutputSchema.parse(raw);
             },
             onSuccess: async () => {
-                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
+                await CacheInvalidationService.invalidateOnAccountSettingsChange(queryClient);
             },
         });
     }
@@ -642,7 +642,7 @@ export class UserQueryService implements IUserQueryService {
                 return UpdateUserPreferencesOutputSchema.parse(raw);
             },
             onSuccess: async () => {
-                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
+                await CacheInvalidationService.invalidateOnPreferencesChange(queryClient);
             },
         });
     }

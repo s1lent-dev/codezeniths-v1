@@ -139,7 +139,7 @@ export const ExportDataModal: React.FC<ExportDataModalProps> = ({
                         onClick={handleExport}
                         disabled={isExporting || (!includeSolutions && !includeSubmissions && !includeProfile && !includeNotes)}
                         leftIcon={isExporting ? <Loader2 className="size-3.5 animate-spin" /> : <DownloadCloud className="size-3.5" />}
-                        className="text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-primary-foreground"
+                        className="text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-foreground-dark-shade3 dark:text-foreground-light-shade3"
                     >
                         {isExporting ? 'Preparing Archive...' : 'Download JSON Archive'}
                     </Button>

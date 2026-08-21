@@ -98,3 +98,119 @@ enum SearchCollection {
   product
   user
 }
+
+// enum UserPersona {
+//   COMPETITIVE_PROGRAMMER
+//   FULL_STACK_DEVELOPER
+//   BACKEND_ENGINEER
+//   FRONTEND_ENGINEER
+//   MOBILE_DEVELOPER
+//   SYSTEM_ARCHITECT
+//   DATA_SCIENTIST
+//   AI_ENGINEER
+//   DEVOPS_ENGINEER
+//   STUDENT
+//   FREELANCER
+// }
+
+// enum EmploymentType {
+//   FULL_TIME
+//   PART_TIME
+//   CONTRACT
+//   FREELANCE
+//   INTERNSHIP
+//   APPRENTICESHIP
+// }
+
+// enum WorkMode {
+//   ON_SITE
+//   HYBRID
+//   REMOTE
+// }
+
+// enum ExperienceDocType {
+//   OFFER_LETTER
+//   EXPERIENCE_LETTER
+//   RELIEVING_LETTER
+//   FULL_AND_FINAL_SETTLEMENT
+//   PAYSLIP
+//   APPRAISAL_LETTER
+// }
+
+// enum EducationTier {
+//   HIGH_SCHOOL
+//   DIPLOMA
+//   BACHELORS
+//   MASTERS
+//   DOCTORATE
+//   CERTIFICATION
+// }
+
+// enum EducationDocType {
+//   DEGREE_CERTIFICATE
+//   PROVISIONAL_CERTIFICATE
+//   MARKSHEET
+//   TRANSCRIPT
+//   STUDENT_ID_CARD
+// }
+
+// enum GradeType {
+//   PERCENTAGE
+//   CGPA
+//   GPA
+//   GRADE_LETTER
+// }
+
+// enum ProjectType {
+//   PERSONAL
+//   ACADEMIC
+//   COMPANY
+//   FREELANCE
+//   OPEN_SOURCE
+//   HACKATHON
+// }
+
+// enum ProjectRole {
+//   SOLO_DEVELOPER
+//   LEAD_DEVELOPER
+//   CONTRIBUTOR
+//   TEAM_MEMBER
+// }
+
+// enum ProjectDocType {
+//   SCREENSHOT
+//   DEMO_VIDEO
+//   PROJECT_REPORT
+//   ARCHITECTURE_DIAGRAM
+//   PRESENTATION
+// }
+
+// enum AchievementCategory {
+//   HACKATHON
+//   COMPETITIVE_PROGRAMMING
+//   ACADEMIC_EXCELLENCE
+//   WORKPLACE_AWARD
+//   OPEN_SOURCE_CONTRIBUTION
+//   COMMUNITY_LEADERSHIP
+//   PUBLIC_SPEAKER
+// }
+
+// enum AchievementDocType {
+//   CERTIFICATE_OF_MERIT
+//   WINNER_CERTIFICATE
+//   OFFICIAL_LETTER
+//   TROPHY_PHOTO
+// }
+
+// enum CertificateDocType {
+//   CERTIFICATE_PDF
+//   BADGE_IMAGE
+//   SCORECARD
+// }
+
+// enum SkillProficiency {
+//   BEGINNER
+//   INTERMEDIATE
+//   ADVANCED
+//   EXPERT
+// }

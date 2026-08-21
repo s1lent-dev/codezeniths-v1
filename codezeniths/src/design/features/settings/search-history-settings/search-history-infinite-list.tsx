@@ -200,18 +200,22 @@ export const SearchHistoryInfiniteList: React.FC<SearchHistoryInfiniteListProps>
 
     if (allItems.length === 0) {
         return (
-            <Card className="w-full p-12 sm:p-16 rounded-md border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark text-center flex flex-col items-center justify-center space-y-3 font-sans">
-                <div className="size-14 rounded-full bg-secondary/15 text-muted-light dark:text-muted-dark flex items-center justify-center">
-                    <SearchX className="size-7 stroke-[1.5]" />
+            <Card className="w-full py-16 px-6 rounded-md border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark font-sans">
+                <div className="w-full flex flex-col items-center justify-center text-center gap-3">
+                    <div className="size-14 rounded-full bg-secondary/15 text-muted-light dark:text-muted-dark flex items-center justify-center shrink-0 mx-auto">
+                        <SearchX className="size-7 stroke-[1.5]" />
+                    </div>
+                    <div className="space-y-1.5 flex flex-col items-center justify-center text-center max-w-md mx-auto">
+                        <Typography variant={TypographyVariant.H6} weight={TypographyWeight.SEMIBOLD} className="text-heading-light dark:text-heading-dark text-sm sm:text-base text-center">
+                            {search ? `No results found for "${search}"` : 'No search history yet'}
+                        </Typography>
+                        <Typography variant={TypographyVariant.MUTED} className="text-xs text-muted-light dark:text-muted-dark text-center leading-relaxed">
+                            {search
+                                ? 'Try searching with different keywords or switch the category filter.'
+                                : 'Your searches across problems, topics, tags, modules, and profiles will be automatically tracked here for quick access.'}
+                        </Typography>
+                    </div>
                 </div>
-                <Typography variant={TypographyVariant.H6} weight={TypographyWeight.SEMIBOLD} className="text-heading-light dark:text-heading-dark text-sm sm:text-base">
-                    {search ? `No results found for "${search}"` : 'No search history yet'}
-                </Typography>
-                <Typography variant={TypographyVariant.MUTED} className="text-xs max-w-sm">
-                    {search
-                        ? 'Try searching with different keywords or switch the category filter.'
-                        : 'Your searches across problems, topics, tags, modules, and profiles will be automatically tracked here for quick access.'}
-                </Typography>
             </Card>
         );
     }

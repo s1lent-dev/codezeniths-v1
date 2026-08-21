@@ -97,8 +97,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 <div className={cn(
                     "p-2.5 rounded-sm transition-colors shrink-0",
                     isSelected
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "bg-primary/5 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                        ? "bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
+                        : "bg-primary/5 text-body-light dark:text-body-dark group-hover:bg-primary/10 group-hover:text-primary"
                 )}>
                     <IconComponent className="w-5 h-5" />
                 </div>
@@ -108,7 +108,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
                         {option.label}
                     </h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {option.description}
                     </p>
                 </div>
@@ -118,7 +118,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     className={cn(
                         "rounded-xs size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
                         isSelected
-                            ? "bg-primary border-primary text-primary-foreground shadow-xs"
+                            ? "bg-primary border-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                             : "border-muted-light/70 dark:border-muted-dark/70 bg-primary/5 group-hover:border-primary/50"
                     )}
                 >
@@ -320,7 +320,7 @@ export const Step3LearningGoals: React.FC<Step3Props> = ({ form }) => {
                         Next Question
                     </Button>
                 ) : (
-                    <span className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+                    <span className="text-xs text-body-light dark:text-body-dark font-medium flex items-center gap-1.5">
                         <Check className="w-3.5 h-3.5 text-primary stroke-3" />
                         Questionnaire complete! Click &quot;Continue&quot; below to proceed.
                     </span>

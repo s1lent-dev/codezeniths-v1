@@ -13,6 +13,11 @@ export class ProgressProducer {
         routingKey: MqRoutingKey.PROGRESS_PROBLEM_SOLVED,
     });
 
+    private readonly problemUnsolvedProducer = createProducer('progress.problem.unsolved', {
+        exchange: MqExchange.PROGRESS,
+        routingKey: MqRoutingKey.PROGRESS_PROBLEM_UNSOLVED,
+    });
+
     private readonly moduleMasteredProducer = createProducer('progress.module.mastered', {
         exchange: MqExchange.PROGRESS,
         routingKey: MqRoutingKey.PROGRESS_MODULE_MASTERED,
@@ -38,6 +43,13 @@ export class ProgressProducer {
      */
     async problemSolved(payload: PayloadOf<'progress.problem.solved'>): Promise<void> {
         await this.problemSolvedProducer.publish(payload);
+    }
+
+    /**
+     * Publishes a problem-unsolved event.
+     */
+    async problemUnsolved(payload: PayloadOf<'progress.problem.unsolved'>): Promise<void> {
+        await this.problemUnsolvedProducer.publish(payload);
     }
 
     /**

@@ -67,12 +67,13 @@ export const ENV_CONFIG: EnvConfig = EnvConfigSchema.parse({
     SMS_DRY_RUN: process.env.SMS_DRY_RUN || 'true',
 
     // Cloudflare R2 Configuration
-    R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID || 'fa2866d67f5dd98f48b149a4b1f62c4a',
+    R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID || 'r2_placeholder_account_id',
     R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID || 'r2_placeholder_access_key',
     R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY || 'r2_placeholder_secret_access_key',
     R2_BUCKET_NAME: process.env.R2_BUCKET_NAME || 'codezeniths-v1',
     R2_API_TOKEN: process.env.R2_API_TOKEN || 'r2_placeholder_api_token',
-    R2_ENDPOINT: process.env.R2_ENDPOINT || 'https://fa2866d67f5dd98f48b149a4b1f62c4a.r2.cloudflarestorage.com',
+    R2_ENDPOINT: process.env.R2_ENDPOINT || 'https://storage.codezeniths.com',
+    R2_PUBLIC_ENDPOINT: process.env.R2_PUBLIC_ENDPOINT || process.env.R2_PUBLIC_URL || process.env.NEXT_PUBLIC_R2_PUBLIC_URL || 'https://storage.codezeniths.com',
 
     // Cloudflare Turnstile Configuration
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA', // Dummy key for testing

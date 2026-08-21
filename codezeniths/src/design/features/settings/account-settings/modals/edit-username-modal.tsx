@@ -194,7 +194,7 @@ export const EditUsernameModal: React.FC<EditUsernameModalProps> = ({
                             disabled={!isValid || isSubmitting || updateUsernameMutation.isPending || isCheckingAvailability || isUsernameTaken}
                             isLoading={updateUsernameMutation.isPending || isSubmitting}
                             loadingText="Updating..."
-                            className="text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-primary-foreground min-w-28 px-4 py-2"
+                            className="text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-foreground-dark-shade3 dark:text-foreground-light-shade3 min-w-28 px-4 py-2"
                         >
                             Update Username
                         </Button>

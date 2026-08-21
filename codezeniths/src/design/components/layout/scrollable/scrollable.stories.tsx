@@ -51,7 +51,7 @@ export const Horizontal: Story = {
                 {Array.from({ length: 20 }).map((_, i) => (
                     <div
                         key={i}
-                        className="flex h-32 w-48 shrink-0 items-center justify-center rounded bg-muted text-muted-foreground"
+                        className="flex h-32 w-48 shrink-0 items-center justify-center rounded bg-muted text-body-light dark:text-body-dark"
                     >
                         Item {i + 1}
                     </div>

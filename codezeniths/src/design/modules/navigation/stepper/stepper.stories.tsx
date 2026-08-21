@@ -36,10 +36,10 @@ function StoryWrapper({
 
 const inputCls =
     'w-full rounded-md border border-input bg-background px-3 py-2 text-sm ' +
-  'placeholder:text-muted-foreground focus-visible:outline-none ' +
+  'placeholder:text-body-light dark:text-body-dark focus-visible:outline-none ' +
   'focus-visible:ring-2 focus-visible:ring-ring';
 
-const labelCls = 'block text-xs font-medium text-muted-foreground mb-1.5';
+const labelCls = 'block text-xs font-medium text-body-light dark:text-body-dark mb-1.5';
 
 function Field({
     label,
@@ -72,7 +72,7 @@ function RadioCard({
             <input type="radio" name="option" className="accent-primary" />
             <div className="flex-1">
                 <p className="text-sm font-medium">{label}</p>
-                <p className="text-xs text-muted-foreground">{sublabel}</p>
+                <p className="text-xs text-body-light dark:text-body-dark">{sublabel}</p>
             </div>
             {badge && (
                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
@@ -134,10 +134,10 @@ export const Default: Story = {
                 <DefaultStepper.Panel>
                     {({ step }) => (
                         <div className="rounded-lg border border-dashed border-border p-6 text-center">
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-body-light dark:text-body-dark">
                                 Active step: <span className="font-semibold text-foreground">{step.title}</span>
                             </p>
-                            <p className="mt-1 text-xs text-muted-foreground">{step.description}</p>
+                            <p className="mt-1 text-xs text-body-light dark:text-body-dark">{step.description}</p>
                         </div>
                     )}
                 </DefaultStepper.Panel>
@@ -170,7 +170,7 @@ export const Sizes: Story = {
         <StoryWrapper className="space-y-10">
             {(['sm', 'md', 'lg'] as const).map((size) => (
                 <div key={size} className="space-y-2">
-                    <p className="text-xs font-mono text-muted-foreground">size=&quot;{size}&quot;</p>
+                    <p className="text-xs font-mono text-body-light dark:text-body-dark">size=&quot;{size}&quot;</p>
                     <SizeStepper.Provider size={size}>
                         <SizeStepper.Navigation />
                     </SizeStepper.Provider>
@@ -203,7 +203,7 @@ export const Variants: Story = {
         <StoryWrapper className="space-y-10">
             {(['default', 'outline', 'ghost'] as const).map((variant) => (
                 <div key={variant} className="space-y-2">
-                    <p className="text-xs font-mono text-muted-foreground">variant=&quot;{variant}&quot;</p>
+                    <p className="text-xs font-mono text-body-light dark:text-body-dark">variant=&quot;{variant}&quot;</p>
                     {/* Start at step 2 so we see upcoming + active + completed */}
                     <VariantStepper.Provider variant={variant} initialStep="two">
                         <VariantStepper.Navigation />
@@ -247,7 +247,7 @@ export const Vertical: Story = {
                         <VerticalStepper.Panel>
                             {({ step }) => (
                                 <div className="rounded-lg border border-dashed border-border p-6 text-center">
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-sm text-body-light dark:text-body-dark">
                                         Showing panel for: <span className="font-semibold text-foreground">{step.title}</span>
                                     </p>
                                 </div>
@@ -290,7 +290,7 @@ export const WithProgressBar: Story = {
                 <ProgressStepper.Panel>
                     {({ step }) => (
                         <div className="rounded-lg border border-dashed border-border p-6 text-center">
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-body-light dark:text-body-dark">
                                 Step content for <span className="font-semibold text-foreground">{step.title}</span>
                             </p>
                         </div>
@@ -328,7 +328,7 @@ export const CustomControls: Story = {
                 <CustomCtrlStepper.Panel>
                     {({ step }) => (
                         <div className="rounded-lg border border-dashed border-border p-6 text-center">
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-body-light dark:text-body-dark">
                                 Active: <span className="font-semibold text-foreground">{step.title}</span>
                             </p>
                         </div>
@@ -341,13 +341,13 @@ export const CustomControls: Story = {
                                 onClick={prev}
                                 disabled={isFirst}
                                 className={cn(
-                                    'text-sm text-muted-foreground underline-offset-4 hover:underline disabled:pointer-events-none disabled:opacity-30',
+                                    'text-sm text-body-light dark:text-body-dark underline-offset-4 hover:underline disabled:pointer-events-none disabled:opacity-30',
                                 )}
                             >
                                 ← Back
                             </button>
 
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-body-light dark:text-body-dark">
                                 {currentIndex + 1} / {steps.length}
                             </span>
 
@@ -361,7 +361,7 @@ export const CustomControls: Story = {
                             ) : (
                                 <button
                                     onClick={next}
-                                    className="rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+                                    className="rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary/90 transition-colors"
                                 >
                                     Next →
                                 </button>
@@ -403,12 +403,12 @@ export const HeadlessCustomLayout: Story = {
                         {/* Custom header */}
                         <div className="space-y-1">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-mono text-muted-foreground">
+                                <span className="text-xs font-mono text-body-light dark:text-body-dark">
                                     Step {methods.currentIndex + 1} of {methods.steps.length}
                                 </span>
                                 <button
                                     onClick={methods.reset}
-                                    className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                                    className="text-xs text-body-light dark:text-body-dark hover:text-foreground underline-offset-2 hover:underline"
                                 >
                                     Restart
                                 </button>
@@ -438,7 +438,7 @@ export const HeadlessCustomLayout: Story = {
                         {/* Panel content */}
                         <HeadlessStepper.Panel>
                             {({ step }) => (
-                                <div className="rounded-lg bg-muted/40 p-4 text-sm text-muted-foreground min-h-[80px] flex items-center justify-center">
+                                <div className="rounded-lg bg-muted/40 p-4 text-sm text-body-light dark:text-body-dark min-h-[80px] flex items-center justify-center">
                                     Content for &quot;{step.title}&quot;
                                 </div>
                             )}
@@ -455,7 +455,7 @@ export const HeadlessCustomLayout: Story = {
                             </button>
                             <button
                                 onClick={methods.isLast ? methods.reset : methods.next}
-                                className="flex-1 rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                                className="flex-1 rounded-lg bg-primary py-2 text-sm font-medium text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary/90 transition-colors"
                             >
                                 {methods.isLast ? 'Start over' : 'Continue'}
                             </button>
@@ -591,7 +591,7 @@ export const CheckoutFlow: Story = {
                                     ['Shipping',  'Free'],
                                     ['Tax',       '$7.12'],
                                 ].map(([label, value]) => (
-                                    <div key={label} className="flex justify-between px-4 py-2.5 text-muted-foreground">
+                                    <div key={label} className="flex justify-between px-4 py-2.5 text-body-light dark:text-body-dark">
                                         <span>{label}</span>
                                         <span className="font-medium text-foreground">{value}</span>
                                     </div>
@@ -745,7 +745,7 @@ function HookDrivenComponent() {
                     <HookStepper.Navigation onStepClick={(s) => logAction(`Clicked: ${s.title}`)} />
                     <HookStepper.Panel>
                         {({ step }) => (
-                            <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
+                            <div className="rounded-lg border border-dashed border-border p-4 text-sm text-body-light dark:text-body-dark">
                                 {step.title}: {step.description}
                             </div>
                         )}
@@ -755,27 +755,27 @@ function HookDrivenComponent() {
 
                 {/* External hook control panel */}
                 <div className="space-y-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-body-light dark:text-body-dark">
                         useStepper hook
                     </p>
                     <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2 text-sm font-mono">
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">currentIndex</span>
+                            <span className="text-body-light dark:text-body-dark">currentIndex</span>
                             <span className="text-foreground">{stepper.currentIndex}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">current.id</span>
+                            <span className="text-body-light dark:text-body-dark">current.id</span>
                             <span className="text-foreground">&quot;{stepper.current.id}&quot;</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">isFirst</span>
-                            <span className={stepper.isFirst ? 'text-green-500' : 'text-muted-foreground'}>
+                            <span className="text-body-light dark:text-body-dark">isFirst</span>
+                            <span className={stepper.isFirst ? 'text-green-500' : 'text-body-light dark:text-body-dark'}>
                                 {String(stepper.isFirst)}
                             </span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">isLast</span>
-                            <span className={stepper.isLast ? 'text-green-500' : 'text-muted-foreground'}>
+                            <span className="text-body-light dark:text-body-dark">isLast</span>
+                            <span className={stepper.isLast ? 'text-green-500' : 'text-body-light dark:text-body-dark'}>
                                 {String(stepper.isLast)}
                             </span>
                         </div>
@@ -790,7 +790,7 @@ function HookDrivenComponent() {
                                     'rounded px-2 py-1 text-xs font-medium border transition-colors',
                                     stepper.current.id === step.id
                                         ? 'border-primary bg-primary/10 text-primary'
-                                        : 'border-input bg-background text-muted-foreground hover:text-foreground',
+                                        : 'border-input bg-background text-body-light dark:text-body-dark hover:text-foreground',
                                 )}
                             >
                                 {step.id}
@@ -798,7 +798,7 @@ function HookDrivenComponent() {
                         ))}
                         <button
                             onClick={() => { stepper.reset(); logAction('reset()'); }}
-                            className="rounded px-2 py-1 text-xs font-medium border border-input text-muted-foreground hover:text-foreground transition-colors"
+                            className="rounded px-2 py-1 text-xs font-medium border border-input text-body-light dark:text-body-dark hover:text-foreground transition-colors"
                         >
                             reset()
                         </button>
@@ -806,13 +806,13 @@ function HookDrivenComponent() {
 
                     {/* Event log */}
                     <div className="space-y-1">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Event log</p>
+                        <p className="text-[10px] uppercase tracking-wider text-body-light dark:text-body-dark font-semibold">Event log</p>
                         <div className="rounded border border-border bg-muted/20 p-2 space-y-0.5 min-h-[80px]">
                             {log.length === 0 && (
-                                <p className="text-[11px] text-muted-foreground">No events yet…</p>
+                                <p className="text-[11px] text-body-light dark:text-body-dark">No events yet…</p>
                             )}
                             {log.map((entry, i) => (
-                                <p key={i} className="text-[11px] font-mono text-muted-foreground">{entry}</p>
+                                <p key={i} className="text-[11px] font-mono text-body-light dark:text-body-dark">{entry}</p>
                             ))}
                         </div>
                     </div>
@@ -860,7 +860,7 @@ export const AllStates: Story = {
         <StoryWrapper className="space-y-10">
             {(['default', 'outline', 'ghost'] as const).map((variant) => (
                 <div key={variant} className="space-y-2">
-                    <p className="text-xs font-mono text-muted-foreground">variant=&quot;{variant}&quot;</p>
+                    <p className="text-xs font-mono text-body-light dark:text-body-dark">variant=&quot;{variant}&quot;</p>
                     {/* initialStep="active" puts two completed steps before it */}
                     <StateStepper.Provider initialStep="active" variant={variant}>
                         <StateStepper.Navigation />

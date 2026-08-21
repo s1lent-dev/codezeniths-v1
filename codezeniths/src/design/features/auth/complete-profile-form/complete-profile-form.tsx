@@ -68,7 +68,7 @@ export const CompleteProfileForm: React.FC = () => {
             <Card variant={CardVariant.FLAT} className="w-[95%] md:w-[80%] sm:w-[75%] max-w-6xl p-8 md:p-16 border border-secondary rounded-2xl bg-foreground-light dark:bg-foreground-dark mx-auto lg:mt-12 md:mt-8 sm:mt-4 shadow-none">
                 <div className="flex flex-col items-center justify-center min-h-75 space-y-4">
                     <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="w-8 h-8 text-primary" />
-                    <p className="text-sm text-muted-foreground">Loading onboarding profile...</p>
+                    <p className="text-sm text-body-light dark:text-body-dark">Loading onboarding profile...</p>
                 </div>
             </Card>
         );

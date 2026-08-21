@@ -56,7 +56,7 @@ export function DatePicker({
                     <span className={selectedDate ? 'text-sm font-normal text-body-light dark:text-body-dark' : 'text-sm text-muted-light dark:text-muted-dark'}>
                         {selectedDate ? format(selectedDate, 'PPP') : placeholder}
                     </span>
-                    <CalendarIcon className="h-4 w-4 text-muted-foreground opacity-70" />
+                    <CalendarIcon className="h-4 w-4 text-body-light dark:text-body-dark opacity-70" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto overflow-hidden p-0 z-300" align="start">
