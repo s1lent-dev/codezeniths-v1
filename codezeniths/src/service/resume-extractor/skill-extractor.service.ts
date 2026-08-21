@@ -14,8 +14,8 @@ SCOPE OF EXTRACTION:
 - Core Computer Science Concepts (e.g., Data Structures, Algorithms, System Design, Machine Learning, Operating Systems)
 
 CRITICAL RULES AND CONSTRAINTS:
-1. OUTPUT FORMAT: You must return *ONLY* a valid JSON array of strings containing the extracted skill titles (e.g., ["JavaScript", "React", "PostgreSQL", "Docker", "System Design"]).
-2. NO MARKDOWN: Absolutely no markdown blocks, backticks (\`\`\`), conversational text, or explanations. Just the raw JSON array.
+1. OUTPUT FORMAT: You must return *ONLY* a valid JSON object with a single key "skills" containing an array of strings (e.g., {"skills": ["JavaScript", "React", "PostgreSQL"]}).
+2. NO MARKDOWN: Absolutely no markdown blocks, backticks (\`\`\`), conversational text, or explanations. Just the raw JSON object.
 3. STANDARDIZATION: Clean, normalize, and standardize the skill titles.
    - Use standard capitalizations (e.g., "Node.js" not "node", "React" not "reactjs", "C++" not "c/c++").
    - Expand common acronyms if applicable to standard industry terms (e.g., "K8s" to "Kubernetes", "AWS" to "Amazon Web Services").
@@ -24,7 +24,7 @@ CRITICAL RULES AND CONSTRAINTS:
 `;
 
 /**
- * Extracts technical skills from raw resume text using Gemini 2.5 Flash as primary LLM
+ * Extracts technical skills from raw resume text using Gemini 3.6 Flash as primary LLM
  * with automatic fallback to Groq Llama 3.3 70B if rate limit or errors occur.
  */
 export async function extractSkillsWithAI(resumeText: string): Promise<string[]> {
@@ -41,7 +41,7 @@ export async function extractSkillsWithAI(resumeText: string): Promise<string[]>
             const ai = new GoogleGenAI({ apiKey: ENV_CONFIG.GEMINI_API_KEY });
 
             const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
+                model: 'gemini-3.6-flash',
                 contents: [
                     { role: 'user', parts: [{ text: `${EXTRACTION_PROMPT}\n\nRESUME TEXT:\n${truncatedText}` }] },
                 ],
