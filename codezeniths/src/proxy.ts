@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import { isPublicRoute, isAuthRoute, isOnboardingRoute, isProtectedRoute } from '@/lib/routes';
 import { betterFetch } from '@better-fetch/fetch';
 import type { BetterAuthSession } from '@/lib/auth/auth.types';
+import { ENV_CONFIG } from './config/config';
 
 export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -22,7 +23,7 @@ export async function proxy(request: NextRequest) {
         const { data: sessionData, error } = await betterFetch<BetterAuthSession>(
             "/api/auth/get-session",
             {
-                baseURL: request.nextUrl.origin,
+                baseURL: ENV_CONFIG.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
                 headers: {
                     cookie: request.headers.get("cookie") || "",
                 },

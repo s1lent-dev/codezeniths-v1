@@ -1,21 +1,20 @@
-#!/usr/bin/env node
 /**
- * @file scripts/mq-reset.mjs
+ * @file scripts/mq-reset.ts
  * @description Deletes all stale CodeZeniths queues and exchanges from RabbitMQ
  *              so the new DLX-backed topology can be asserted cleanly.
  *
  * Usage:
- *   node scripts/mq-reset.mjs
- *   node scripts/mq-reset.mjs --url=amqp://user:pass@host:5672/vhost
+ *   pnpm mq:reset
  */
 
-import amqp from 'amqplib';
+import 'dotenv/config';
+import amqp, { Channel } from 'amqplib';
+import { ENV_CONFIG } from '../config/config';
 
-const RABBITMQ_URL = process.env.AMQP_URL
-    || process.env.MQ_URL
-    || 'amqp://guest:guest@localhost:5672';
 
-const QUEUES_TO_DELETE = [
+const RABBITMQ_URL = ENV_CONFIG.AMQP_URL;
+
+const QUEUES_TO_DELETE: string[] = [
     // ── Auth Emails ──────────────────────────────────────────────────
     'q.auth.email.welcome',
     'q.auth.email.verify',
@@ -78,7 +77,7 @@ const QUEUES_TO_DELETE = [
     'q.auth.retry-delay',
 ];
 
-const EXCHANGES_TO_DELETE = [
+const EXCHANGES_TO_DELETE: string[] = [
     // Domain exchanges (from MqExchange enum)
     'auth.direct',
     'payment.direct',
@@ -93,7 +92,7 @@ const EXCHANGES_TO_DELETE = [
     'notification.dlx',
 ];
 
-async function deleteQueue(channel, name) {
+async function deleteQueue(channel: Channel, name: string): Promise<boolean> {
     try {
         await channel.deleteQueue(name, { ifEmpty: false, ifUnused: false });
         return true;
@@ -114,7 +113,11 @@ async function reset() {
         // Reopen channel each time — a failed deleteQueue closes the channel
         const ch = await connection.createChannel();
         const ok = await deleteQueue(ch, q);
-        try { await ch.close(); } catch { /* ignore */ }
+        try {
+            await ch.close();
+        } catch {
+            /* ignore */
+        }
         if (ok) {
             console.log(`   ✅  ${q}`);
             deleted++;
@@ -129,11 +132,19 @@ async function reset() {
         const ch = await connection.createChannel();
         try {
             await ch.deleteExchange(ex, { ifUnused: false });
-            try { await ch.close(); } catch { /* ignore */ }
+            try {
+                await ch.close();
+            } catch {
+                /* ignore */
+            }
             console.log(`   ✅  ${ex}`);
             deleted++;
         } catch {
-            try { await ch.close(); } catch { /* ignore */ }
+            try {
+                await ch.close();
+            } catch {
+                /* ignore */
+            }
             console.log(`   ⏭️   ${ex} (not found)`);
             skipped++;
         }
@@ -142,11 +153,15 @@ async function reset() {
     console.log(`\n✨ Done — deleted ${deleted}, skipped ${skipped} (not found).`);
     console.log('🚀 Restart your Next.js server — topology will be re-asserted cleanly.\n');
 
-    try { await connection.close(); } catch { /* ignore */ }
+    try {
+        await connection.close();
+    } catch {
+        /* ignore */
+    }
     process.exit(0);
 }
 
-reset().catch(err => {
+reset().catch((err: Error) => {
     console.error('\n❌ Reset failed:', err.message);
     process.exit(1);
 });
