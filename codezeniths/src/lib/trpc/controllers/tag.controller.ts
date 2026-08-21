@@ -10,6 +10,10 @@ import {
     GetSingleTagProblemProgressTRPCOutputSchema,
     GetSingleTagTRPCInputSchema,
     GetSingleTagTRPCOutputSchema,
+    ToggleTagBookmarkTRPCInputSchema,
+    ToggleTagBookmarkTRPCOutputSchema,
+    GetUserTagProgressByLevelTRPCInputSchema,
+    GetUserTagProgressByLevelTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { TRPCError } from '@trpc/server';
 import { logger } from '@/service/logging';
@@ -167,6 +171,74 @@ export class TagController implements ITagController {
                 message: error.message || 'Something went wrong while fetching tag details.',
                 cause: error,
             });
+        }
+    }
+
+    async toggleTagBookmark({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof ToggleTagBookmarkTRPCInputSchema>;
+    }): Promise<z.infer<typeof ToggleTagBookmarkTRPCOutputSchema>> {
+        logger.info('Executing toggleTagBookmark controller', { input });
+        const userId = ctx.user?.id;
+        if (!userId) {
+            throw new TRPCError({
+                code: 'UNAUTHORIZED',
+                message: 'User authentication required.',
+            });
+        }
+
+        try {
+            return await ctx.queries.tag.toggleTagBookmark({
+                tagId: input.tagId,
+                tagSlug: input.tagSlug,
+                userId,
+            });
+        } catch (error: any) {
+            logger.error('Error in toggleTagBookmark controller', { error, userId });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error.message || 'Something went wrong while toggling tag bookmark.',
+                cause: error,
+            });
+        }
+    }
+
+    async getUserTagProgressByLevel({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetUserTagProgressByLevelTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetUserTagProgressByLevelTRPCOutputSchema>> {
+        logger.info('Executing getUserTagProgressByLevel controller', { input, userId: ctx.user?.id });
+        const targetUserId = input.userId || ctx.user?.id;
+
+        if (!targetUserId) {
+            return {
+                fundamental: [],
+                intermediate: [],
+                advanced: [],
+            };
+        }
+
+        try {
+            return await ctx.queries.tag.getUserTagProgressByLevel({
+                userId: targetUserId,
+                moduleSlug: input.moduleSlug,
+                moduleId: input.moduleId,
+            });
+        } catch (error: any) {
+            logger.error('Error in getUserTagProgressByLevel controller', { error, userId: targetUserId });
+            if (error instanceof TRPCError) throw error;
+            return {
+                fundamental: [],
+                intermediate: [],
+                advanced: [],
+            };
         }
     }
 }

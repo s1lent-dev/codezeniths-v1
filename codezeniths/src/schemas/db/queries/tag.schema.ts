@@ -50,6 +50,7 @@ export const GetTagsFilteredOutputSchema = z.array(
         problemsCount: z.number().int(),
         problemsSolvedCount: z.number().int(),
         problemsSolvedPercentage: z.number(),
+        isBookmarked: z.boolean().default(false),
         createdAt: z.coerce.date().optional(),
     }),
 );
@@ -151,6 +152,7 @@ export const GetSingleTagOutputSchema = z.object({
     slug: z.string(),
     description: z.string().nullable().optional(),
     level: LevelSchema.nullable().optional(),
+    isBookmarked: z.boolean().default(false),
     module: z.object({
         title: z.string(),
         slug: z.string(),
@@ -173,5 +175,43 @@ export const GetSingleTagOutputSchema = z.object({
         }),
     }),
     similarTags: z.array(SimilarTagSchema),
+});
+
+// ─── toggleTagBookmark ─────────────────────────────────────────────────────────
+
+export const ToggleTagBookmarkInputSchema = z.object({
+    tagId: z.uuidv7().optional(),
+    tagSlug: z.string().optional(),
+    userId: z.uuidv7(),
+}).refine((d) => d.tagId || d.tagSlug, {
+    message: 'At least one of tagId or tagSlug must be provided',
+});
+
+export const ToggleTagBookmarkOutputSchema = z.object({
+    isBookmarked: z.boolean(),
+    tagId: z.uuidv7(),
+});
+
+// ─── getUserTagProgressByLevel ───────────────────────────────────────────────
+
+export const GetUserTagProgressByLevelInputSchema = z.object({
+    userId: z.uuidv7(),
+    moduleSlug: z.string().optional(),
+    moduleId: z.uuidv7().optional(),
+});
+
+export const TagProgressItemSchema = z.object({
+    id: z.uuidv7(),
+    name: z.string(),
+    slug: z.string(),
+    level: LevelSchema.nullable().optional(),
+    solvedCount: z.number().int(),
+    totalProblems: z.number().int(),
+});
+
+export const GetUserTagProgressByLevelOutputSchema = z.object({
+    fundamental: z.array(TagProgressItemSchema),
+    intermediate: z.array(TagProgressItemSchema),
+    advanced: z.array(TagProgressItemSchema),
 });
 

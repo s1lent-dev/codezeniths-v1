@@ -1,6 +1,9 @@
+'use client';
+
 import { useQuery } from '@tanstack/react-query';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
 import { queryKeys } from '../query-keys';
+import { CACHE_TIERS } from '../cache-config';
 import type { ITopicQueryService } from '../interfaces';
 import {
     GetSingleTopicTRPCInputSchema,
@@ -20,6 +23,7 @@ export class TopicQueryService implements ITopicQueryService {
                 const raw = await trpcClient.topic.getSingleTopic.query(validatedInput);
                 return GetSingleTopicTRPCOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -32,6 +36,7 @@ export class TopicQueryService implements ITopicQueryService {
                 const raw = await trpcClient.topic.getSingleTopicProgress.query(validatedInput);
                 return GetSingleTopicProgressTRPCOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 }

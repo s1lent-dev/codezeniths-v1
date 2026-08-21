@@ -144,6 +144,37 @@ export class UpstashRedisClient implements IRedisClient {
         return res ?? 0;
     }
 
+    async zaddMany(key: string, entries: Array<{ score: number; member: string }>): Promise<number> {
+        if (entries.length === 0) return 0;
+        const CHUNK_SIZE = 500;
+        let total = 0;
+        for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
+            const chunk = entries.slice(i, i + CHUNK_SIZE);
+            const [first, ...rest] = chunk;
+            if (first) {
+                const res = await this.client.zadd(key, first, ...rest);
+                total += typeof res === 'number' ? res : 0;
+            }
+        }
+        return total;
+    }
+
+    async zincrby(key: string, increment: number, member: string): Promise<number> {
+
+        const res = await this.client.zincrby(key, increment, member);
+        return typeof res === 'number' ? res : parseFloat(String(res || '0'));
+    }
+
+    async zrevrank(key: string, member: string): Promise<number | null> {
+        const res = await this.client.zrevrank(key, member);
+        return res !== null && res !== undefined ? Number(res) : null;
+    }
+
+    async zscore(key: string, member: string): Promise<number | null> {
+        const res = await this.client.zscore(key, member);
+        return res !== null && res !== undefined ? Number(res) : null;
+    }
+
     async zrange(
         key: string,
         min: number | string,
@@ -165,6 +196,28 @@ export class UpstashRedisClient implements IRedisClient {
             res = await this.client.zrange<unknown[]>(key, min as any, max as any);
         }
         return res.map((item) => (typeof item === 'object' ? JSON.stringify(item) : String(item)));
+    }
+
+    async zrevrange(key: string, start: number, stop: number): Promise<string[]> {
+        const res = await this.client.zrange<unknown[]>(key, start, stop, { rev: true });
+        return res.map((item) => (typeof item === 'object' ? JSON.stringify(item) : String(item)));
+    }
+
+    async zrevrangeWithScores(key: string, start: number, stop: number): Promise<Array<{ member: string; score: number }>> {
+        const res = await this.client.zrange<unknown[]>(key, start, stop, { rev: true, withScores: true });
+        // @upstash/redis withScores returns array of { member, score } or alternating array
+        if (!Array.isArray(res)) return [];
+        const result: Array<{ member: string; score: number }> = [];
+        for (let i = 0; i < res.length; i++) {
+            const item = res[i];
+            if (typeof item === 'object' && item !== null && 'member' in item && 'score' in item) {
+                result.push({ member: String((item as any).member), score: Number((item as any).score) });
+            } else if (typeof item === 'string' && i + 1 < res.length && typeof res[i + 1] === 'number') {
+                result.push({ member: item, score: Number(res[i + 1]) });
+                i++;
+            }
+        }
+        return result;
     }
 
     async zrem(key: string, ...members: string[]): Promise<number> {

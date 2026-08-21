@@ -1,4 +1,4 @@
-import { mqConnectionManager } from './mq.connection';
+import { mqConnectionManager, type IRestartableConsumer } from './mq.connection';
 import type {
     Serializer,
     MessageContext,
@@ -23,7 +23,7 @@ export interface ConsumerOptions<K extends keyof MessageRegistry> {
     middlewares?: Array<ConsumerMiddleware<PayloadOf<K>>>;
 }
 
-export class Consumer<K extends keyof MessageRegistry> {
+export class Consumer<K extends keyof MessageRegistry> implements IRestartableConsumer {
     private readonly queue: MqQueue;
     private readonly messageKey: K;
     private readonly prefetch: number;
@@ -35,6 +35,7 @@ export class Consumer<K extends keyof MessageRegistry> {
     private readonly handler: (payload: PayloadOf<K>, context: MessageContext) => Promise<void> | void;
     private channel: Channel | null = null;
     private consumerTag: string | null = null;
+    private isRunning = false;
 
     constructor(
         messageKey: K,
@@ -55,113 +56,117 @@ export class Consumer<K extends keyof MessageRegistry> {
             withRetry<PayloadOf<K>>(this.queue, this.backoffStrategy, this.maxRetries),
             withValidation<K>(this.messageKey)
         ];
+
+        // Register in connection manager so it can be resumed on reconnection
+        mqConnectionManager.registerConsumer(this);
     }
 
     /**
      * Starts consuming messages from the configured queue.
      */
     async start(): Promise<string> {
-        if (this.channel) return this.consumerTag!;
+        if (this.channel && this.consumerTag) {
+            return this.consumerTag;
+        }
 
-        const chan = await mqConnectionManager.createChannel();
-        this.channel = chan;
-        await chan.prefetch(this.prefetch);
+        try {
+            const chan = await mqConnectionManager.createChannel();
+            this.channel = chan;
+            await chan.prefetch(this.prefetch);
 
-        logger.info(`[mq:consumer:${this.queue}] Starting consumer for messageKey=${String(this.messageKey)} prefetch=${this.prefetch}...`);
+            logger.info(`[mq:consumer:${this.queue}] Starting consumer for messageKey=${String(this.messageKey)} prefetch=${this.prefetch}...`);
 
-        const composedHandler = composeMiddlewares(this.middlewares, this.handler);
+            const composedHandler = composeMiddlewares(this.middlewares, this.handler);
 
-        const consumeResult = await chan.consume(this.queue, async (msg: Message | null) => {
-            if (!msg) {
-                logger.warn(`[mq:consumer:${this.queue}] Consumer cancelled by broker.`);
-                return;
-            }
-
-            mqConnectionManager.incrementInFlight();
-
-            let settled = false;
-            const context: MessageContext = {
-                fields: msg.fields,
-                properties: {
-                    ...msg.properties,
-                    headers: msg.properties.headers ?? {},
-                },
-                ack: () => {
-                    if (!settled) {
-                        try {
-                            chan.ack(msg);
-                        } catch (err) {
-                            logger.error(`[mq:consumer:${this.queue}] Failed to ack message`, err);
-                        } finally {
-                            settled = true;
-                            mqConnectionManager.decrementInFlight();
-                        }
-                    }
-                },
-                nack: (requeue = false) => {
-                    if (!settled) {
-                        try {
-                            chan.nack(msg, false, requeue);
-                        } catch (err) {
-                            logger.error(`[mq:consumer:${this.queue}] Failed to nack message`, err);
-                        } finally {
-                            settled = true;
-                            mqConnectionManager.decrementInFlight();
-                        }
-                    }
-                },
-                reject: (requeue = false) => {
-                    if (!settled) {
-                        try {
-                            chan.reject(msg, requeue);
-                        } catch (err) {
-                            logger.error(`[mq:consumer:${this.queue}] Failed to reject message`, err);
-                        } finally {
-                            settled = true;
-                            mqConnectionManager.decrementInFlight();
-                        }
-                    }
-                },
-            };
-
-            let payload: PayloadOf<K>;
-            try {
-                payload = this.serializer.deserialize(msg.content);
-            } catch (err) {
-                logger.error(`[mq:consumer:${this.queue}] Payload deserialization failed. Rejecting message.`, err);
-                context.reject(false);
-                return;
-            }
-
-            try {
-                await composedHandler(payload, context);
-                
-                if (this.autoAck && !settled) {
-                    context.ack();
+            const consumeResult = await chan.consume(this.queue, async (msg: Message | null) => {
+                if (!msg) {
+                    logger.warn(`[mq:consumer:${this.queue}] Consumer cancelled by broker.`);
+                    return;
                 }
-            } catch (err) {
-                logger.error(`[mq:consumer:${this.queue}] Uncaught exception in middleware chain. Rejecting message.`, err);
-                if (!settled) {
+
+                let settled = false;
+                const context: MessageContext = {
+                    fields: msg.fields,
+                    properties: {
+                        ...msg.properties,
+                        headers: msg.properties.headers ?? {},
+                    },
+                    ack: () => {
+                        if (!settled) {
+                            settled = true;
+                            try { chan.ack(msg); } catch (err) {
+                                logger.error(`[mq:consumer:${this.queue}] Failed to ack message`, err);
+                            }
+                        }
+                    },
+                    nack: (requeue = false) => {
+                        if (!settled) {
+                            settled = true;
+                            try { chan.nack(msg, false, requeue); } catch (err) {
+                                logger.error(`[mq:consumer:${this.queue}] Failed to nack message`, err);
+                            }
+                        }
+                    },
+                    reject: (requeue = false) => {
+                        if (!settled) {
+                            settled = true;
+                            try { chan.reject(msg, requeue); } catch (err) {
+                                logger.error(`[mq:consumer:${this.queue}] Failed to reject message`, err);
+                            }
+                        }
+                    },
+                };
+
+                let payload: PayloadOf<K>;
+                try {
+                    payload = this.serializer.deserialize(msg.content);
+                } catch (err) {
+                    logger.error(`[mq:consumer:${this.queue}] Payload deserialization failed. Rejecting message.`, err);
                     context.reject(false);
+                    return;
                 }
-            }
-        });
 
-        this.consumerTag = consumeResult.consumerTag;
-        mqConnectionManager.registerConsumerTag(chan, this.consumerTag);
-        return this.consumerTag;
+                try {
+                    await composedHandler(payload, context);
+                    if (this.autoAck && !settled) {
+                        context.ack();
+                    }
+                } catch (err) {
+                    logger.error(`[mq:consumer:${this.queue}] Uncaught error in handler. Rejecting message.`, err);
+                    if (!settled) context.reject(false);
+                }
+            });
+
+            this.consumerTag = consumeResult.consumerTag;
+            this.isRunning = true;
+            return this.consumerTag;
+        } catch (error) {
+            logger.error(`[mq:consumer:${this.queue}] Failed to start consumer`, error);
+            this.channel = null;
+            this.consumerTag = null;
+            this.isRunning = false;
+            throw error;
+        }
     }
 
-    /**
-     * Stops the consumer by cancelling consumption on the channel.
-     */
+    async restart(): Promise<void> {
+        if (!this.isRunning) return;
+        this.channel = null;
+        this.consumerTag = null;
+        try {
+            await this.start();
+        } catch (err) {
+            logger.error(`[mq:consumer:${this.queue}] Failed to restart after reconnect`, err);
+        }
+    }
+
     async stop(): Promise<void> {
+        this.isRunning = false;
         if (!this.channel || !this.consumerTag) return;
         try {
             await this.channel.cancel(this.consumerTag);
-            mqConnectionManager.deregisterConsumerTag(this.channel, this.consumerTag);
         } catch (err) {
-            logger.error(`[mq:consumer:${this.queue}] Error during stop cancel`, err);
+            logger.error(`[mq:consumer:${this.queue}] Error during stop`, err);
         } finally {
             this.channel = null;
             this.consumerTag = null;

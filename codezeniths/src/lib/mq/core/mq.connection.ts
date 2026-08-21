@@ -1,207 +1,114 @@
+/**
+ * @file mq.connection.ts
+ * @description Single AMQP connection manager with automatic reconnection and consumer recovery.
+ *
+ * Design principles:
+ *   - One connection, created lazily on first use.
+ *   - On disconnect: wait 5 s, then reconnect and restart registered consumers.
+ *   - NEVER asserts topology here — topology is asserted once in mq.bootstrap.ts.
+ */
+
 import amqp from 'amqplib';
 import { ENV_CONFIG } from '@/config/config';
 import { logger } from '@/service/logging';
 
 if (process.env.NEXT_RUNTIME === 'edge') {
-    throw new Error(
-        '[mq] This module uses TCP sockets via amqplib and cannot run in the Edge Runtime. ' +
-        'Only import it from Node.js runtime code.',
-    );
+    throw new Error('[mq] amqplib cannot run in the Edge Runtime. Only import from Node.js runtime code.');
 }
 
-export class ConnectionManager {
+export interface IRestartableConsumer {
+    restart(): Promise<void>;
+}
+
+class ConnectionManager {
     private connection: amqp.ChannelModel | null = null;
-    private connectingPromise: Promise<amqp.ChannelModel> | null = null;
-    private readonly channels: Set<amqp.Channel> = new Set();
-    private reconnectTimeout: NodeJS.Timeout | null = null;
-    private inFlightCount = 0;
-    private readonly activeConsumerTags: Map<amqp.Channel, Set<string>> = new Map();
+    private connecting: Promise<amqp.ChannelModel> | null = null;
+    private reconnectTimer: NodeJS.Timeout | null = null;
+    private readonly consumers = new Set<IRestartableConsumer>();
+    private destroyed = false;
 
-    constructor() {
-        this.setupShutdownHooks();
+    registerConsumer(consumer: IRestartableConsumer): void {
+        this.consumers.add(consumer);
     }
 
-    /**
-     * Establishes a connection to the AMQP broker. Resolves to the active connection.
-     */
-    async connect(): Promise<amqp.ChannelModel> {
-        if (this.connection) return this.connection;
-        if (this.connectingPromise) return this.connectingPromise;
-
-        this.connectingPromise = (async () => {
-            try {
-                logger.info(`[mq] Connecting to RabbitMQ at ${ENV_CONFIG.AMQP_URL}...`);
-                const conn = await amqp.connect(ENV_CONFIG.AMQP_URL);
-                this.connection = conn;
-                this.connectingPromise = null;
-                logger.info('[mq] Connected to RabbitMQ successfully.');
-
-                // Assert topology on connect to ensure all exchanges/queues exist
-                void (async () => {
-                    try {
-                        const { buildCodeZenithsTopology } = await import('./mq.topology');
-                        const tempChannel = await conn.createChannel();
-                        const builder = buildCodeZenithsTopology();
-                        await builder.assert(tempChannel);
-                        await tempChannel.close();
-                        logger.info('[mq] RabbitMQ topology asserted successfully.');
-                    } catch (err) {
-                        logger.error('[mq] Failed to assert topology on connection', err);
-                    }
-                })();
-
-                conn.on('error', (err: Error) => {
-                    logger.error('[mq] Connection error', err);
-                    void this.handleDisconnect();
-                });
-
-                conn.on('close', () => {
-                    logger.warn('[mq] Connection closed.');
-                    void this.handleDisconnect();
-                });
-
-                return conn;
-            } catch (error) {
-                this.connectingPromise = null;
-                void this.handleDisconnect();
-                throw error;
-            }
-        })();
-
-        return this.connectingPromise;
-    }
-
-    private async handleDisconnect() {
-        this.connection = null;
-        this.channels.clear();
-        this.activeConsumerTags.clear();
-
-        if (!this.reconnectTimeout) {
-            this.reconnectTimeout = setTimeout(() => {
-                this.reconnectTimeout = null;
-                void this.connect().catch(() => {});
-            }, 5000);
-        }
-    }
-
-    /**
-     * Creates a standard AMQP channel.
-     */
     async createChannel(): Promise<amqp.Channel> {
         const conn = await this.connect();
-        const channel = await conn.createChannel();
-        this.channels.add(channel);
-        channel.on('close', () => {
-            this.channels.delete(channel);
-            this.activeConsumerTags.delete(channel);
-        });
-        return channel;
+        const ch = await conn.createChannel();
+        ch.on('error', (err) => logger.error('[mq:channel] Channel error', err));
+        return ch;
     }
 
-    /**
-     * Creates a confirm channel supporting publisher confirmations.
-     */
     async createConfirmChannel(): Promise<amqp.ConfirmChannel> {
         const conn = await this.connect();
-        const channel = await conn.createConfirmChannel();
-        this.channels.add(channel);
-        channel.on('close', () => {
-            this.channels.delete(channel);
-            this.activeConsumerTags.delete(channel);
+        const ch = await (conn as any).createConfirmChannel() as amqp.ConfirmChannel;
+        ch.on('error', (err) => logger.error('[mq:confirm-channel] Channel error', err));
+        return ch;
+    }
+
+    async connect(): Promise<amqp.ChannelModel> {
+        if (this.connection) return this.connection;
+        if (this.connecting) return this.connecting;
+
+        this.connecting = this._doConnect();
+        try {
+            this.connection = await this.connecting;
+            return this.connection;
+        } finally {
+            this.connecting = null;
+        }
+    }
+
+    private async _doConnect(): Promise<amqp.ChannelModel> {
+        logger.info(`[mq] Connecting to RabbitMQ...`);
+        const conn = (await amqp.connect(ENV_CONFIG.AMQP_URL, { heartbeat: 15 } as any)) as unknown as amqp.ChannelModel;
+        logger.info('[mq] Connected to RabbitMQ.');
+
+        conn.on('error', (err) => {
+            logger.error('[mq] Connection error', err);
+            this._onDisconnect();
         });
-        return channel;
+
+        conn.on('close', () => {
+            logger.warn('[mq] Connection closed.');
+            this._onDisconnect();
+        });
+
+        return conn;
     }
 
-    registerConsumerTag(channel: amqp.Channel, consumerTag: string) {
-        let tags = this.activeConsumerTags.get(channel);
-        if (!tags) {
-            tags = new Set();
-            this.activeConsumerTags.set(channel, tags);
-        }
-        tags.add(consumerTag);
-    }
+    private _onDisconnect(): void {
+        if (this.destroyed) return;
+        this.connection = null;
 
-    deregisterConsumerTag(channel: amqp.Channel, consumerTag: string) {
-        const tags = this.activeConsumerTags.get(channel);
-        if (tags) {
-            tags.delete(consumerTag);
-        }
-    }
-
-    incrementInFlight() {
-        this.inFlightCount++;
-    }
-
-    decrementInFlight() {
-        this.inFlightCount = Math.max(0, this.inFlightCount - 1);
-    }
-
-    /**
-     * Performs a graceful shutdown of all active channels and connection.
-     */
-    async close(): Promise<void> {
-        logger.info('[mq] Starting connection shutdown...');
-
-        // 1. Cancel all active consumers
-        for (const [channel, tags] of this.activeConsumerTags.entries()) {
-            for (const tag of tags) {
-                try {
-                    await channel.cancel(tag);
-                } catch (err) {
-                    // ignore
-                }
-            }
-        }
-        this.activeConsumerTags.clear();
-
-        // 2. Wait for in-flight messages to drain
-        if (this.inFlightCount > 0) {
-            logger.info(`[mq] Waiting for ${this.inFlightCount} in-flight messages to process...`);
-            await new Promise<void>((resolve) => {
-                const interval = setInterval(() => {
-                    if (this.inFlightCount === 0) {
-                        clearInterval(interval);
-                        resolve();
+        if (this.reconnectTimer) return;
+        this.reconnectTimer = setTimeout(async () => {
+            this.reconnectTimer = null;
+            try {
+                await this.connect();
+                // Restart all registered consumers after reconnect
+                for (const consumer of this.consumers) {
+                    try { await consumer.restart(); } catch (err) {
+                        logger.error('[mq] Failed to restart consumer after reconnect', err);
                     }
-                }, 100);
-            });
-        }
-
-        // 3. Close channels
-        for (const channel of this.channels) {
-            try {
-                await channel.close();
+                }
             } catch (err) {
-                // ignore channel close errors during shutdown
+                logger.error('[mq] Reconnect attempt failed', err);
+                this._onDisconnect(); // schedule another attempt
             }
-        }
-        this.channels.clear();
+        }, 5000);
+    }
 
-        // 4. Close connection
+    async destroy(): Promise<void> {
+        this.destroyed = true;
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
         if (this.connection) {
-            try {
-                await this.connection.close();
-            } catch (err) {
-                // ignore connection close errors during shutdown
-            }
+            try { await (this.connection as any).close(); } catch { /* ignore */ }
             this.connection = null;
         }
-        logger.info('[mq] MQ client shut down gracefully.');
-    }
-
-    private setupShutdownHooks() {
-        const shutdown = async () => {
-            await this.close();
-            process.exit(0);
-        };
-        process.once('SIGTERM', () => void shutdown());
-        process.once('SIGINT', () => void shutdown());
     }
 }
 
-const globalForMq = globalThis as unknown as { __mqConnectionManager?: ConnectionManager };
-export const mqConnectionManager = globalForMq.__mqConnectionManager ?? new ConnectionManager();
-
-if (process.env.NODE_ENV !== 'production') {
-    globalForMq.__mqConnectionManager = mqConnectionManager;
-}
+export const mqConnectionManager = new ConnectionManager();

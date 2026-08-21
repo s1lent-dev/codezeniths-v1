@@ -14,10 +14,14 @@ import {
     UpdateProblemNoteOutputSchema,
     UpdateProblemFavouriteInputSchema,
     UpdateProblemFavouriteOutputSchema,
+    UpdateProblemRevisitInputSchema,
+    UpdateProblemRevisitOutputSchema,
     GetProblemTablePrimitivesInputSchema,
     GetProblemTablePrimitivesOutputSchema,
     GetProblemProgressInputSchema,
     GetProblemProgressOutputSchema,
+    GetRecentlySolvedProblemsInputSchema,
+    GetRecentlySolvedProblemsOutputSchema,
 } from '@codezeniths/schemas/db';
 
 export interface IProblemQueries {
@@ -53,7 +57,15 @@ export interface IProblemQueries {
         payload: z.infer<typeof UpdateProblemFavouriteInputSchema>,
     ) => Promise<z.infer<typeof UpdateProblemFavouriteOutputSchema>>;
 
+    updateProblemRevisit: (
+        payload: z.infer<typeof UpdateProblemRevisitInputSchema>,
+    ) => Promise<z.infer<typeof UpdateProblemRevisitOutputSchema>>;
+
     getProblemProgress: (
         payload: z.infer<typeof GetProblemProgressInputSchema>,
     ) => Promise<z.infer<typeof GetProblemProgressOutputSchema>>;
+
+    getRecentlySolvedProblems: (
+        payload: z.infer<typeof GetRecentlySolvedProblemsInputSchema>,
+    ) => Promise<z.infer<typeof GetRecentlySolvedProblemsOutputSchema>>;
 }

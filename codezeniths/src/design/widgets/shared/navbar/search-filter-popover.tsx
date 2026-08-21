@@ -21,9 +21,7 @@ export const SearchFilterPopover = () => {
         resetSearchFilters,
     } = useNavigationStore();
 
-    const activeFilterCount =
-        (searchFilters.difficulty && searchFilters.difficulty !== 'all' ? 1 : 0) +
-        (searchFilters.type && searchFilters.type !== 'all' ? 1 : 0);
+    const activeFilterCount = searchFilters.type && searchFilters.type !== 'all' ? 1 : 0;
 
     return (
         <Popover open={isSearchFilterOpen} onOpenChange={setSearchFilterOpen}>
@@ -49,7 +47,7 @@ export const SearchFilterPopover = () => {
                 <div className="flex items-center justify-between border-b border-foreground-light-shade3 dark:border-foreground-dark-shade3 m-2 pb-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-heading-light dark:text-heading-dark flex items-center gap-2">
                         <SlidersHorizontal className="w-3.5 h-3.5 text-primary" />
-                        Search Filters
+                        Search Category
                     </span>
                     {activeFilterCount > 0 && (
                         <button
@@ -61,31 +59,6 @@ export const SearchFilterPopover = () => {
                     )}
                 </div>
 
-                {/* Difficulty Filter */}
-                <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-light dark:text-muted-dark">
-                        Difficulty
-                    </label>
-                    <div className="grid grid-cols-4 gap-1.5">
-                        {(['all', 'easy', 'medium', 'hard'] as const).map((diff) => {
-                            const isSelected = (searchFilters.difficulty || 'all') === diff;
-                            return (
-                                <button
-                                    key={diff}
-                                    type="button"
-                                    onClick={() => setSearchFilters({ difficulty: diff })}
-                                    className={`px-2 py-1 text-xs font-medium rounded-md capitalize transition-all cursor-pointer ${
-                                        isSelected
-                                            ? 'bg-primary text-white shadow-sm'
-                                            : 'bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 text-body-light dark:text-body-dark hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2'
-                                    }`}
-                                >
-                                    {diff}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
 
                 {/* Category Type Filter */}
                 <div className="space-y-2">
@@ -93,7 +66,7 @@ export const SearchFilterPopover = () => {
                         Category
                     </label>
                     <div className="grid grid-cols-2 gap-1.5">
-                        {(['all', 'problems', 'modules', 'tags'] as const).map((cat) => {
+                        {(['all', 'problems', 'topics', 'modules', 'tags', 'products', 'users'] as const).map((cat) => {
                             const isSelected = (searchFilters.type || 'all') === cat;
                             return (
                                 <button
@@ -113,6 +86,7 @@ export const SearchFilterPopover = () => {
                         })}
                     </div>
                 </div>
+
 
                 <div className="pt-1 border-t border-foreground-light-shade3 dark:border-foreground-dark-shade3">
                     <Button

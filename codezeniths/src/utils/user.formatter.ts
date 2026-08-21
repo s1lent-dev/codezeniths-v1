@@ -1,6 +1,7 @@
 import { redisService } from '@/lib/redis';
 import { storageService } from '@/service/storage';
 import { createCache } from '@/hooks/performance-hooks/cache/cache';
+import { logger } from '@/service/logging';
 
 /**
  * Multi-Tiered Stampede-Safe Cache for Signed Media URLs (Profile Images + Resumes).
@@ -50,13 +51,34 @@ async function resolveSignedUrl(storageKey: string): Promise<string> {
     const cleanKey = storageKey.trim();
     if (!cleanKey) return storageKey;
 
+    if (cleanKey.startsWith('http')) {
+        logger.info('User formatter URL resolved', {
+            storageKey: cleanKey,
+            tier: 'BYPASS_DIRECT_HTTP',
+            source: 'HTTP_URL',
+        });
+        return cleanKey;
+    }
+
     // --- Tier 1: Adaptive L1 Memory Cache (0 ms hit time, capped at 5000 entries) ---
     const l1Cached = l1MemoryCache.get(cleanKey);
-    if (l1Cached) return l1Cached;
+    if (l1Cached) {
+        logger.info('User formatter URL resolved', {
+            storageKey: cleanKey,
+            tier: 'L1_MEMORY_CACHE',
+            source: 'MEMORY',
+        });
+        return l1Cached;
+    }
 
     // --- Tier 2: In-Flight Promise De-duplication ---
     const existingInFlight = inFlightPromises.get(cleanKey);
     if (existingInFlight) {
+        logger.info('User formatter URL resolved', {
+            storageKey: cleanKey,
+            tier: 'IN_FLIGHT_DEDUPLICATION',
+            source: 'IN_FLIGHT_PROMISE',
+        });
         return existingInFlight;
     }
 
@@ -66,6 +88,11 @@ async function resolveSignedUrl(storageKey: string): Promise<string> {
             const l2Cached = await mediaUrlStore.get(cleanKey);
             if (l2Cached !== null) {
                 l1MemoryCache.set(cleanKey, l2Cached, SIGNED_URL_TTL_MS);
+                logger.info('User formatter URL resolved', {
+                    storageKey: cleanKey,
+                    tier: 'L2_REDIS_CACHE',
+                    source: 'REDIS',
+                });
                 return l2Cached;
             }
 
@@ -78,6 +105,11 @@ async function resolveSignedUrl(storageKey: string): Promise<string> {
                     const doubleCheckL2 = await mediaUrlStore.get(cleanKey);
                     if (doubleCheckL2 !== null) {
                         l1MemoryCache.set(cleanKey, doubleCheckL2, SIGNED_URL_TTL_MS);
+                        logger.info('User formatter URL resolved', {
+                            storageKey: cleanKey,
+                            tier: 'L2_REDIS_CACHE_DOUBLE_CHECK',
+                            source: 'REDIS',
+                        });
                         return doubleCheckL2;
                     }
 
@@ -87,6 +119,12 @@ async function resolveSignedUrl(storageKey: string): Promise<string> {
                     // Write to L2 Redis Store + Adaptive L1 Memory Cache
                     await mediaUrlStore.set(cleanKey, signedUrl, SIGNED_URL_TTL_SECONDS);
                     l1MemoryCache.set(cleanKey, signedUrl, SIGNED_URL_TTL_MS);
+
+                    logger.info('User formatter URL resolved', {
+                        storageKey: cleanKey,
+                        tier: 'S3_PRESIGNED_ORIGIN',
+                        source: 'S3_STORAGE_SERVICE',
+                    });
 
                     return signedUrl;
                 } finally {
@@ -99,11 +137,23 @@ async function resolveSignedUrl(storageKey: string): Promise<string> {
                 await new Promise((resolve) => setTimeout(resolve, LOCK_POLL_INTERVAL_MS));
 
                 const l1Populated = l1MemoryCache.get(cleanKey);
-                if (l1Populated) return l1Populated;
+                if (l1Populated) {
+                    logger.info('User formatter URL resolved', {
+                        storageKey: cleanKey,
+                        tier: 'LOCK_POLLING_POPULATED_L1',
+                        source: 'LOCK_WAIT',
+                    });
+                    return l1Populated;
+                }
 
                 const l2Populated = await mediaUrlStore.get(cleanKey);
                 if (l2Populated !== null) {
                     l1MemoryCache.set(cleanKey, l2Populated, SIGNED_URL_TTL_MS);
+                    logger.info('User formatter URL resolved', {
+                        storageKey: cleanKey,
+                        tier: 'LOCK_POLLING_POPULATED_L2',
+                        source: 'LOCK_WAIT',
+                    });
                     return l2Populated;
                 }
             }
@@ -112,6 +162,13 @@ async function resolveSignedUrl(storageKey: string): Promise<string> {
             const signedUrl = await storageService.getPresignedDownloadUrl(cleanKey, 86_400);
             await mediaUrlStore.set(cleanKey, signedUrl, SIGNED_URL_TTL_SECONDS);
             l1MemoryCache.set(cleanKey, signedUrl, SIGNED_URL_TTL_MS);
+
+            logger.warn('User formatter URL resolved via lock timeout fallback', {
+                storageKey: cleanKey,
+                tier: 'S3_PRESIGNED_FALLBACK',
+                source: 'FALLBACK_TIMEOUT',
+            });
+
             return signedUrl;
         } finally {
             inFlightPromises.delete(cleanKey);

@@ -104,7 +104,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
                 sideOffset={6}
                 onOpenAutoFocus={(e) => e.preventDefault()}
                 onCloseAutoFocus={(e) => e.preventDefault()}
-                className="w-(--radix-popover-trigger-width) min-w-70 rounded-xl border border-secondary/20 dark:border-secondary-shade2/40 bg-foreground-light dark:bg-foreground-dark p-1.5 shadow-2xl backdrop-blur-md z-50 focus:outline-none overflow-hidden"
+                className="w-(--radix-popover-trigger-width) min-w-70 rounded-xl border border-secondary/20 dark:border-secondary-shade2/40 bg-foreground-light dark:bg-foreground-dark p-1.5 shadow-2xl backdrop-blur-md z-200 focus:outline-none overflow-hidden"
             >
                 <Container
                     align="center"

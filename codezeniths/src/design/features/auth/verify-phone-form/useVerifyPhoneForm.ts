@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { isValidPhoneNumber } from 'libphonenumber-js';
-import { useAuth, authClient } from '@/lib/auth/auth';
+import { useAuth, authClient, refetchAuthSession } from '@/lib/auth/auth';
 import { useToast } from '@codezeniths/modules';
 import { userQueryService } from '@/lib/tanstack/services/user.query-service';
 import { verifyPhoneSchema, VerifyPhoneFormValues } from './verify-phone.types';
@@ -139,8 +139,8 @@ export const useVerifyPhoneForm = () => {
             toast.success('Phone verified successfully!');
             await refetch();
             
-            // Get fresh session to ensure we have the latest isOnboardingComplete state
-            const session = await authClient.getSession();
+            // Invalidate session cookie cache & fetch fresh session from server
+            const session = await refetchAuthSession();
             const updatedUser = session?.data?.user;
             
             if (updatedUser && !updatedUser.isOnboardingComplete) {

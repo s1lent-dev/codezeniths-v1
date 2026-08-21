@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { Calendar as CalendarIcon, Upload, User as UserIcon, MapPin, Phone } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import {
     Select,
     SelectTrigger,
@@ -12,11 +12,25 @@ import {
     FloatingLabelInput,
     FloatingLabelTextarea,
     FloatingOutlineWrapper,
+    Typography,
+    TypographyVariant,
 } from '@codezeniths/components';
-import { Calendar, DatePicker } from '@codezeniths/modules';
+import { DatePicker } from '@codezeniths/modules';
 import { LocationInput, UploadInput } from '@codezeniths/widgets';
 import { Step0Values } from '../useCompleteProfileForm';
 import { GENDER_OPTIONS } from '../complete-profile.utils';
+
+export const COUNTRY_CODE_OPTIONS = [
+    { code: 'US', label: 'US (+1)', value: '+1' },
+    { code: 'IN', label: 'IN (+91)', value: '+91' },
+    { code: 'UK', label: 'UK (+44)', value: '+44' },
+    { code: 'AU', label: 'AU (+61)', value: '+61' },
+    { code: 'DE', label: 'DE (+49)', value: '+49' },
+    { code: 'FR', label: 'FR (+33)', value: '+33' },
+    { code: 'SG', label: 'SG (+65)', value: '+65' },
+    { code: 'AE', label: 'AE (+971)', value: '+971' },
+    { code: 'JP', label: 'JP (+81)', value: '+81' },
+];
 
 interface Step1Props {
     form: UseFormReturn<Step0Values>;
@@ -24,6 +38,8 @@ interface Step1Props {
     isUploadingImage: boolean;
     onAvatarUpload: (file: File) => void;
     onAvatarRemove: () => void;
+    phoneCheck?: { available: boolean; isVerified?: boolean };
+    isCheckingPhone?: boolean;
 }
 
 export const Step1PersonalDetails: React.FC<Step1Props> = ({
@@ -32,6 +48,8 @@ export const Step1PersonalDetails: React.FC<Step1Props> = ({
     isUploadingImage,
     onAvatarUpload,
     onAvatarRemove,
+    phoneCheck,
+    isCheckingPhone,
 }) => {
     const { register, watch, setValue, formState: { errors } } = form;
 
@@ -39,6 +57,9 @@ export const Step1PersonalDetails: React.FC<Step1Props> = ({
     const currentDob = watch('dob');
     const currentGender = watch('gender');
     const currentLocation = watch('location');
+    const currentCountryCode = watch('countryCode') || '+1';
+    const currentPhone = watch('phone');
+    const hasPhoneError = Boolean(errors.phone);
 
     return (
         <div className="space-y-8 w-full p-6">
@@ -174,14 +195,66 @@ export const Step1PersonalDetails: React.FC<Step1Props> = ({
                 )}
             </div>
 
-            {/* Row 5: Phone Number (Optional) */}
+            {/* Row 5: Phone Number (Optional) with Floating Styling & Live Availability Check */}
             {!hasExistingPhoneNumber && (
-                <div className="w-full space-y-1">
-                    <FloatingLabelInput
-                        id="phoneNumber"
-                        label="Phone Number (Optional)"
-                        {...register('phoneNumber')}
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-8 w-full">
+                    {/* Country Code (1 col) */}
+                    <div className="md:col-span-1 space-y-1">
+                        <FloatingOutlineWrapper
+                            label="Country"
+                            hasValue={Boolean(currentCountryCode)}
+                        >
+                            <Select
+                                value={currentCountryCode}
+                                onValueChange={(val) => setValue('countryCode', val, { shouldValidate: true, shouldDirty: true })}
+                            >
+                                <SelectTrigger className="w-full! h-full! justify-between items-center border-0! px-0! bg-transparent! shadow-none text-sm font-normal focus:ring-0 cursor-pointer">
+                                    <SelectValue placeholder="" />
+                                </SelectTrigger>
+                                <SelectContent position="popper" className="w-full min-w-40">
+                                    {COUNTRY_CODE_OPTIONS.map((option) => (
+                                        <SelectItem key={`${option.code}-${option.value}`} value={option.value} className="cursor-pointer">
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </FloatingOutlineWrapper>
+                    </div>
+
+                    {/* Phone Number Input with Floating Label (3 cols) */}
+                    <div className="md:col-span-3 space-y-1">
+                        <div className="relative group w-full">
+                            <FloatingLabelInput
+                                id="phone"
+                                type="tel"
+                                label="Phone Number (Optional)"
+                                value={currentPhone || ''}
+                                onChange={(e) => setValue('phone', e.target.value, { shouldValidate: true, shouldDirty: true })}
+                                error={hasPhoneError}
+                                className={isCheckingPhone || (currentPhone && phoneCheck?.available && !hasPhoneError) ? 'pr-28' : ''}
+                            />
+                            {isCheckingPhone && (
+                                <Typography variant={TypographyVariant.CAPTION} className="text-warning dark:text-warning absolute right-3 top-1/2 -translate-y-1/2 font-medium">
+                                    checking...
+                                </Typography>
+                            )}
+                            {!isCheckingPhone && currentPhone && currentPhone.length > 0 && phoneCheck?.available && !hasPhoneError && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
+                                    <Typography variant={TypographyVariant.CAPTION} className="text-success dark:text-success font-medium">
+                                        Available
+                                    </Typography>
+                                    <CheckCircle2 size={18} className="text-success animate-in zoom-in duration-300" />
+                                </div>
+                            )}
+                            <div className="absolute left-0 -top-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 text-foreground-dark dark:text-foreground-light text-xs px-3 py-2 rounded-md shadow-lg z-20 whitespace-normal sm:whitespace-nowrap w-max max-w-full">
+                                It&apos;s optional, but if you want to verify with a phone number in the future, you must add it here.
+                            </div>
+                        </div>
+                        {hasPhoneError && (
+                            <p className="text-xs text-destructive pt-0.5">{errors.phone?.message as string}</p>
+                        )}
+                    </div>
                 </div>
             )}
         </div>

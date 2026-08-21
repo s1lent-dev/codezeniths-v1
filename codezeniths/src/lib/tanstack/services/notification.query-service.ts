@@ -1,5 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+'use client';
+
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
+import { CacheInvalidationService } from '../cache-invalidation.service';
+import { queryKeys } from '../query-keys';
 import {
     GetNotificationsTRPCInputSchema,
     GetNotificationsTRPCOutputSchema,
@@ -15,16 +19,45 @@ import { z } from 'zod';
 import type { INotificationQueryService } from '../interfaces';
 
 export class NotificationQueryService implements INotificationQueryService {
-
     getNotifications(input?: z.infer<typeof GetNotificationsTRPCInputSchema>) {
         const validatedInput = GetNotificationsTRPCInputSchema.parse(input);
         return useQuery({
-            queryKey: ['notifications', validatedInput],
+            queryKey: queryKeys.notification.list(validatedInput),
             queryFn: async () => {
                 const raw = await trpcClient.notification.getNotifications.query(validatedInput);
                 return GetNotificationsTRPCOutputSchema.parse(raw);
             },
-            refetchInterval: 15000, // Poll every 15 seconds
+            refetchInterval: 60000, // Poll every 1 min
+            refetchOnWindowFocus: true,
+        });
+    }
+
+    getNotificationsInfinite(
+        filters?: {
+            status?: 'all' | 'unread' | 'read';
+            category?: 'all' | 'achievements' | 'social' | 'system';
+            sort?: 'latest' | 'oldest';
+            search?: string;
+        },
+        limit = 6
+    ) {
+        return useInfiniteQuery({
+            queryKey: queryKeys.notification.infinite({ filters, limit }),
+            queryFn: async ({ pageParam }) => {
+                const input = {
+                    ...filters,
+                    limit,
+                    cursor: pageParam as string | undefined,
+                };
+                const validatedInput = GetNotificationsTRPCInputSchema.parse(input);
+                const raw = await trpcClient.notification.getNotifications.query(validatedInput);
+                return GetNotificationsTRPCOutputSchema.parse(raw);
+            },
+            initialPageParam: undefined as string | undefined,
+            getNextPageParam: (lastPage) => {
+                return lastPage.nextCursor ?? undefined;
+            },
+            refetchInterval: 60000,
             refetchOnWindowFocus: true,
         });
     }
@@ -37,8 +70,8 @@ export class NotificationQueryService implements INotificationQueryService {
                 const raw = await trpcClient.notification.markAsRead.mutate(validatedInput);
                 return MarkAsReadTRPCOutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnNotificationsRead(queryClient);
             },
         });
     }
@@ -50,8 +83,8 @@ export class NotificationQueryService implements INotificationQueryService {
                 const raw = await trpcClient.notification.markAllAsRead.mutate();
                 return MarkAllAsReadTRPCOutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnNotificationsRead(queryClient);
             },
         });
     }

@@ -7,6 +7,7 @@ import type {
     RippleEffectProps,
     RippleState,
     ShimmerEffectProps,
+    ThemeColor,
 } from './button.types';
 
 export function useShimmerEffect(props: ShimmerEffectProps) {
@@ -40,8 +41,14 @@ export function useShimmerEffect(props: ShimmerEffectProps) {
     const defaultShimmerColor = isDark ? '#a78bfa' : '#7c3aed';
     const defaultBackground = isDark ? '#1C2136' : '#e1def7';
 
-    const finalShimmerColor = propShimmerColor ?? defaultShimmerColor;
-    const finalBackground = propBackground ?? defaultBackground;
+    const resolveColor = (colorProp?: ThemeColor, fallback?: string): string => {
+        if (!colorProp) return fallback || '';
+        if (typeof colorProp === 'string') return colorProp;
+        return isDark ? colorProp.dark : colorProp.light;
+    };
+
+    const finalShimmerColor = resolveColor(propShimmerColor, defaultShimmerColor);
+    const finalBackground = resolveColor(propBackground, defaultBackground);
 
     const style = useMemo(() => ({
         '--spread': '90deg',

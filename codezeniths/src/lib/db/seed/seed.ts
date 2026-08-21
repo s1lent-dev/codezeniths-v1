@@ -90,8 +90,8 @@ async function main() {
         for (const topicData of moduleGroup.topics) {
           const topic = await tx.topic.upsert({
             where: { slug: topicData.slug },
-            update: { title: topicData.title, description: topicData.description, order: topicData.order, moduleId },
-            create: { title: topicData.title, description: topicData.description, slug: topicData.slug, order: topicData.order, moduleId },
+            update: { title: topicData.title, description: topicData.description, order: topicData.order, moduleId, level: topicData.level },
+            create: { title: topicData.title, description: topicData.description, slug: topicData.slug, order: topicData.order, moduleId, level: topicData.level },
           });
           topicSlugToId.set(topic.slug, topic.id);
         }

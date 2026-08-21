@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { GetNotificationsOutputSchema, DevicePlatformSchema } from '../db';
+import {
+    GetNotificationsOutputSchema,
+    DevicePlatformSchema,
+    NotificationStatusSchema,
+    NotificationCategorySchema,
+    NotificationSortSchema,
+} from '../db';
 
 export const deviceTokenUpsertSchema = z.object({
     fid: z.string().min(1),
@@ -10,7 +16,12 @@ export const deviceTokenUpsertSchema = z.object({
 export type DeviceTokenUpsertInput = z.infer<typeof deviceTokenUpsertSchema>;
 
 export const GetNotificationsTRPCInputSchema = z.object({
-    limit: z.number().int().optional(),
+    status: NotificationStatusSchema.default('all').optional(),
+    category: NotificationCategorySchema.default('all').optional(),
+    sort: NotificationSortSchema.default('latest').optional(),
+    search: z.string().optional(),
+    limit: z.number().int().min(1).max(100).default(6).optional(),
+    cursor: z.string().uuid().optional(),
     offset: z.number().int().optional(),
 }).optional();
 

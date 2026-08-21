@@ -1,15 +1,30 @@
 model Topic {
-  id          String     @id @default(uuid(7)) @db.Uuid
-  moduleId    String     @db.Uuid
-  module      Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  id          String          @id @default(uuid(7)) @db.Uuid
+  moduleId    String          @db.Uuid
+  module      Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   title       String
   description String?
-  slug        String     @unique
+  slug        String          @unique
   level       Level?
-  order       Int        @default(0)
+  order       Int             @default(0)
   problems    Problem[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  bookmarks   TopicBookmark[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   @@map("topic")
+}
+
+model TopicBookmark {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @db.Uuid
+  topicId   String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+  @@index([userId])
+  @@map("user_topic_bookmark")
 }

@@ -13,6 +13,8 @@ import { ProductController } from '../controllers/product.controller';
 import { SkillController } from '../controllers/skill.controller';
 import { SearchController } from '../controllers/search.controller';
 import { FavouriteController } from '../controllers/favourite.controller';
+import { LeaderboardController } from '../controllers/leaderboard.controller';
+import { PlaylistController } from '../controllers/playlist.controller';
 import {
     IModuleController,
     ITopicController,
@@ -22,8 +24,10 @@ import {
     INotificationController,
     IProductController,
     ISkillController,
-    IFavouriteController
+    IFavouriteController,
+    IPlaylistController,
 } from '../controllers/interfaces';
+import { ILeaderboardController } from '../controllers/interfaces/leaderboard.controller.interface';
 
 
 import { ModuleQueries } from '@codezeniths/lib/db/queries/module.queries';
@@ -36,6 +40,8 @@ import { ProductQueries } from '@codezeniths/lib/db/queries/product.queries';
 import { SkillQueries } from '@codezeniths/lib/db/queries/skill.queries';
 import { SearchQueries } from '@codezeniths/lib/db/queries/search.queries';
 import { FavouriteQueries } from '@codezeniths/lib/db/queries/favourite.queries';
+import { LeaderboardQueries } from '@codezeniths/lib/db/queries/leaderboard.queries';
+import { PlaylistQueries } from '@codezeniths/lib/db/queries/playlist.queries';
 
 import { IModuleQueries } from '@codezeniths/lib/db/queries/interfaces/module.queries.interface';
 import { ITopicQueries } from '@codezeniths/lib/db/queries/interfaces/topic.queries.interface';
@@ -47,6 +53,8 @@ import { INotificationQueries } from '@codezeniths/lib/db/queries/interfaces/not
 import { IProductQueries } from '@codezeniths/lib/db/queries/interfaces/product.queries.interface';
 import { ISkillQueries } from '@codezeniths/lib/db/queries/interfaces/skill.queries.interface';
 import { ISearchQueries } from '@codezeniths/lib/db/queries/interfaces/search.queries.interface';
+import { ILeaderboardQueries } from '@codezeniths/lib/db/queries/interfaces/leaderboard.queries.interface';
+import { IPlaylistQueries } from '@codezeniths/lib/db/queries/interfaces/playlist.queries.interface';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Base context — the raw Next.js request headers
@@ -128,6 +136,8 @@ export interface ControllersContext {
         skill: ISkillController;
         search: SearchController;
         favourite: IFavouriteController;
+        leaderboard: ILeaderboardController;
+        playlist: IPlaylistController;
     };
 }
 
@@ -140,6 +150,8 @@ const notificationController = new NotificationController();
 const productController = new ProductController();
 const skillController = new SkillController();
 const favouriteController = new FavouriteController();
+const leaderboardController = new LeaderboardController();
+const playlistController = new PlaylistController();
 import { searchClient } from '@codezeniths/service/search';
 const searchController = new SearchController(searchClient);
 
@@ -156,6 +168,8 @@ export function createControllersContext(): ControllersContext {
             skill: skillController,
             search: searchController,
             favourite: favouriteController,
+            leaderboard: leaderboardController,
+            playlist: playlistController,
         },
     };
 }
@@ -172,6 +186,8 @@ export interface QueriesContext {
         skill: ISkillQueries;
         search: ISearchQueries;
         favourite: IFavouriteQueries;
+        leaderboard: ILeaderboardQueries;
+        playlist: IPlaylistQueries;
     };
 }
 
@@ -188,6 +204,8 @@ export function createQueriesContext(): QueriesContext {
             skill: new SkillQueries(),
             search: new SearchQueries(),
             favourite: new FavouriteQueries(),
+            leaderboard: new LeaderboardQueries(),
+            playlist: new PlaylistQueries(),
         },
     };
 }

@@ -1,140 +1,120 @@
+/**
+ * @file mq.registry.ts
+ * @description Zod schema registry for all domain message queue payloads in CodeZeniths.
+ */
+
+import { UserRole, UserType, SearchCollection } from '@prisma/client';
 import { z } from 'zod';
 
-// ── Registry Zod Schemas ──
 const correlationId = z.string().optional();
 
 export const messageRegistry = {
     // ── Auth Email Messages ─────────────────────────────────────────
     'auth.email.welcome': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
+        userId: z.string(),
+        email: z.string(),
         name: z.string(),
     }),
     'auth.email.verify': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
+        userId: z.string(),
+        email: z.string(),
         token: z.string(),
+        url: z.string().optional(),
     }),
     'auth.email.otp': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
+        userId: z.string(),
+        email: z.string(),
         code: z.string(),
     }),
     'auth.email.magic_link': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
-        url: z.url(),
+        userId: z.string(),
+        email: z.string(),
+        url: z.string(),
     }),
     'auth.email.reset_password': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
-        url: z.url(),
+        userId: z.string(),
+        email: z.string(),
+        url: z.string(),
+        code: z.string().optional(),
     }),
     'auth.email.new_device': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
+        userId: z.string(),
+        email: z.string(),
         deviceName: z.string(),
         location: z.string().optional(),
     }),
     'auth.email.oauth_login': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
+        userId: z.string(),
+        email: z.string(),
         provider: z.string(),
     }),
     'auth.email.password_changed': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
+        userId: z.string(),
+        email: z.string(),
     }),
     'auth.email.session_revoked': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
+        userId: z.string(),
+        email: z.string(),
         sessionId: z.string(),
     }),
     'auth.email.account_deactivated': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
+        userId: z.string(),
+        email: z.string(),
     }),
     'auth.email.account_reactivated': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
+        userId: z.string(),
+        email: z.string(),
+    }),
+    'auth.email.passwordless_credentials': z.object({
+        correlationId,
+        userId: z.string(),
+        email: z.string(),
+        name: z.string(),
+        username: z.string().optional(),
+        password: z.string(),
     }),
 
     // ── Auth SMS Messages ───────────────────────────────────────────
     'auth.sms.otp': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         phoneNumber: z.string(),
         code: z.string(),
     }),
     'auth.sms.magic_link': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         phoneNumber: z.string(),
-        url: z.url(),
+        url: z.string(),
+    }),
+    'auth.sms.passwordless_credentials': z.object({
+        correlationId,
+        userId: z.string(),
+        phoneNumber: z.string(),
+        password: z.string(),
     }),
     'auth.sms.new_device': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         phoneNumber: z.string(),
         deviceName: z.string(),
     }),
     'auth.sms.account_locked': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         phoneNumber: z.string(),
         reason: z.string().optional(),
-    }),
-    'auth.email.passwordless_credentials': z.object({
-        correlationId,
-        userId: z.uuidv7(),
-        email: z.email(),
-        name: z.string(),
-        password: z.string(),
-    }),
-    'auth.sms.passwordless_credentials': z.object({
-        correlationId,
-        userId: z.uuidv7(),
-        phoneNumber: z.string(),
-        password: z.string(),
-    }),
-
-    // ── Notifications ───────────────────────────────────────────────
-    'notification.user_login': z.object({
-        correlationId,
-        userId: z.uuidv7(),
-        timestamp: z.string(),
-    }),
-    'notification.new_device': z.object({
-        correlationId,
-        userId: z.uuidv7(),
-        deviceName: z.string(),
-        timestamp: z.string(),
-    }),
-    'notification.admin_broadcast': z.object({
-        correlationId,
-        title: z.string(),
-        message: z.string(),
-        senderId: z.uuidv7(),
-    }),
-
-    // ── Progress Event ──────────────────────────────────────────────
-    'progress.event': z.object({
-        correlationId,
-        userId: z.uuidv7(),
-        moduleSlug: z.string(),
-        eventType: z.enum(['solved', 'revisit', 'mastered']),
-        problemId: z.uuidv7().optional(),
     }),
 
     // ── Payment Messages ────────────────────────────────────────────
@@ -145,111 +125,177 @@ export const messageRegistry = {
     }),
     'payment.checkout.initiated': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         amount: z.number(),
         currency: z.string(),
         checkoutSessionId: z.string(),
     }),
     'payment.confirmed': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         paymentIntentId: z.string(),
         amount: z.number(),
     }),
     'payment.failed': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         paymentIntentId: z.string().optional(),
         amount: z.number(),
         reason: z.string(),
     }),
     'payment.retry': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         invoiceId: z.string(),
         retryCount: z.number(),
     }),
     'payment.refund': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         paymentIntentId: z.string(),
         amount: z.number(),
     }),
     'payment.subscription.created': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         subscriptionId: z.string(),
         planId: z.string(),
     }),
     'payment.subscription.renewed': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         subscriptionId: z.string(),
         expiryDate: z.string(),
     }),
     'payment.subscription.cancelled': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         subscriptionId: z.string(),
     }),
     'payment.subscription.expired': z.object({
         correlationId,
-        userId: z.uuidv7(),
+        userId: z.string(),
         subscriptionId: z.string(),
     }),
 
-    // ── Media Messages ──────────────────────────────────────────────
-    'media.avatar.upload': z.object({
+    // ── Progress Messages ───────────────────────────────────────────
+    'progress.problem.solved': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        key: z.string(),
-        size: z.number(),
+        userId: z.string(),
+        problemId: z.string(),
+        problemTitle: z.string(),
+        difficulty: z.string().optional(),
+        module: z.string(),
+        isFirstSolve: z.boolean().default(true),
+        streakCount: z.number().optional(),
     }),
-    'media.avatar.replace': z.object({
+    'progress.module.mastered': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        oldKey: z.string(),
-        newKey: z.string(),
+        userId: z.string(),
+        moduleSlug: z.string(),
+        moduleTitle: z.string(),
     }),
-    'media.avatar.url_expiry': z.object({
+    'progress.streak.milestone': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        key: z.string(),
-        expiresAt: z.string(),
+        userId: z.string(),
+        streakCount: z.number(),
     }),
-    'media.content.upload': z.object({
+    'progress.weekly.digest': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        contentId: z.uuidv7(),
-        key: z.string(),
+        userId: z.string(),
+        summaryUrl: z.string().optional(),
+        problemsSolvedCount: z.number().optional(),
+        streakCount: z.number().optional(),
     }),
-    'media.upload_failed': z.object({
+    'progress.rank.promoted': z.object({
         correlationId,
-        userId: z.uuidv7(),
-        key: z.string(),
-        error: z.string(),
+        userId: z.string(),
+        oldRank: z.string(),
+        newRank: z.string(),
+        division: z.string().optional(),
     }),
 
-    // ── Content Messages ────────────────────────────────────────────
-    'content.published': z.object({
+    // ── Social Messages ─────────────────────────────────────────────
+    'social.user.followed': z.object({
         correlationId,
-        contentId: z.uuidv7(),
+        followerId: z.string(),
+        followerName: z.string(),
+        followerUsername: z.string().nullable().optional(),
+        followerImage: z.string().nullable().optional(),
+        followingId: z.string(),
+    }),
+    'social.profile.viewed': z.object({
+        correlationId,
+        viewerId: z.string(),
+        viewerName: z.string(),
+        viewerUsername: z.string().nullable().optional(),
+        viewedUserId: z.string(),
+    }),
+    'social.playlist.interacted': z.object({
+        correlationId,
+        actorId: z.string(),
+        actorName: z.string(),
+        creatorId: z.string(),
+        playlistId: z.string(),
+        playlistTitle: z.string(),
+        action: z.enum(['starred', 'forked', 'collaborated', 'created']),
+    }),
+
+    // ── Notifications ───────────────────────────────────────────────
+    'notification.inapp': z.object({
+        correlationId,
+        userId: z.string().nullable().optional(), // null means global
+        type: z.string(),
         title: z.string(),
-        contentType: z.string(),
+        message: z.string(),
+        link: z.string().optional(),
+    }),
+    'notification.push': z.object({
+        correlationId,
+        userId: z.string(),
+        title: z.string(),
+        body: z.string(),
+        data: z.record(z.string(), z.string()).optional(),
+    }),
+    'notification.admin_broadcast': z.object({
+        correlationId,
+        title: z.string(),
+        message: z.string(),
+        senderId: z.string(),
+        sendEmail: z.boolean().default(false),
+        sendPush: z.boolean().default(false),
+    }),
+    'notification.user_login': z.object({
+        correlationId,
+        userId: z.string(),
+        timestamp: z.string(),
+    }),
+    'notification.new_device': z.object({
+        correlationId,
+        userId: z.string(),
+        deviceName: z.string(),
+        timestamp: z.string(),
     }),
 
-    // ── Cron Messages ───────────────────────────────────────────────
-    'cron.weekly_digest': z.object({
+    // ── Search Messages ─────────────────────────────────────────────
+    'search.user.index': z.object({
         correlationId,
-        timestamp: z.string(),
+        userId: z.string(),
+        name: z.string(),
+        username: z.string().nullable().optional(),
+        email: z.string(),
+        image: z.string().nullable().optional(),
+        role: z.enum(UserRole).optional(),
+        userType: z.enum(UserType).nullable().optional(),
     }),
-    'cron.session_cleanup': z.object({
+    'search.history.record': z.object({
         correlationId,
-        timestamp: z.string(),
-    }),
-    'cron.avatar_url_refresh': z.object({
-        correlationId,
-        timestamp: z.string(),
+        userId: z.string(),
+        collection: z.enum(SearchCollection),
+        resultId: z.string(),
+        title: z.string(),
+        slug: z.string().nullable().optional(),
+        document: z.record(z.string(), z.any()),
     }),
 } satisfies Record<string, z.ZodType>;
 

@@ -2,30 +2,17 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Home } from 'lucide-react';
-import {
-    Breadcrumb,
-    BreadcrumbList,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from '@codezeniths/design/components/navigation/breadcrumb';
 import { Card } from '@codezeniths/modules';
 import { Typography, TypographyVariant } from '@codezeniths/components';
-import { ProblemsSection } from '@codezeniths/features';
+import { ProblemsSection } from '@codezeniths/design/features/shared/problem-list-section';
+import { BreadcrumbHeader } from '@codezeniths/design/widgets/shared';
 import { useFavourites } from './useFavourites';
 import { FavouritesInfoCard } from './favourites-info-card/favourites-info-card';
-import { SingleFavouritesPageSkeleton } from './favourites-skeleton';
 
 export const FavouritesSection: React.FC = () => {
     const { favouriteInfo, isLoading, isError, error } = useFavourites();
 
-    if (isLoading) {
-        return <SingleFavouritesPageSkeleton />;
-    }
-
-    if (isError || !favouriteInfo) {
+    if (isError) {
         return (
             <Card className="rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark p-12 text-center my-8">
                 <Typography variant={TypographyVariant.H3} className="text-xl font-bold text-destructive mb-2">
@@ -46,35 +33,17 @@ export const FavouritesSection: React.FC = () => {
 
     return (
         <div className="w-full space-y-6 pb-12">
-            {/* Top Breadcrumb Bar */}
-            <div className="w-full rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark px-5 py-3.5 sm:px-6 sm:py-4 shadow-xs">
-                <Breadcrumb className="w-full">
-                    <BreadcrumbList className="text-sm sm:text-base font-medium">
-                        <BreadcrumbItem>
-                            <BreadcrumbLink asChild>
-                                <Link
-                                    href="/"
-                                    className="inline-flex items-center gap-1.5 text-heading-light dark:text-heading-dark hover:text-primary dark:hover:text-primary transition-colors"
-                                >
-                                    <Home className="size-4.5" />
-                                </Link>
-                            </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                            <BreadcrumbPage className="font-medium text-heading-light dark:text-heading-dark">
-                                Favourites
-                            </BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-            </div>
+            {/* Top Shared Breadcrumb Bar */}
+            <BreadcrumbHeader
+                isLoading={isLoading}
+                items={[{ label: 'Favourites', isCurrentPage: true }]}
+            />
 
             {/* Main 2-Column Split Layout */}
             <div className="flex flex-col lg:flex-row gap-6 w-full max-w-full min-w-0 items-start">
                 {/* Left Column: Favourites Info Card */}
                 <div className="w-full lg:w-82.5 xl:w-90 shrink-0 space-y-6">
-                    <FavouritesInfoCard favouriteInfo={favouriteInfo} />
+                    <FavouritesInfoCard favouriteInfo={favouriteInfo} isLoading={isLoading} />
                 </div>
 
                 {/* Right Column: Problem List Component for Favourites */}

@@ -1,14 +1,29 @@
 model Tag {
-  id          String       @id @default(uuid(7)) @db.Uuid
+  id          String        @id @default(uuid(7)) @db.Uuid
   name        String
-  slug        String       @unique
+  slug        String        @unique
   description String?
   level       Level?
-  moduleId    String       @db.Uuid
-  module      Module       @relation(fields: [moduleId], references: [id])
+  moduleId    String        @db.Uuid
+  module      Module        @relation(fields: [moduleId], references: [id])
   problems    ProblemTag[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  bookmarks   TagBookmark[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@map("tag")
+}
+
+model TagBookmark {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @db.Uuid
+  tagId     String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tagId])
+  @@index([userId])
+  @@map("user_tag_bookmark")
 }

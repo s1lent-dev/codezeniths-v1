@@ -56,3 +56,40 @@ export const GetSingleTagTRPCInputSchema = z.object({
 
 export const GetSingleTagTRPCOutputSchema = GetSingleTagOutputSchema;
 
+// ─── toggleTagBookmark ─────────────────────────────────────────────────────────
+
+export const ToggleTagBookmarkTRPCInputSchema = z.object({
+    tagId: z.uuidv7().optional(),
+    tagSlug: z.string().optional(),
+}).refine((d) => d.tagId || d.tagSlug, {
+    message: 'At least one of tagId or tagSlug must be provided',
+});
+
+export const ToggleTagBookmarkTRPCOutputSchema = z.object({
+    isBookmarked: z.boolean(),
+    tagId: z.uuidv7(),
+});
+
+// ─── getUserTagProgressByLevel ───────────────────────────────────────────────
+
+export const GetUserTagProgressByLevelTRPCInputSchema = z.object({
+    userId: z.string().uuid().optional(),
+    moduleSlug: z.string().optional(),
+    moduleId: z.string().uuid().optional(),
+});
+
+export const TagProgressItemTRPCSchema = z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    slug: z.string(),
+    level: z.enum(['fundamental', 'intermediate', 'advanced']).nullable().optional(),
+    solvedCount: z.number().int(),
+    totalProblems: z.number().int(),
+});
+
+export const GetUserTagProgressByLevelTRPCOutputSchema = z.object({
+    fundamental: z.array(TagProgressItemTRPCSchema),
+    intermediate: z.array(TagProgressItemTRPCSchema),
+    advanced: z.array(TagProgressItemTRPCSchema),
+});
+

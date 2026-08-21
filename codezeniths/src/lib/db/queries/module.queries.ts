@@ -10,6 +10,14 @@ import {
     GetSingleModuleOutputSchema,
     GetSingleModuleProgressInputSchema,
     GetSingleModuleProgressOutputSchema,
+    GetRecentlySolvedModuleInputSchema,
+    GetRecentlySolvedModuleOutputSchema,
+    GetModulesWithTopicsInputSchema,
+    GetModulesWithTopicsOutputSchema,
+    ToggleModuleBookmarkInputSchema,
+    ToggleModuleBookmarkOutputSchema,
+    ToggleTopicBookmarkInputSchema,
+    ToggleTopicBookmarkOutputSchema,
 } from '@codezeniths/schemas/db';
 import { IModuleQueries } from './interfaces/module.queries.interface';
 
@@ -19,6 +27,7 @@ import { z } from 'zod';
 const modulesCache = redisService.cache.createStore<z.infer<typeof GetModulesOutputSchema>>({
     namespace: 'modules',
     ttlSeconds: 86400, // 24 hours
+    schema: GetModulesOutputSchema,
 });
 
 export class ModuleQueries implements IModuleQueries {
@@ -50,15 +59,16 @@ export class ModuleQueries implements IModuleQueries {
             logger.info('Executing getSingleModule query', { payload });
             const { id, slug, userId } = payload;
 
-            // Verify user exists first
-            const userExists = await prisma.user.findUnique({
-                where: { id: userId },
-            });
-            if (!userExists) {
-                logger.warn('User not found while getting single module', { userId });
-                throw new AppErrorBuilder('User not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
+            if (userId) {
+                const userExists = await prisma.user.findUnique({
+                    where: { id: userId },
+                });
+                if (!userExists) {
+                    logger.warn('User not found while getting single module', { userId });
+                    throw new AppErrorBuilder('User not found')
+                        .setCode(ErrorCode.NOT_FOUND)
+                        .build();
+                }
             }
 
             // Find module
@@ -88,65 +98,135 @@ export class ModuleQueries implements IModuleQueries {
                     .build();
             }
 
-            // Fetch user's progress for all problems in this module
-            const allProblemIds = module.topics.flatMap((topic) =>
-                topic.problems.map((problem) => problem.id)
-            );
-
-            const userProgress = await prisma.problemProgress.findMany({
+            // Count tags associated with this module
+            const tagCount = await prisma.tag.count({
                 where: {
-                    userId,
-                    problemId: { in: allProblemIds },
-                },
-                select: {
-                    problemId: true,
-                    status: true,
+                    moduleId: module.id,
                 },
             });
 
-            const solvedProblemIds = new Set(
-                userProgress
-                    .filter((p) => p.status === 'solved')
-                    .map((p) => p.problemId)
-            );
+            const topicCount = module.topics.length;
+
+            // Fetch all problems in this module across topics
+            const allProblems = module.topics.flatMap((topic) => topic.problems);
+            const problemsCount = allProblems.length;
+            const allProblemIds = allProblems.map((p) => p.id);
+
+            let problemsSolvedCount = 0;
+            let problemsRevisitCount = 0;
+            let solvedProgress: Array<{ status: string; problemId: string; problem: { id: string; difficulty: any } | null }> = [];
+
+            if (userId && allProblemIds.length > 0) {
+                const userProgress = await prisma.problemProgress.findMany({
+                    where: {
+                        userId,
+                        ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
+                    },
+                    select: {
+                        status: true,
+                        revisit: true,
+                        problemId: true,
+                        problem: {
+                            select: {
+                                id: true,
+                                difficulty: true,
+                            },
+                        },
+                    },
+                });
+
+                problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
+                problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
+                solvedProgress = userProgress.filter((p) => p.status === 'solved' && p.problem);
+            }
+
+            const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
+            const problemsSolvedPercentage =
+                problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
+
+            const problemsCountByDifficultyRaw = countBy(allProblems, (p) => p.difficulty);
+            const problemsCountByDifficulty = {
+                easy: problemsCountByDifficultyRaw.easy || 0,
+                medium: problemsCountByDifficultyRaw.medium || 0,
+                hard: problemsCountByDifficultyRaw.hard || 0,
+            };
+
+            const problemsSolvedCountByDifficultyRaw = countBy(solvedProgress, (p) => p.problem!.difficulty);
+            const problemsSolvedCountByDifficulty = {
+                easy: problemsSolvedCountByDifficultyRaw.easy || 0,
+                medium: problemsSolvedCountByDifficultyRaw.medium || 0,
+                hard: problemsSolvedCountByDifficultyRaw.hard || 0,
+            };
+
+            const solvedProblemIds = new Set(solvedProgress.map((p) => p.problemId));
+
+            // Fetch bookmarks for module & topics if userId is present
+            let isModuleBookmarked = false;
+            const bookmarkedTopicIds = new Set<string>();
+
+            if (userId) {
+                const [modBm, topicBms] = await Promise.all([
+                    prisma.moduleBookmark.findUnique({
+                        where: {
+                            userId_moduleId: {
+                                userId,
+                                moduleId: module.id,
+                            },
+                        },
+                    }),
+                    prisma.topicBookmark.findMany({
+                        where: {
+                            userId,
+                            topicId: { in: module.topics.map((t) => t.id) },
+                        },
+                        select: {
+                            topicId: true,
+                        },
+                    }),
+                ]);
+                isModuleBookmarked = !!modBm;
+                topicBms.forEach((tb) => bookmarkedTopicIds.add(tb.topicId));
+            }
 
             const topics = module.topics.map((topic) => {
                 const problems = topic.problems;
-                const problemsCount = problems.length;
+                const tpProblemsCount = problems.length;
 
-                const problemsCountByDifficulty = {
+                const tpProblemsCountByDifficulty = {
                     easy: 0,
                     medium: 0,
                     hard: 0,
                 };
 
-                let problemsSolvedCount = 0;
+                let tpProblemsSolvedCount = 0;
 
                 for (const problem of problems) {
-                    if (problem.difficulty === 'easy') problemsCountByDifficulty.easy++;
-                    else if (problem.difficulty === 'medium') problemsCountByDifficulty.medium++;
-                    else if (problem.difficulty === 'hard') problemsCountByDifficulty.hard++;
+                    if (problem.difficulty === 'easy') tpProblemsCountByDifficulty.easy++;
+                    else if (problem.difficulty === 'medium') tpProblemsCountByDifficulty.medium++;
+                    else if (problem.difficulty === 'hard') tpProblemsCountByDifficulty.hard++;
 
                     if (solvedProblemIds.has(problem.id)) {
-                        problemsSolvedCount++;
+                        tpProblemsSolvedCount++;
                     }
                 }
 
-                const problemsSolvedPercentage =
-                    problemsCount > 0
-                        ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2))
+                const tpProblemsSolvedPercentage =
+                    tpProblemsCount > 0
+                        ? parseFloat(((tpProblemsSolvedCount / tpProblemsCount) * 100).toFixed(2))
                         : 0;
 
                 return {
+                    id: topic.id,
                     title: topic.title,
                     description: topic.description,
                     slug: topic.slug,
                     level: topic.level,
                     order: topic.order,
-                    problemsCount,
-                    problemsCountByDifficulty,
-                    problemsSolvedCount,
-                    problemsSolvedPercentage,
+                    isBookmarked: bookmarkedTopicIds.has(topic.id),
+                    problemsCount: tpProblemsCount,
+                    problemsCountByDifficulty: tpProblemsCountByDifficulty,
+                    problemsSolvedCount: tpProblemsSolvedCount,
+                    problemsSolvedPercentage: tpProblemsSolvedPercentage,
                 };
             });
 
@@ -155,8 +235,122 @@ export class ModuleQueries implements IModuleQueries {
                 title: module.title,
                 description: module.description,
                 slug: module.slug,
+                isBookmarked: isModuleBookmarked,
+                tagCount,
+                topicCount,
+                progress: {
+                    problemsCount,
+                    problemsSolvedCount,
+                    problemsRevisitCount,
+                    problemNotSolvedCount,
+                    problemsSolvedPercentage,
+                    problemsCountByDifficulty,
+                    problemsSolvedCountByDifficulty,
+                },
                 topics,
             };
+        })
+        .build();
+
+    toggleModuleBookmark = qRPC()
+        .input(ToggleModuleBookmarkInputSchema)
+        .output(ToggleModuleBookmarkOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing toggleModuleBookmark query', { payload });
+            const { moduleId, moduleSlug, userId } = payload;
+
+            const module = await prisma.module.findFirst({
+                where: {
+                    OR: [
+                        moduleId ? { id: moduleId } : {},
+                        moduleSlug ? { slug: moduleSlug } : {},
+                    ].filter((item) => Object.keys(item).length > 0),
+                },
+                select: { id: true },
+            });
+
+            if (!module) {
+                throw new AppErrorBuilder('Module not found')
+                    .setCode(ErrorCode.NOT_FOUND)
+                    .build();
+            }
+
+            const existing = await prisma.moduleBookmark.findUnique({
+                where: {
+                    userId_moduleId: {
+                        userId,
+                        moduleId: module.id,
+                    },
+                },
+            });
+
+            if (existing) {
+                await prisma.moduleBookmark.delete({
+                    where: {
+                        id: existing.id,
+                    },
+                });
+                return { isBookmarked: false, moduleId: module.id };
+            } else {
+                await prisma.moduleBookmark.create({
+                    data: {
+                        userId,
+                        moduleId: module.id,
+                    },
+                });
+                return { isBookmarked: true, moduleId: module.id };
+            }
+        })
+        .build();
+
+    toggleTopicBookmark = qRPC()
+        .input(ToggleTopicBookmarkInputSchema)
+        .output(ToggleTopicBookmarkOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing toggleTopicBookmark query', { payload });
+            const { topicId, topicSlug, userId } = payload;
+
+            const topic = await prisma.topic.findFirst({
+                where: {
+                    OR: [
+                        topicId ? { id: topicId } : {},
+                        topicSlug ? { slug: topicSlug } : {},
+                    ].filter((item) => Object.keys(item).length > 0),
+                },
+                select: { id: true },
+            });
+
+            if (!topic) {
+                throw new AppErrorBuilder('Topic not found')
+                    .setCode(ErrorCode.NOT_FOUND)
+                    .build();
+            }
+
+            const existing = await prisma.topicBookmark.findUnique({
+                where: {
+                    userId_topicId: {
+                        userId,
+                        topicId: topic.id,
+                    },
+                },
+            });
+
+            if (existing) {
+                await prisma.topicBookmark.delete({
+                    where: {
+                        id: existing.id,
+                    },
+                });
+                return { isBookmarked: false, topicId: topic.id };
+            } else {
+                await prisma.topicBookmark.create({
+                    data: {
+                        userId,
+                        topicId: topic.id,
+                    },
+                });
+                return { isBookmarked: true, topicId: topic.id };
+            }
         })
         .build();
 
@@ -228,10 +422,11 @@ export class ModuleQueries implements IModuleQueries {
             const userProgress = await prisma.problemProgress.findMany({
                 where: {
                     userId,
-                    problemId: { in: allProblemIds },
+                    ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
                 },
                 select: {
                     status: true,
+                    revisit: true,
                     problem: {
                         select: {
                             id: true,
@@ -257,7 +452,7 @@ export class ModuleQueries implements IModuleQueries {
 
             const problemsCount = allProblems.length;
             const problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-            const problemsRevisitCount = userProgress.filter((p) => p.status === 'revisit').length;
+            const problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
             const problemsAttemptedCount = userProgress.length;
             const problemsSolvedPercentage = problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
 
@@ -317,6 +512,154 @@ export class ModuleQueries implements IModuleQueries {
                 problemsCountByTags,
                 problemsSolvedCountByTags,
             };
+        })
+        .build();
+
+    getRecentlySolvedModule = qRPC()
+        .input(GetRecentlySolvedModuleInputSchema)
+        .output(GetRecentlySolvedModuleOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing getRecentlySolvedModule query', { payload });
+            const { userId } = payload;
+
+            const userExists = await prisma.user.findUnique({
+                where: { id: userId },
+            });
+            if (!userExists) {
+                throw new AppErrorBuilder('User not found')
+                    .setCode(ErrorCode.NOT_FOUND)
+                    .build();
+            }
+
+            const latestProgress = await prisma.problemProgress.findFirst({
+                where: { userId },
+                orderBy: { updatedAt: 'desc' },
+                include: {
+                    problem: {
+                        select: {
+                            title: true,
+                            slug: true,
+                            topic: {
+                                select: {
+                                    module: {
+                                        select: {
+                                            id: true,
+                                            title: true,
+                                            slug: true,
+                                            description: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            if (!latestProgress || !latestProgress.problem?.topic?.module) {
+                return { module: null, lastProblem: null };
+            }
+
+            const targetModule = latestProgress.problem.topic.module;
+
+            const allModuleProblems = await prisma.problem.findMany({
+                where: {
+                    topic: {
+                        moduleId: targetModule.id,
+                    },
+                },
+                select: { id: true },
+            });
+
+            const allModuleProblemIds = allModuleProblems.map((p) => p.id);
+
+            const solvedCount = await prisma.problemProgress.count({
+                where: {
+                    userId,
+                    problemId: { in: allModuleProblemIds },
+                    status: 'solved',
+                },
+            });
+
+            const problemsCount = allModuleProblemIds.length;
+            const problemsSolvedPercentage = problemsCount > 0 ? parseFloat(((solvedCount / problemsCount) * 100).toFixed(2)) : 0;
+
+            return {
+                module: {
+                    id: targetModule.id,
+                    title: targetModule.title,
+                    slug: targetModule.slug,
+                    description: targetModule.description,
+                    problemsCount,
+                    problemsSolvedCount: solvedCount,
+                    problemsSolvedPercentage,
+                },
+                lastProblem: {
+                    title: latestProgress.problem.title,
+                    slug: latestProgress.problem.slug,
+                },
+            };
+        })
+        .build();
+
+    getModulesWithTopics = qRPC()
+        .input(GetModulesWithTopicsInputSchema)
+        .output(GetModulesWithTopicsOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing getModulesWithTopics query', { payload });
+            const { userId } = payload;
+
+            const modules = await prisma.module.findMany({
+                orderBy: { title: 'asc' },
+                include: {
+                    topics: {
+                        orderBy: { order: 'asc' },
+                        include: {
+                            problems: {
+                                select: { id: true },
+                            },
+                        },
+                    },
+                },
+            });
+
+            let solvedProblemIds = new Set<string>();
+            if (userId) {
+                const userProgress = await prisma.problemProgress.findMany({
+                    where: { userId, status: 'solved' },
+                    select: { problemId: true },
+                });
+                solvedProblemIds = new Set(userProgress.map((p) => p.problemId));
+            }
+
+            return modules.map((m) => {
+                const topics = m.topics.map((t) => {
+                    const problemsCount = t.problems.length;
+                    const problemsSolvedCount = t.problems.filter((p) => solvedProblemIds.has(p.id)).length;
+                    const problemsSolvedPercentage = problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
+
+                    return {
+                        id: t.id,
+                        title: t.title,
+                        slug: t.slug,
+                        description: t.description,
+                        level: t.level,
+                        order: t.order,
+                        problemsCount,
+                        problemsSolvedCount,
+                        problemsSolvedPercentage,
+                    };
+                });
+
+                return {
+                    id: m.id,
+                    title: m.title,
+                    slug: m.slug,
+                    description: m.description,
+                    topicsCount: topics.length,
+                    topics,
+                };
+            });
         })
         .build();
 }

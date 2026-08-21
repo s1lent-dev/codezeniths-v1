@@ -44,6 +44,8 @@ export const CompleteProfileForm: React.FC = () => {
         isExtractingSkills,
         resumeUploadCount,
         extractedResumeKeys,
+        phoneCheck,
+        isCheckingPhone,
         isSubmittingStep0,
         isSubmittingStep1,
         isSubmittingStep2,
@@ -128,6 +130,8 @@ export const CompleteProfileForm: React.FC = () => {
                                             isUploadingImage={isUploadingImage}
                                             onAvatarUpload={handleAvatarUpload}
                                             onAvatarRemove={handleAvatarRemove}
+                                            phoneCheck={phoneCheck}
+                                            isCheckingPhone={isCheckingPhone}
                                         />
                                     </Stepper.Panel>
                                     <Stepper.Panel forStep="role">

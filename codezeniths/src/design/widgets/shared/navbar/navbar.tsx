@@ -30,6 +30,8 @@ const Navbar = () => {
         '/modules',
         '/tags',
         '/favourites',
+        '/playlists',
+        '/leaderboards',
         '/roadmaps',
         '/contests',
         '/playground',

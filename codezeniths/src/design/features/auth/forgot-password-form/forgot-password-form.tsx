@@ -13,6 +13,7 @@ import {
     Container,
 } from '@codezeniths/components';
 import { InputOTP, InputOTPGroup, InputOTPSlot, PhoneInput } from '@codezeniths/modules';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { useForgotPasswordForm } from './useForgotPasswordForm';
 
 export const ForgotPasswordForm = () => {
@@ -28,6 +29,9 @@ export const ForgotPasswordForm = () => {
         emailCheck,
         phoneCheck,
         sentIdentifier,
+        turnstileToken,
+        setTurnstileToken,
+        turnstileRef,
         handleTypeChange,
         handleRequest,
         handleVerify,
@@ -149,6 +153,17 @@ export const ForgotPasswordForm = () => {
                                 )}
                             </Container>
 
+                            <div className="flex justify-center my-1 w-full">
+                                <Turnstile
+                                    ref={turnstileRef}
+                                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                                    onSuccess={(token) => setTurnstileToken(token)}
+                                    onError={() => setTurnstileToken(null)}
+                                    onExpire={() => setTurnstileToken(null)}
+                                    options={{ size: 'normal', theme: 'auto' }}
+                                />
+                            </div>
+
                             <Button
                                 type="submit"
                                 variant={ButtonVariant.SECONDARY}
@@ -156,8 +171,8 @@ export const ForgotPasswordForm = () => {
                                 pulseColor={'rgb(99 102 241 / 0.25)'}
                                 pulseDuration={'1.5s'}
                                 isLoading={isSending}
-                                disabled={!requestForm.watch('identifier') || isSending || !!requestForm.formState.errors.identifier}
-                                className="w-full h-12 text-foreground-dark dark:text-foreground-light shadow-md mt-4 cursor-pointer disabled:cursor-not-allowed"
+                                disabled={!requestForm.watch('identifier') || isSending || !!requestForm.formState.errors.identifier || !turnstileToken}
+                                className="w-full h-12 text-foreground-dark dark:text-foreground-light shadow-md mt-2 cursor-pointer disabled:cursor-not-allowed"
                             >
                                 Send Reset Code
                                 {!isSending && <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />}

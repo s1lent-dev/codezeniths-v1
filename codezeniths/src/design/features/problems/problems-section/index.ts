@@ -1,3 +1,1 @@
-export * from './problems-section';
-export * from './useProblems';
-export * from './problems-section.types';
+export * from '../../shared/problem-list-section';

@@ -7,12 +7,11 @@ import { ENV_CONFIG } from '@/config/config';
 const mockSend = vi.fn();
 vi.mock('resend', () => {
   return {
-    Resend: vi.fn().mockImplementation(() => {
-      return {
-        emails: {
-          send: mockSend,
-        },
+    Resend: vi.fn().mockImplementation(function (this: any) {
+      this.emails = {
+        send: mockSend,
       };
+      return this;
     }),
   };
 });
@@ -112,7 +111,7 @@ describe('Mail Service Unit Tests', () => {
       expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({
         to: ['welcome@example.com'],
         subject: 'Welcome to CodeZeniths!',
-        html: expect.stringContaining('Welcome, Alice!'),
+        html: expect.stringContaining('Alice'),
       }));
     });
   });

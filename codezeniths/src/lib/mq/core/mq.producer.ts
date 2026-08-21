@@ -4,6 +4,8 @@ import { defaultMqSerializer } from '../shared/mq.utils';
 import { messageRegistry } from '../shared/mq.registry';
 import type { MessageRegistry, PayloadOf } from '../shared/mq.registry';
 
+import { logger } from '@/service/logging';
+
 export class Producer<K extends keyof MessageRegistry> {
     private readonly exchange: MqExchange;
     private readonly messageKey: K;
@@ -46,6 +48,7 @@ export class Producer<K extends keyof MessageRegistry> {
         const schema = messageRegistry[this.messageKey];
         const parsed = schema.safeParse(payload);
         if (!parsed.success) {
+            logger.error(`[mq:producer:${String(this.messageKey)}] Payload validation failed`, { error: parsed.error.message });
             throw new Error(`[mq:producer:${String(this.messageKey)}] Payload validation failed: ${parsed.error.message}`);
         }
 
@@ -66,8 +69,13 @@ export class Producer<K extends keyof MessageRegistry> {
                 publishOptions,
                 (err) => {
                     if (err) {
+                        logger.error(`[mq:producer:${String(this.messageKey)}] Failed to publish message`, err);
                         reject(err);
                     } else {
+                        logger.info(`[mq:producer:${String(this.messageKey)}] Published message successfully`, {
+                            exchange: this.exchange,
+                            routingKey: this.routingKey,
+                        });
                         resolve(true);
                     }
                 }

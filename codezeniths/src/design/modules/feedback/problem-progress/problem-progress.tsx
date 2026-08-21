@@ -21,30 +21,27 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
 }) => {
     const [isHovered, setIsHovered] = useState(false);
 
-    // Determine current mode
+    // Determine current mode (hover swaps mode when interactive)
     const isStatusMode = interactive
         ? defaultMode === 'difficulty'
             ? isHovered
             : !isHovered
         : defaultMode === 'status';
 
-    // SVG Geometry Constants
+    // ── SVG Gauge Geometry ────────────────────────────────────────────────
     const radius = 45;
-    const circumference = 2 * Math.PI * radius; // ~282.743
-    const totalSpanFraction = 0.75; // 270 degrees semi-circle open ring
-    const totalGaugeArcLength = circumference * totalSpanFraction; // ~212.057px
-
-    // Refined 3.5px stroke width and rounded linecap overhang compensation
+    const circumference = 2 * Math.PI * radius; // ~282.743px
+    const totalSpanFraction = 0.75; // 270-degree open gauge
+    const totalGaugeArcLength = circumference * totalSpanFraction; // ~212.058px
     const strokeWidthVal = 3.5;
-    const strokeOverhang = 3.5;
-    const gapPx = 8;
+    const strokeCapRadius = strokeWidthVal / 2; // 1.75px (half-cap offset for rounded linecaps)
+    const gapPx = 8; // Visual gap between consecutive rounded segments
 
-    // Total problems sum for proportional calculations
-    const calcTotalProblems = Math.max(1, totalProblems || (easy.total + medium.total + hard.total));
+    // Total problems sum for proportional slice allocation
+    const actualTotalProblems = totalProblems ?? (easy.total + medium.total + hard.total);
+    const calcTotalProblems = Math.max(1, actualTotalProblems);
 
-    // =========================================================================
-    // DIFFICULTY MODE: Proportional Slices for Easy (Teal), Medium (Yellow), Hard (Red)
-    // =========================================================================
+    // ── DIFFICULTY MODE: Proportional Slices (Easy = Teal, Medium = Yellow, Hard = Red) ──
     const easyShare = Math.min(1, Math.max(0, easy.total / calcTotalProblems));
     const mediumShare = Math.min(1 - easyShare, Math.max(0, medium.total / calcTotalProblems));
     const hardShare = Math.min(1 - easyShare - mediumShare, Math.max(0, hard.total / calcTotalProblems));
@@ -53,38 +50,37 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
     const totalDiffGapsPx = activeDiffSegmentsCount > 1 ? (activeDiffSegmentsCount - 1) * gapPx : 0;
     const availableDiffLength = Math.max(0, totalGaugeArcLength - totalDiffGapsPx);
 
-    // Allocated track lengths per difficulty tier based on total problems per tier
-    const rawEasyTotalLength = availableDiffLength * easyShare;
-    const rawMediumTotalLength = availableDiffLength * mediumShare;
-    const rawHardTotalLength = availableDiffLength * hardShare;
+    // Allocated visible length per difficulty tier
+    const easyAlloc = availableDiffLength * easyShare;
+    const mediumAlloc = availableDiffLength * mediumShare;
+    const hardAlloc = availableDiffLength * hardShare;
 
-    const easyTrackLength = Math.max(0, rawEasyTotalLength - (easyShare > 0 ? strokeOverhang : 0));
-    const mediumTrackLength = Math.max(0, rawMediumTotalLength - (mediumShare > 0 ? strokeOverhang : 0));
-    const hardTrackLength = Math.max(0, rawHardTotalLength - (hardShare > 0 ? strokeOverhang : 0));
+    // Track dash lengths (subtract strokeWidthVal so the outer rounded ends fit within the allocation)
+    const easyTrackLength = Math.max(0, easyAlloc - strokeWidthVal);
+    const mediumTrackLength = Math.max(0, mediumAlloc - strokeWidthVal);
+    const hardTrackLength = Math.max(0, hardAlloc - strokeWidthVal);
 
-    // Exact sub-pixel linear progress fill lengths with rounded linecap overhang compensation
-    const rawEasyFill = rawEasyTotalLength * (easy.total > 0 ? Math.min(1, Math.max(0, easy.solved / easy.total)) : 0);
-    const rawMediumFill = rawMediumTotalLength * (medium.total > 0 ? Math.min(1, Math.max(0, medium.solved / medium.total)) : 0);
-    const rawHardFill = rawHardTotalLength * (hard.total > 0 ? Math.min(1, Math.max(0, hard.solved / hard.total)) : 0);
-
-    const easyFillLength = easy.solved > 0
-        ? Math.max(0.1, rawEasyFill > strokeOverhang ? rawEasyFill - strokeOverhang : rawEasyFill)
+    // Exact linear fill lengths with rounded linecap scaling
+    const easyFillLength = easy.total > 0 && easy.solved > 0
+        ? easyTrackLength * Math.min(1, Math.max(0, easy.solved / easy.total))
         : 0;
-    const mediumFillLength = medium.solved > 0
-        ? Math.max(0.1, rawMediumFill > strokeOverhang ? rawMediumFill - strokeOverhang : rawMediumFill)
+    const mediumFillLength = medium.total > 0 && medium.solved > 0
+        ? mediumTrackLength * Math.min(1, Math.max(0, medium.solved / medium.total))
         : 0;
-    const hardFillLength = hard.solved > 0
-        ? Math.max(0.1, rawHardFill > strokeOverhang ? rawHardFill - strokeOverhang : rawHardFill)
+    const hardFillLength = hard.total > 0 && hard.solved > 0
+        ? hardTrackLength * Math.min(1, Math.max(0, hard.solved / hard.total))
         : 0;
 
-    // Offsets for Difficulty Mode along the 270-degree arc
-    const offsetEasy = 0;
-    const offsetMedium = -(rawEasyTotalLength + gapPx);
-    const offsetHard = -(rawEasyTotalLength + gapPx + rawMediumTotalLength + gapPx);
+    // Rotational offsets (shifted by strokeCapRadius so rounded start caps align precisely with segment start)
+    const posEasy = 0;
+    const posMedium = easyShare > 0 ? easyAlloc + gapPx : 0;
+    const posHard = (easyShare > 0 ? easyAlloc + gapPx : 0) + (mediumShare > 0 ? mediumAlloc + gapPx : 0);
 
-    // =========================================================================
-    // STATUS DISTRIBUTION MODE: Exact Proportional Shares for Solved, Revisit, Unsolved
-    // =========================================================================
+    const offsetEasy = -(posEasy + strokeCapRadius);
+    const offsetMedium = -(posMedium + strokeCapRadius);
+    const offsetHard = -(posHard + strokeCapRadius);
+
+    // ── STATUS DISTRIBUTION MODE: Solved (Green), Revisit (Amber), Unsolved (Dim) ──
     const solvedShare = Math.min(1, Math.max(0, solved / calcTotalProblems));
     const revisitShare = Math.min(1 - solvedShare, Math.max(0, revisitCount / calcTotalProblems));
     const unsolvedShare = Math.min(1 - solvedShare - revisitShare, Math.max(0, unsolved / calcTotalProblems));
@@ -93,23 +89,21 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
     const totalStatusGapsPx = activeStatusSegmentsCount > 1 ? (activeStatusSegmentsCount - 1) * gapPx : 0;
     const availableStatusLength = Math.max(0, totalGaugeArcLength - totalStatusGapsPx);
 
-    const rawDistSolvedLength = availableStatusLength * solvedShare;
-    const rawDistRevisitLength = availableStatusLength * revisitShare;
-    const rawDistUnsolvedLength = availableStatusLength * unsolvedShare;
+    const solvedAlloc = availableStatusLength * solvedShare;
+    const revisitAlloc = availableStatusLength * revisitShare;
+    const unsolvedAlloc = availableStatusLength * unsolvedShare;
 
-    const distSolvedLength = solved > 0
-        ? Math.max(0.1, rawDistSolvedLength > strokeOverhang ? rawDistSolvedLength - strokeOverhang : rawDistSolvedLength)
-        : 0;
-    const distRevisitLength = revisitCount > 0
-        ? Math.max(0.1, rawDistRevisitLength > strokeOverhang ? rawDistRevisitLength - strokeOverhang : rawDistRevisitLength)
-        : 0;
-    const distUnsolvedLength = unsolved > 0
-        ? Math.max(0.1, rawDistUnsolvedLength > strokeOverhang ? rawDistUnsolvedLength - strokeOverhang : rawDistUnsolvedLength)
-        : 0;
+    const distSolvedLength = Math.max(0, solvedAlloc - strokeWidthVal);
+    const distRevisitLength = Math.max(0, revisitAlloc - strokeWidthVal);
+    const distUnsolvedLength = Math.max(0, unsolvedAlloc - strokeWidthVal);
 
-    const offsetDistSolved = 0;
-    const offsetDistRevisit = -(rawDistSolvedLength + gapPx);
-    const offsetDistUnsolved = -(rawDistSolvedLength + gapPx + rawDistRevisitLength + gapPx);
+    const posDistSolved = 0;
+    const posDistRevisit = solvedShare > 0 ? solvedAlloc + gapPx : 0;
+    const posDistUnsolved = (solvedShare > 0 ? solvedAlloc + gapPx : 0) + (revisitShare > 0 ? revisitAlloc + gapPx : 0);
+
+    const offsetDistSolved = -(posDistSolved + strokeCapRadius);
+    const offsetDistRevisit = -(posDistRevisit + strokeCapRadius);
+    const offsetDistUnsolved = -(posDistUnsolved + strokeCapRadius);
 
     // Format Completion Percentage integer and decimal parts
     const integerPart = Math.floor(completionPercentage || 0);
@@ -127,17 +121,17 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
             onMouseEnter={() => interactive && setIsHovered(true)}
             onMouseLeave={() => interactive && setIsHovered(false)}
         >
-            {/* SVG Semi-Circle Gauge Container with Glowing Filters */}
+            {/* SVG Semi-Circle Gauge Container */}
             <div className="relative size-44 flex items-center justify-center">
                 <svg
                     className="size-full overflow-visible"
                     viewBox="0 0 100 100"
                 >
                     <defs>
-                        {/* Glow Filter for Easy Arc (Teal) */}
-                        <filter id="glow-cp-easy" x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
-                            <feFlood floodColor="#00b8a3" floodOpacity="0.5" result="c" />
+                        {/* Refined, crisp luminescent filters */}
+                        <filter id="glow-cp-easy" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur" />
+                            <feFlood floodColor="#00b8a3" floodOpacity="0.35" result="c" />
                             <feComposite in="c" in2="blur" operator="in" result="glow" />
                             <feMerge>
                                 <feMergeNode in="glow" />
@@ -145,10 +139,9 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                             </feMerge>
                         </filter>
 
-                        {/* Glow Filter for Medium Arc (Yellow) */}
-                        <filter id="glow-cp-medium" x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
-                            <feFlood floodColor="#feb800" floodOpacity="0.5" result="c" />
+                        <filter id="glow-cp-medium" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur" />
+                            <feFlood floodColor="#feb800" floodOpacity="0.35" result="c" />
                             <feComposite in="c" in2="blur" operator="in" result="glow" />
                             <feMerge>
                                 <feMergeNode in="glow" />
@@ -156,10 +149,9 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                             </feMerge>
                         </filter>
 
-                        {/* Glow Filter for Hard Arc (Red) */}
-                        <filter id="glow-cp-hard" x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
-                            <feFlood floodColor="#ff2d55" floodOpacity="0.5" result="c" />
+                        <filter id="glow-cp-hard" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur" />
+                            <feFlood floodColor="#ff2d55" floodOpacity="0.35" result="c" />
                             <feComposite in="c" in2="blur" operator="in" result="glow" />
                             <feMerge>
                                 <feMergeNode in="glow" />
@@ -167,10 +159,9 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                             </feMerge>
                         </filter>
 
-                        {/* Glow Filter for Solved Arc (Green) */}
-                        <filter id="glow-cp-solved" x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
-                            <feFlood floodColor="#2cbb5d" floodOpacity="0.5" result="c" />
+                        <filter id="glow-cp-solved" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur" />
+                            <feFlood floodColor="#2cbb5d" floodOpacity="0.35" result="c" />
                             <feComposite in="c" in2="blur" operator="in" result="glow" />
                             <feMerge>
                                 <feMergeNode in="glow" />
@@ -181,7 +172,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
 
                     <AnimatePresence mode="wait">
                         {!isStatusMode ? (
-                            /* MODE 1: Difficulty Mode (Easy = Teal #00b8a3, Medium = Yellow #feb800, Hard = Red #ff2d55) */
+                            /* MODE 1: Difficulty Mode (Easy = Teal, Medium = Yellow, Hard = Red) with Rounded Linecaps */
                             <motion.g
                                 key="difficulty-arcs"
                                 className="transform rotate-135 origin-[50px_50px]"
@@ -191,7 +182,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 transition={{ duration: 0.2 }}
                             >
                                 {/* Easy Tier: Background Track & Solved Fill */}
-                                {rawEasyTotalLength > 0 && (
+                                {easyAlloc > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -199,7 +190,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                         strokeWidth={strokeWidthVal}
                                         fill="none"
                                         strokeLinecap="round"
-                                        className="stroke-teal/18"
+                                        className="stroke-teal/20"
                                         strokeDasharray={`${easyTrackLength} ${circumference - easyTrackLength}`}
                                         strokeDashoffset={offsetEasy}
                                         initial={{ strokeDasharray: `0 ${circumference}` }}
@@ -207,7 +198,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                         transition={{ duration: 0.4, delay: 0, ease: 'easeOut' }}
                                     />
                                 )}
-                                {easyFillLength > 0 && (
+                                {easy.solved > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -226,7 +217,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 )}
 
                                 {/* Medium Tier: Background Track & Solved Fill */}
-                                {rawMediumTotalLength > 0 && (
+                                {mediumAlloc > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -234,7 +225,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                         strokeWidth={strokeWidthVal}
                                         fill="none"
                                         strokeLinecap="round"
-                                        className="stroke-warning/18"
+                                        className="stroke-warning/20"
                                         strokeDasharray={`${mediumTrackLength} ${circumference - mediumTrackLength}`}
                                         strokeDashoffset={offsetMedium}
                                         initial={{ strokeDasharray: `0 ${circumference}` }}
@@ -242,7 +233,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                         transition={{ duration: 0.4, delay: 0.08, ease: 'easeOut' }}
                                     />
                                 )}
-                                {mediumFillLength > 0 && (
+                                {medium.solved > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -261,7 +252,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 )}
 
                                 {/* Hard Tier: Background Track & Solved Fill */}
-                                {rawHardTotalLength > 0 && (
+                                {hardAlloc > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -269,7 +260,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                         strokeWidth={strokeWidthVal}
                                         fill="none"
                                         strokeLinecap="round"
-                                        className="stroke-destructive/18"
+                                        className="stroke-destructive/20"
                                         strokeDasharray={`${hardTrackLength} ${circumference - hardTrackLength}`}
                                         strokeDashoffset={offsetHard}
                                         initial={{ strokeDasharray: `0 ${circumference}` }}
@@ -277,7 +268,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                         transition={{ duration: 0.4, delay: 0.16, ease: 'easeOut' }}
                                     />
                                 )}
-                                {hardFillLength > 0 && (
+                                {hard.solved > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -296,7 +287,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 )}
                             </motion.g>
                         ) : (
-                            /* MODE 2: Status Distribution Mode (Solved = Green #2cbb5d, Revisit = Amber #feb800, Unsolved = Dim) */
+                            /* MODE 2: Status Distribution Mode (Solved = Green, Revisit = Amber, Unsolved = Dim) with Rounded Linecaps */
                             <motion.g
                                 key="status-arcs"
                                 className="transform rotate-135 origin-[50px_50px]"
@@ -306,7 +297,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 transition={{ duration: 0.2 }}
                             >
                                 {/* 1. Solved Share Arc (Green) */}
-                                {distSolvedLength > 0 && (
+                                {solved > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -325,7 +316,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 )}
 
                                 {/* 2. Revisit Share Arc (Amber) */}
-                                {distRevisitLength > 0 && (
+                                {revisitCount > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -344,7 +335,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 )}
 
                                 {/* 3. Unsolved Share Arc (Dim Slate/Grey) */}
-                                {distUnsolvedLength > 0 && (
+                                {unsolved > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -352,7 +343,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                         strokeWidth={strokeWidthVal}
                                         fill="none"
                                         strokeLinecap="round"
-                                        className="stroke-foreground-light-shade3/40 dark:stroke-foreground-dark-shade3/40"
+                                        className="stroke-foreground-light-shade3/30 dark:stroke-foreground-dark-shade3/30"
                                         strokeDasharray={`${distUnsolvedLength} ${circumference - distUnsolvedLength}`}
                                         strokeDashoffset={offsetDistUnsolved}
                                         initial={{ strokeDasharray: `0 ${circumference}` }}
@@ -380,7 +371,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 <div className="flex items-baseline font-mono text-heading-light dark:text-heading-dark">
                                     <span className="text-3xl font-extrabold tabular-nums tracking-tight">{solved}</span>
                                     <span className="text-sm font-bold text-muted-light dark:text-muted-dark ml-0.5">
-                                        /{calcTotalProblems}
+                                        /{actualTotalProblems}
                                     </span>
                                 </div>
                                 <div className="mt-0.5 text-[10px] font-sans font-bold text-muted-light dark:text-muted-dark tracking-widest uppercase flex items-center justify-center gap-1">

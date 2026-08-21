@@ -10,6 +10,10 @@ import {
     GetSingleTagProblemProgressTRPCOutputSchema,
     GetSingleTagTRPCInputSchema,
     GetSingleTagTRPCOutputSchema,
+    ToggleTagBookmarkTRPCInputSchema,
+    ToggleTagBookmarkTRPCOutputSchema,
+    GetUserTagProgressByLevelTRPCInputSchema,
+    GetUserTagProgressByLevelTRPCOutputSchema,
 } from '@/schemas/trpc';
 
 export const tagRouter = createTRPCRouter({
@@ -36,5 +40,15 @@ export const tagRouter = createTRPCRouter({
         .input(GetSingleTagTRPCInputSchema)
         .output(GetSingleTagTRPCOutputSchema)
         .query(({ ctx, input }) => ctx.controllers.tag.getSingleTag({ ctx, input })),
+
+    toggleTagBookmark: protectedProcedure
+        .input(ToggleTagBookmarkTRPCInputSchema)
+        .output(ToggleTagBookmarkTRPCOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.tag.toggleTagBookmark({ ctx, input })),
+
+    getUserTagProgressByLevel: publicProcedure
+        .input(GetUserTagProgressByLevelTRPCInputSchema)
+        .output(GetUserTagProgressByLevelTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.tag.getUserTagProgressByLevel({ ctx, input })),
 });
 

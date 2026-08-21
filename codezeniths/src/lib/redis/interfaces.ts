@@ -29,12 +29,19 @@ export interface IRedisClient {
 
     // Sorted Set (ZSet) Operations
     zadd(key: string, score: number, member: string): Promise<number>;
+    zaddMany(key: string, entries: Array<{ score: number; member: string }>): Promise<number>;
+    zincrby(key: string, increment: number, member: string): Promise<number>;
+
+    zrevrank(key: string, member: string): Promise<number | null>;
+    zscore(key: string, member: string): Promise<number | null>;
     zrange(
         key: string, 
         min: number | string, 
         max: number | string, 
         options?: { byScore?: boolean; byLex?: boolean; limit?: { offset: number; count: number } }
     ): Promise<string[]>;
+    zrevrange(key: string, start: number, stop: number): Promise<string[]>;
+    zrevrangeWithScores(key: string, start: number, stop: number): Promise<Array<{ member: string; score: number }>>;
     zrem(key: string, ...members: string[]): Promise<number>;
     zcard(key: string): Promise<number>;
     zremrangebyscore(key: string, min: number | string, max: number | string): Promise<number>;

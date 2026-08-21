@@ -11,10 +11,31 @@ model Problem {
   order          Int               @default(0)
   tags           ProblemTag[]
   progresses     ProblemProgress[]
+  playlistItems  PlaylistItem[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
   @@map("problem")
+}
+
+model ProblemProgress {
+  id        String         @id @default(uuid(7)) @db.Uuid
+  userId    String         @db.Uuid
+  problemId String         @db.Uuid
+  status    ProgressStatus @default(not_solved)
+  revisit   Boolean        @default(false)
+  favourite Boolean        @default(false)
+  notes     String?
+  solvedAt  DateTime?
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem   Problem        @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([userId, problemId])
+  @@index([userId, status])
+  @@index([userId, revisit])
+  @@map("problem_progress")
 }
 
 model ProblemTag {

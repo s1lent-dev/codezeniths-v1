@@ -1,9 +1,11 @@
 import { qRPC } from './utils/qrpc.utils';
 import { buildProblemWhere, buildProblemOrderBy } from './utils/problem.utils';
 import { prisma } from '@codezeniths/lib/db/prisma.client';
+import { redisService } from '@codezeniths/lib/redis';
 import { logger } from '@codezeniths/service/logging';
 import { AppErrorBuilder } from '@codezeniths/service/error/error';
 import { ErrorCode } from '@codezeniths/service/error/error.types';
+import { progressProducer, notificationProducer } from '@/lib/mq';
 import {
     GetProblemsInputSchema,
     GetProblemsOutputSchema,
@@ -19,13 +21,20 @@ import {
     UpdateProblemNoteOutputSchema,
     UpdateProblemFavouriteInputSchema,
     UpdateProblemFavouriteOutputSchema,
+    UpdateProblemRevisitInputSchema,
+    UpdateProblemRevisitOutputSchema,
     GetProblemTablePrimitivesInputSchema,
     GetProblemTablePrimitivesOutputSchema,
     GetProblemProgressInputSchema,
     GetProblemProgressOutputSchema,
+    GetRecentlySolvedProblemsInputSchema,
+    GetRecentlySolvedProblemsOutputSchema,
 } from '@codezeniths/schemas/db';
 import { IProblemQueries } from './interfaces/problem.queries.interface';
 import { Prisma } from '@prisma/client';
+import { recordProblemSolvedAndSyncStreak } from './utils/streak.utils';
+
+import { processScoreTransition } from './utils/leaderboard.utils';
 import { countBy } from 'lodash';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -39,13 +48,23 @@ async function attachUserProgress(
 ): Promise<any[]> {
     if (!userId || problems.length === 0) {
         return problems.map((problem) => ({
-            ...problem,
+            id: problem.id,
+            title: problem.title,
+            slug: problem.slug,
+            difficulty: problem.difficulty,
+            order: problem.order,
+            articleUrl: problem.articleUrl ?? null,
+            problemUrl: problem.problemUrl ?? null,
+            favouriteCount: problem.favouriteCount ?? 0,
+            topicId: problem.topicId ?? problem.topic?.id ?? null,
+            topicSlug: problem.topic?.slug ?? null,
             tags: problem.tags.map((pt: any) => ({
                 id: pt.tag.id,
                 name: pt.tag.name,
                 slug: pt.tag.slug,
             })),
             status: null,
+            revisit: null,
             favourite: null,
         }));
     }
@@ -54,17 +73,18 @@ async function attachUserProgress(
     const progresses = await prisma.problemProgress.findMany({
         where: {
             userId,
-            problemId: { in: problemIds },
+            ...(problemIds.length <= 100 ? { problemId: { in: problemIds } } : {}),
         },
         select: {
             problemId: true,
             status: true,
+            revisit: true,
             favourite: true,
         },
     });
 
     const progressMap = new Map(
-        progresses.map((p) => [p.problemId, { status: p.status, favourite: p.favourite }])
+        progresses.map((p) => [p.problemId, { status: p.status, revisit: p.revisit, favourite: p.favourite }])
     );
 
     return problems.map((problem) => {
@@ -78,12 +98,15 @@ async function attachUserProgress(
             articleUrl: problem.articleUrl ?? null,
             problemUrl: problem.problemUrl ?? null,
             favouriteCount: problem.favouriteCount ?? 0,
+            topicId: problem.topicId ?? problem.topic?.id ?? null,
+            topicSlug: problem.topic?.slug ?? null,
             tags: problem.tags.map((pt: any) => ({
                 id: pt.tag.id,
                 name: pt.tag.name,
                 slug: pt.tag.slug,
             })),
             status: progress?.status || 'not_solved',
+            revisit: progress?.revisit ?? false,
             favourite: progress?.favourite ?? false,
         };
     });
@@ -117,6 +140,12 @@ export class ProblemQueries implements IProblemQueries {
                     where,
                     orderBy,
                     include: {
+                        topic: {
+                            select: {
+                                id: true,
+                                slug: true,
+                            },
+                        },
                         tags: {
                             include: {
                                 tag: true,
@@ -163,6 +192,12 @@ export class ProblemQueries implements IProblemQueries {
                     skip: (page - 1) * limit,
                     take: limit,
                     include: {
+                        topic: {
+                            select: {
+                                id: true,
+                                slug: true,
+                            },
+                        },
                         tags: {
                             include: {
                                 tag: true,
@@ -214,6 +249,12 @@ export class ProblemQueries implements IProblemQueries {
                     skip: cursor ? 1 : 0,
                     take: limit + 1,
                     include: {
+                        topic: {
+                            select: {
+                                id: true,
+                                slug: true,
+                            },
+                        },
                         tags: {
                             include: {
                                 tag: true,
@@ -314,6 +355,18 @@ export class ProblemQueries implements IProblemQueries {
 
             const problemExists = await prisma.problem.findUnique({
                 where: { id: problemId },
+                include: {
+                    topic: {
+                        select: {
+                            moduleId: true,
+                            module: {
+                                select: {
+                                    title: true
+                                }
+                            }
+                        },
+                    },
+                },
             });
             if (!problemExists) {
                 logger.warn('Problem not found for status update', { problemId });
@@ -327,6 +380,8 @@ export class ProblemQueries implements IProblemQueries {
                     userId_problemId: { userId, problemId },
                 },
             });
+
+            const previousStatus = existingProgress?.status ?? 'not_solved';
 
             const isTransitioningToSolved =
                 status === 'solved' && (!existingProgress || existingProgress.status !== 'solved');
@@ -353,6 +408,7 @@ export class ProblemQueries implements IProblemQueries {
                     userId: true,
                     problemId: true,
                     status: true,
+                    revisit: true,
                     favourite: true,
                     problem: {
                         select: {
@@ -363,23 +419,98 @@ export class ProblemQueries implements IProblemQueries {
             });
 
             if (isTransitioningToSolved) {
-                const today = new Date();
-                today.setUTCHours(0, 0, 0, 0);
+                const points = problemExists.difficulty === 'easy' ? 10 : problemExists.difficulty === 'medium' ? 20 : 30;
+                await recordProblemSolvedAndSyncStreak({ userId, pointsEarned: points, problemsSolved: 1 });
+                logger.info('Recorded user problem solved activity and synced streak', { userId, points });
 
-                await prisma.userActivity.upsert({
-                    where: {
-                        userId_date: { userId, date: today },
-                    },
-                    update: {
-                        count: { increment: 1 },
-                    },
-                    create: {
-                        userId,
-                        date: today,
-                        count: 1,
-                    },
+                // Publish domain events to MQ for asynchronous notification & push delivery
+                void (async () => {
+                    try {
+                        const module = problemExists.topic?.module?.title || 'algorithms';
+                        await progressProducer.problemSolved({
+                            userId,
+                            problemId,
+                            problemTitle: problemExists.title,
+                            difficulty: problemExists.difficulty,
+                            module,
+                            isFirstSolve: previousStatus !== 'solved',
+                        });
+
+                        // 1. Topic completion check
+                        if (problemExists.topicId) {
+                            const topicId = problemExists.topicId;
+                            const [topic, topicTotal, topicSolved] = await Promise.all([
+                                prisma.topic.findUnique({
+                                    where: { id: topicId },
+                                    select: { title: true, slug: true },
+                                }),
+                                prisma.problem.count({
+                                    where: { topicId },
+                                }),
+                                prisma.problemProgress.count({
+                                    where: {
+                                        userId,
+                                        status: 'solved',
+                                        problem: { topicId },
+                                    },
+                                }),
+                            ]);
+
+                            if (topicTotal > 0 && topicSolved === topicTotal) {
+                                await notificationProducer.publishInApp({
+                                    userId,
+                                    type: 'topic_completed',
+                                    title: 'Topic Completed! 🚀',
+                                    message: `You have solved all problems in "${topic?.title || 'the topic'}".`,
+                                    link: `/problems?topic=${topic?.slug || topicId}`,
+                                });
+                            }
+                        }
+
+                        // 2. Module completion check
+                        const moduleId = problemExists.topic?.moduleId;
+                        if (moduleId) {
+                            const [moduleData, modTotal, modSolved] = await Promise.all([
+                                prisma.module.findUnique({
+                                    where: { id: moduleId },
+                                    select: { title: true, slug: true },
+                                }),
+                                prisma.problem.count({
+                                    where: { topic: { moduleId } },
+                                }),
+                                prisma.problemProgress.count({
+                                    where: {
+                                        userId,
+                                        status: 'solved',
+                                        problem: { topic: { moduleId } },
+                                    },
+                                }),
+                            ]);
+
+                            if (modTotal > 0 && modSolved === modTotal) {
+                                await progressProducer.moduleMastered({
+                                    userId,
+                                    moduleSlug: moduleData?.slug || moduleId,
+                                    moduleTitle: moduleData?.title || 'Module',
+                                });
+                            }
+                        }
+                    } catch (notifErr) {
+                        logger.error('Failed to publish problem/module completion MQ events', { error: notifErr, userId });
+                    }
+                })();
+            }
+
+
+            if (previousStatus !== status) {
+                await processScoreTransition({
+                    userId,
+                    problemId,
+                    previousStatus,
+                    newStatus: status,
+                    difficulty: problemExists.difficulty,
+                    moduleId: problemExists.topic?.moduleId ?? null,
                 });
-                logger.info('Incremented user activity count', { userId, date: today });
             }
 
             logger.info('Successfully updated user problem status', { userId, problemId, status });
@@ -389,6 +520,7 @@ export class ProblemQueries implements IProblemQueries {
                 problemId: progress.problemId,
                 problemSlug: progress.problem.slug,
                 status: progress.status,
+                revisit: progress.revisit,
                 favourite: progress.favourite,
             };
         })
@@ -486,6 +618,7 @@ export class ProblemQueries implements IProblemQueries {
                         userId: true,
                         problemId: true,
                         status: true,
+                        revisit: true,
                         favourite: true,
                         problem: { select: { slug: true } },
                     },
@@ -508,6 +641,7 @@ export class ProblemQueries implements IProblemQueries {
                 problemId: progress.problemId,
                 problemSlug: progress.problem.slug,
                 status: progress.status,
+                revisit: progress.revisit,
                 favourite: progress.favourite,
             };
         } catch (err) {
@@ -522,6 +656,74 @@ export class ProblemQueries implements IProblemQueries {
         }
     })
     .build();
+
+    updateProblemRevisit = qRPC()
+        .input(UpdateProblemRevisitInputSchema)
+        .output(UpdateProblemRevisitOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing updateProblemRevisit mutation', { payload });
+            const { userId, problemId, revisit } = payload;
+
+            const userExists = await prisma.user.findUnique({
+                where: { id: userId },
+            });
+            if (!userExists) {
+                logger.warn('User not found for problem revisit update', { userId });
+                throw new AppErrorBuilder('User not found')
+                    .setCode(ErrorCode.NOT_FOUND)
+                    .build();
+            }
+
+            const problemExists = await prisma.problem.findUnique({
+                where: { id: problemId },
+            });
+            if (!problemExists) {
+                logger.warn('Problem not found for revisit update', { problemId });
+                throw new AppErrorBuilder('Problem not found')
+                    .setCode(ErrorCode.NOT_FOUND)
+                    .build();
+            }
+
+            const progress = await prisma.problemProgress.upsert({
+                where: {
+                    userId_problemId: { userId, problemId },
+                },
+                update: {
+                    revisit,
+                },
+                create: {
+                    userId,
+                    problemId,
+                    revisit,
+                    status: 'not_solved',
+                },
+                select: {
+                    id: true,
+                    userId: true,
+                    problemId: true,
+                    status: true,
+                    revisit: true,
+                    favourite: true,
+                    problem: {
+                        select: {
+                            slug: true,
+                        },
+                    },
+                },
+            });
+
+            logger.info('Successfully updated user problem revisit status', { userId, problemId, revisit });
+            return {
+                id: progress.id,
+                userId: progress.userId,
+                problemId: progress.problemId,
+                problemSlug: progress.problem.slug,
+                status: progress.status,
+                revisit: progress.revisit,
+                favourite: progress.favourite,
+            };
+        })
+        .build();
 
     getProblemTablePrimitives = qRPC()
         .input(GetProblemTablePrimitivesInputSchema)
@@ -607,10 +809,11 @@ export class ProblemQueries implements IProblemQueries {
             const userProgress = await prisma.problemProgress.findMany({
                 where: {
                     userId,
-                    problemId: { in: allProblemIds },
+                    ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
                 },
                 select: {
                     status: true,
+                    revisit: true,
                     problem: {
                         select: {
                             id: true,
@@ -621,8 +824,8 @@ export class ProblemQueries implements IProblemQueries {
             });
 
             const problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-            const problemsRevisitCount = userProgress.filter((p) => p.status === 'revisit').length;
-            const problemNotSolvedCount = Math.max(0, problemsCount - (problemsSolvedCount + problemsRevisitCount));
+            const problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
+            const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
             const problemsSolvedPercentage =
                 problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
 
@@ -651,6 +854,41 @@ export class ProblemQueries implements IProblemQueries {
                 problemsCountByDifficulty,
                 problemsSolvedCountByDifficulty,
             };
+        })
+        .build();
+
+    getRecentlySolvedProblems = qRPC()
+        .input(GetRecentlySolvedProblemsInputSchema)
+        .output(GetRecentlySolvedProblemsOutputSchema)
+        .handler(async ({ userId, limit }) => {
+            logger.info('Executing getRecentlySolvedProblems query', { userId, limit });
+
+            const solvedProgress = await prisma.problemProgress.findMany({
+                where: {
+                    userId,
+                    status: 'solved',
+                },
+                orderBy: { updatedAt: 'desc' },
+                take: limit,
+                include: {
+                    problem: {
+                        select: {
+                            id: true,
+                            title: true,
+                            slug: true,
+                        },
+                    },
+                },
+            });
+
+            return solvedProgress
+                .filter((p) => p.problem !== null)
+                .map((p) => ({
+                    id: p.problem!.id,
+                    title: p.problem!.title,
+                    slug: p.problem!.slug,
+                    solvedAt: p.updatedAt,
+                }));
         })
         .build();
 }

@@ -1,36 +1,71 @@
+/**
+ * @file progress.producer.ts
+ * @description Producer for algorithmic progress, problem solves, module masteries, streaks, and rank promotions.
+ */
+
 import { createProducer } from '../core/mq.producer';
-import { MqExchange, buildProgressRoutingKey } from '../shared/mq.types';
+import { MqExchange, MqRoutingKey } from '../shared/mq.types';
 import type { PayloadOf } from '../shared/mq.registry';
 
 export class ProgressProducer {
-    /** JSDoc: Triggered when a user solves a problem. Targets exchange progress.topic via routing key progress.<moduleSlug>.solved. */
-    async problemSolved(payload: PayloadOf<'progress.event'>): Promise<void> {
-        const routingKey = buildProgressRoutingKey(payload.moduleSlug, 'solved');
-        const producer = createProducer('progress.event', {
-            exchange: MqExchange.PROGRESS,
-            routingKey,
-        });
-        await producer.publish(payload);
+    private readonly problemSolvedProducer = createProducer('progress.problem.solved', {
+        exchange: MqExchange.PROGRESS,
+        routingKey: MqRoutingKey.PROGRESS_PROBLEM_SOLVED,
+    });
+
+    private readonly moduleMasteredProducer = createProducer('progress.module.mastered', {
+        exchange: MqExchange.PROGRESS,
+        routingKey: MqRoutingKey.PROGRESS_MODULE_MASTERED,
+    });
+
+    private readonly streakMilestoneProducer = createProducer('progress.streak.milestone', {
+        exchange: MqExchange.PROGRESS,
+        routingKey: MqRoutingKey.PROGRESS_STREAK_MILESTONE,
+    });
+
+    private readonly weeklyDigestProducer = createProducer('progress.weekly.digest', {
+        exchange: MqExchange.PROGRESS,
+        routingKey: MqRoutingKey.PROGRESS_WEEKLY_DIGEST,
+    });
+
+    private readonly rankPromotedProducer = createProducer('progress.rank.promoted', {
+        exchange: MqExchange.PROGRESS,
+        routingKey: MqRoutingKey.PROGRESS_RANK_PROMOTED,
+    });
+
+    /**
+     * Publishes a problem-solved event.
+     */
+    async problemSolved(payload: PayloadOf<'progress.problem.solved'>): Promise<void> {
+        await this.problemSolvedProducer.publish(payload);
     }
 
-    /** JSDoc: Triggered when a user marks a problem to revisit. Targets exchange progress.topic via routing key progress.<moduleSlug>.revisit. */
-    async problemRevisit(payload: PayloadOf<'progress.event'>): Promise<void> {
-        const routingKey = buildProgressRoutingKey(payload.moduleSlug, 'revisit');
-        const producer = createProducer('progress.event', {
-            exchange: MqExchange.PROGRESS,
-            routingKey,
-        });
-        await producer.publish(payload);
+    /**
+     * Publishes a module-mastered event.
+     */
+    async moduleMastered(payload: PayloadOf<'progress.module.mastered'>): Promise<void> {
+        await this.moduleMasteredProducer.publish(payload);
     }
 
-    /** JSDoc: Triggered when a user masters a module. Targets exchange progress.topic via routing key progress.<moduleSlug>.mastered. */
-    async moduleMastered(payload: PayloadOf<'progress.event'>): Promise<void> {
-        const routingKey = buildProgressRoutingKey(payload.moduleSlug, 'mastered');
-        const producer = createProducer('progress.event', {
-            exchange: MqExchange.PROGRESS,
-            routingKey,
-        });
-        await producer.publish(payload);
+    /**
+     * Publishes a streak-milestone event.
+     */
+    async streakMilestone(payload: PayloadOf<'progress.streak.milestone'>): Promise<void> {
+        await this.streakMilestoneProducer.publish(payload);
+    }
+
+    /**
+     * Publishes a weekly progress digest event.
+     */
+    async weeklyDigest(payload: PayloadOf<'progress.weekly.digest'>): Promise<void> {
+        await this.weeklyDigestProducer.publish(payload);
+    }
+
+    /**
+     * Publishes a leaderboard rank promotion event.
+     */
+    async rankPromoted(payload: PayloadOf<'progress.rank.promoted'>): Promise<void> {
+        await this.rankPromotedProducer.publish(payload);
     }
 }
 

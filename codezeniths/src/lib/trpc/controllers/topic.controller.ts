@@ -21,17 +21,7 @@ export class TopicController implements ITopicController {
         logger.info('Executing getSingleTopic controller', { input });
 
         const userId = ctx.user?.id;
-        if (!userId) {
-            logger.warn('Unauthorized attempt to fetch single topic details');
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
-        }
-
         try {
-            // TODO: [Redis] Check cache for single topic structure
-
             const result = await ctx.queries.topic.getSingleTopic({
                 id: input.id,
                 slug: input.slug,

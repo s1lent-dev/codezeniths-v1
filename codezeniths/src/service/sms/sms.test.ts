@@ -7,11 +7,9 @@ import { ENV_CONFIG } from '@/config/config';
 const mockSend = vi.fn();
 vi.mock('@vonage/server-sdk', () => {
   return {
-    Vonage: vi.fn().mockImplementation(() => {
-      return {
-        messages: {
-          send: mockSend,
-        },
+    Vonage: vi.fn().mockImplementation(function (this: any) {
+      this.messages = {
+        send: mockSend,
       };
     }),
   };

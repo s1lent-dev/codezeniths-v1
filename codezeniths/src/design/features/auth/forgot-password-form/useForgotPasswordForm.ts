@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -60,6 +60,10 @@ export const useForgotPasswordForm = () => {
     const [step, setStep] = useState<'request' | 'verify'>('request');
     const [isSending, setIsSending] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
+
+    // Turnstile Captcha
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+    const turnstileRef = useRef<any>(null);
     
     // Store the identifier (email/phone) to use in the verify step
     const [sentIdentifier, setSentIdentifier] = useState('');
@@ -148,29 +152,32 @@ export const useForgotPasswordForm = () => {
             return;
         }
 
+        if (!turnstileToken) {
+            toast.error('Please complete the CAPTCHA verification');
+            return;
+        }
+
         setIsSending(true);
         try {
             if (data.type === 'email') {
-                // Send OTP via email
+                // Send OTP via email with captcha verification header
                 const otpRes = await authClient.emailOtp.requestPasswordReset({
                     email: data.identifier || '',
+                    fetchOptions: {
+                        headers: { 'x-captcha-response': turnstileToken },
+                    },
                 });
                 
                 if (otpRes.error) throw new Error(otpRes.error.message || 'Failed to send OTP');
-                
-                // Simultaneously send Magic Link (Fire & Forget, we don't block on this)
-                authClient.requestPasswordReset({
-                    email: data.identifier || '',
-                    redirectTo: `${window.location.origin}/reset-password`,
-                }).then((res) => {
-                    if (res.error) console.error("Magic link error:", res.error);
-                }).catch(console.error);
 
-                toast.success('Verification code sent. Check your email for the code or magic link.');
+                toast.success('Verification code sent. Check your email for the code and reset link.');
             } else {
-                // Send OTP via phone
+                // Send OTP via phone with captcha verification header
                 const otpRes = await authClient.phoneNumber.requestPasswordReset({
                     phoneNumber: (data.identifier || '').replace(/\s+/g, ''),
+                    fetchOptions: {
+                        headers: { 'x-captcha-response': turnstileToken },
+                    },
                 });
                 if (otpRes.error) throw new Error(otpRes.error.message || 'Failed to send SMS');
                 
@@ -181,6 +188,8 @@ export const useForgotPasswordForm = () => {
             setStep('verify');
         } catch (error: any) {
             toast.error(error.message || 'Something went wrong. Please try again.');
+            turnstileRef.current?.reset();
+            setTurnstileToken(null);
         } finally {
             setIsSending(false);
         }
@@ -223,6 +232,8 @@ export const useForgotPasswordForm = () => {
             requestForm.setValue('type', type);
             requestForm.setValue('identifier', '');
             requestForm.clearErrors();
+            turnstileRef.current?.reset();
+            setTurnstileToken(null);
         }
     };
 
@@ -230,6 +241,8 @@ export const useForgotPasswordForm = () => {
     const handleBack = () => {
         setStep('request');
         verifyForm.reset();
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
     };
 
     return {
@@ -244,6 +257,9 @@ export const useForgotPasswordForm = () => {
         emailCheck,
         phoneCheck,
         sentIdentifier,
+        turnstileToken,
+        setTurnstileToken,
+        turnstileRef,
         handleTypeChange,
         handleRequest: requestForm.handleSubmit(handleRequest),
         handleVerify: verifyForm.handleSubmit(handleVerify),

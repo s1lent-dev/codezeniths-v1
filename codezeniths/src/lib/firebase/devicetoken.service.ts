@@ -3,6 +3,7 @@ import { prisma } from '@codezeniths/lib/db/prisma.client';
 import { fcmAdminService } from './admin';
 import { FcmTemplateData, FcmTemplateRegistry, FcmTemplate } from './types';
 import { deviceTokenUpsertSchema, type DeviceTokenUpsertInput } from '@/schemas/trpc/notification.schema';
+import { logger } from '@codezeniths/service/logging';
 export { deviceTokenUpsertSchema, type DeviceTokenUpsertInput };
 
 /**
@@ -75,6 +76,32 @@ export class DeviceTokenService {
     if (fids.length === 0) return null;
 
     const result = await fcmAdminService.sendTemplatedNotification(template, fids, data, options);
+
+    if (result.status === 'sent' && result.invalidFids?.length) {
+      logger.info(`Pruning ${result.invalidFids.length} invalid FIDs from DeviceToken table`);
+      await this.pruneInvalidFids(result.invalidFids);
+    }
+
+    return result;
+  }
+
+  /**
+   * Sends a direct push notification with title, body, and action link to all registered devices of a user.
+   */
+  async sendNotificationToUser(
+    userId: string,
+    payload: { title: string; body: string; link?: string; data?: Record<string, string> }
+  ) {
+    const fids = await this.listActiveFidsForUser(userId);
+    if (fids.length === 0) return null;
+
+    const result = await fcmAdminService.sendNotification({
+      title: payload.title,
+      body: payload.body,
+      fids,
+      link: payload.link,
+      data: payload.data,
+    });
 
     if (result.status === 'sent' && result.invalidFids?.length) {
       await this.pruneInvalidFids(result.invalidFids);

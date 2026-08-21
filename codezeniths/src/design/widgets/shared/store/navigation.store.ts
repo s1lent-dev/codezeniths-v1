@@ -1,3 +1,5 @@
+'use client';
+
 import { create } from 'zustand';
 
 export type NotificationFilter = 'all' | 'new' | 'unread' | 'read' | 'others';
@@ -11,9 +13,10 @@ export interface NotificationItem {
     category: 'new' | 'unread' | 'read' | 'others';
 }
 
-interface SearchFilters {
-    difficulty?: 'all' | 'easy' | 'medium' | 'hard';
-    type?: 'all' | 'problems' | 'modules' | 'tags';
+export type SearchCollectionType = 'all' | 'problems' | 'topics' | 'modules' | 'tags' | 'products' | 'users';
+
+export interface SearchFilters {
+    type?: SearchCollectionType;
 }
 
 interface NavigationStore {
@@ -113,9 +116,10 @@ export const useNavigationStore = create<NavigationStore>((set) => ({
     setSearchQuery: (query) => set({ searchQuery: query }),
     isSearchFilterOpen: false,
     setSearchFilterOpen: (open) => set({ isSearchFilterOpen: open }),
-    searchFilters: { difficulty: 'all', type: 'all' },
+    searchFilters: { type: 'all' },
     setSearchFilters: (filters) => set((state) => ({ searchFilters: { ...state.searchFilters, ...filters } })),
-    resetSearchFilters: () => set({ searchFilters: { difficulty: 'all', type: 'all' } }),
+    resetSearchFilters: () => set({ searchFilters: { type: 'all' } }),
+
 
     // Notifications
     isNotificationPopoverOpen: false,

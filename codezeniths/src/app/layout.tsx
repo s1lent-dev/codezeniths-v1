@@ -51,8 +51,8 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background-light dark:bg-background-dark">
           <TRPCReactProvider>
-              {/* <ClientSideServiceWorker />
-              <FcmListenerProvider /> */}
+              <ClientSideServiceWorker />
+              <FcmListenerProvider />
               <Suspense fallback={<div className="fixed inset-0 z-999 flex items-center justify-center bg-background-light dark:bg-background-dark"><Loader /></div>}>
                   {children}
               </Suspense>

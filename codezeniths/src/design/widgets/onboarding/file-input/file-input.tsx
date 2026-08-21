@@ -12,6 +12,7 @@ import {
     AlertCircle,
     ExternalLink,
     Eye,
+    Minus,
 } from 'lucide-react';
 import {
     Container,
@@ -99,6 +100,7 @@ export const FileInput: React.FC<FileInputProps> = ({
     const [dragActive, setDragActive] = useState(false);
     const [uploadItem, setUploadItem] = useState<UploadProgressItem | null>(null);
     const [fileError, setFileError] = useState<string | null>(null);
+    const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
 
     const maxSizeMb = (maxSizeBytes / (1024 * 1024)).toFixed(0);
 
@@ -426,37 +428,83 @@ export const FileInput: React.FC<FileInputProps> = ({
                         </div>
                     </Container>
 
-                    {/* Embedded PDF Viewer Box */}
+                    {/* Embedded PDF Viewer Box with Minimize / Expand options */}
                     {isPdf && uploadItem.previewUrl && (
-                        <div className="w-full mt-2 rounded-xl border border-secondary/20 dark:border-secondary-shade2/40 overflow-hidden bg-background-light/50 dark:bg-background-dark/50 p-3 space-y-3 shadow-inner">
-                            <div className="flex items-center justify-between px-1">
-                                <div className="flex items-center gap-2">
-                                    <div className="p-1.5 rounded-md bg-destructive/15 text-destructive">
+                        <div className="w-full mt-2 rounded-xl border border-secondary/20 dark:border-secondary-shade2/40 overflow-hidden bg-background-light/50 dark:bg-background-dark/50 p-3.5 space-y-3 shadow-inner">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="p-2 rounded-md bg-destructive/15 text-destructive shrink-0">
                                         <FileText className="w-4 h-4" />
                                     </div>
-                                    <span className="text-xs font-bold text-body-light dark:text-body-dark truncate max-w-xs sm:max-w-md">
-                                        PDF Document Preview
-                                    </span>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="text-xs font-bold text-body-light dark:text-body-dark truncate max-w-xs sm:max-w-md">
+                                            {uploadItem.name}
+                                        </span>
+                                        <span className="text-[11px] text-muted-light dark:text-muted-dark">
+                                            PDF Document
+                                        </span>
+                                    </div>
                                 </div>
-                                <a
-                                    href={uploadItem.previewUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-semibold"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <span>Open Full PDF</span>
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                </a>
+
+                                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                                    {/* View Preview Button / Toggle */}
+                                    {!isPreviewExpanded ? (
+                                        <Button
+                                            type="button"
+                                            variant={ButtonVariant.OUTLINE}
+                                            size={ButtonSize.SM}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIsPreviewExpanded(true);
+                                            }}
+                                            leftIcon={<Eye className="w-3.5 h-3.5" />}
+                                            className="text-xs h-8 px-2.5 rounded-md border-secondary/30 text-heading-light dark:text-heading-dark"
+                                        >
+                                            <span>View Preview</span>
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            type="button"
+                                            variant={ButtonVariant.GHOST}
+                                            size={ButtonSize.ICON_SM}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIsPreviewExpanded(false);
+                                            }}
+                                            className="text-muted-light dark:text-muted-dark hover:text-foreground hover:bg-secondary/15 size-8"
+                                            title="Minimize Preview"
+                                        >
+                                            <Minus className="w-4 h-4" />
+                                        </Button>
+                                    )}
+
+                                    {/* Open Full PDF in New Tab */}
+                                    <Button
+                                        type="button"
+                                        variant={ButtonVariant.OUTLINE}
+                                        size={ButtonSize.SM}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            window.open(uploadItem.previewUrl, '_blank');
+                                        }}
+                                        rightIcon={<ExternalLink className="w-3.5 h-3.5" />}
+                                        className="text-xs h-8 px-2.5 rounded-md border-primary/30 bg-primary/10 text-primary hover:bg-primary/15"
+                                    >
+                                        <span>View Full PDF</span>
+                                    </Button>
+                                </div>
                             </div>
 
-                            <div className="w-full h-80 rounded-lg overflow-hidden border border-secondary/20 bg-muted/20 relative">
-                                <iframe
-                                    src={`${uploadItem.previewUrl}#toolbar=0`}
-                                    title="PDF Document Preview"
-                                    className="w-full h-full border-0"
-                                />
-                            </div>
+                            {/* Expanded PDF iframe Preview */}
+                            {isPreviewExpanded && (
+                                <div className="w-full h-80 rounded-lg overflow-hidden border border-secondary/20 bg-muted/20 relative animate-in fade-in zoom-in-95 duration-200">
+                                    <iframe
+                                        src={`${uploadItem.previewUrl}#toolbar=0`}
+                                        title="PDF Document Preview"
+                                        className="w-full h-full border-0"
+                                    />
+                                </div>
+                            )}
                         </div>
                     )}
                 </Container>

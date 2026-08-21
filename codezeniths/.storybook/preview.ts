@@ -1,6 +1,8 @@
 import type { Preview } from '@storybook/nextjs';
 import { withThemeByClassName } from '@storybook/addon-themes';
-import '../src/app/globals.css';
+// CSS is resolved by Storybook's bundler; TypeScript has no declaration for it.
+// @ts-expect-error -- side-effect CSS import
+import './globals.css';
 
 const preview: Preview = {
   parameters: {

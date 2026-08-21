@@ -3,6 +3,8 @@ import {
     GetModulesOutputSchema,
     GetSingleModuleOutputSchema,
     GetSingleModuleProgressOutputSchema,
+    GetRecentlySolvedModuleOutputSchema,
+    GetModulesWithTopicsOutputSchema,
 } from '@codezeniths/schemas/db';
 
 // ─── getModules ────────────────────────────────────────────────────────────────
@@ -30,3 +32,40 @@ export const GetSingleModuleProgressTRPCInputSchema = z.object({
 });
 
 export const GetSingleModuleProgressTRPCOutputSchema = GetSingleModuleProgressOutputSchema;
+
+// ─── getRecentlySolvedModule ───────────────────────────────────────────────────
+
+export const GetRecentlySolvedModuleTRPCOutputSchema = GetRecentlySolvedModuleOutputSchema;
+
+// ─── getModulesWithTopics ──────────────────────────────────────────────────────
+
+export const GetModulesWithTopicsTRPCInputSchema = z.object({}).optional();
+export const GetModulesWithTopicsTRPCOutputSchema = GetModulesWithTopicsOutputSchema;
+
+// ─── toggleModuleBookmark ──────────────────────────────────────────────────────
+
+export const ToggleModuleBookmarkTRPCInputSchema = z.object({
+    moduleId: z.uuidv7().optional(),
+    moduleSlug: z.string().optional(),
+}).refine((d) => d.moduleId || d.moduleSlug, {
+    message: 'At least one of moduleId or moduleSlug must be provided',
+});
+
+export const ToggleModuleBookmarkTRPCOutputSchema = z.object({
+    isBookmarked: z.boolean(),
+    moduleId: z.uuidv7(),
+});
+
+// ─── toggleTopicBookmark ───────────────────────────────────────────────────────
+
+export const ToggleTopicBookmarkTRPCInputSchema = z.object({
+    topicId: z.uuidv7().optional(),
+    topicSlug: z.string().optional(),
+}).refine((d) => d.topicId || d.topicSlug, {
+    message: 'At least one of topicId or topicSlug must be provided',
+});
+
+export const ToggleTopicBookmarkTRPCOutputSchema = z.object({
+    isBookmarked: z.boolean(),
+    topicId: z.uuidv7(),
+});

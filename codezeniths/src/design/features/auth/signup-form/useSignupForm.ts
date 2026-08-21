@@ -11,6 +11,8 @@ import { userQueryService } from '@/lib/tanstack/services/user.query-service';
 import { getPasswordStrength, generateUsernameSuggestions } from './signup.utils';
 import { SignupSchema, SignupFormValues, PasswordStrength } from './signup.types';
 
+import { CacheInvalidationService } from '@/lib/tanstack/cache-invalidation.service';
+
 export const useSignupForm = () => {
     const toast = useToast();
     const queryClient = useQueryClient();
@@ -112,7 +114,10 @@ export const useSignupForm = () => {
 
     const handleGoogleOAuth = async () => {
         try {
-            await authClient.signIn.social({ provider: 'google', callbackURL: '/problemset' });
+            await authClient.signIn.social({
+                provider: 'google',
+                callbackURL: '/problemset',
+            });
         } catch (err: any) {
             toast.error('Google OAuth Failed: ' + err.message);
         }
@@ -120,7 +125,10 @@ export const useSignupForm = () => {
 
     const handleGithubOAuth = async () => {
         try {
-            await authClient.signIn.social({ provider: 'github', callbackURL: '/problemset' });
+            await authClient.signIn.social({
+                provider: 'github',
+                callbackURL: '/problemset',
+            });
         } catch (err: any) {
             toast.error('Github OAuth Failed: ' + err.message);
         }
@@ -153,9 +161,8 @@ export const useSignupForm = () => {
 
             toast.success('Account created! Please verify your email.');
             
-            // Invalidate availability checks so verification pages query real-time status if needed
-            queryClient.invalidateQueries({ queryKey: ['user', 'emailAvailability'] });
-            queryClient.invalidateQueries({ queryKey: ['user', 'phoneAvailability'] });
+            // Invalidate availability checks & auth session via centralized CacheInvalidationService
+            await CacheInvalidationService.invalidateOnUserSignup(queryClient);
 
             // Clean up the form fields and stop background checks immediately
             form.reset();

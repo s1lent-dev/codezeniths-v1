@@ -22,7 +22,8 @@ export const useResetPasswordForm = () => {
     const toast = useToast();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const token = searchParams.get('token');
+    const token = searchParams.get('token') || searchParams.get('otp');
+    const email = searchParams.get('email');
 
     const [isResetting, setIsResetting] = useState(false);
     const [tokenError, setTokenError] = useState(false);
@@ -31,6 +32,8 @@ export const useResetPasswordForm = () => {
         if (!token) {
             setTokenError(true);
             toast.error('The password reset link is missing or invalid.');
+        } else {
+            setTokenError(false);
         }
     }, [token, toast]);
 
@@ -44,12 +47,28 @@ export const useResetPasswordForm = () => {
 
     const handleReset = async (data: ResetPasswordFormData) => {
         if (!token) {
-            toast.error('Invalid reset link.');
+            toast.error('Invalid or expired reset link.');
             return;
         }
 
         setIsResetting(true);
         try {
+            // 1. If email is present in URL params, verify via emailOtp first
+            if (email) {
+                const otpRes = await authClient.emailOtp.resetPassword({
+                    email,
+                    otp: token,
+                    password: data.newPassword,
+                });
+
+                if (!otpRes.error) {
+                    toast.success('Your password has been successfully updated.');
+                    router.push('/problemset');
+                    return;
+                }
+            }
+
+            // 2. Fallback to standard token reset
             const res = await authClient.resetPassword({
                 newPassword: data.newPassword,
                 token: token,
@@ -58,10 +77,9 @@ export const useResetPasswordForm = () => {
             if (res.error) throw new Error(res.error.message || 'Failed to reset password');
 
             toast.success('Your password has been successfully updated.');
-            
             router.push('/problemset');
         } catch (error: any) {
-            toast.error(error.message || 'Something went wrong. Please try again.');
+            toast.error(error.message || 'Invalid or expired token. Please request a new link.');
         } finally {
             setIsResetting(false);
         }

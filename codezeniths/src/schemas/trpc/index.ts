@@ -13,3 +13,6 @@ export * from './auth.schema';
 export * from './notification.schema';
 export * from './search.schema';
 export * from './favourite.schema';
+export * from './leaderboard.schema';
+export * from './playlist.schema';
+

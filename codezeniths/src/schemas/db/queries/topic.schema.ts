@@ -31,17 +31,47 @@ const TopicProblemSchema = z.object({
     favourite: z.boolean().nullable().optional(),
 });
 
+export const SimilarTopicSchema = z.object({
+    id: z.uuidv7(),
+    title: z.string(),
+    slug: z.string(),
+    level: LevelSchema.nullable().optional(),
+    moduleTitle: z.string().optional(),
+    moduleSlug: z.string().optional(),
+    problemsCount: z.number().int(),
+});
+
 export const GetSingleTopicOutputSchema = z.object({
     id: z.uuidv7(),
     title: z.string(),
-    description: z.string().nullable().optional(),
     slug: z.string(),
-    level: LevelSchema.nullable(),
+    description: z.string().nullable().optional(),
+    level: LevelSchema.nullable().optional(),
     order: z.number().int(),
-    problemsCount: z.number().int(),
-    problemsSolvedCount: z.number().int(),
-    problemsSolvedPercentage: z.number(),
-    problems: z.array(TopicProblemSchema),
+    isBookmarked: z.boolean().default(false),
+    module: z.object({
+        title: z.string(),
+        slug: z.string(),
+    }).optional(),
+    progress: z.object({
+        problemsCount: z.number().int(),
+        problemsSolvedCount: z.number().int(),
+        problemsRevisitCount: z.number().int(),
+        problemNotSolvedCount: z.number().int(),
+        problemsSolvedPercentage: z.number(),
+        problemsCountByDifficulty: z.object({
+            easy: z.number().int(),
+            medium: z.number().int(),
+            hard: z.number().int(),
+        }),
+        problemsSolvedCountByDifficulty: z.object({
+            easy: z.number().int(),
+            medium: z.number().int(),
+            hard: z.number().int(),
+        }),
+    }),
+    similarTopics: z.array(SimilarTopicSchema),
+    problems: z.array(TopicProblemSchema).optional(),
 });
 
 // ─── getSingleTopicProgress ───────────────────────────────────────────────────

@@ -11,6 +11,8 @@ import { userQueryService } from '@/lib/tanstack/services/user.query-service';
 import { moduleQueryService } from '@/lib/tanstack/services/module.query-service';
 import { skillQueryService } from '@/lib/tanstack/services/skill.query-service';
 import { z } from 'zod';
+import { useQueryClient } from '@tanstack/react-query';
+import { CacheInvalidationService } from '@/lib/tanstack/cache-invalidation.service';
 import {
     step1Schema,
     step2Schema,
@@ -25,6 +27,7 @@ export type Step3Values = z.infer<typeof step4Schema>;
 
 export const useCompleteProfileForm = () => {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const searchParams = useSearchParams();
     const toast = useToast();
     const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -70,11 +73,38 @@ export const useCompleteProfileForm = () => {
             dob: null,
             gender: 'prefer_not_to_say',
             location: '',
+            countryCode: '+1',
+            phone: '',
             phoneNumber: '',
             about: '',
         },
         mode: 'onChange',
     });
+
+    // Phone debounce and live availability check for step 1
+    const [debouncedPhone, setDebouncedPhone] = useState('');
+    const watchedPhone = step0Form.watch('phone');
+    const watchedCountryCode = step0Form.watch('countryCode') || '+1';
+
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedPhone(watchedPhone || ''), 500);
+        return () => clearTimeout(timer);
+    }, [watchedPhone]);
+
+    const combinedPhone = debouncedPhone ? `${watchedCountryCode}${debouncedPhone}`.replace(/\s+/g, '') : '';
+    const { data: phoneCheck, isFetching: isCheckingPhone } = userQueryService.checkPhoneAvailability(
+        { phone: combinedPhone }
+    );
+
+    useEffect(() => {
+        if (debouncedPhone && phoneCheck && !phoneCheck.available) {
+            step0Form.setError('phone', { type: 'manual', message: 'This phone number is already registered' });
+        } else if (debouncedPhone && phoneCheck?.available) {
+            if (step0Form.formState.errors.phone?.type === 'manual') {
+                step0Form.clearErrors('phone');
+            }
+        }
+    }, [phoneCheck, debouncedPhone, step0Form]);
 
     const step1Form = useForm<Step1Values>({
         resolver: zodResolver(step2Schema) as any,
@@ -117,6 +147,18 @@ export const useCompleteProfileForm = () => {
 
             const db0 = onboardingProfile.step0;
             if (db0) {
+                let initialCountryCode = '+1';
+                let initialPhone = '';
+                if (db0.phoneNumber) {
+                    const match = db0.phoneNumber.match(/^(\+\d{1,4})(.*)$/);
+                    if (match) {
+                        initialCountryCode = match[1];
+                        initialPhone = match[2];
+                    } else {
+                        initialPhone = db0.phoneNumber;
+                    }
+                }
+
                 step0Form.reset({
                     image: onboardingProfile.image || draft0.image || null,
                     firstName: draft0.firstName ?? (db0.firstName || ''),
@@ -125,6 +167,8 @@ export const useCompleteProfileForm = () => {
                     dob: draft0.dob ? new Date(draft0.dob) : (db0.dob ? new Date(db0.dob) : null),
                     gender: (draft0.gender ?? (db0.gender as any)) || 'prefer_not_to_say',
                     location: draft0.location ?? (db0.location || ''),
+                    countryCode: draft0.countryCode ?? initialCountryCode,
+                    phone: draft0.phone ?? initialPhone,
                     phoneNumber: draft0.phoneNumber ?? (db0.phoneNumber || ''),
                     about: draft0.about ?? (db0.about || ''),
                 });
@@ -409,13 +453,18 @@ export const useCompleteProfileForm = () => {
     // 7. Per-Step Submission Handlers
     const submitStep0 = async (values: Step0Values) => {
         try {
+            const rawPhone = values.phone?.trim();
+            const combinedPhoneValue = rawPhone && rawPhone.length > 0
+                ? `${values.countryCode || '+1'}${rawPhone}`.replace(/\s+/g, '')
+                : null;
+
             await updateStep0Mutation.mutateAsync({
                 firstName: values.firstName,
                 lastName: values.lastName,
                 dob: values.dob,
                 gender: values.gender,
                 location: values.location,
-                phoneNumber: hasExistingPhoneNumber ? undefined : values.phoneNumber,
+                phoneNumber: hasExistingPhoneNumber ? undefined : combinedPhoneValue,
                 about: values.about,
             });
             setDraft0({});
@@ -476,6 +525,9 @@ export const useCompleteProfileForm = () => {
                 profileVisibility: values.profileVisibility,
             });
 
+            // Invalidate session cookie cache & refetch fresh session before redirecting to home
+            await CacheInvalidationService.refetchSession(queryClient);
+
             setDraft0({});
             setDraft1({});
             setDraft2({});
@@ -535,6 +587,8 @@ export const useCompleteProfileForm = () => {
         isExtractingSkills,
         resumeUploadCount,
         extractedResumeKeys,
+        phoneCheck,
+        isCheckingPhone,
         isSubmittingStep0: updateStep0Mutation.isPending,
         isSubmittingStep1: updateStep1Mutation.isPending,
         isSubmittingStep2: updateStep2Mutation.isPending,

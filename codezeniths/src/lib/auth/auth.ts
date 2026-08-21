@@ -28,7 +28,19 @@ export function useAuth() {
         isAdmin:         data?.user && (data.user as unknown as AuthUser).role === 'admin',
         error,
         refetch,
-    }
+    };
+}
+
+/**
+ * Re-syncs Better-Auth's internal session store with fresh user data from the server.
+ * Call this whenever user profile, avatar, or onboarding state is mutated via tRPC.
+ */
+export async function refetchAuthSession() {
+    return await authClient.getSession({
+        query: {
+            disableCookieCache: true,
+        },
+    });
 }
 
 export const {

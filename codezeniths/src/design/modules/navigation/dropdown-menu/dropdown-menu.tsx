@@ -71,7 +71,7 @@ function DropdownMenuItem({
             data-inset={inset}
             data-variant={variant}
             className={cn(
-                "focus:bg-primary-shade3 focus:text-foreground-dark data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive not-data-[variant=destructive]:focus:**:text-foreground-dark gap-sm-2 rounded-md px-sm-2 py-sm-1 text-p data-inset:pl-lg-2 [&_svg:not([class*='size-'])]:size-4 group/dropdown-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                "data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive gap-sm-2 rounded-md px-sm-2 py-sm-1 text-p data-inset:pl-lg-2 [&_svg:not([class*='size-'])]:size-4 group/dropdown-menu-item relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
                 className,
             )}
             {...props}
@@ -218,7 +218,7 @@ function DropdownMenuSubTrigger({
             data-slot="dropdown-menu-sub-trigger"
             data-inset={inset}
             className={cn(
-                "focus:bg-primary-shade3 focus:text-foreground-dark data-open:bg-primary-shade3 data-open:text-foreground-dark not-data-[variant=destructive]:focus:**:text-foreground-dark gap-sm-2 rounded-md px-sm-2 py-sm-1 text-p data-inset:pl-lg-2 [&_svg:not([class*='size-'])]:size-4 flex cursor-default items-center outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                " data-open:bg-primary/15 data-open:text-primary gap-sm-2 rounded-md px-sm-2 py-sm-1 text-p data-inset:pl-lg-2 [&_svg:not([class*='size-'])]:size-4 flex cursor-default items-center outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
                 className,
             )}
             {...props}

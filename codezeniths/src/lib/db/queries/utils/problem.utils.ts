@@ -9,11 +9,17 @@ export function buildProblemWhere(
     userId?: string,
 ): Prisma.ProblemWhereInput {
     const where: Prisma.ProblemWhereInput = {};
+    const topicWhere: Prisma.TopicWhereInput = {};
 
     if (filters.topicSlug) {
-        where.topic = { slug: filters.topicSlug };
-    } else if (filters.moduleSlug) {
-        where.topic = { module: { slug: filters.moduleSlug } };
+        topicWhere.slug = filters.topicSlug;
+    }
+    if (filters.moduleSlug) {
+        topicWhere.module = { slug: filters.moduleSlug };
+    }
+
+    if (filters.topicLevel) {
+        topicWhere.level = filters.topicLevel;
     }
 
     if (filters.difficulty) {
@@ -24,58 +30,135 @@ export function buildProblemWhere(
         where.tags = { some: { tag: { slug: { in: filters.tagSlugs } } } };
     }
 
-    if (filters.status && userId) {
-        if (filters.status === 'solved') {
-            where.progresses = {
-                some: {
-                    userId,
-                    status: 'solved',
+    if (filters.playlistSlug) {
+        where.playlistItems = {
+            some: {
+                playlist: {
+                    slug: filters.playlistSlug,
                 },
-            };
-        } else if (filters.status === 'revisit') {
-            where.progresses = {
-                some: {
-                    userId,
-                    status: 'revisit',
-                },
-            };
-        } else if (filters.status === 'not_solved') {
-            where.progresses = {
-                none: {
-                    userId,
-                    status: { in: ['solved', 'revisit'] },
-                },
-            };
-        }
-    }
-
-    if (filters.favourite !== undefined && userId) {
-        if (filters.favourite) {
-            if (where.progresses?.some) {
-                where.progresses.some.favourite = true;
-            } else {
-                where.progresses = {
-                    some: {
-                        userId,
-                        favourite: true,
-                    },
-                };
-            }
-        } else {
-            where.progresses = {
-                none: {
-                    userId,
-                    favourite: true,
-                },
-            };
-        }
+            },
+        };
+    } else if (filters.playlistId) {
+        where.playlistItems = {
+            some: {
+                playlistId: filters.playlistId,
+            },
+        };
     }
 
     if (filters.search) {
-        where.title = {
-            contains: filters.search,
-            mode: 'insensitive',
-        };
+        if (filters.searchScope === 'topic') {
+            topicWhere.title = {
+                contains: filters.search,
+                mode: 'insensitive',
+            };
+        } else {
+            where.title = {
+                contains: filters.search,
+                mode: 'insensitive',
+            };
+        }
+    }
+
+    if (Object.keys(topicWhere).length > 0) {
+        where.topic = topicWhere;
+    }
+
+    // ─── User-Specific Progress Filters (Solved status, Revisit, Favourite) ───
+    const andConditions: Prisma.ProblemWhereInput[] = [];
+
+    // 1. Status Filter (Solved / Not Solved)
+    if (filters.status) {
+        if (userId) {
+            if (filters.status === 'solved') {
+                andConditions.push({
+                    progresses: {
+                        some: {
+                            userId,
+                            status: 'solved',
+                        },
+                    },
+                });
+            } else if (filters.status === 'not_solved') {
+                andConditions.push({
+                    progresses: {
+                        none: {
+                            userId,
+                            status: 'solved',
+                        },
+                    },
+                });
+            }
+        } else {
+            // Unauthenticated users have 0 solved problems
+            if (filters.status === 'solved') {
+                andConditions.push({ id: '00000000-0000-0000-0000-000000000000' });
+            }
+        }
+    }
+
+    // 2. Revisit Filter
+    if (filters.revisit !== undefined) {
+        if (userId) {
+            if (filters.revisit) {
+                andConditions.push({
+                    progresses: {
+                        some: {
+                            userId,
+                            revisit: true,
+                        },
+                    },
+                });
+            } else {
+                andConditions.push({
+                    progresses: {
+                        none: {
+                            userId,
+                            revisit: true,
+                        },
+                    },
+                });
+            }
+        } else {
+            // Unauthenticated users have 0 revisit marked problems
+            if (filters.revisit) {
+                andConditions.push({ id: '00000000-0000-0000-0000-000000000000' });
+            }
+        }
+    }
+
+    // 3. Favourite Filter
+    if (filters.favourite !== undefined) {
+        if (userId) {
+            if (filters.favourite) {
+                andConditions.push({
+                    progresses: {
+                        some: {
+                            userId,
+                            favourite: true,
+                        },
+                    },
+                });
+            } else {
+                andConditions.push({
+                    progresses: {
+                        none: {
+                            userId,
+                            favourite: true,
+                        },
+                    },
+                });
+            }
+        } else {
+            // Unauthenticated users have 0 favourite problems
+            if (filters.favourite) {
+                andConditions.push({ id: '00000000-0000-0000-0000-000000000000' });
+            }
+        }
+    }
+
+    if (andConditions.length > 0) {
+        where.AND = andConditions;
     }
 
     return where;
@@ -102,6 +185,8 @@ export function buildProblemOrderBy(
             return [{ createdAt: order }, { id: 'asc' }];
         case 'popularity':
             return [{ favouriteCount: order }, { id: 'asc' }];
+        case 'topicLevel':
+            return [{ topic: { level: order } }, { order: 'asc' }, { id: 'asc' }];
         default:
             return [{ order: 'asc' }, { id: 'asc' }];
     }

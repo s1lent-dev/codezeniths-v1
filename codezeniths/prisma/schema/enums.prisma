@@ -1,6 +1,5 @@
 enum ProgressStatus {
   solved
-  revisit
   not_solved
 }
 
@@ -11,7 +10,7 @@ enum Difficulty {
 }
 
 enum Level {
-  beginner
+  fundamental
   intermediate
   advanced
 }
@@ -59,34 +58,43 @@ enum UserType {
 }
 
 enum LearningGoal {
-  interview_prep             // "Interview Preparation"
-  competitive_programming    // "Competitive Programming"
-  cs_fundamentals            // "Learn CS Fundamentals"
-  practice_dsa               // "Practice DSA"
-  system_design              // "Master System Design"
-  machine_coding             // "Practice Machine Coding"
-  structured_learning        // "Structured Courses & Certifications"
-  reference_reading          // "Read Reference Content & Articles"
-  visualize_concepts         // "Visualize Concepts"
-  community_engagement       // "Community Discussions"
-  hire_candidates            // "Hire & Evaluate Candidates"
-  teach_mentor               // "Teach or Mentor"
-  explore_platform           // "Explore & Be Curious"
-  career_growth              // "Upskill for Career Growth"
+  interview_prep // "Interview Preparation"
+  competitive_programming // "Competitive Programming"
+  cs_fundamentals // "Learn CS Fundamentals"
+  practice_dsa // "Practice DSA"
+  system_design // "Master System Design"
+  machine_coding // "Practice Machine Coding"
+  structured_learning // "Structured Courses & Certifications"
+  reference_reading // "Read Reference Content & Articles"
+  visualize_concepts // "Visualize Concepts"
+  community_engagement // "Community Discussions"
+  hire_candidates // "Hire & Evaluate Candidates"
+  teach_mentor // "Teach or Mentor"
+  explore_platform // "Explore & Be Curious"
+  career_growth // "Upskill for Career Growth"
 }
 
 enum LearningStyle {
-  reading_articles           // "Reading articles/docs"
-  video_explanations         // "Video explanations"
+  reading_articles // "Reading articles/docs"
+  video_explanations // "Video explanations"
   interactive_visualizations // "Interactive visualizations/simulations"
-  hands_on_coding            // "Hands-on coding practice"
-  timed_contests             // "Timed contests/challenges"
-  structured_courses         // "Structured courses with milestones"
-  peer_discussion            // "Peer discussion/community"
+  hands_on_coding // "Hands-on coding practice"
+  timed_contests // "Timed contests/challenges"
+  structured_courses // "Structured courses with milestones"
+  peer_discussion // "Peer discussion/community"
 }
 
 enum DevicePlatform {
   web
   android
   ios
+}
+
+enum SearchCollection {
+  problem
+  topic
+  module
+  tag
+  product
+  user
 }

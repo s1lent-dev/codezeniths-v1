@@ -9,6 +9,10 @@ import {
     GetSingleTagProblemProgressTRPCOutputSchema,
     GetSingleTagTRPCInputSchema,
     GetSingleTagTRPCOutputSchema,
+    ToggleTagBookmarkTRPCInputSchema,
+    ToggleTagBookmarkTRPCOutputSchema,
+    GetUserTagProgressByLevelTRPCInputSchema,
+    GetUserTagProgressByLevelTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { z } from 'zod';
 
@@ -36,4 +40,14 @@ export interface ITagController {
         ctx: TRPCContext;
         input: z.infer<typeof GetSingleTagTRPCInputSchema>;
     }): Promise<z.infer<typeof GetSingleTagTRPCOutputSchema>>;
+
+    toggleTagBookmark(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof ToggleTagBookmarkTRPCInputSchema>;
+    }): Promise<z.infer<typeof ToggleTagBookmarkTRPCOutputSchema>>;
+
+    getUserTagProgressByLevel(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetUserTagProgressByLevelTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetUserTagProgressByLevelTRPCOutputSchema>>;
 }

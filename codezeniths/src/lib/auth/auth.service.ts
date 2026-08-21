@@ -1,10 +1,11 @@
 import { createAuth } from './auth.config';
 import type { AuthContext, AuthUser, BetterAuthSession } from './auth.types';
 import { formatUserProfile } from '@/utils/user.formatter';
+import { ENV_CONFIG } from '@/config/config';
 
 export const { auth, resolveSession, resolveSessionFromRawHeaders } = createAuth({
-    secret:         process.env.AUTH_SECRET!,
-    baseURL:        process.env.NEXT_PUBLIC_APP_URL!,
+    secret:         ENV_CONFIG.AUTH_SECRET || process.env.AUTH_SECRET!,
+    baseURL:        ENV_CONFIG.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     db:             null, 
     trustedOrigins: process.env.AUTH_TRUSTED_ORIGINS?.split(',') ?? [],
 

@@ -61,7 +61,10 @@ export const useSigninForm = () => {
 
     const handleGoogleOAuth = async () => {
         try {
-            await authClient.signIn.social({ provider: 'google', callbackURL: '/problemset' });
+            await authClient.signIn.social({
+                provider: 'google',
+                callbackURL: '/problemset',
+            });
         } catch (err: any) {
             toast.error('Google OAuth Failed: ' + err.message);
         }
@@ -69,7 +72,10 @@ export const useSigninForm = () => {
 
     const handleGithubOAuth = async () => {
         try {
-            await authClient.signIn.social({ provider: 'github', callbackURL: '/problemset' });
+            await authClient.signIn.social({
+                provider: 'github',
+                callbackURL: '/problemset',
+            });
         } catch (err: any) {
             toast.error('Github OAuth Failed: ' + err.message);
         }

@@ -10,3 +10,20 @@ model Skill {
 
   @@map("skill")
 }
+
+model UserSkill {
+  id           String           @id @default(uuid(7)) @db.Uuid
+  userId       String           @db.Uuid
+  skillId      String           @db.Uuid
+  proficiency  ProficiencyLevel @default(beginner)
+  isInterested Boolean          @default(true)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill        Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@map("user_skill")
+}

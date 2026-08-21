@@ -14,6 +14,8 @@ export const ProblemOutputSchema = z.object({
     articleUrl: z.string().url().nullable().optional(),
     problemUrl: z.string().url().nullable().optional(),
     favouriteCount: z.number().int().default(0),
+    topicId: z.uuidv7().nullable().optional(),
+    topicSlug: z.string().nullable().optional(),
     tags: z.array(
         z.object({
             id: z.uuidv7(),
@@ -22,6 +24,7 @@ export const ProblemOutputSchema = z.object({
         }),
     ),
     status: ProgressStatusSchema.nullable().optional(),
+    revisit: z.boolean().nullable().optional(),
     favourite: z.boolean().nullable().optional(),
 });
 
@@ -41,20 +44,14 @@ export const GetProblemsOutputSchema = z.object({
 
 // ─── getProblemsPaginated ──────────────────────────────────────────────────────
 
-export const GetProblemsPaginatedInputSchema = z.object({
-    userId: z.uuidv7().optional(),
-    page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(20),
-    sorting: ProblemSortingInputSchema.optional(),
-    // filters flat
-    moduleSlug: z.string().optional(),
-    topicSlug: z.string().optional(),
-    difficulty: DifficultySchema.optional(),
-    tagSlugs: z.array(z.string()).optional(),
-    status: ProgressStatusSchema.optional(),
-    favourite: z.boolean().optional(),
-    search: z.string().optional(),
-});
+export const GetProblemsPaginatedInputSchema = z
+    .object({
+        userId: z.uuidv7().optional(),
+        page: z.coerce.number().int().min(1).default(1),
+        limit: z.coerce.number().int().min(1).max(100).default(20),
+        sorting: ProblemSortingInputSchema.optional(),
+    })
+    .merge(ProblemFilterInputSchema);
 
 export const GetProblemsPaginatedOutputSchema = z.object({
     items: z.array(ProblemOutputSchema),
@@ -68,20 +65,14 @@ export const GetProblemsPaginatedOutputSchema = z.object({
 
 // ─── getProblemsInfinite ───────────────────────────────────────────────────────
 
-export const GetProblemsInfiniteInputSchema = z.object({
-    userId: z.uuidv7().optional(),
-    cursor: z.uuidv7().optional(),
-    limit: z.coerce.number().int().min(1).max(100).default(20),
-    sorting: ProblemSortingInputSchema.optional(),
-    // filters flat
-    moduleSlug: z.string().optional(),
-    topicSlug: z.string().optional(),
-    difficulty: DifficultySchema.optional(),
-    tagSlugs: z.array(z.string()).optional(),
-    status: ProgressStatusSchema.optional(),
-    favourite: z.boolean().optional(),
-    search: z.string().optional(),
-});
+export const GetProblemsInfiniteInputSchema = z
+    .object({
+        userId: z.uuidv7().optional(),
+        cursor: z.uuidv7().optional(),
+        limit: z.coerce.number().int().min(1).max(100).default(20),
+        sorting: ProblemSortingInputSchema.optional(),
+    })
+    .merge(ProblemFilterInputSchema);
 
 export const GetProblemsInfiniteOutputSchema = z.object({
     items: z.array(ProblemOutputSchema),
@@ -123,6 +114,7 @@ export const UpdateProblemStatusOutputSchema = z.object({
     problemId: z.uuidv7(),
     problemSlug: z.string(),
     status: ProgressStatusSchema,
+    revisit: z.boolean(),
     favourite: z.boolean(),
 });
 
@@ -156,6 +148,25 @@ export const UpdateProblemFavouriteOutputSchema = z.object({
     problemId: z.uuidv7(),
     problemSlug: z.string(),
     status: ProgressStatusSchema,
+    revisit: z.boolean(),
+    favourite: z.boolean(),
+});
+
+// ─── updateProblemRevisit ──────────────────────────────────────────────────────
+
+export const UpdateProblemRevisitInputSchema = z.object({
+    userId: z.uuidv7(),
+    problemId: z.uuidv7(),
+    revisit: z.boolean(),
+});
+
+export const UpdateProblemRevisitOutputSchema = z.object({
+    id: z.uuidv7(),
+    userId: z.uuidv7(),
+    problemId: z.uuidv7(),
+    problemSlug: z.string(),
+    status: ProgressStatusSchema,
+    revisit: z.boolean(),
     favourite: z.boolean(),
 });
 
@@ -214,3 +225,19 @@ export const GetProblemProgressOutputSchema = z.object({
         hard: z.number().int(),
     }),
 });
+
+// ─── getRecentlySolvedProblems ───────────────────────────────────────────────
+
+export const GetRecentlySolvedProblemsInputSchema = z.object({
+    userId: z.uuidv7(),
+    limit: z.coerce.number().int().min(1).max(50).default(10),
+});
+
+export const RecentlySolvedProblemItemSchema = z.object({
+    id: z.uuidv7(),
+    title: z.string(),
+    slug: z.string(),
+    solvedAt: z.coerce.date().nullable().optional(),
+});
+
+export const GetRecentlySolvedProblemsOutputSchema = z.array(RecentlySolvedProblemItemSchema);

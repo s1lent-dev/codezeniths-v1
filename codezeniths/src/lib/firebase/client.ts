@@ -164,6 +164,11 @@ class FcmClientService {
           setNotificationPermissionStatus(Notification.permission);
           void onFidRegisteredRef.current?.(installationId);
         });
+
+        // If permission is already granted, trigger registration to confirm/refresh FID
+        if (Notification.permission === 'granted') {
+          void this.registerFcm();
+        }
       };
 
       setupRegisteredListener();
@@ -175,11 +180,10 @@ class FcmClientService {
 
     // Foreground message listener
     useEffect(() => {
+      if (typeof window === 'undefined' || !('Notification' in window)) return;
       let unsubscribe: Unsubscribe | null = null;
 
       const setupListener = async () => {
-        if (!fid) return;
-
         const messaging = await this.getMessagingInstance();
         if (!messaging) return;
 
@@ -214,30 +218,40 @@ class FcmClientService {
               };
             }
           } else if (link) {
-            toastOptions.action = {
-              label: 'View',
-              onClick: () => router.push(link),
-            };
+            // toastOptions.action = {
+            //   label: 'View',
+            //   onClick: () => router.push(link),
+            // };
           }
 
           toast.info(title, description, toastOptions);
 
           try {
-            const n = new Notification(
-              payload.notification?.title || 'New Message',
-              {
-                body: payload.notification?.body || '',
-                data: link ? { url: link } : undefined,
-              }
-            );
+            if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+              void navigator.serviceWorker.ready.then((registration) => {
+                void registration.showNotification(title, {
+                  body: description,
+                  icon: payload.notification?.icon || '/icon.svg',
+                  data: link ? { url: link } : undefined,
+                });
+              });
+            } else {
+              const n = new Notification(
+                payload.notification?.title || 'New Message',
+                {
+                  body: payload.notification?.body || '',
+                  data: link ? { url: link } : undefined,
+                }
+              );
 
-            n.onclick = (event) => {
-              event.preventDefault();
-              const targetUrl = (event.target as Notification)?.data?.url;
-              if (targetUrl) router.push(targetUrl);
-            };
+              n.onclick = (event) => {
+                event.preventDefault();
+                const targetUrl = (event.target as Notification)?.data?.url;
+                if (targetUrl) router.push(targetUrl);
+              };
+            }
           } catch (error) {
-            console.error('Failed to trigger HTML5 notification overlay:', error);
+            console.error('Failed to trigger notification overlay:', error);
           }
         });
       };
@@ -247,7 +261,7 @@ class FcmClientService {
       return () => {
         if (unsubscribe) unsubscribe();
       };
-    }, [fid, router]);
+    }, [router]);
 
     return { fid, notificationPermissionStatus };
   };

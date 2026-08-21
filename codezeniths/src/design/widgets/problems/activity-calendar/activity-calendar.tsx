@@ -1,23 +1,28 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { cn } from '@codezeniths/design/cn';
 import { trpc } from '@/lib/trpc/trpc/trpc.client';
 import { Spinner, SpinnerVariant } from '@codezeniths/components';
+import { ActivityCalendarSkeleton } from './activity-calendar-skeleton';
 
 export interface ActivityCalendarProps {
     initialYear?: number;
     initialMonth?: number; // 1-12
+    isLoading?: boolean;
     className?: string;
     onMonthChange?: (year: number, month: number) => void;
 }
 
 const DAYS_HEADER = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
+export { ActivityCalendarSkeleton } from './activity-calendar-skeleton';
+
 export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
     initialYear,
     initialMonth,
+    isLoading: isPropsLoading = false,
     className,
     onMonthChange,
 }) => {
@@ -35,13 +40,19 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
     const month = currentDate.getMonth() + 1; // 1-indexed (1-12)
 
     // Query user monthly activity via tRPC
-    const { data: activityData, isLoading } = trpc.user.getUserMonthlyActivity.useQuery(
+    const { data: activityData, isLoading: isQueryLoading } = trpc.user.getUserMonthlyActivity.useQuery(
         { year, month },
         {
             staleTime: 1000 * 60 * 5, // 5 minutes cache
             refetchOnWindowFocus: false,
         }
     );
+
+    const isLoading = isPropsLoading || isQueryLoading;
+
+    if (isLoading && !activityData) {
+        return <ActivityCalendarSkeleton className={className} />;
+    }
 
     // Build solved dates set ("YYYY-MM-DD")
     const solvedDates = new Set<string>();
@@ -118,7 +129,7 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
                     <h2 className="text-lg font-bold tracking-tight text-heading-light dark:text-heading-dark ml-3">
                         Day {currentDayNumber}
                     </h2>
-                    {isLoading && <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="w-3.5 h-3.5 text-primary" />}
+                    {isQueryLoading && <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="w-3.5 h-3.5 text-primary" />}
                 </div>
 
                 {/* Right: Nav Controls with Emblem Badge in the Middle & slightly offset top */}

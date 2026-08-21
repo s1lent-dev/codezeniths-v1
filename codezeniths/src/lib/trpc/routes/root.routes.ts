@@ -9,6 +9,8 @@ import { userRouter } from './user.routes';
 import { notificationRouter } from './notification.routes';
 import { searchRouter } from './search.routes';
 import { favouriteRouter } from './favourite.routes';
+import { leaderboardRouter } from './leaderboard.routes';
+import { playlistRouter } from './playlist.routes';
 
 export const appRouter = createTRPCRouter({
     module: moduleRouter,
@@ -21,6 +23,8 @@ export const appRouter = createTRPCRouter({
     product: productRouter,
     skill: skillRouter,
     favourite: favouriteRouter,
+    leaderboard: leaderboardRouter,
+    playlist: playlistRouter,
 });
 
 

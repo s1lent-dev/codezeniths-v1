@@ -10,3 +10,6 @@ export * from './queries/notification.schema';
 export * from './queries/product.schema';
 export * from './queries/skill.schema';
 export * from './queries/search.schema';
+export * from './queries/leaderboard.schema';
+export * from './queries/playlist.schema';
+

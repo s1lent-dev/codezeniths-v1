@@ -1,6 +1,9 @@
+'use client';
+
 import { useQuery } from '@tanstack/react-query';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
 import { queryKeys } from '../query-keys';
+import { CACHE_TIERS } from '../cache-config';
 import type { IProductQueryService } from '../interfaces';
 import {
     GetProductsOutputSchema,
@@ -18,6 +21,7 @@ export class ProductQueryService implements IProductQueryService {
                 const raw = await trpcClient.product.getProducts.query(input);
                 return GetProductsOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.STATIC_CATALOG,
         });
     }
 
@@ -30,6 +34,7 @@ export class ProductQueryService implements IProductQueryService {
                 const raw = await trpcClient.product.getSingleProduct.query(validatedInput);
                 return GetSingleProductOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.STATIC_CATALOG,
         });
     }
 }

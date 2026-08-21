@@ -1,3 +1,5 @@
+'use client';
+
 import { lazy, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import type { ComponentType, FC, JSX, LazyExoticComponent, ReactNode } from 'react';

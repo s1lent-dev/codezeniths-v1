@@ -7,7 +7,10 @@ import {
     UpdateProblemTRPCOutputSchema,
     GetProblemTablePrimitivesTRPCInputSchema,
     GetProblemTablePrimitivesTRPCOutputSchema,
+    GetProblemProgressTRPCInputSchema,
     GetProblemProgressTRPCOutputSchema,
+    GetRecentlySolvedProblemsTRPCInputSchema,
+    GetRecentlySolvedProblemsTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { TRPCError } from '@trpc/server';
 import { logger } from '@/service/logging';
@@ -105,7 +108,7 @@ export class ProblemController implements IProblemController {
             });
         }
 
-        const { problemId, status, notes, favourite } = input;
+        const { problemId, status, notes, revisit, favourite } = input;
 
         try {
             // Apply status update if provided
@@ -114,6 +117,15 @@ export class ProblemController implements IProblemController {
                     userId,
                     problemId,
                     status,
+                });
+            }
+
+            // Apply revisit toggle/set if provided
+            if (revisit !== undefined) {
+                await ctx.queries.problem.updateProblemRevisit({
+                    userId,
+                    problemId,
+                    revisit,
                 });
             }
 
@@ -167,6 +179,7 @@ export class ProblemController implements IProblemController {
                 problemId: progress.problemId,
                 userId: progress.userId,
                 status: progress.status,
+                revisit: progress.revisit,
                 favourite: progress.favourite,
                 notes: progress.notes ?? null,
                 problemSlug: progress.problem.slug,
@@ -211,31 +224,69 @@ export class ProblemController implements IProblemController {
 
     async getProblemProgress({
         ctx,
+        input,
     }: {
         ctx: TRPCContext;
+        input?: z.infer<typeof GetProblemProgressTRPCInputSchema>;
     }): Promise<z.infer<typeof GetProblemProgressTRPCOutputSchema>> {
-        logger.info('Executing getProblemProgress controller');
+        logger.info('Executing getProblemProgress controller', { input });
 
-        const userId = ctx.user?.id;
-        if (!userId) {
-            logger.warn('Unauthorized attempt to fetch problem progress');
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
+        const targetUserId = input?.userId || ctx.user?.id;
+        if (!targetUserId) {
+            return {
+                problemsCount: 0,
+                problemsSolvedCount: 0,
+                problemsRevisitCount: 0,
+                problemNotSolvedCount: 0,
+                problemsSolvedPercentage: 0,
+                problemsCountByDifficulty: { easy: 0, medium: 0, hard: 0 },
+                problemsSolvedCountByDifficulty: { easy: 0, medium: 0, hard: 0 },
+            };
         }
 
         try {
             const result = await ctx.queries.problem.getProblemProgress({
-                userId,
+                userId: targetUserId,
             });
             return result;
         } catch (error: any) {
-            logger.error('Error in getProblemProgress controller', { error, userId });
+            logger.error('Error in getProblemProgress controller', { error, userId: targetUserId });
             if (error instanceof TRPCError) throw error;
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: error.message || 'Something went wrong while fetching problem progress.',
+                cause: error,
+            });
+        }
+    }
+
+    async getRecentlySolvedProblems({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetRecentlySolvedProblemsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetRecentlySolvedProblemsTRPCOutputSchema>> {
+        logger.info('Executing getRecentlySolvedProblems controller', { input });
+        const targetUserId = input.userId || ctx.user?.id;
+        if (!targetUserId) {
+            throw new TRPCError({
+                code: 'UNAUTHORIZED',
+                message: 'Target user ID or authentication required.',
+            });
+        }
+
+        try {
+            return await ctx.queries.problem.getRecentlySolvedProblems({
+                userId: targetUserId,
+                limit: input.limit,
+            });
+        } catch (error: any) {
+            logger.error('Error in getRecentlySolvedProblems controller', { error, userId: targetUserId });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error.message || 'Something went wrong while fetching recently solved problems.',
                 cause: error,
             });
         }

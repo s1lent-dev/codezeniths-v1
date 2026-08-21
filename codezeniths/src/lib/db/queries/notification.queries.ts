@@ -77,34 +77,128 @@ export class NotificationQueries implements INotificationQueries {
         .output(GetNotificationsOutputSchema)
         .handler(async (payload) => {
             logger.info('Executing getNotifications query', { payload });
-            const { userId, limit = 50, offset = 0 } = payload;
+            const {
+                userId,
+                status = 'all',
+                category = 'all',
+                sort = 'latest',
+                search,
+                limit = 6,
+                cursor,
+                offset,
+            } = payload;
 
-            // Fetch notifications that are personal OR global (userId is null)
-            const notifications = await prisma.notification.findMany({
-                where: {
+            // 1. Construct target & status condition
+            let targetCondition: any = {
+                OR: [{ userId }, { userId: null }],
+            };
+
+            if (status === 'unread') {
+                targetCondition = {
                     OR: [
-                        { userId },
-                        { userId: null },
+                        { userId, read: false },
+                        { userId: null, reads: { none: { userId } } },
                     ],
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-                take: limit,
-                skip: offset,
-                include: {
-                    reads: {
-                        where: { userId },
+                };
+            } else if (status === 'read') {
+                targetCondition = {
+                    OR: [
+                        { userId, read: true },
+                        { userId: null, reads: { some: { userId } } },
+                    ],
+                };
+            }
+
+            // 2. Category condition
+            let categoryCondition: any = undefined;
+            if (category === 'achievements') {
+                categoryCondition = {
+                    OR: ['rank', 'streak', 'module', 'solve', 'achievement', 'badge', 'tier', 'topic', 'tag'].map((cat) => ({
+                        type: { contains: cat, mode: 'insensitive' as const },
+                    })),
+                };
+            } else if (category === 'social') {
+                categoryCondition = {
+                    OR: ['profile_view', 'viewer', 'follow', 'playlist', 'bookmark', 'star', 'comment', 'like'].map((cat) => ({
+                        type: { contains: cat, mode: 'insensitive' as const },
+                    })),
+                };
+            } else if (category === 'system') {
+                categoryCondition = {
+                    OR: ['welcome', 'payment', 'subscription', 'session', 'device', 'security', 'lock', 'admin', 'broadcast', 'announcement', 'system'].map((cat) => ({
+                        type: { contains: cat, mode: 'insensitive' as const },
+                    })),
+                };
+            }
+
+            // 3. Search condition
+            let searchCondition: any = undefined;
+            if (search && search.trim()) {
+                const query = search.trim();
+                searchCondition = {
+                    OR: [
+                        { title: { contains: query, mode: 'insensitive' as const } },
+                        { message: { contains: query, mode: 'insensitive' as const } },
+                    ],
+                };
+            }
+
+            const whereClause: any = {
+                AND: [
+                    targetCondition,
+                    ...(categoryCondition ? [categoryCondition] : []),
+                    ...(searchCondition ? [searchCondition] : []),
+                ],
+            };
+
+            // Fetch limit + 1 items to determine hasNextPage
+            const takeCount = limit + 1;
+            const [rawNotifications, totalCount, personalUnreadCount, globalUnreadCount] = await Promise.all([
+                prisma.notification.findMany({
+                    where: whereClause,
+                    take: takeCount,
+                    orderBy: {
+                        createdAt: sort === 'oldest' ? 'asc' : 'desc',
                     },
-                },
-            });
+                    cursor: cursor ? { id: cursor } : undefined,
+                    skip: cursor ? 1 : typeof offset === 'number' && offset > 0 ? offset : undefined,
+                    include: {
+                        reads: {
+                            where: { userId },
+                        },
+                    },
+                }),
+                prisma.notification.count({
+                    where: whereClause,
+                }),
+                prisma.notification.count({
+                    where: {
+                        userId,
+                        read: false,
+                    },
+                }),
+                prisma.notification.count({
+                    where: {
+                        userId: null,
+                        reads: {
+                            none: {
+                                userId,
+                            },
+                        },
+                    },
+                }),
+            ]);
+
+            const hasNextPage = rawNotifications.length > limit;
+            const items = hasNextPage ? rawNotifications.slice(0, limit) : rawNotifications;
+            const nextCursor = hasNextPage && items.length > 0 ? items[items.length - 1].id : null;
 
             // Map and calculate if notification is read
-            const formattedNotifications = notifications.map((n) => {
-                const isRead = n.userId === null 
-                    ? n.reads.length > 0 // For global notifications, check NotificationRead join
-                    : n.read; // For personal notifications, check read column
-                
+            const formattedNotifications = items.map((n) => {
+                const isRead = n.userId === null
+                    ? n.reads.length > 0
+                    : n.read;
+
                 return {
                     id: n.id,
                     userId: n.userId,
@@ -116,33 +210,14 @@ export class NotificationQueries implements INotificationQueries {
                 };
             });
 
-            // Count unread notifications
-            // We need to count personal unread + global unread
-            const personalUnreadCount = await prisma.notification.count({
-                where: {
-                    userId,
-                    read: false,
-                },
-            });
-
-            // For global notifications, find notifications where userId is null,
-            // and no read record exists for this user in NotificationRead.
-            const globalUnreadCount = await prisma.notification.count({
-                where: {
-                    userId: null,
-                    reads: {
-                        none: {
-                            userId,
-                        },
-                    },
-                },
-            });
-
             const unreadCount = personalUnreadCount + globalUnreadCount;
 
             return {
                 notifications: formattedNotifications,
                 unreadCount,
+                totalCount,
+                nextCursor,
+                hasNextPage,
             };
         })
         .build();

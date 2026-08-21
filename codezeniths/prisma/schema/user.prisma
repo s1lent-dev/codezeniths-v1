@@ -1,79 +1,100 @@
 model User {
-  id                   String             @id @default(uuid(7)) @db.Uuid
-  username             String?            @unique
+  id                   String           @id @default(uuid(7)) @db.Uuid
+  username             String?          @unique
   firstName            String?
   lastName             String?
   name                 String
-  email                String             @unique
-  emailVerified        Boolean            @default(false)
+  email                String           @unique
+  emailVerified        Boolean          @default(false)
   image                String?
   resume               String?
-  dob                  DateTime?          @db.Date
+  dob                  DateTime?        @db.Date
   about                String?
   location             String?
-  twoFactorEnabled     Boolean?           @default(false)
-  phoneNumber          String?            @unique
+  twoFactorEnabled     Boolean?         @default(false)
+  phoneNumber          String?          @unique
   phoneNumberVerified  Boolean?
-  isOnboardingComplete Boolean            @default(false)
-  onBoardingStep       Int                @default(0)
-  isActive             Boolean            @default(true)
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  isOnboardingComplete Boolean          @default(false)
+  onBoardingStep       Int              @default(0)
+  isActive             Boolean          @default(true)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
   experienceLevel      ExperienceLevel?
   userType             UserType?
-  userSkills           UserSkill[]
-  deviceTokens         DeviceToken[]
-  learningGoals        LearningGoal[]
-  learningStyles       LearningStyle[]
-  sessions             Session[]
-  accounts             Account[]
-  twofactors           TwoFactor[]
   gender               Gender?
-  progress             ProblemProgress[]
-  role                 UserRole           @default(user)
-  socialLinks          UserSocialLinks?
-  preferences          UserPreference?
-  activity             UserActivity[]
-  notifications        Notification[]
-  notificationReads    NotificationRead[]
+  role                 UserRole         @default(user)
+
+  // Follow Relations
+  followers UserFollow[] @relation("UserFollowers")
+  following UserFollow[] @relation("UserFollowing")
+
+  // Profile View Relations
+  viewsGiven    ProfileView[] @relation("ProfileViewsGiven")
+  viewsReceived ProfileView[] @relation("ProfileViewsReceived")
+
+  // Leaderboard & Aggregate Stats Relations
+  globalStats UserGlobalStats?
+  moduleStats UserModuleStats[]
+
+  // Bookmark Relations
+  moduleBookmarks   ModuleBookmark[]
+  topicBookmarks    TopicBookmark[]
+  tagBookmarks      TagBookmark[]
+  playlistBookmarks UserPlaylistBookmark[]
+
+  // Custom Playlists
+  createdPlaylists Playlist[]
+
+  // Core User Relations
+  userSkills          UserSkill[]
+  deviceTokens        DeviceToken[]
+  learningGoals       LearningGoal[]
+  learningStyles      LearningStyle[]
+  sessions            Session[]
+  accounts            Account[]
+  twofactors          TwoFactor[]
+  progress            ProblemProgress[]
+  socialLinks         UserSocialLinks?
+  preferences         UserPreference?
+  userStreak          UserStreak?
+  userDailyActivities UserDailyActivity[]
+  userSearchHistories UserSearchHistory[]
+  notifications       Notification[]
+  notificationReads   NotificationRead[]
 
   @@index([username])
   @@map("user")
 }
 
-model UserSkill {
-  id           String           @id @default(uuid(7)) @db.Uuid
-  userId       String           @db.Uuid
-  skillId      String           @db.Uuid
-  proficiency  ProficiencyLevel @default(beginner)
-  isInterested Boolean          @default(true)
-  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  skill        Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+model UserFollow {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  followerId  String   @db.Uuid
+  followingId String   @db.Uuid
+  createdAt   DateTime @default(now())
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, skillId])
-  @@index([userId])
-  @@map("user_skill")
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("user_follow")
 }
 
-model ProblemProgress {
-  id        String         @id @default(uuid(7)) @db.Uuid
-  userId    String         @db.Uuid
-  problemId String         @db.Uuid
-  status    ProgressStatus @default(not_solved)
-  notes     String?
-  solvedAt  DateTime?
-  favourite Boolean        @default(false)
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  problem   Problem        @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+model ProfileView {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  viewerId     String?  @db.Uuid
+  viewedUserId String   @db.Uuid
+  ipAddress    String?
+  userAgent    String?
+  viewedAt     DateTime @default(now())
 
-  @@unique([userId, problemId])
-  @@index([userId, status])
-  @@map("problem_progress")
+  viewer     User? @relation("ProfileViewsGiven", fields: [viewerId], references: [id], onDelete: SetNull)
+  viewedUser User  @relation("ProfileViewsReceived", fields: [viewedUserId], references: [id], onDelete: Cascade)
+
+  @@index([viewedUserId, viewedAt(sort: Desc)])
+  @@index([viewerId])
+  @@map("profile_view")
 }
 
 model Session {
@@ -179,14 +200,73 @@ model UserPreference {
   @@map("user_preference")
 }
 
-model UserActivity {
+model UserStreak {
+  id     String @id @default(uuid(7)) @db.Uuid
+  userId String @unique @db.Uuid
+
+  // ─── Problem Solving Streak (🔥 Coding Streak) ───                                                        
+  currentStreak         Int       @default(0) // Consecutive days solving problems                           
+  longestStreak         Int       @default(0) // All-time best consecutive solve days                        
+  lastProblemSolvedDate DateTime? @db.Date // Last date a problem was solved                              
+  streakFreezeAvailable Int       @default(0) // Unused streak freezes held by user                          
+  streakFreezeUsed      Int       @default(0) // Total streak freezes redeemed all-time                      
+
+  // ─── Platform Presence & Check-In Days (📅 Visit Streak) ───                                              
+  totalActiveDays      Int       @default(0) // Total all-time distinct days on platform                    
+  currentCheckInStreak Int       @default(0) // Consecutive days visiting the platform                      
+  longestCheckInStreak Int       @default(0) // All-time best consecutive visit streak                      
+  lastActiveDate       DateTime? @db.Date // Last date user opened/visited the platform                  
+
+  // Relations & Timestamps                                                                                   
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([currentStreak(sort: Desc)])
+  @@index([longestStreak(sort: Desc)])
+  @@index([totalActiveDays(sort: Desc)])
+  @@map("user_streaks")
+}
+
+// =========================================================================                                  
+// 2. DAILY ACTIVITY LEDGER (1 row per user per day - powers the 365-day Heatmap)                             
+// =========================================================================                                  
+
+model UserDailyActivity {
   id     String   @id @default(uuid(7)) @db.Uuid
   userId String   @db.Uuid
   date   DateTime @db.Date
-  count  Int      @default(1)
-  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // ─── Daily Breakdown ───                                                                                  
+  checkedIn      Boolean @default(true) // User visited/checked in on this date                             
+  problemsSolved Int     @default(0) // Count of problems solved on this date                            
+  pointsEarned   Int     @default(0) // Points earned on this date (e.g. +10, +20, +30)                  
+  wasFreezed     Boolean @default(false) // Whether a streak freeze was consumed for this date               
+
+  // Relations & Timestamps                                                                                   
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@unique([userId, date])
-  @@index([userId, date])
-  @@map("user_activity")
+  @@index([userId, date(sort: Desc)])
+  @@map("user_daily_activities")
 }
+
+
+model UserSearchHistory {                                                                                                          
+      id         String   @id @default(uuid(7)) @db.Uuid                                                                               
+      userId     String   @db.Uuid                                                                                                     
+      collection SearchCollection   // "problem" | "topic" | "module" | "tag" | "product" | "user"                                               
+      resultId   String   // Target document/entity ID                                                                                 
+      title      String   // Display title / name                                                                                      
+      slug       String?  // Routing slug                                                                                              
+      metadata   Json     // Exact search document snapshot for zero-join instant rendering                                            
+      createdAt  DateTime @default(now())                                                                                              
+      updatedAt  DateTime @updatedAt                                                                                                   
+                                                                                                                                       
+      user User @relation(fields: [userId], references: [id], onDelete: Cascade)                                                       
+                                                                                                                                       
+      @@unique([userId, collection, resultId])                                                                                         
+      @@index([userId, updatedAt(sort: Desc)])                                                                                         
+      @@map("user_search_histories")                                                                                                   
+    }                        

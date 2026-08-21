@@ -32,7 +32,7 @@ export class TopicQueries implements ITopicQueries {
                 }
             }
 
-            // Find topic
+            // Find topic with module and problems
             const topic = await prisma.topic.findFirst({
                 where: {
                     OR: [
@@ -41,6 +41,13 @@ export class TopicQueries implements ITopicQueries {
                     ].filter((item) => Object.keys(item).length > 0),
                 },
                 include: {
+                    module: {
+                        select: {
+                            id: true,
+                            title: true,
+                            slug: true,
+                        },
+                    },
                     problems: {
                         orderBy: {
                             order: 'asc',
@@ -63,72 +70,150 @@ export class TopicQueries implements ITopicQueries {
                     .build();
             }
 
-            // Fetch user's progress for all problems in this topic
-            const allProblemIds = topic.problems.map((problem) => problem.id);
+            const allProblems = topic.problems;
+            const problemsCount = allProblems.length;
+            const allProblemIds = allProblems.map((p) => p.id);
 
-            const userProgress = await prisma.problemProgress.findMany({
+            let problemsSolvedCount = 0;
+            let problemsRevisitCount = 0;
+            let solvedProgress: Array<{ status: string; problemId: string; problem: { id: string; difficulty: any } | null }> = [];
+
+            let userProgress: Array<{ status: string; revisit: boolean; problemId: string; problem: { id: string; difficulty: any } | null }> = [];
+            if (userId) {
+                userProgress = await prisma.problemProgress.findMany({
+                    where: {
+                        userId,
+                        ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
+                    },
+                    select: {
+                        status: true,
+                        revisit: true,
+                        problemId: true,
+                        problem: {
+                            select: {
+                                id: true,
+                                difficulty: true,
+                            },
+                        },
+                    },
+                });
+
+                problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
+                problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
+                solvedProgress = userProgress.filter((p) => p.status === 'solved' && p.problem);
+            }
+
+            const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
+            const problemsSolvedPercentage =
+                problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
+
+            const problemsCountByDifficultyRaw = countBy(allProblems, (p) => p.difficulty);
+            const problemsCountByDifficulty = {
+                easy: problemsCountByDifficultyRaw.easy || 0,
+                medium: problemsCountByDifficultyRaw.medium || 0,
+                hard: problemsCountByDifficultyRaw.hard || 0,
+            };
+
+            const problemsSolvedCountByDifficultyRaw = countBy(solvedProgress, (p) => p.problem!.difficulty);
+            const problemsSolvedCountByDifficulty = {
+                easy: problemsSolvedCountByDifficultyRaw.easy || 0,
+                medium: problemsSolvedCountByDifficultyRaw.medium || 0,
+                hard: problemsSolvedCountByDifficultyRaw.hard || 0,
+            };
+
+            // ── Semantic Similarity Ranking for Top 10 Similar Topics ────────────
+            const activeProblemIdsSet = new Set(allProblemIds);
+
+            // Fetch candidate topics (excluding current topic)
+            const candidates = await prisma.topic.findMany({
                 where: {
-                    userId,
-                    problemId: { in: allProblemIds },
+                    id: { not: topic.id },
                 },
-                select: {
-                    problemId: true,
-                    status: true,
-                    favourite: true,
+                include: {
+                    module: {
+                        select: {
+                            title: true,
+                            slug: true,
+                        },
+                    },
+                    problems: {
+                        select: {
+                            id: true,
+                        },
+                    },
                 },
             });
 
-            const progressMap = new Map(
-                userProgress.map((p) => [p.problemId, { status: p.status, favourite: p.favourite }])
-            );
+            // Score each candidate topic
+            const scoredCandidates = candidates.map((cand) => {
+                let score = 0;
 
-            let problemsSolvedCount = 0;
-
-            const mappedProblems = topic.problems.map((problem) => {
-                const progress = progressMap.get(problem.id);
-                const status = progress?.status || 'not_solved';
-                const favourite = progress?.favourite ?? false;
-
-                if (status === 'solved') {
-                    problemsSolvedCount++;
+                // 1. Same Module match (+40)
+                if (topic.moduleId && cand.moduleId === topic.moduleId) {
+                    score += 40;
                 }
 
+                // 2. Shared problem co-occurrence (+10 per shared problem, max 30)
+                const sharedCount = cand.problems.filter((p) => activeProblemIdsSet.has(p.id)).length;
+                score += Math.min(30, sharedCount * 10);
+
+                // 3. Same Proficiency Level match (+20)
+                if (topic.level && cand.level === topic.level) {
+                    score += 20;
+                }
+
+                // 4. Popularity bonus based on problem count (+10 max)
+                score += Math.min(10, cand.problems.length);
+
                 return {
-                    id: problem.id,
-                    title: problem.title,
-                    slug: problem.slug,
-                    difficulty: problem.difficulty,
-                    order: problem.order,
-                    articleUrl: problem.articleUrl ?? null,
-                    problemUrl: problem.problemUrl ?? null,
-                    favouriteCount: problem.favouriteCount ?? 0,
-                    status,
-                    favourite,
-                    tags: problem.tags.map((pt) => ({
-                        id: pt.tag.id,
-                        name: pt.tag.name,
-                        slug: pt.tag.slug,
-                    })),
+                    id: cand.id,
+                    title: cand.title,
+                    slug: cand.slug,
+                    level: cand.level,
+                    moduleTitle: cand.module?.title,
+                    moduleSlug: cand.module?.slug,
+                    problemsCount: cand.problems.length,
+                    score,
                 };
             });
 
-            const problemsCount = topic.problems.length;
-            const problemsSolvedPercentage =
-                problemsCount > 0
-                    ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2))
-                    : 0;
+            // Sort by score DESC, then title ASC
+            scoredCandidates.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title));
+
+            const top10SimilarTopics = scoredCandidates.slice(0, 10).map(({ score, ...rest }) => rest);
+
+            let isBookmarked = false;
+            if (userId) {
+                const bm = await prisma.topicBookmark.findUnique({
+                    where: {
+                        userId_topicId: {
+                            userId,
+                            topicId: topic.id,
+                        },
+                    },
+                });
+                isBookmarked = !!bm;
+            }
 
             return {
                 id: topic.id,
                 title: topic.title,
-                description: topic.description,
                 slug: topic.slug,
+                description: topic.description,
                 level: topic.level,
                 order: topic.order,
-                problemsCount,
-                problemsSolvedCount,
-                problemsSolvedPercentage,
-                problems: mappedProblems,
+                isBookmarked,
+                module: topic.module ? { title: topic.module.title, slug: topic.module.slug } : undefined,
+                progress: {
+                    problemsCount,
+                    problemsSolvedCount,
+                    problemsRevisitCount,
+                    problemNotSolvedCount,
+                    problemsSolvedPercentage,
+                    problemsCountByDifficulty,
+                    problemsSolvedCountByDifficulty,
+                },
+                similarTopics: top10SimilarTopics,
             };
         })
         .build();
@@ -199,10 +284,11 @@ export class TopicQueries implements ITopicQueries {
             const userProgress = await prisma.problemProgress.findMany({
                 where: {
                     userId,
-                    problemId: { in: allProblemIds },
+                    ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
                 },
                 select: {
                     status: true,
+                    revisit: true,
                     problem: {
                         select: {
                             id: true,
@@ -228,7 +314,7 @@ export class TopicQueries implements ITopicQueries {
 
             const problemsCount = allProblems.length;
             const problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-            const problemsRevisitCount = userProgress.filter((p) => p.status === 'revisit').length;
+            const problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
             const problemsAttemptedCount = userProgress.length;
             const problemsSolvedPercentage = problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
 

@@ -6,6 +6,13 @@ import {
     GetSingleModuleTRPCOutputSchema,
     GetSingleModuleProgressTRPCInputSchema,
     GetSingleModuleProgressTRPCOutputSchema,
+    GetRecentlySolvedModuleTRPCOutputSchema,
+    GetModulesWithTopicsTRPCInputSchema,
+    GetModulesWithTopicsTRPCOutputSchema,
+    ToggleModuleBookmarkTRPCInputSchema,
+    ToggleModuleBookmarkTRPCOutputSchema,
+    ToggleTopicBookmarkTRPCInputSchema,
+    ToggleTopicBookmarkTRPCOutputSchema,
 } from '@/schemas/trpc';
 
 export const moduleRouter = createTRPCRouter({
@@ -22,4 +29,23 @@ export const moduleRouter = createTRPCRouter({
         .input(GetSingleModuleProgressTRPCInputSchema)
         .output(GetSingleModuleProgressTRPCOutputSchema)
         .query(({ ctx, input }) => ctx.controllers.module.getSingleModuleProgress({ ctx, input })),
+
+    getRecentlySolvedModule: publicProcedure
+        .output(GetRecentlySolvedModuleTRPCOutputSchema)
+        .query(({ ctx }) => ctx.controllers.module.getRecentlySolvedModule({ ctx })),
+
+    getModulesWithTopics: publicProcedure
+        .input(GetModulesWithTopicsTRPCInputSchema)
+        .output(GetModulesWithTopicsTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.module.getModulesWithTopics({ ctx, input })),
+
+    toggleModuleBookmark: protectedProcedure
+        .input(ToggleModuleBookmarkTRPCInputSchema)
+        .output(ToggleModuleBookmarkTRPCOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.module.toggleModuleBookmark({ ctx, input })),
+
+    toggleTopicBookmark: protectedProcedure
+        .input(ToggleTopicBookmarkTRPCInputSchema)
+        .output(ToggleTopicBookmarkTRPCOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.module.toggleTopicBookmark({ ctx, input })),
 });

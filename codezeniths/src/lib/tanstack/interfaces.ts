@@ -17,86 +17,15 @@ import {
     GetTagsFilteredTRPCInputSchema,
 
     GetProblemsTRPCInputSchema,
-    UpdateProblemTRPCInputSchema,
 
     GetNotificationsTRPCInputSchema,
-    MarkAsReadTRPCInputSchema,
 
-    SignInWithEmailInputSchema,
-    SignUpWithEmailInputSchema,
-    SignInWithUsernameInputSchema,
-    ChangeUsernameInputSchema,
-    SignInWithMagicLinkInputSchema,
-    SendMagicLinkInputSchema,
-    SignInWithPhoneNumberInputSchema,
-    SignUpWithPhoneNumberInputSchema,
-    SendVerificationOTPInputSchema,
-    EnableTwoFactorInputSchema,
-    DisableTwoFactorInputSchema,
-    VerifyTwoFactorInputSchema,
-    GetBackupCodesInputSchema,
-    SignInWithEmailOTPInputSchema,
-    SignUpWithEmailOTPInputSchema,
-    SendVerificationEmailInputSchema,
-    UpdateUserInputSchema,
-    ChangePasswordInputSchema,
-    SetPasswordInputSchema,
-    DeleteUserInputSchema,
-    ForgetPasswordInputSchema,
-    ResetPasswordInputSchema,
-    VerifyEmailInputSchema,
-    SignInSocialInputSchema,
-    SignInIdTokenInputSchema,
-    VerifyPhoneNumberInputSchema,
-    UpdatePhoneNumberInputSchema,
-    IsUsernameAvailableInputSchema,
     CheckEmailAvailabilityInputSchema,
-    CheckEmailAvailabilityOutputSchema,
     CheckPhoneAvailabilityInputSchema,
-    CheckPhoneAvailabilityOutputSchema,
     AutocompleteTRPCInputSchema,
     MoreLikeThisTRPCInputSchema,
     SearchTRPCInputSchema,
 } from '@/schemas/trpc';
-// ─── Auth Query Service Interface ──────────────────────────────────────────────
-
-export interface IAuthQueryService {
-    getSession(): any;
-    signInWithEmail(input: z.infer<typeof SignInWithEmailInputSchema>): any;
-    signUpWithEmail(input: z.infer<typeof SignUpWithEmailInputSchema>): any;
-    signInWithUsername(input: z.infer<typeof SignInWithUsernameInputSchema>): any;
-    changeUsername(input: z.infer<typeof ChangeUsernameInputSchema>): any;
-    signInWithMagicLink(input: z.infer<typeof SignInWithMagicLinkInputSchema>): any;
-    sendMagicLink(input: z.infer<typeof SendMagicLinkInputSchema>): any;
-    signInWithPhoneNumber(input: z.infer<typeof SignInWithPhoneNumberInputSchema>): any;
-    signUpWithPhoneNumber(input: z.infer<typeof SignUpWithPhoneNumberInputSchema>): any;
-    sendVerificationOTP(input: z.infer<typeof SendVerificationOTPInputSchema>): any;
-    enableTwoFactor(input: z.infer<typeof EnableTwoFactorInputSchema>): any;
-    disableTwoFactor(input: z.infer<typeof DisableTwoFactorInputSchema>): any;
-    verifyTwoFactor(input: z.infer<typeof VerifyTwoFactorInputSchema>): any; // legacy verification method
-    verifyTwoFactorTotp(input: z.infer<typeof VerifyTwoFactorInputSchema>): any;
-    verifyTwoFactorOtp(input: z.infer<typeof VerifyTwoFactorInputSchema>): any;
-    verifyTwoFactorBackupCode(input: z.infer<typeof VerifyTwoFactorInputSchema>): any;
-    getBackupCodes(input: z.infer<typeof GetBackupCodesInputSchema>): any;
-    signInWithEmailOTP(input: z.infer<typeof SignInWithEmailOTPInputSchema>): any;
-    signUpWithEmailOTP(input: z.infer<typeof SignUpWithEmailOTPInputSchema>): any;
-    sendVerificationEmail(input: z.infer<typeof SendVerificationEmailInputSchema>): any;
-    signOut(): any;
-
-    // Interactive Flow Routes
-    updateUser(input: z.infer<typeof UpdateUserInputSchema>): any;
-    changePassword(input: z.infer<typeof ChangePasswordInputSchema>): any;
-    setPassword(input: z.infer<typeof SetPasswordInputSchema>): any;
-    deleteUser(input: z.infer<typeof DeleteUserInputSchema>): any;
-    forgetPassword(input: z.infer<typeof ForgetPasswordInputSchema>): any;
-    resetPassword(input: z.infer<typeof ResetPasswordInputSchema>): any;
-    verifyEmail(input: z.infer<typeof VerifyEmailInputSchema>): any;
-    signInSocial(input: z.infer<typeof SignInSocialInputSchema>): any;
-    signInIdToken(input: z.infer<typeof SignInIdTokenInputSchema>): any;
-    verifyPhoneNumber(input: z.infer<typeof VerifyPhoneNumberInputSchema>): any;
-    updatePhoneNumber(input: z.infer<typeof UpdatePhoneNumberInputSchema>): any;
-    isUsernameAvailable(input: z.infer<typeof IsUsernameAvailableInputSchema>): any;
-}
 
 // ─── User Query Service Interface ──────────────────────────────────────────────
 
@@ -129,6 +58,25 @@ export interface IUserQueryService {
     updateOnboardingStep3(): any;
     extractResumeSkills(): any;
     getExtractionProgress(variables: any, options?: any): any;
+    getActiveStreak(): any;
+    getUserStreak(input?: { userId?: string }): any;
+    recordDailyCheckIn(): any;
+
+    getFollowStats(input: { userId: string }, options?: { enabled?: boolean }): any;
+    getFollowers(input: { userId: string; page?: number; limit?: number }, options?: { enabled?: boolean }): any;
+    getFollowing(input: { userId: string; page?: number; limit?: number }, options?: { enabled?: boolean }): any;
+    followUser(): any;
+    unfollowUser(): any;
+    recordProfileView(): any;
+    getProfileViewStats(input?: { userId?: string }, options?: { enabled?: boolean }): any;
+    getProfileViewers(input?: { userId?: string; page?: number; limit?: number }, options?: { enabled?: boolean }): any;
+    getProfileViewersInfinite(input?: { userId?: string; limit?: number }, options?: { enabled?: boolean }): any;
+    getUserYearlyActivity(input?: { userId?: string; year?: number }, options?: { enabled?: boolean }): any;
+    getUserProfileDetails(input?: { username?: string; userId?: string }, options?: { enabled?: boolean }): any;
+    updateUsername(): any;
+    updateEmail(): any;
+    updatePhoneNumber(): any;
+    updateUserPreferences(): any;
 }
 
 // ─── Module Query Service Interface ─────────────────────────────────────────────
@@ -137,6 +85,10 @@ export interface IModuleQueryService {
     getModules(): any;
     getSingleModule(input: z.infer<typeof GetSingleModuleTRPCInputSchema>): any;
     getSingleModuleProgress(input: z.infer<typeof GetSingleModuleProgressTRPCInputSchema>): any;
+    getRecentlySolvedModule(): any;
+    getModulesWithTopics(): any;
+    toggleModuleBookmark(): any;
+    toggleTopicBookmark(): any;
 }
 
 // ─── Topic Query Service Interface ──────────────────────────────────────────────
@@ -154,6 +106,8 @@ export interface ITagQueryService {
     getSingleTagProblems(input: z.infer<typeof GetSingleTagProblemsTRPCInputSchema>): any;
     getSingleTagProblemProgress(input: z.infer<typeof GetSingleTagProblemProgressTRPCInputSchema>): any;
     getSingleTag(input: z.infer<typeof GetSingleTagTRPCInputSchema>): any;
+    toggleTagBookmark(): any;
+    getUserTagProgressByLevel(input?: { userId?: string; moduleSlug?: string; moduleId?: string }, options?: { enabled?: boolean }): any;
 }
 
 // ─── Favourite Query Service Interface ──────────────────────────────────────────
@@ -162,20 +116,21 @@ export interface IFavouriteQueryService {
     getFavouriteInfo(): any;
 }
 
-
 // ─── Problem Query Service Interface ────────────────────────────────────────────
 
 export interface IProblemQueryService {
     getProblemTablePrimitives(input?: any): any;
     getProblems(input: z.infer<typeof GetProblemsTRPCInputSchema>): any;
     updateProblem(): any;
-    getProblemProgress(): any;
+    getProblemProgress(input?: { userId?: string }, options?: { enabled?: boolean }): any;
+    getRecentlySolvedProblems(input?: { userId?: string; limit?: number }, options?: { enabled?: boolean }): any;
 }
 
 // ─── Notification Query Service Interface ────────────────────────────────────────
 
 export interface INotificationQueryService {
     getNotifications(input?: z.infer<typeof GetNotificationsTRPCInputSchema>): any;
+    getNotificationsInfinite(filters?: any, limit?: number): any;
     markAsRead(): any;
     markAllAsRead(): any;
     upsertDeviceToken(): any;
@@ -188,12 +143,19 @@ export interface ISearchQueryService {
     search(collectionName: string, input: Omit<z.infer<typeof SearchTRPCInputSchema>, 'collection'>, enabled?: boolean): any;
     autocomplete(collectionName: string, input: Omit<z.infer<typeof AutocompleteTRPCInputSchema>, 'collection'>, enabled?: boolean): any;
     getRecommendations(collectionName: string, input: Omit<z.infer<typeof MoreLikeThisTRPCInputSchema>, 'collection'>, enabled?: boolean): any;
+    getRecentHistory(options?: { enabled?: boolean; limit?: number }): any;
+    getSearchHistoryInfinite(filters?: any, limit?: number): any;
+    getSearchHistoryStats(): any;
+    recordSelection(): any;
+    deleteHistoryItem(): any;
+    clearHistory(): any;
 }
+
 
 // ─── Skill Query Service Interface ──────────────────────────────────────────────
 
 export interface ISkillQueryService {
-    getSkills(): any;
+    getSkills(input?: any): any;
     createSkill(): any;
 }
 
@@ -204,4 +166,42 @@ export interface IProductQueryService {
     getSingleProduct(input: any): any;
 }
 
+// ─── Leaderboard Query Service Interface ─────────────────────────────────────────
+
+export interface ILeaderboardQueryService {
+    getLeaderboardPaginated(input: {
+        scope?: 'global' | 'following' | 'followers' | 'network';
+        moduleId?: string | null;
+        search?: string | null;
+        page?: number;
+        limit?: number;
+    }): any;
+
+    getLeaderboardInfinite(input: {
+        scope?: 'global' | 'following' | 'followers' | 'network';
+        moduleId?: string | null;
+        search?: string | null;
+        limit?: number;
+    }): any;
+
+    getUserRankAndPercentile(input?: {
+        userId?: string;
+        moduleId?: string | null;
+    }, options?: { enabled?: boolean }): any;
+}
+
+// ─── Playlist Query Service Interface ──────────────────────────────────────────
+
+export interface IPlaylistQueryService {
+    getMyPlaylists(options?: { enabled?: boolean }): any;
+    getCommunityPlaylists(input?: any, options?: { enabled?: boolean }): any;
+    getCommunityPlaylistsInfinite(input?: any): any;
+    getPlaylistInfo(input: { slug?: string; id?: string }, options?: { enabled?: boolean }): any;
+    createPlaylist(): any;
+    updatePlaylist(): any;
+    removePlaylist(): any;
+    toggleBookmark(): any;
+    toggleProblemInPlaylist(): any;
+    getPlaylistsForProblem(input: { problemId: string }, options?: { enabled?: boolean }): any;
+}
 

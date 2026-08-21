@@ -480,6 +480,68 @@ export const Interactive3DEffectStory: Story = {
   ),
 };
 
+export const Interactive3DNativeHTMLStory: Story = {
+  render: () => (
+    <div className="w-full max-w-6xl mx-auto bg-[#111827] border border-gray-800 rounded-2xl p-16 flex items-center justify-center overflow-hidden h-[600px] relative">
+      <Carousel 
+        effect={CarouselEffect.INTERACTIVE3D} 
+        options={{ loop: true, align: 'center' }}
+        className="w-full z-10"
+      >
+        <CarouselContent className="h-[400px]">
+          {MOVIES.map((movie, index) => (
+            <CarouselItem key={index} className="basis-[600px] transform-gpu flex justify-center items-center">
+              <div className="interactive-3d-wrapper will-change-transform transform-gpu flex justify-center items-center w-[600px] h-[340px] rounded-3xl">
+                {/* Pure Native HTML Card Container without In-House Card component */}
+                <div 
+                  className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-gray-700 hover:border-indigo-500 rounded-3xl p-8 flex flex-col justify-between shadow-2xl transition-[border-color,box-shadow,color,background-color] duration-300 group cursor-pointer"
+                  onClick={() => alert(`Card clicked for: ${movie.title}`)}
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+                        Native Slide #{index + 1}
+                      </span>
+                      <span className="text-gray-400 text-xs font-mono">
+                        ID: {index + 100}
+                      </span>
+                    </div>
+
+                    <h1 className="text-white text-3xl font-extrabold tracking-tight group-hover:text-indigo-400 transition-colors">
+                      {movie.title}
+                    </h1>
+
+                    <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
+                      {movie.desc}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-700/60">
+                    <span className="text-xs text-gray-400">
+                      Standard HTML Elements
+                    </span>
+
+                    <button
+                      type="button"
+                      className="px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all cursor-pointer shadow-md hover:scale-105"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        alert(`Redirecting to: /modules/${movie.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`);
+                      }}
+                    >
+                      Test Redirect Button →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+    </div>
+  ),
+};
+
 export const SpringEffectStory: Story = {
   render: () => (
     <div className="w-full max-w-[1920px] mx-auto bg-[#fdf9e8] p-16 flex items-center justify-center overflow-hidden h-[866px] relative">

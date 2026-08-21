@@ -15,6 +15,10 @@ import {
     GetSingleTagProblemProgressOutputSchema,
     GetSingleTagInputSchema,
     GetSingleTagOutputSchema,
+    ToggleTagBookmarkInputSchema,
+    ToggleTagBookmarkOutputSchema,
+    GetUserTagProgressByLevelInputSchema,
+    GetUserTagProgressByLevelOutputSchema,
 } from '@codezeniths/schemas/db';
 import { ITagQueries } from './interfaces/tag.queries.interface';
 
@@ -24,6 +28,7 @@ import { z } from 'zod';
 const tagsCache = redisService.cache.createStore<z.infer<typeof GetTagsOutputSchema>>({
     namespace: 'tags',
     ttlSeconds: 86400, // 24 hours
+    schema: GetTagsOutputSchema,
 });
 
 export class TagQueries implements ITagQueries {
@@ -90,17 +95,30 @@ export class TagQueries implements ITagQueries {
             });
 
             let solvedProblemIds = new Set<string>();
+            let bookmarkedTagIds = new Set<string>();
             if (userId) {
-                const userSolved = await prisma.problemProgress.findMany({
-                    where: {
-                        userId,
-                        status: 'solved',
-                    },
-                    select: {
-                        problemId: true,
-                    },
-                });
+                const [userSolved, userBookmarks] = await Promise.all([
+                    prisma.problemProgress.findMany({
+                        where: {
+                            userId,
+                            status: 'solved',
+                        },
+                        select: {
+                            problemId: true,
+                        },
+                    }),
+                    prisma.tagBookmark.findMany({
+                        where: {
+                            userId,
+                            tagId: { in: tags.map((t) => t.id) },
+                        },
+                        select: {
+                            tagId: true,
+                        },
+                    }),
+                ]);
                 solvedProblemIds = new Set(userSolved.map((p) => p.problemId));
+                bookmarkedTagIds = new Set(userBookmarks.map((b) => b.tagId));
             }
 
             return tags.map((tag) => {
@@ -121,6 +139,7 @@ export class TagQueries implements ITagQueries {
                     problemsCount,
                     problemsSolvedCount,
                     problemsSolvedPercentage,
+                    isBookmarked: bookmarkedTagIds.has(tag.id),
                     createdAt: tag.createdAt,
                 };
             });
@@ -184,7 +203,7 @@ export class TagQueries implements ITagQueries {
             const userProgress = await prisma.problemProgress.findMany({
                 where: {
                     userId,
-                    problemId: { in: problemIds },
+                    ...(problemIds.length <= 100 ? { problemId: { in: problemIds } } : {}),
                 },
                 select: {
                     problemId: true,
@@ -301,10 +320,11 @@ export class TagQueries implements ITagQueries {
             const userProgress = await prisma.problemProgress.findMany({
                 where: {
                     userId,
-                    problemId: { in: allProblemIds },
+                    ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
                 },
                 select: {
                     status: true,
+                    revisit: true,
                     problem: {
                         select: {
                             id: true,
@@ -316,8 +336,8 @@ export class TagQueries implements ITagQueries {
 
             const problemsCount = allProblems.length;
             const problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-            const problemsRevisitCount = userProgress.filter((p) => p.status === 'revisit').length;
-            const problemNotSolvedCount = Math.max(0, problemsCount - (problemsSolvedCount + problemsRevisitCount));
+            const problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
+            const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
             const problemsSolvedPercentage = problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
 
             const solvedProgress = userProgress.filter((p) => p.status === 'solved' && p.problem);
@@ -397,15 +417,16 @@ export class TagQueries implements ITagQueries {
             let problemsRevisitCount = 0;
             let solvedProgress: typeof userProgress = [];
 
-            let userProgress: Array<{ status: string; problemId: string; problem: { id: string; difficulty: any } | null }> = [];
+            let userProgress: Array<{ status: string; revisit: boolean; problemId: string; problem: { id: string; difficulty: any } | null }> = [];
             if (userId) {
                 userProgress = await prisma.problemProgress.findMany({
                     where: {
                         userId,
-                        problemId: { in: allProblemIds },
+                        ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
                     },
                     select: {
                         status: true,
+                        revisit: true,
                         problemId: true,
                         problem: {
                             select: {
@@ -417,11 +438,11 @@ export class TagQueries implements ITagQueries {
                 });
 
                 problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-                problemsRevisitCount = userProgress.filter((p) => p.status === 'revisit').length;
+                problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
                 solvedProgress = userProgress.filter((p) => p.status === 'solved' && p.problem);
             }
 
-            const problemNotSolvedCount = Math.max(0, problemsCount - (problemsSolvedCount + problemsRevisitCount));
+            const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
             const problemsSolvedPercentage =
                 problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
 
@@ -498,12 +519,26 @@ export class TagQueries implements ITagQueries {
 
             const top10SimilarTags = scoredCandidates.slice(0, 10).map(({ score, ...rest }) => rest);
 
+            let isBookmarked = false;
+            if (userId) {
+                const bm = await prisma.tagBookmark.findUnique({
+                    where: {
+                        userId_tagId: {
+                            userId,
+                            tagId: tag.id,
+                        },
+                    },
+                });
+                isBookmarked = !!bm;
+            }
+
             return {
                 id: tag.id,
                 title: tag.name,
                 slug: tag.slug,
                 description: tag.description,
                 level: tag.level,
+                isBookmarked,
                 module: tag.module ? { title: tag.module.title, slug: tag.module.slug } : undefined,
                 progress: {
                     problemsCount,
@@ -515,6 +550,145 @@ export class TagQueries implements ITagQueries {
                     problemsSolvedCountByDifficulty,
                 },
                 similarTags: top10SimilarTags,
+            };
+        })
+        .build();
+
+    toggleTagBookmark = qRPC()
+        .input(ToggleTagBookmarkInputSchema)
+        .output(ToggleTagBookmarkOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing toggleTagBookmark query', { payload });
+            const { tagId, tagSlug, userId } = payload;
+
+            const tag = await prisma.tag.findFirst({
+                where: {
+                    OR: [
+                        tagId ? { id: tagId } : {},
+                        tagSlug ? { slug: tagSlug } : {},
+                    ].filter((item) => Object.keys(item).length > 0),
+                },
+                select: { id: true },
+            });
+
+            if (!tag) {
+                throw new AppErrorBuilder('Tag not found')
+                    .setCode(ErrorCode.NOT_FOUND)
+                    .build();
+            }
+
+            const existing = await prisma.tagBookmark.findUnique({
+                where: {
+                    userId_tagId: {
+                        userId,
+                        tagId: tag.id,
+                    },
+                },
+            });
+
+            if (existing) {
+                await prisma.tagBookmark.delete({
+                    where: {
+                        id: existing.id,
+                    },
+                });
+                return { isBookmarked: false, tagId: tag.id };
+            } else {
+                await prisma.tagBookmark.create({
+                    data: {
+                        userId,
+                        tagId: tag.id,
+                    },
+                });
+                return { isBookmarked: true, tagId: tag.id };
+            }
+        })
+        .build();
+
+    getUserTagProgressByLevel = qRPC()
+        .input(GetUserTagProgressByLevelInputSchema)
+        .output(GetUserTagProgressByLevelOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing getUserTagProgressByLevel query', { payload });
+            const { userId, moduleSlug, moduleId } = payload;
+
+            const solvedRecords = await prisma.problemProgress.findMany({
+                where: {
+                    userId,
+                    status: 'solved',
+                },
+                select: {
+                    problemId: true,
+                },
+            });
+
+            const solvedProblemIds = new Set(solvedRecords.map((r) => r.problemId));
+
+            const isModuleFilter = moduleSlug && moduleSlug !== 'all';
+            const tags = await prisma.tag.findMany({
+                where: {
+                    level: {
+                        in: ['fundamental', 'intermediate', 'advanced'],
+                    },
+                    ...(isModuleFilter
+                        ? { module: { slug: moduleSlug } }
+                        : moduleId
+                        ? { moduleId }
+                        : {}),
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    level: true,
+                    problems: {
+                        select: {
+                            problemId: true,
+                        },
+                    },
+                },
+            });
+
+            const processedTags = tags.map((t) => {
+                const totalProblems = t.problems.length;
+                let solvedCount = 0;
+                for (const p of t.problems) {
+                    if (solvedProblemIds.has(p.problemId)) {
+                        solvedCount++;
+                    }
+                }
+                return {
+                    id: t.id,
+                    name: t.name,
+                    slug: t.slug,
+                    level: t.level,
+                    solvedCount,
+                    totalProblems,
+                };
+            });
+
+            const sortBySolvedDesc = (a: (typeof processedTags)[number], b: (typeof processedTags)[number]) =>
+                b.solvedCount - a.solvedCount || b.totalProblems - a.totalProblems || a.name.localeCompare(b.name);
+
+            const fundamental = processedTags
+                .filter((t) => t.level === 'fundamental')
+                .sort(sortBySolvedDesc)
+                .slice(0, 10);
+
+            const intermediate = processedTags
+                .filter((t) => t.level === 'intermediate')
+                .sort(sortBySolvedDesc)
+                .slice(0, 10);
+
+            const advanced = processedTags
+                .filter((t) => t.level === 'advanced')
+                .sort(sortBySolvedDesc)
+                .slice(0, 10);
+
+            return {
+                fundamental,
+                intermediate,
+                advanced,
             };
         })
         .build();

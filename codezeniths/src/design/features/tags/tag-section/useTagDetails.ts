@@ -11,11 +11,22 @@ export function useTagDetails() {
         slug: tagSlug,
     });
 
+    const toggleTagBookmarkMutation = tagQueryService.toggleTagBookmark();
+
+    const handleToggleBookmark = () => {
+        if (!tagSlug && !tagDetails?.id) return;
+        toggleTagBookmarkMutation.mutate({
+            tagSlug: tagSlug || undefined,
+            tagId: tagDetails?.id || undefined,
+        });
+    };
+
     return {
         tagSlug,
         tagDetails,
         isLoading,
         isError,
         error,
+        handleToggleBookmark,
     };
 }

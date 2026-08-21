@@ -161,7 +161,7 @@ export const TagsGridSection: React.FC = () => {
                                             <span>All Levels</span>
                                             {selectedLevel === undefined && <Check className="size-3.5" />}
                                         </Button>
-                                        {(['beginner', 'intermediate', 'advanced'] as Level[]).map((lvl) => (
+                                        {(['fundamental', 'intermediate', 'advanced'] as Level[]).map((lvl) => (
                                             <Button
                                                 type="button"
                                                 key={lvl}

@@ -41,12 +41,14 @@ type OnClickHandler = (e: MouseEvent<HTMLButtonElement>) => void | Promise<void>
 
 /** @prop_interfaces */
 
+type ThemeColor = string | { light: string; dark: string };
+
 // Shimmer effect props
 interface ShimmerEffectProps {
-    shimmerColor?: string;
+    shimmerColor?: ThemeColor;
     shimmerSize?: string;
     shimmerDuration?: string;
-    background?: string;
+    background?: ThemeColor;
 }
 
 // Ripple effect props
@@ -157,6 +159,7 @@ export const BUTTON_EFFECT_PROP_KEYS = [
 /** @exports */
 export { ButtonVariant, ButtonSize, ButtonEffect };
 export type {
+    ThemeColor,
     ShimmerEffectProps,
     RippleEffectProps,
     PulsatingEffectProps,

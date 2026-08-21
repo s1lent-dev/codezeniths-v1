@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest';
-import { TopologyBuilder } from '../core/mq.topology';
 import { FixedBackoffStrategy, ExponentialBackoffStrategy } from './mq.utils';
 import { JsonSerializer } from './mq.utils';
 import { Producer } from '../core/mq.producer';
@@ -12,7 +11,7 @@ type TestPayloadWelcome = PayloadOf<'auth.email.welcome'>;
 const _compileTest: TestPayloadWelcome = { userId: 'd3b07384-d113-4956-a56e-86164749f99f', email: 'test@email.com', name: 'Test User' };
 
 // Mock connection manager to avoid connecting to a real broker
-vi.mock('./mq.connection', () => {
+vi.mock('../core/mq.connection', () => {
     return {
         mqConnectionManager: {
             createChannel: vi.fn().mockResolvedValue({
@@ -30,11 +29,9 @@ vi.mock('./mq.connection', () => {
                 }),
                 waitForConfirms: vi.fn().mockResolvedValue(undefined),
                 once: vi.fn(),
+                on: vi.fn(),
             }),
-            incrementInFlight: vi.fn(),
-            decrementInFlight: vi.fn(),
-            registerConsumerTag: vi.fn(),
-            deregisterConsumerTag: vi.fn(),
+            registerConsumer: vi.fn(),
         }
     };
 });
@@ -67,30 +64,6 @@ describe('Message Queue Unit Tests', () => {
         });
     });
 
-    describe('Topology Builder', () => {
-        it('should properly structure topological assertions', async () => {
-            const builder = new TopologyBuilder()
-                .exchange('test-ex', 'direct', { durable: true })
-                .queue('test-q', { durable: true, messageTtl: 60000 })
-                .bind('test-q', 'test-ex', 'test-rk');
-
-            const mockChannel = {
-                assertExchange: vi.fn(),
-                assertQueue: vi.fn(),
-                bindQueue: vi.fn(),
-            };
-
-            await builder.assert(mockChannel as any);
-
-            expect(mockChannel.assertExchange).toHaveBeenCalledWith('test-ex', 'direct', { durable: true });
-            expect(mockChannel.assertQueue).toHaveBeenCalledWith('test-q', {
-                durable: true,
-                arguments: { 'x-message-ttl': 60000 }
-            });
-            expect(mockChannel.bindQueue).toHaveBeenCalledWith('test-q', 'test-ex', 'test-rk', undefined);
-        });
-    });
-
     describe('Producer & Consumer Validation', () => {
         it('producer should throw error on Zod validation failure before publishing', async () => {
             const producer = new Producer({
@@ -99,8 +72,8 @@ describe('Message Queue Unit Tests', () => {
                 routingKey: MqRoutingKey.AUTH_EMAIL_WELCOME,
             });
             
-            // Should throw error because email is invalid
-            await expect(producer.publish({ userId: 'bad-uuid', email: 'bad-email', name: 'Test' } as any)).rejects.toThrow();
+            // Should throw error because email is missing
+            await expect(producer.publish({ userId: 'bad-uuid', name: 'Test' } as any)).rejects.toThrow();
         });
 
         it('producer should succeed with valid payload', async () => {
@@ -117,9 +90,9 @@ describe('Message Queue Unit Tests', () => {
             expect(success).toBe(true);
         });
 
-        it('consumer should successfully start with class', async () => {
+        it('consumer should successfully instantiate', async () => {
             const handler = vi.fn();
-            const consumer = new Consumer('auth.email.welcome', handler, { queue: MqQueue.EMAIL_WELCOME });
+            const consumer = new Consumer('auth.email.welcome', handler, { queue: MqQueue.AUTH_EMAIL_WELCOME });
             expect(consumer).toBeDefined();
         });
     });

@@ -1,12 +1,26 @@
 'use client';
 
 import React from 'react';
-import { TagCard, TagCardItem } from './TagCard';
 import { Button, Grid, Typography, TypographyVariant, TypographyWeight } from '@codezeniths/components';
 import { Card } from '@codezeniths/modules';
 import { Tag } from 'lucide-react';
+import { CategoryCard, CategoryCardGridSkeleton } from '@codezeniths/design/widgets/shared';
+import { Level } from '@prisma/client';
 
-import { TagsGridSkeleton } from '../tags-skeleton';
+export interface TagCardItem {
+    id: string;
+    title: string;
+    slug: string;
+    description?: string | null;
+    level?: Level | string | null;
+    module?: {
+        title: string;
+        slug: string;
+    };
+    problemsCount: number;
+    problemsSolvedCount: number;
+    problemsSolvedPercentage: number;
+}
 
 export interface TagsGridProps {
     tags?: TagCardItem[];
@@ -22,7 +36,7 @@ export const TagsGrid: React.FC<TagsGridProps> = ({
     onClearFilters,
 }) => {
     if (isLoading) {
-        return <TagsGridSkeleton />;
+        return <CategoryCardGridSkeleton count={6} />;
     }
 
     if (!tags || tags.length === 0) {
@@ -50,7 +64,22 @@ export const TagsGrid: React.FC<TagsGridProps> = ({
     return (
         <Grid cols={3} className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
             {tags.map((tag) => (
-                <TagCard key={tag.id} tag={tag} />
+                <CategoryCard
+                    key={tag.id}
+                    data={{
+                        id: tag.id,
+                        title: tag.title,
+                        slug: tag.slug,
+                        href: `/tags/${tag.slug}`,
+                        description: tag.description,
+                        level: tag.level,
+                        moduleSlug: tag.module?.slug,
+                        problemsCount: tag.problemsCount,
+                        problemsSolvedCount: tag.problemsSolvedCount,
+                        problemsSolvedPercentage: tag.problemsSolvedPercentage,
+                        type: 'tag',
+                    }}
+                />
             ))}
         </Grid>
     );

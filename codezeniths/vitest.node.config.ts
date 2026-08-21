@@ -13,6 +13,7 @@ export default defineConfig({
     environment: 'node',
     include: [
       'src/service/payment/**/*.test.ts',
+      'src/service/mail/**/*.test.ts',
       'src/lib/firebase/**/*.test.ts',
       'src/lib/storage/**/*.test.ts'
     ],

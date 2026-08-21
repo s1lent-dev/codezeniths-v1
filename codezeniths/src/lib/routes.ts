@@ -6,19 +6,17 @@ export const publicRoutes = [
     '/privacy',
     '/verify-email',
     '/verify-phone',
+    '/forgot-password',
+    '/reset-password',
 ];
 
 export const authRoutes = [
     '/sign-in',
     '/sign-up',
-    '/forgot-password',
-    '/reset-password',
 ];
 
 export const onboardingRoutes = [
     '/complete-profile',
-    '/verify-email',
-    '/verify-phone',
 ];
 
 /**

@@ -1,6 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+'use client';
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
 import { queryKeys } from '../query-keys';
+import { CACHE_TIERS } from '../cache-config';
 import type { IModuleQueryService } from '../interfaces';
 import {
     GetModulesTRPCOutputSchema,
@@ -8,6 +11,10 @@ import {
     GetSingleModuleTRPCOutputSchema,
     GetSingleModuleProgressTRPCInputSchema,
     GetSingleModuleProgressTRPCOutputSchema,
+    GetRecentlySolvedModuleTRPCOutputSchema,
+    GetModulesWithTopicsTRPCOutputSchema,
+    ToggleModuleBookmarkTRPCInputSchema,
+    ToggleTopicBookmarkTRPCInputSchema,
 } from '@/schemas/trpc';
 import { z } from 'zod';
 
@@ -19,10 +26,11 @@ export class ModuleQueryService implements IModuleQueryService {
                 const raw = await trpcClient.module.getModules.query();
                 return GetModulesTRPCOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.STATIC_CATALOG,
         });
     }
 
-    getSingleModule(input: z.infer<typeof GetSingleModuleTRPCInputSchema>) {
+    getSingleModule(input: z.infer<typeof GetSingleModuleTRPCInputSchema>, options?: { enabled?: boolean }) {
         const validatedInput = GetSingleModuleTRPCInputSchema.parse(input);
         const cacheKey = validatedInput.slug || validatedInput.id || 'unknown';
         return useQuery({
@@ -31,6 +39,8 @@ export class ModuleQueryService implements IModuleQueryService {
                 const raw = await trpcClient.module.getSingleModule.query(validatedInput);
                 return GetSingleModuleTRPCOutputSchema.parse(raw);
             },
+            enabled: options?.enabled,
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -42,6 +52,54 @@ export class ModuleQueryService implements IModuleQueryService {
             queryFn: async () => {
                 const raw = await trpcClient.module.getSingleModuleProgress.query(validatedInput);
                 return GetSingleModuleProgressTRPCOutputSchema.parse(raw);
+            },
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
+
+    getRecentlySolvedModule() {
+        return useQuery({
+            queryKey: queryKeys.module.recentlySolved(),
+            queryFn: async () => {
+                const raw = await trpcClient.module.getRecentlySolvedModule.query();
+                return GetRecentlySolvedModuleTRPCOutputSchema.parse(raw);
+            },
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
+
+    getModulesWithTopics() {
+        return useQuery({
+            queryKey: queryKeys.module.listWithTopics(),
+            queryFn: async () => {
+                const raw = await trpcClient.module.getModulesWithTopics.query();
+                return GetModulesWithTopicsTRPCOutputSchema.parse(raw);
+            },
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
+
+    toggleModuleBookmark() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (input: z.infer<typeof ToggleModuleBookmarkTRPCInputSchema>) => {
+                return await trpcClient.module.toggleModuleBookmark.mutate(input);
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ['module'] });
+            },
+        });
+    }
+
+    toggleTopicBookmark() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (input: z.infer<typeof ToggleTopicBookmarkTRPCInputSchema>) => {
+                return await trpcClient.module.toggleTopicBookmark.mutate(input);
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ['module'] });
+                queryClient.invalidateQueries({ queryKey: ['topic'] });
             },
         });
     }

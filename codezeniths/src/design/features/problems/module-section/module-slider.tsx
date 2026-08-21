@@ -7,14 +7,21 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@codezeniths/design/cn';
 import { ModuleItem } from './useModules';
 import { ModuleCard } from './module-card';
+import { ModuleSliderSkeleton } from './module-slider-skeleton';
 
 export interface ModuleSliderProps {
     modules: ModuleItem[];
+    isLoading?: boolean;
     onSolve?: (slug: string) => void;
     className?: string;
 }
 
-export const ModuleSlider: React.FC<ModuleSliderProps> = ({ modules, onSolve, className }) => {
+export const ModuleSlider: React.FC<ModuleSliderProps> = ({
+    modules,
+    isLoading = false,
+    onSolve,
+    className,
+}) => {
     const [emblaRef, emblaApi] = useEmblaCarousel(
         {
             align: 'start',
@@ -52,6 +59,10 @@ export const ModuleSlider: React.FC<ModuleSliderProps> = ({ modules, onSolve, cl
     const scrollNext = useCallback(() => {
         if (emblaApi) emblaApi.scrollNext();
     }, [emblaApi]);
+
+    if (isLoading) {
+        return <ModuleSliderSkeleton className={className} />;
+    }
 
     if (!modules || modules.length === 0) return null;
 

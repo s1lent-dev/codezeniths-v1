@@ -238,28 +238,31 @@ Interactive3DWrapperLayer.displayName = 'Interactive3DWrapperLayer';
 // 5. Magic Background Layer (Layer 2)
 // ─────────────────────────────────────────────────────────────
 export const MagicBackgroundLayer: React.FC<{
+    data?: {
+        overlayRef?: React.RefObject<HTMLDivElement | null>;
+        borderGlowBackground?: any;
+        innerSpotlightBackground?: any;
+    };
+    overlayRef?: React.RefObject<HTMLDivElement | null>;
+    borderGlowBackground?: any;
+    innerSpotlightBackground?: any;
     gradientSize?: number;
     gradientColor?: string;
     gradientFrom?: string;
     gradientTo?: string;
     gradientOpacity?: number;
-}> = ({
-    gradientSize,
-    gradientColor,
-    gradientFrom,
-    gradientTo,
-    gradientOpacity = 0.8,
-}) => {
-    const {
-        overlayRef,
-        borderGlowBackground,
-        innerSpotlightBackground,
-    } = useMagicBackgroundEffect({
-        gradientSize,
-        gradientColor,
-        gradientFrom,
-        gradientTo,
+}> = (props) => {
+    const hookData = useMagicBackgroundEffect({
+        gradientSize: props.gradientSize,
+        gradientColor: props.gradientColor,
+        gradientFrom: props.gradientFrom,
+        gradientTo: props.gradientTo,
     });
+
+    const overlayRef = props.data?.overlayRef ?? props.overlayRef ?? hookData.overlayRef;
+    const borderGlowBackground = props.data?.borderGlowBackground ?? props.borderGlowBackground ?? hookData.borderGlowBackground;
+    const innerSpotlightBackground = props.data?.innerSpotlightBackground ?? props.innerSpotlightBackground ?? hookData.innerSpotlightBackground;
+    const gradientOpacity = props.gradientOpacity ?? 0.8;
 
     return (
         <>
@@ -487,18 +490,24 @@ GradientBorderLayer.displayName = 'GradientBorderLayer';
 // 10. Gradient Hover Border Layer (Layer 3)
 // ─────────────────────────────────────────────────────────────
 export const GradientHoverBorderLayer: React.FC<{
+    data?: {
+        overlayRef?: React.RefObject<HTMLDivElement | null>;
+        background?: any;
+    };
+    overlayRef?: React.RefObject<HTMLDivElement | null>;
+    background?: any;
     gradientColor?: string;
     gradientSize?: number;
     gradientOpacity?: number;
-}> = ({
-    gradientColor,
-    gradientSize,
-    gradientOpacity = 0.6,
-}) => {
-    const {
-        overlayRef,
-        background,
-    } = useGradientHoverBorderEffect({ gradientColor, gradientSize });
+}> = (props) => {
+    const hookData = useGradientHoverBorderEffect({
+        gradientColor: props.gradientColor,
+        gradientSize: props.gradientSize,
+    });
+
+    const overlayRef = props.data?.overlayRef ?? props.overlayRef ?? hookData.overlayRef;
+    const background = props.data?.background ?? props.background ?? hookData.background;
+    const gradientOpacity = props.gradientOpacity ?? 0.6;
 
     return (
         <motion.div

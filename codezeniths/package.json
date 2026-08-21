@@ -7,11 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "storybook:build": "storybook build",
+    "test": "vitest run --config vitest.unit.config.ts",
+    "test:unit": "vitest run --config vitest.unit.config.ts",
     "test:storybook": "vitest --project storybook",
-    "db:seed": "npx tsx src/lib/db/seed/seed.ts"
+    "email": "email dev --dir src/service/mail/templates -p 3001",
+    "email:export": "email export --dir src/service/mail/templates",
+    "db:seed": "pnpx tsx src/lib/db/seed/seed.ts",
+    "search:reindex": "pnpx tsx src/scripts/run-reindex.ts",
+    "search:reindex-users": "pnpx tsx src/scripts/reindex-users.ts"
   },
   "pnpm": {
     "overrides": {
@@ -54,7 +61,7 @@
     "@radix-ui/react-toggle-group": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.10",
     "@react-email/components": "^1.0.12",
-    "@react-email/render": "^2.0.9",
+    "@react-email/render": "^2.1.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@react-three/postprocessing": "^3.0.4",
@@ -109,6 +116,7 @@
     "react": "19.2.7",
     "react-day-picker": "^10.0.1",
     "react-dom": "19.2.7",
+    "react-email": "^6.9.2",
     "react-error-boundary": "^6.1.2",
     "react-hook-form": "^7.79.0",
     "react-resizable-panels": "^4.11.2",

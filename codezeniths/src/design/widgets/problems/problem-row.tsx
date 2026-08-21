@@ -2,10 +2,19 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Star, ExternalLink } from 'lucide-react';
+import { Star, ExternalLink, Bookmark, MoreVertical } from 'lucide-react';
 import { cn } from '@codezeniths/design/cn';
-import { TableRow, TableCell } from '@codezeniths/modules';
+import {
+    TableRow,
+    TableCell,
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+} from '@codezeniths/modules';
 import { Checkbox, Tooltip, TooltipTrigger, TooltipContent } from '@codezeniths/components';
+import { ProblemPlaylistSubmenu } from './problem-playlist-submenu';
 
 export interface ProblemItem {
     id: string;
@@ -16,8 +25,11 @@ export interface ProblemItem {
     articleUrl?: string | null;
     problemUrl?: string | null;
     favouriteCount?: number;
+    topicId?: string | null;
+    topicSlug?: string | null;
     tags?: Array<{ id: string; name: string; slug: string }>;
-    status?: 'solved' | 'revisit' | 'not_solved' | null;
+    status?: 'solved' | 'not_solved' | null;
+    revisit?: boolean | null;
     favourite?: boolean | null;
 }
 
@@ -26,8 +38,10 @@ export interface ProblemRowProps extends React.HTMLAttributes<HTMLTableRowElemen
     problem: ProblemItem;
     index?: number;
     isSolved?: boolean;
+    isRevisit?: boolean;
     isFavourite?: boolean;
     onToggleSolved?: (problemId: string, currentSolved: boolean) => void;
+    onToggleRevisit?: (problemId: string, currentRevisit: boolean) => void;
     onToggleFavourite?: (problemId: string, currentFavourite: boolean) => void;
     className?: string;
 }
@@ -39,8 +53,10 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
             index = 0,
             'data-index': dataIndex,
             isSolved = problem.status === 'solved',
+            isRevisit = Boolean(problem.revisit),
             isFavourite = Boolean(problem.favourite),
             onToggleSolved,
+            onToggleRevisit,
             onToggleFavourite,
             className,
             ...props
@@ -84,9 +100,9 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
                     </Link>
                 </TableCell>
 
-                {/* 3. Right Actions (External Link, Difficulty, Favourite Star) Column */}
-                <TableCell className="w-44 min-w-44 max-w-44 pr-4 py-3 text-right align-middle rounded-r-md border-0">
-                    <div className="flex items-center justify-end gap-3">
+                {/* 3. Right Actions (External Link, Difficulty, 3-Dot Actions Dropdown) Column */}
+                <TableCell className="w-36 min-w-36 max-w-36 pr-4 py-3 text-right align-middle rounded-r-md border-0">
+                    <div className="flex items-center justify-end gap-2.5">
                         {/* External Link */}
                         {problem.problemUrl || problem.articleUrl ? (
                             <Tooltip>
@@ -97,7 +113,7 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
                                         rel="noopener noreferrer"
                                         className="text-muted-light dark:text-muted-dark hover:text-primary transition-colors p-1"
                                     >
-                                        <ExternalLink className="w-4.5 h-4.5" />
+                                        <ExternalLink className="w-4 h-4" />
                                     </a>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="text-xs">
@@ -105,13 +121,13 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
                                 </TooltipContent>
                             </Tooltip>
                         ) : (
-                            <div className="w-5 h-5" />
+                            <div className="w-4 h-4" />
                         )}
 
                         {/* Difficulty Badge */}
                         <span
                             className={cn(
-                                'text-xs font-semibold w-14 text-center',
+                                'text-xs font-semibold w-12 text-center',
                                 problem.difficulty === 'hard' && 'text-rose-500 dark:text-rose-400',
                                 problem.difficulty === 'medium' && 'text-amber-500 dark:text-amber-400',
                                 problem.difficulty === 'easy' && 'text-emerald-500 dark:text-emerald-400'
@@ -120,26 +136,58 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
                             {formatDifficulty(problem.difficulty)}
                         </span>
 
-                        {/* Favourite Star Icon */}
-                        <Tooltip>
-                            <TooltipTrigger asChild>
+                        {/* 3-Dot Actions Dropdown Menu */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
                                 <button
                                     type="button"
+                                    className="size-7 rounded-md flex items-center justify-center text-muted-light dark:text-muted-dark hover:text-body-light-shade3 dark:hover:text-body-dark hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 transition-colors cursor-pointer"
+                                    title="Problem options"
+                                >
+                                    <MoreVertical className="size-4" />
+                                    <span className="sr-only">Actions</span>
+                                </button>
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent
+                                align="end"
+                                sideOffset={6}
+                                className="w-52 p-1 rounded-md bg-foreground-light dark:bg-foreground-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-lg text-body-light-shade3 dark:text-body-dark space-y-0.5 z-100"
+                            >
+                                {/* Toggle Favourite */}
+                                <DropdownMenuItem
                                     onClick={() => onToggleFavourite?.(problem.id, isFavourite)}
-                                    className="rounded text-muted-light dark:text-muted-dark hover:text-amber-500 dark:hover:text-amber-400 transition-colors cursor-pointer p-1"
+                                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-amber-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none"
                                 >
                                     <Star
                                         className={cn(
-                                            'w-4.5 h-4.5 transition-transform active:scale-125',
-                                            isFavourite && 'fill-amber-400 text-amber-400'
+                                            'size-3.5 shrink-0',
+                                            isFavourite ? 'fill-amber-400 text-amber-400' : 'text-muted-light dark:text-muted-dark'
                                         )}
                                     />
-                                </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="text-xs">
-                                {isFavourite ? 'Remove from Favourites' : 'Add to Favourites'}
-                            </TooltipContent>
-                        </Tooltip>
+                                    <span>{isFavourite ? 'Remove from Favourites' : 'Add to Favourites'}</span>
+                                </DropdownMenuItem>
+
+                                {/* Toggle Revisit */}
+                                <DropdownMenuItem
+                                    onClick={() => onToggleRevisit?.(problem.id, isRevisit)}
+                                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-blue-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none"
+                                >
+                                    <Bookmark
+                                        className={cn(
+                                            'size-3.5 shrink-0',
+                                            isRevisit ? 'fill-blue-500 text-blue-500' : 'text-muted-light dark:text-muted-dark'
+                                        )}
+                                    />
+                                    <span>{isRevisit ? 'Remove from Revisit' : 'Mark for Revisit'}</span>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator className="my-1 bg-foreground-light-shade3 dark:bg-foreground-dark-shade1 h-px" />
+
+                                {/* Add to Playlist Submenu */}
+                                <ProblemPlaylistSubmenu problemId={problem.id} />
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </TableCell>
             </TableRow>

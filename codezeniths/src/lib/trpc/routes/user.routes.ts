@@ -48,6 +48,40 @@ import {
     GetResumeDownloadUrlOutputSchema,
     GetUserMonthlyActivityInputSchema,
     GetUserMonthlyActivityOutputSchema,
+    GetActiveStreakTRPCOutputSchema,
+    GetUserStreakTRPCInputSchema,
+    GetUserStreakTRPCOutputSchema,
+    RecordDailyCheckInTRPCInputSchema,
+    RecordDailyCheckInTRPCOutputSchema,
+    FollowUserTRPCInputSchema,
+
+    FollowUserTRPCOutputSchema,
+    UnfollowUserTRPCInputSchema,
+    UnfollowUserTRPCOutputSchema,
+    GetFollowStatsTRPCInputSchema,
+    GetFollowStatsTRPCOutputSchema,
+    GetFollowersTRPCInputSchema,
+    GetFollowersTRPCOutputSchema,
+    GetFollowingTRPCInputSchema,
+    GetFollowingTRPCOutputSchema,
+    RecordProfileViewTRPCInputSchema,
+    RecordProfileViewTRPCOutputSchema,
+    GetProfileViewStatsTRPCInputSchema,
+    GetProfileViewStatsTRPCOutputSchema,
+    GetProfileViewersTRPCInputSchema,
+    GetProfileViewersTRPCOutputSchema,
+    GetUserYearlyActivityTRPCInputSchema,
+    GetUserYearlyActivityTRPCOutputSchema,
+    GetUserProfileDetailsTRPCInputSchema,
+    GetUserProfileDetailsTRPCOutputSchema,
+    UpdateUsernameInputSchema,
+    UpdateUsernameOutputSchema,
+    UpdateEmailInputSchema,
+    UpdateEmailOutputSchema,
+    UpdateUserPhoneNumberInputSchema,
+    UpdateUserPhoneNumberOutputSchema,
+    UpdateUserPreferencesInputSchema,
+    UpdateUserPreferencesOutputSchema,
 } from "@/schemas/trpc";
 
 export const userRouter = createTRPCRouter({
@@ -189,5 +223,91 @@ export const userRouter = createTRPCRouter({
         .input(GetUserMonthlyActivityInputSchema)
         .output(GetUserMonthlyActivityOutputSchema)
         .query(({ ctx, input }) => ctx.controllers.user.getUserMonthlyActivity({ ctx, input })),
+
+    getActiveStreak: publicProcedure
+        .output(GetActiveStreakTRPCOutputSchema)
+        .query(({ ctx }) => ctx.controllers.user.getActiveStreak({ ctx })),
+
+    getUserStreak: publicProcedure
+        .input(GetUserStreakTRPCInputSchema)
+        .output(GetUserStreakTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.user.getUserStreak({ ctx, input })),
+
+    recordDailyCheckIn: protectedProcedure
+        .input(RecordDailyCheckInTRPCInputSchema)
+        .output(RecordDailyCheckInTRPCOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.user.recordDailyCheckIn({ ctx, input })),
+
+
+    followUser: protectedProcedure
+        .input(FollowUserTRPCInputSchema)
+        .output(FollowUserTRPCOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.user.followUser({ ctx, input })),
+
+    unfollowUser: protectedProcedure
+        .input(UnfollowUserTRPCInputSchema)
+        .output(UnfollowUserTRPCOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.user.unfollowUser({ ctx, input })),
+
+    getFollowStats: publicProcedure
+        .input(GetFollowStatsTRPCInputSchema)
+        .output(GetFollowStatsTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.user.getFollowStats({ ctx, input })),
+
+    getFollowers: publicProcedure
+        .input(GetFollowersTRPCInputSchema)
+        .output(GetFollowersTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.user.getFollowers({ ctx, input })),
+
+    getFollowing: publicProcedure
+        .input(GetFollowingTRPCInputSchema)
+        .output(GetFollowingTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.user.getFollowing({ ctx, input })),
+
+    recordProfileView: publicProcedure
+        .input(RecordProfileViewTRPCInputSchema)
+        .output(RecordProfileViewTRPCOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.user.recordProfileView({ ctx, input })),
+
+    getProfileViewStats: publicProcedure
+        .input(GetProfileViewStatsTRPCInputSchema)
+        .output(GetProfileViewStatsTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.user.getProfileViewStats({ ctx, input })),
+
+    getProfileViewers: publicProcedure
+        .input(GetProfileViewersTRPCInputSchema)
+        .output(GetProfileViewersTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.user.getProfileViewers({ ctx, input })),
+
+    getUserYearlyActivity: publicProcedure
+        .input(GetUserYearlyActivityTRPCInputSchema)
+        .output(GetUserYearlyActivityTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.user.getUserYearlyActivity({ ctx, input })),
+
+    getUserProfileDetails: publicProcedure
+        .input(GetUserProfileDetailsTRPCInputSchema)
+        .output(GetUserProfileDetailsTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.user.getUserProfileDetails({ ctx, input })),
+
+    updateUsername: protectedProcedure
+        .input(UpdateUsernameInputSchema)
+        .output(UpdateUsernameOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.user.updateUsername({ ctx, input })),
+
+    updateEmail: protectedProcedure
+        .input(UpdateEmailInputSchema)
+        .output(UpdateEmailOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.user.updateEmail({ ctx, input })),
+
+    updatePhoneNumber: protectedProcedure
+        .input(UpdateUserPhoneNumberInputSchema)
+        .output(UpdateUserPhoneNumberOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.user.updatePhoneNumber({ ctx, input })),
+
+    updateUserPreferences: protectedProcedure
+        .input(UpdateUserPreferencesInputSchema)
+        .output(UpdateUserPreferencesOutputSchema)
+        .mutation(({ ctx, input }) => ctx.controllers.user.updateUserPreferences({ ctx, input })),
 });
+
 

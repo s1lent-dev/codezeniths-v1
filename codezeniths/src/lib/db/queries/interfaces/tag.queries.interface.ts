@@ -7,6 +7,10 @@ import {
     GetSingleTagProblemsOutputSchema,
     GetSingleTagProblemProgressInputSchema,
     GetSingleTagProblemProgressOutputSchema,
+    ToggleTagBookmarkInputSchema,
+    ToggleTagBookmarkOutputSchema,
+    GetUserTagProgressByLevelInputSchema,
+    GetUserTagProgressByLevelOutputSchema,
 } from '@codezeniths/schemas/db';
 
 export interface ITagQueries {
@@ -27,5 +31,13 @@ export interface ITagQueries {
     getSingleTag: (
         payload: z.infer<typeof import('@codezeniths/schemas/db').GetSingleTagInputSchema>,
     ) => Promise<z.infer<typeof import('@codezeniths/schemas/db').GetSingleTagOutputSchema>>;
+
+    toggleTagBookmark: (
+        payload: z.infer<typeof ToggleTagBookmarkInputSchema>,
+    ) => Promise<z.infer<typeof ToggleTagBookmarkOutputSchema>>;
+
+    getUserTagProgressByLevel: (
+        payload: z.infer<typeof GetUserTagProgressByLevelInputSchema>,
+    ) => Promise<z.infer<typeof GetUserTagProgressByLevelOutputSchema>>;
 }
 

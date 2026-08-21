@@ -36,12 +36,15 @@ export class NotificationController implements INotificationController {
         }
 
         try {
-            const limit = input?.limit;
-            const offset = input?.offset;
             const result = await ctx.queries.notification.getNotifications({
                 userId,
-                limit,
-                offset,
+                status: input?.status,
+                category: input?.category,
+                sort: input?.sort,
+                search: input?.search,
+                limit: input?.limit,
+                cursor: input?.cursor,
+                offset: input?.offset,
             });
             return result;
         } catch (error: any) {

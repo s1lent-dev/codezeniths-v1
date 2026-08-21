@@ -15,6 +15,7 @@ import {
     LifeBuoy,
     LogOut,
     Command,
+    ListMusic,
 } from 'lucide-react';
 import { cn } from '@codezeniths/design/cn';
 import { authClient } from '@codezeniths/lib/auth/auth';
@@ -34,6 +35,7 @@ import {
 import { Card, CardBackgroundEffect } from '@codezeniths/modules';
 import { Logo } from '../common/logo';
 import { useNavigationStore } from '../store/navigation.store';
+import { SidebarProfileCompletionCard } from './sidebar-profile-completion-card';
 
 const sidebarGroups = [
     {
@@ -41,7 +43,9 @@ const sidebarGroups = [
         items: [
             { name: 'Problems', href: '/problemset', icon: LayoutDashboard },
             { name: 'Modules', href: '/modules', icon: BookOpen },
+            { name: 'Leaderboards', href: '/leaderboards', icon: Trophy },
             { name: 'Tags', href: '/tags', icon: Tags },
+            { name: 'Playlists', href: '/playlists', icon: ListMusic },
             { name: 'Favourites', href: '/favourites', icon: Heart },
         ],
     },
@@ -86,7 +90,7 @@ export const MobileSidebarSheet = () => {
 
                 {/* Body — identical content to desktop sidebar */}
                 <ScrollArea className="flex-1 min-h-0 w-full" type="auto">
-                    <div className="py-6 px-6 space-y-8">
+                    <div className="py-6 pr-8 pl-4 space-y-8">
                         {sidebarGroups.map((group, idx) => (
                             <div key={idx}>
                                 <Typography
@@ -106,7 +110,7 @@ export const MobileSidebarSheet = () => {
                                             >
                                                 <div
                                                     className={cn(
-                                                        'flex items-center gap-4 px-4 py-2.5 rounded-lg transition-all duration-200 group',
+                                                        'flex items-center gap-4 px-4 py-2.5 rounded-md transition-all duration-200 group',
                                                         isActive
                                                             ? 'bg-primary/10 text-primary font-semibold'
                                                             : 'text-body-light dark:text-body-dark hover:bg-primary/5 hover:text-heading-light dark:hover:text-heading-dark'
@@ -144,7 +148,7 @@ export const MobileSidebarSheet = () => {
                                 <Link href="/settings" onClick={() => setMobileSidebarOpen(false)}>
                                     <div
                                         className={cn(
-                                            'flex items-center gap-4 px-4 py-2.5 rounded-lg transition-all duration-200 group',
+                                            'flex items-center gap-4 px-4 py-2.5 rounded-md transition-all duration-200 group',
                                             pathname.startsWith('/settings')
                                                 ? 'bg-primary/10 text-primary font-semibold'
                                                 : 'text-body-light dark:text-body-dark hover:bg-primary/5 hover:text-heading-light dark:hover:text-heading-dark'
@@ -189,50 +193,9 @@ export const MobileSidebarSheet = () => {
 
                         <Separator className="bg-primary/10" />
 
-                        {/* Profile Progression Card */}
+                        {/* Profile Completion / Strength Progress Card */}
                         <div className="pt-2">
-                            <Card
-                                effectConfig={{
-                                    backgroundEffect: CardBackgroundEffect.MAGIC,
-                                    backgroundEffectProps: {
-                                        [CardBackgroundEffect.MAGIC]: {
-                                            gradientSize: 200,
-                                            gradientColor: '#2B2F4C',
-                                            gradientFrom: '#6A7CFF',
-                                            gradientTo: '#9E7AFF',
-                                            gradientOpacity: 0.5,
-                                        },
-                                    },
-                                }}
-                                className="relative overflow-hidden bg-foreground-light dark:bg-foreground-dark rounded-xl p-4 shadow-lg"
-                            >
-                                <Container size="none" direction="row" align="start" padded={false} gap="3" className="relative z-10 mb-6">
-                                    <div className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center shrink-0 bg-primary/10">
-                                        <Command className="w-5 h-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <Typography variant={TypographyVariant.H6} className="text-foreground font-bold text-base leading-tight tracking-tight">
-                                            Codezeniths v1
-                                        </Typography>
-                                        <Typography variant={TypographyVariant.MUTED} className="text-muted-light dark:text-muted-dark text-[11px] mt-0.5">
-                                            Be the zen1th
-                                        </Typography>
-                                    </div>
-                                </Container>
-
-                                <div className="relative z-10">
-                                    <Container size="none" direction="row" align="center" justify="between" padded={false} className="text-[11px] text-muted-light dark:text-muted-dark mb-1.5">
-                                        <span>Progress</span>
-                                        <span>80 %</span>
-                                    </Container>
-                                    <div className="w-full h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-primary rounded-full transition-all duration-500"
-                                            style={{ width: '80%' }}
-                                        />
-                                    </div>
-                                </div>
-                            </Card>
+                            <SidebarProfileCompletionCard onNavigate={() => setMobileSidebarOpen(false)} />
                         </div>
                     </div>
                 </ScrollArea>

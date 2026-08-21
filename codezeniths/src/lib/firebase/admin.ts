@@ -217,6 +217,8 @@ export class FcmAdminService {
         return { status: 'skipped-dry-run', success: true };
       }
 
+      logger.info(`[FCM] Sending Push to ${payload.fids.length} devices. Title: "${payload.title}" | Body: "${payload.body}" | Link: "${payload.link || ''}"`);
+
       return await this.provider.send(payload);
     } catch (error: unknown) {
       logger.error('FCM sendNotification failed:', error);

@@ -90,7 +90,7 @@ export const BACKGROUND_EFFECT_REGISTRY: Record<CardBackgroundEffect, AnyBackgro
     },
     [CardBackgroundEffect.MAGIC]: {
         useEffectHook: (props) => useMagicBackgroundEffect(props),
-        renderLayer: (data) => <MagicBackgroundLayer {...data} />,
+        renderLayer: (data, props) => <MagicBackgroundLayer data={data} {...props} />,
     },
     [CardBackgroundEffect.CANVAS_REVEAL]: {
         useEffectHook: (props) => useCanvasRevealEffect(props),
@@ -114,7 +114,7 @@ export const BORDER_EFFECT_REGISTRY: Record<CardBorderEffect, AnyBorderEffectDef
     },
     [CardBorderEffect.GRADIENT_HOVER]: {
         useEffectHook: (props) => useGradientHoverBorderEffect(props),
-        renderLayer: (data) => <GradientHoverBorderLayer {...data} />,
+        renderLayer: (data, props) => <GradientHoverBorderLayer data={data} {...props} />,
     },
 } satisfies Record<CardBorderEffect, AnyBorderEffectDefinition>;
 

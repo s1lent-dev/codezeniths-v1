@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
-import type { Dispatch, SetStateAction} from 'react';
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 
 /**
  * Utility function to create a namespaced storage key to avoid collisions.
@@ -25,11 +27,19 @@ export const createStorageKey = (prefix: string = 'app', ...keys: Array<string>)
  * @returns A tuple of [value, setValue] where setValue updates both state and storage.
  */
 const useStorage = <T>(
-    storage: Storage,
+    storage: Storage | undefined,
     key: string,
     initialValue: T | (() => T),
 ): readonly [T, Dispatch<SetStateAction<T>>] => {
-    const getStoredValue = useCallback((): T => {
+    // Keep a stable ref for initialValue so object/array literals don't cause infinite re-render loops
+    const initialValueRef = useRef(initialValue);
+    initialValueRef.current = initialValue;
+
+    const readValueFromStorage = useCallback((): T => {
+        if (!storage || typeof window === 'undefined') {
+            const init = initialValueRef.current;
+            return typeof init === 'function' ? (init as () => T)() : init;
+        }
         try {
             const item = storage.getItem(key);
             if (item !== null) {
@@ -38,44 +48,64 @@ const useStorage = <T>(
         } catch (error) {
             console.warn(`Failed to parse stored value for key "${key}":`, error);
         }
-        return typeof initialValue === 'function' ? (initialValue as () => T)() : initialValue;
-    }, [storage, key, initialValue]);
+        const init = initialValueRef.current;
+        return typeof init === 'function' ? (init as () => T)() : init;
+    }, [storage, key]);
 
-    const [value, setValue] = useState<T>(getStoredValue);
+    const [value, setValueState] = useState<T>(readValueFromStorage);
 
+    // Re-sync value state on client mount or whenever key/storage reference changes
     useEffect(() => {
-        try {
-            storage.setItem(key, JSON.stringify(value));
-        } catch (error) {
-            console.error(`Failed to store value for key "${key}":`, error);
-            // Optionally, could add quota management logic here (e.g., clear old items).
-        }
-    }, [key, value, storage]);
+        setValueState(readValueFromStorage());
+    }, [key, storage, readValueFromStorage]);
 
-    // Re-sync on storage changes from other tabs/windows (optional cross-tab sync)
+    // Explicit setter that updates both React state and the underlying storage
+    const setStoredValue: Dispatch<SetStateAction<T>> = useCallback(
+        (action: SetStateAction<T>) => {
+            setValueState((prev) => {
+                const nextValue = typeof action === 'function' ? (action as (prevState: T) => T)(prev) : action;
+                if (storage && typeof window !== 'undefined') {
+                    try {
+                        if (nextValue === undefined) {
+                            storage.removeItem(key);
+                        } else {
+                            storage.setItem(key, JSON.stringify(nextValue));
+                        }
+                    } catch (error) {
+                        console.error(`Failed to store value for key "${key}":`, error);
+                    }
+                }
+                return nextValue;
+            });
+        },
+        [storage, key]
+    );
+
+    // Re-sync on storage changes from other tabs/windows (cross-tab sync)
     useEffect(() => {
+        if (!storage || typeof window === 'undefined') return;
         const handleStorageChange = (event: StorageEvent): void => {
             if (event.key === key && event.storageArea === storage) {
                 try {
                     const newItem = event.newValue;
                     if (newItem !== null) {
                         const parsedValue = JSON.parse(newItem) as T;
-                        setValue(parsedValue);
+                        setValueState(parsedValue);
                     } else {
-                        setValue(getStoredValue());
+                        setValueState(readValueFromStorage());
                     }
                 } catch (error) {
                     console.warn(`Failed to sync storage change for key "${key}":`, error);
-                    setValue(getStoredValue());
+                    setValueState(readValueFromStorage());
                 }
             }
         };
 
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
-    }, [key, storage, getStoredValue]);
+    }, [key, storage, readValueFromStorage]);
 
-    return [value, setValue] as const;
+    return [value, setStoredValue] as const;
 };
 
 /**
@@ -96,7 +126,7 @@ export const useLocalStorage = <T>(
     key: string,
     initialValue: T | (() => T),
 ): readonly [T, Dispatch<SetStateAction<T>>] => {
-    return useStorage<T>(localStorage, key, initialValue);
+    return useStorage<T>(typeof window !== 'undefined' ? window.localStorage : undefined, key, initialValue);
 };
 
 /**
@@ -117,5 +147,5 @@ export const useSessionStorage = <T>(
     key: string,
     initialValue: T | (() => T),
 ): readonly [T, Dispatch<SetStateAction<T>>] => {
-    return useStorage<T>(sessionStorage, key, initialValue);
+    return useStorage<T>(typeof window !== 'undefined' ? window.sessionStorage : undefined, key, initialValue);
 };

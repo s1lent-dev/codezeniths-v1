@@ -6,7 +6,10 @@ import {
     UpdateProblemTRPCOutputSchema,
     GetProblemTablePrimitivesTRPCInputSchema,
     GetProblemTablePrimitivesTRPCOutputSchema,
+    GetProblemProgressTRPCInputSchema,
     GetProblemProgressTRPCOutputSchema,
+    GetRecentlySolvedProblemsTRPCInputSchema,
+    GetRecentlySolvedProblemsTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { z } from 'zod';
 
@@ -28,5 +31,11 @@ export interface IProblemController {
 
     getProblemProgress(args: {
         ctx: TRPCContext;
+        input?: z.infer<typeof GetProblemProgressTRPCInputSchema>;
     }): Promise<z.infer<typeof GetProblemProgressTRPCOutputSchema>>;
+
+    getRecentlySolvedProblems(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetRecentlySolvedProblemsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetRecentlySolvedProblemsTRPCOutputSchema>>;
 }

@@ -47,6 +47,40 @@ import {
     GetResumeDownloadUrlOutputSchema,
     GetUserMonthlyActivityInputSchema,
     GetUserMonthlyActivityOutputSchema,
+    GetActiveStreakTRPCOutputSchema,
+    GetUserStreakTRPCInputSchema,
+    GetUserStreakTRPCOutputSchema,
+    RecordDailyCheckInTRPCInputSchema,
+    RecordDailyCheckInTRPCOutputSchema,
+
+    FollowUserTRPCInputSchema,
+    FollowUserTRPCOutputSchema,
+    UnfollowUserTRPCInputSchema,
+    UnfollowUserTRPCOutputSchema,
+    GetFollowStatsTRPCInputSchema,
+    GetFollowStatsTRPCOutputSchema,
+    GetFollowersTRPCInputSchema,
+    GetFollowersTRPCOutputSchema,
+    GetFollowingTRPCInputSchema,
+    GetFollowingTRPCOutputSchema,
+    RecordProfileViewTRPCInputSchema,
+    RecordProfileViewTRPCOutputSchema,
+    GetProfileViewStatsTRPCInputSchema,
+    GetProfileViewStatsTRPCOutputSchema,
+    GetProfileViewersTRPCInputSchema,
+    GetProfileViewersTRPCOutputSchema,
+    GetUserYearlyActivityTRPCInputSchema,
+    GetUserYearlyActivityTRPCOutputSchema,
+    GetUserProfileDetailsTRPCInputSchema,
+    GetUserProfileDetailsTRPCOutputSchema,
+    UpdateUsernameInputSchema,
+    UpdateUsernameOutputSchema,
+    UpdateEmailInputSchema,
+    UpdateEmailOutputSchema,
+    UpdateUserPhoneNumberInputSchema,
+    UpdateUserPhoneNumberOutputSchema,
+    UpdateUserPreferencesInputSchema,
+    UpdateUserPreferencesOutputSchema,
 } from '@/schemas/trpc';
 import { redisService } from '@codezeniths/lib/redis';
 import { storageService } from '@/service/storage';
@@ -56,9 +90,11 @@ import { prisma } from '@codezeniths/lib/db/prisma.client';
 import { logger } from '@/service/logging';
 import { extractTextFromPdf, extractSkillsWithAI, matchSkillsWithDatabase } from '@codezeniths/service/resume-extractor';
 import { z } from 'zod';
-import { formatUserProfile } from '@/utils/user.formatter';
+import { formatUserProfile, formatUserProfiles } from '@/utils/user.formatter';
+import { searchProducer } from '@/lib/mq';
 
 export class UserController implements IUserController {
+
     async getProfileById({
         ctx,
         input,
@@ -94,7 +130,13 @@ export class UserController implements IUserController {
 
             // TODO: [Redis] Cache the aggregated profile data to Redis
 
-            // TODO: [MQ] Publish a profile-viewed event if necessary
+            // Asynchronous non-blocking profile view recording
+            if (ctx.user?.id && ctx.user.id !== targetUserId) {
+                void ctx.queries.user.recordProfileView({
+                    viewedUserId: targetUserId,
+                    viewerId: ctx.user.id,
+                }).catch((err) => logger.error('Failed async profile view recording', { err, targetUserId }));
+            }
 
             return {
                 profile: {
@@ -275,10 +317,21 @@ export class UserController implements IUserController {
                 ...input,
             });
 
-            // TODO: [Redis] Invalidate cached user profile
-            // e.g., await redis.del(`user:${userId}:profile`);
+            // Publish async MQ event to index/update user in Redis Search Trie
+            searchProducer.publishIndexUser({
+                userId: updatedUser.id,
+                name: updatedUser.name,
+                username: updatedUser.username || null,
+                email: updatedUser.email,
+                image: updatedUser.image || null,
+                role: updatedUser.role || 'user',
+                userType: updatedUser.userType || null,
+            }).catch((err) => {
+                logger.warn('Failed to publish search.user.index MQ event in updateProfile', { error: String(err), userId });
+            });
 
-            // TODO: [MQ] Publish profile-updated event (e.g. notify integrations, rebuild static cache)
+
+            const formattedUser = await formatUserProfile(updatedUser);
 
             return {
                 id: updatedUser.id,
@@ -287,8 +340,8 @@ export class UserController implements IUserController {
                 lastName: updatedUser.lastName ?? null,
                 name: updatedUser.name,
                 email: updatedUser.email,
-                image: updatedUser.image ?? null,
-                resume: updatedUser.resume ?? null,
+                image: formattedUser?.image ?? null,
+                resume: formattedUser?.resume ?? null,
                 about: updatedUser.about ?? null,
                 location: updatedUser.location ?? null,
                 gender: updatedUser.gender ?? null,
@@ -982,6 +1035,10 @@ export class UserController implements IUserController {
             const nextStep = Math.max(currentUser.onBoardingStep ?? 0, 1);
             const combinedName = `${input.firstName.trim()} ${input.lastName.trim()}`.trim();
 
+            const cleanPhoneNumber = (typeof input.phoneNumber === 'string' && input.phoneNumber.trim().length > 0)
+                ? input.phoneNumber.trim()
+                : (input.phoneNumber === undefined ? undefined : null);
+
             const updatedUser = await ctx.queries.user.updateUserProfile({
                 id: userId,
                 firstName: input.firstName,
@@ -990,10 +1047,12 @@ export class UserController implements IUserController {
                 dob: input.dob,
                 gender: input.gender as any,
                 location: input.location,
-                phoneNumber: input.phoneNumber,
+                phoneNumber: cleanPhoneNumber,
                 about: input.about,
                 onBoardingStep: nextStep,
             });
+
+            const formattedUser = await formatUserProfile(updatedUser);
 
             return {
                 id: updatedUser.id,
@@ -1002,8 +1061,8 @@ export class UserController implements IUserController {
                 lastName: updatedUser.lastName ?? null,
                 name: updatedUser.name,
                 email: updatedUser.email,
-                image: updatedUser.image ?? null,
-                resume: updatedUser.resume ?? null,
+                image: formattedUser?.image ?? null,
+                resume: formattedUser?.resume ?? null,
                 about: updatedUser.about ?? null,
                 location: updatedUser.location ?? null,
                 gender: updatedUser.gender ?? null,
@@ -1047,6 +1106,8 @@ export class UserController implements IUserController {
                 onBoardingStep: nextStep,
             });
 
+            const formattedUser = await formatUserProfile(updatedUser);
+
             return {
                 id: updatedUser.id,
                 username: updatedUser.username ?? null,
@@ -1054,8 +1115,8 @@ export class UserController implements IUserController {
                 lastName: updatedUser.lastName ?? null,
                 name: updatedUser.name,
                 email: updatedUser.email,
-                image: updatedUser.image ?? null,
-                resume: updatedUser.resume ?? null,
+                image: formattedUser?.image ?? null,
+                resume: formattedUser?.resume ?? null,
                 about: updatedUser.about ?? null,
                 location: updatedUser.location ?? null,
                 gender: updatedUser.gender ?? null,
@@ -1098,6 +1159,8 @@ export class UserController implements IUserController {
                 onBoardingStep: nextStep,
             });
 
+            const formattedUser = await formatUserProfile(updatedUser);
+
             return {
                 id: updatedUser.id,
                 username: updatedUser.username ?? null,
@@ -1105,8 +1168,8 @@ export class UserController implements IUserController {
                 lastName: updatedUser.lastName ?? null,
                 name: updatedUser.name,
                 email: updatedUser.email,
-                image: updatedUser.image ?? null,
-                resume: updatedUser.resume ?? null,
+                image: formattedUser?.image ?? null,
+                resume: formattedUser?.resume ?? null,
                 about: updatedUser.about ?? null,
                 location: updatedUser.location ?? null,
                 gender: updatedUser.gender ?? null,
@@ -1169,6 +1232,21 @@ export class UserController implements IUserController {
                 onBoardingStep: 4,
             });
 
+            // Publish async MQ event to index user into Redis Search Trie upon profile completion
+            searchProducer.publishIndexUser({
+                userId: updatedUser.id,
+                name: updatedUser.name,
+                username: updatedUser.username || null,
+                email: updatedUser.email,
+                image: updatedUser.image || null,
+                role: updatedUser.role || 'user',
+                userType: updatedUser.userType || null,
+            }).catch((err) => {
+                logger.warn('Failed to publish search.user.index MQ event in updateOnboardingStep3', { error: String(err), userId });
+            });
+
+            const formattedUser = await formatUserProfile(updatedUser);
+
             return {
                 id: updatedUser.id,
                 username: updatedUser.username ?? null,
@@ -1176,8 +1254,8 @@ export class UserController implements IUserController {
                 lastName: updatedUser.lastName ?? null,
                 name: updatedUser.name,
                 email: updatedUser.email,
-                image: updatedUser.image ?? null,
-                resume: updatedUser.resume ?? null,
+                image: formattedUser?.image ?? null,
+                resume: formattedUser?.resume ?? null,
                 about: updatedUser.about ?? null,
                 location: updatedUser.location ?? null,
                 gender: updatedUser.gender ?? null,
@@ -1396,7 +1474,7 @@ export class UserController implements IUserController {
                 userCreatedAtIso = userObj.createdAt.toISOString();
             }
 
-            const activities = await ctx.queries.user.getUserActivity({
+            const activities = await ctx.queries.user.getUserDailyActivity({
                 userId,
                 startDate,
                 endDate,
@@ -1404,7 +1482,7 @@ export class UserController implements IUserController {
 
             activities.forEach((act) => {
                 const dateStr = act.date.toISOString().split('T')[0];
-                activityMap[dateStr] = (activityMap[dateStr] || 0) + act.count;
+                activityMap[dateStr] = (activityMap[dateStr] || 0) + act.problemsSolved;
             });
         }
 
@@ -1435,5 +1513,545 @@ export class UserController implements IUserController {
             activities: resultActivities,
         };
     }
+
+    async getActiveStreak({
+        ctx,
+    }: {
+        ctx: TRPCContext;
+    }): Promise<z.infer<typeof GetActiveStreakTRPCOutputSchema>> {
+        logger.info('Executing getActiveStreak controller', { userId: ctx.user?.id });
+        const userId = ctx.user?.id;
+        if (!userId) {
+            return {
+                currentStreak: 0,
+                longestStreak: 0,
+                lastProblemSolvedDate: null,
+                totalActiveDays: 0,
+                currentCheckInStreak: 0,
+                longestCheckInStreak: 0,
+                lastActiveDate: null,
+                bestStreak: 0,
+                activeDaysCount: 0,
+            };
+        }
+
+        try {
+            return await ctx.queries.user.getActiveStreak({ userId });
+        } catch (error: any) {
+            logger.error('Error in getActiveStreak controller', { error, userId });
+            return {
+                currentStreak: 0,
+                longestStreak: 0,
+                lastProblemSolvedDate: null,
+                totalActiveDays: 0,
+                currentCheckInStreak: 0,
+                longestCheckInStreak: 0,
+                lastActiveDate: null,
+                bestStreak: 0,
+                activeDaysCount: 0,
+            };
+        }
+    }
+
+    async getUserStreak({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetUserStreakTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetUserStreakTRPCOutputSchema>> {
+        logger.info('Executing getUserStreak controller', { input, userId: ctx.user?.id });
+        const userId = input.userId || ctx.user?.id;
+        if (!userId) {
+            throw new TRPCError({
+                code: 'UNAUTHORIZED',
+                message: 'User authentication or target userId required.',
+            });
+        }
+
+        try {
+            return await ctx.queries.user.getUserStreak({ userId });
+        } catch (error: any) {
+            logger.error('Error in getUserStreak controller', { error: error?.message, userId });
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to fetch user streak.',
+            });
+        }
+    }
+
+    async recordDailyCheckIn({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input?: z.infer<typeof RecordDailyCheckInTRPCInputSchema>;
+    }): Promise<z.infer<typeof RecordDailyCheckInTRPCOutputSchema>> {
+        const userId = input?.userId || ctx.user?.id;
+        if (!userId) {
+            throw new TRPCError({
+                code: 'UNAUTHORIZED',
+                message: 'User authentication or target userId required.',
+            });
+        }
+
+        try {
+            return await ctx.queries.user.recordDailyCheckIn({
+                userId,
+                date: input?.date,
+            });
+        } catch (error: any) {
+            logger.error('Error in recordDailyCheckIn controller', { error: error?.message, userId });
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to record check-in.',
+            });
+        }
+    }
+
+
+    async followUser({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof FollowUserTRPCInputSchema>;
+    }): Promise<z.infer<typeof FollowUserTRPCOutputSchema>> {
+        const followerId = ctx.user?.id;
+        if (!followerId) {
+            throw new TRPCError({
+                code: 'UNAUTHORIZED',
+                message: 'User authentication required to follow users.',
+            });
+        }
+
+        if (followerId === input.targetUserId) {
+            throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'You cannot follow yourself.',
+            });
+        }
+
+        try {
+            return await ctx.queries.user.followUser({
+                followerId,
+                followingId: input.targetUserId,
+            });
+        } catch (error: any) {
+            logger.error('Error in followUser controller', { error: error?.message, followerId, targetUserId: input.targetUserId });
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to follow user.',
+            });
+        }
+    }
+
+    async unfollowUser({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof UnfollowUserTRPCInputSchema>;
+    }): Promise<z.infer<typeof UnfollowUserTRPCOutputSchema>> {
+        const followerId = ctx.user?.id;
+        if (!followerId) {
+            throw new TRPCError({
+                code: 'UNAUTHORIZED',
+                message: 'User authentication required to unfollow users.',
+            });
+        }
+
+        try {
+            return await ctx.queries.user.unfollowUser({
+                followerId,
+                followingId: input.targetUserId,
+            });
+        } catch (error: any) {
+            logger.error('Error in unfollowUser controller', { error: error?.message, followerId, targetUserId: input.targetUserId });
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to unfollow user.',
+            });
+        }
+    }
+
+    async getFollowStats({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetFollowStatsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetFollowStatsTRPCOutputSchema>> {
+        try {
+            return await ctx.queries.user.getFollowStats({
+                userId: input.userId,
+                viewerId: ctx.user?.id,
+            });
+        } catch (error: any) {
+            logger.error('Error in getFollowStats controller', { error: error?.message, userId: input.userId });
+            return { followerCount: 0, followingCount: 0, isFollowing: false };
+        }
+    }
+
+    async getFollowers({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetFollowersTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetFollowersTRPCOutputSchema>> {
+        try {
+            const result = await ctx.queries.user.getFollowers({
+                userId: input.userId,
+                viewerId: ctx.user?.id,
+                page: input.page,
+                limit: input.limit,
+            });
+            const formattedItems = await formatUserProfiles(result.items);
+            return {
+                ...result,
+                items: formattedItems,
+            };
+        } catch (error: any) {
+            logger.error('Error in getFollowers controller', { error: error?.message, userId: input.userId });
+            return { items: [], total: 0, page: input.page, limit: input.limit, totalPages: 0, hasNextPage: false };
+        }
+    }
+
+    async getFollowing({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetFollowingTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetFollowingTRPCOutputSchema>> {
+        try {
+            const result = await ctx.queries.user.getFollowing({
+                userId: input.userId,
+                viewerId: ctx.user?.id,
+                page: input.page,
+                limit: input.limit,
+            });
+            const formattedItems = await formatUserProfiles(result.items);
+            return {
+                ...result,
+                items: formattedItems,
+            };
+        } catch (error: any) {
+            logger.error('Error in getFollowing controller', { error: error?.message, userId: input.userId });
+            return { items: [], total: 0, page: input.page, limit: input.limit, totalPages: 0, hasNextPage: false };
+        }
+    }
+
+    async recordProfileView({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof RecordProfileViewTRPCInputSchema>;
+    }): Promise<z.infer<typeof RecordProfileViewTRPCOutputSchema>> {
+        logger.info('Executing recordProfileView controller', { input, viewerId: ctx.user?.id });
+        try {
+            return await ctx.queries.user.recordProfileView({
+                viewedUserId: input.viewedUserId,
+                viewerId: ctx.user?.id ?? null,
+            });
+        } catch (error: any) {
+            logger.error('Error in recordProfileView controller', { error: error?.message, viewedUserId: input.viewedUserId });
+            return { success: false, recorded: false };
+        }
+    }
+
+    async getProfileViewStats({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetProfileViewStatsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetProfileViewStatsTRPCOutputSchema>> {
+        logger.info('Executing getProfileViewStats controller', { input, userId: ctx.user?.id });
+        const targetUserId = input.userId || ctx.user?.id;
+        if (!targetUserId) {
+            throw new TRPCError({
+                code: 'UNAUTHORIZED',
+                message: 'Target user ID or authentication required.',
+            });
+        }
+
+        try {
+            const result = await ctx.queries.user.getProfileViewStats({ userId: targetUserId });
+            const formattedRecentViewers = await formatUserProfiles(result.recentViewers);
+            return {
+                ...result,
+                recentViewers: formattedRecentViewers,
+            };
+        } catch (error: any) {
+            logger.error('Error in getProfileViewStats controller', { error: error?.message, userId: targetUserId });
+            return { totalViews: 0, pastWeekViews: 0, uniqueViewers: 0, recentViewers: [], playlistCount: 0, totalPlaylistBookmarks: 0 };
+        }
+    }
+
+    async getProfileViewers({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetProfileViewersTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetProfileViewersTRPCOutputSchema>> {
+        logger.info('Executing getProfileViewers controller', { input, userId: ctx.user?.id });
+        const targetUserId = input.userId || ctx.user?.id;
+        if (!targetUserId) {
+            throw new TRPCError({
+                code: 'UNAUTHORIZED',
+                message: 'Target user ID or authentication required.',
+            });
+        }
+
+        try {
+            const result = await ctx.queries.user.getProfileViewers({
+                userId: targetUserId,
+                page: input.page,
+                limit: input.limit,
+                cursor: input.cursor,
+            });
+            const formattedItems = await formatUserProfiles(result.items);
+            return {
+                ...result,
+                items: formattedItems,
+            };
+        } catch (error: any) {
+            logger.error('Error in getProfileViewers controller', { error: error?.message, userId: targetUserId });
+            return { items: [], total: 0, page: input.page ?? 1, limit: input.limit ?? 6, totalPages: 0, hasNextPage: false, nextCursor: null };
+        }
+    }
+
+    async getUserYearlyActivity({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetUserYearlyActivityTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetUserYearlyActivityTRPCOutputSchema>> {
+        logger.info('Executing getUserYearlyActivity controller', { input, userId: ctx.user?.id });
+        const targetUserId = input.userId || ctx.user?.id;
+        const targetYear = input.year ?? new Date().getFullYear();
+
+        try {
+            return await ctx.queries.user.getUserYearlyActivity({
+                userId: targetUserId,
+                year: targetYear,
+            });
+        } catch (error: any) {
+            logger.error('Error in getUserYearlyActivity controller', { error: error?.message, userId: targetUserId, year: targetYear });
+            return {
+                year: targetYear,
+                totalSolvedCount: 0,
+                maxStreak: 0,
+                activeDaysCount: 0,
+                userCreatedAt: null,
+                activities: [],
+            };
+        }
+    }
+
+    async getUserProfileDetails({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetUserProfileDetailsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetUserProfileDetailsTRPCOutputSchema>> {
+        logger.info('Executing getUserProfileDetails controller', { input, viewerId: ctx.user?.id });
+        const targetUsername = input.username;
+        const targetUserId = input.userId || (!targetUsername ? ctx.user?.id : undefined);
+
+        if (!targetUsername && !targetUserId) {
+            throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'Either username or userId must be provided.',
+            });
+        }
+
+        try {
+            const rawProfile = await ctx.queries.user.getUserProfileDetails({
+                username: targetUsername,
+                userId: targetUserId,
+                viewerId: ctx.user?.id,
+            });
+
+            const formattedProfile = await formatUserProfile(rawProfile);
+            return formattedProfile!;
+        } catch (error: any) {
+            logger.error('Error in getUserProfileDetails controller', { error: error?.message, input });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: error?.code === 'NOT_FOUND' ? 'NOT_FOUND' : 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to fetch user profile details.',
+            });
+        }
+    }
+
+    async updateUsername({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof UpdateUsernameInputSchema>;
+    }): Promise<z.infer<typeof UpdateUsernameOutputSchema>> {
+        logger.info('Executing updateUsername controller', { input, userId: ctx.user?.id });
+        const userId = ctx.user?.id;
+        if (!userId) {
+            throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User authentication required.' });
+        }
+
+        try {
+            const result = await ctx.queries.user.updateUsername({
+                id: userId,
+                username: input.username,
+            });
+
+            // Re-index user in Redis search trie
+            const user = await ctx.queries.user.getUserProfile({ id: userId });
+            searchProducer.publishIndexUser({
+                userId: user.id,
+                name: user.name,
+                username: result.username,
+                email: user.email,
+                image: user.image || null,
+                role: user.role || 'user',
+                userType: user.userType || null,
+            }).catch((err) => {
+                logger.warn('Failed to publish search.user.index MQ event in updateUsername', { error: String(err), userId });
+            });
+
+            return {
+                success: true,
+                username: result.username,
+                message: 'Username updated successfully.',
+            };
+        } catch (error: any) {
+            logger.error('Error in updateUsername controller', { error: error?.message, userId });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: error?.code === 'RESOURCE_ALREADY_EXISTS' ? 'CONFLICT' : 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to update username.',
+            });
+        }
+    }
+
+    async updateEmail({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof UpdateEmailInputSchema>;
+    }): Promise<z.infer<typeof UpdateEmailOutputSchema>> {
+        logger.info('Executing updateEmail controller', { input, userId: ctx.user?.id });
+        const userId = ctx.user?.id;
+        if (!userId) {
+            throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User authentication required.' });
+        }
+
+        try {
+            const result = await ctx.queries.user.updateEmail({
+                id: userId,
+                email: input.email,
+            });
+
+            // Re-index user in Redis search trie
+            const user = await ctx.queries.user.getUserProfile({ id: userId });
+            searchProducer.publishIndexUser({
+                userId: user.id,
+                name: user.name,
+                username: user.username || null,
+                email: result.email,
+                image: user.image || null,
+                role: user.role || 'user',
+                userType: user.userType || null,
+            }).catch((err) => {
+                logger.warn('Failed to publish search.user.index MQ event in updateEmail', { error: String(err), userId });
+            });
+
+            return {
+                success: true,
+                email: result.email,
+                emailVerified: result.emailVerified,
+                message: 'Email address updated. Linked OAuth accounts have been disconnected and email verification has been reset.',
+            };
+        } catch (error: any) {
+            logger.error('Error in updateEmail controller', { error: error?.message, userId });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: error?.code === 'RESOURCE_ALREADY_EXISTS' ? 'CONFLICT' : 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to update email address.',
+            });
+        }
+    }
+
+    async updatePhoneNumber({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof UpdateUserPhoneNumberInputSchema>;
+    }): Promise<z.infer<typeof UpdateUserPhoneNumberOutputSchema>> {
+        logger.info('Executing updatePhoneNumber controller', { input, userId: ctx.user?.id });
+        const userId = ctx.user?.id;
+        if (!userId) {
+            throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User authentication required.' });
+        }
+
+        try {
+            const result = await ctx.queries.user.updatePhoneNumber({
+                id: userId,
+                phoneNumber: input.phoneNumber,
+            });
+
+            return {
+                success: true,
+                phoneNumber: result.phoneNumber,
+                phoneNumberVerified: result.phoneNumberVerified,
+                message: 'Phone number updated successfully. Phone verification has been reset.',
+            };
+        } catch (error: any) {
+            logger.error('Error in updatePhoneNumber controller', { error: error?.message, userId });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: error?.code === 'RESOURCE_ALREADY_EXISTS' ? 'CONFLICT' : 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to update phone number.',
+            });
+        }
+    }
+
+    async updateUserPreferences({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof UpdateUserPreferencesInputSchema>;
+    }): Promise<z.infer<typeof UpdateUserPreferencesOutputSchema>> {
+        logger.info('Executing updateUserPreferences controller', { input, userId: ctx.user?.id });
+        const userId = ctx.user?.id;
+        if (!userId) {
+            throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User authentication required.' });
+        }
+
+        try {
+            const preferences = await ctx.queries.user.updateUserPreferences({
+                userId,
+                ...input,
+            });
+
+            return preferences as any;
+        } catch (error: any) {
+            logger.error('Error in updateUserPreferences controller', { error: error?.message, userId });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to update user preferences.',
+            });
+        }
+    }
 }
+
 

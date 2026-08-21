@@ -10,3 +10,5 @@ export * from './product.controller.interface';
 export * from './skill.controller.interface';
 export * from './search.controller.interface';
 export * from './favourite.controller.interface';
+export * from './playlist.controller.interface';
+

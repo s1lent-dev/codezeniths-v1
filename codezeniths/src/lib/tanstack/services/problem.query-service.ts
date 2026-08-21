@@ -1,6 +1,10 @@
+'use client';
+
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
 import { queryKeys } from '../query-keys';
+import { CACHE_TIERS } from '../cache-config';
+import { CacheInvalidationService } from '../cache-invalidation.service';
 import type { IProblemQueryService } from '../interfaces';
 import {
     GetProblemsTRPCInputSchema,
@@ -9,7 +13,10 @@ import {
     UpdateProblemTRPCOutputSchema,
     GetProblemTablePrimitivesTRPCInputSchema,
     GetProblemTablePrimitivesTRPCOutputSchema,
+    GetProblemProgressTRPCInputSchema,
     GetProblemProgressTRPCOutputSchema,
+    GetRecentlySolvedProblemsTRPCInputSchema,
+    GetRecentlySolvedProblemsTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { z } from 'zod';
 
@@ -21,6 +28,7 @@ export class ProblemQueryService implements IProblemQueryService {
                 const raw = await trpcClient.problem.getProblemTablePrimitives.query(input || {});
                 return GetProblemTablePrimitivesTRPCOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -32,6 +40,7 @@ export class ProblemQueryService implements IProblemQueryService {
                 const raw = await trpcClient.problem.getProblems.query(validatedInput);
                 return GetProblemsTRPCOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -61,6 +70,7 @@ export class ProblemQueryService implements IProblemQueryService {
                 }
                 return undefined;
             },
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -73,26 +83,43 @@ export class ProblemQueryService implements IProblemQueryService {
                 return UpdateProblemTRPCOutputSchema.parse(raw);
             },
             onMutate: async (newVal) => {
-                // Cancel outgoing refetches
                 await queryClient.cancelQueries({ queryKey: ['problem'] });
             },
-            onSuccess: () => {
-                // Invalidate query ranges so all counters & lists update
-                queryClient.invalidateQueries({ queryKey: ['problem'] });
-                queryClient.invalidateQueries({ queryKey: ['module'] });
-                queryClient.invalidateQueries({ queryKey: ['topic'] });
-                queryClient.invalidateQueries({ queryKey: ['tag'] });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProblemProgressChange(queryClient);
             },
         });
     }
 
-    getProblemProgress() {
+    getProblemProgress(
+        input?: { userId?: string },
+        options?: { enabled?: boolean }
+    ) {
         return useQuery({
-            queryKey: queryKeys.problem.progress(),
+            queryKey: queryKeys.problem.progress(input?.userId),
             queryFn: async () => {
-                const raw = await trpcClient.problem.getProblemProgress.query();
+                const validatedInput = GetProblemProgressTRPCInputSchema.parse(input ?? {});
+                const raw = await trpcClient.problem.getProblemProgress.query(validatedInput);
                 return GetProblemProgressTRPCOutputSchema.parse(raw);
             },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
+
+    getRecentlySolvedProblems(
+        input?: { userId?: string; limit?: number },
+        options?: { enabled?: boolean }
+    ) {
+        return useQuery({
+            queryKey: queryKeys.problem.recentlySolved(input?.userId, input?.limit),
+            queryFn: async () => {
+                const validatedInput = GetRecentlySolvedProblemsTRPCInputSchema.parse(input ?? {});
+                const raw = await trpcClient.problem.getRecentlySolvedProblems.query(validatedInput);
+                return GetRecentlySolvedProblemsTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 }

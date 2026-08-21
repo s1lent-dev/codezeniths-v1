@@ -37,8 +37,13 @@ const exactMatchStrategy: ScoringStrategy = {
     for (const field of ctx.fields) {
       const values = getFieldValues(ctx.document, field.field);
       for (const val of values) {
-        if (val.toLowerCase() === queryLower) {
+        const valLower = val.toLowerCase();
+        if (valLower === queryLower) {
           totalScore = Math.max(totalScore, EXACT_MATCH_SCORE * field.weight);
+        } else if (valLower.startsWith(queryLower)) {
+          totalScore = Math.max(totalScore, 85 * field.weight);
+        } else if (valLower.split(/\s+/).some(token => token.startsWith(queryLower))) {
+          totalScore = Math.max(totalScore, 75 * field.weight);
         }
       }
     }
@@ -54,8 +59,15 @@ const substringStrategy: ScoringStrategy = {
     for (const field of ctx.fields) {
       const values = getFieldValues(ctx.document, field.field);
       for (const val of values) {
-        if (val.toLowerCase().includes(queryLower)) {
-          totalScore = Math.max(totalScore, SUBSTRING_MATCH_SCORE * field.weight);
+        const valLower = val.toLowerCase();
+        if (valLower.includes(queryLower)) {
+          if (valLower.startsWith(queryLower)) {
+            totalScore = Math.max(totalScore, 65 * field.weight);
+          } else if (valLower.split(/\s+/).some(token => token.startsWith(queryLower))) {
+            totalScore = Math.max(totalScore, 55 * field.weight);
+          } else {
+            totalScore = Math.max(totalScore, SUBSTRING_MATCH_SCORE * field.weight);
+          }
         }
       }
     }
@@ -63,18 +75,47 @@ const substringStrategy: ScoringStrategy = {
   }
 };
 
+
 const fuzzyStrategy: ScoringStrategy = {
   name: 'fuzzy',
   score<TDoc>(ctx: ScoringContext<TDoc>): number {
-    if (!ctx.config.fuzzy) return 0;
-    const algo = fuzzyAlgorithmRegistry[ctx.config.fuzzy.algorithm];
+    const algo = fuzzyAlgorithmRegistry[ctx.config.fuzzy?.algorithm || 'jaro-winkler'];
+    const threshold = ctx.config.fuzzy?.threshold ?? 0.65;
+    const queryLower = ctx.query.toLowerCase();
+    const qTokens = ctx.queryTokens;
     let totalScore = 0;
+
     for (const field of ctx.fields) {
       const values = getFieldValues(ctx.document, field.field);
       for (const val of values) {
-        const sim = algo.similarity(ctx.query.toLowerCase(), val.toLowerCase());
-        if (sim >= ctx.config.fuzzy.threshold) {
-          totalScore = Math.max(totalScore, sim * MAX_FUZZY_SCORE * field.weight);
+        const valLower = val.toLowerCase();
+        const fullSim = algo.similarity(queryLower, valLower);
+        if (fullSim >= threshold) {
+          totalScore = Math.max(totalScore, fullSim * MAX_FUZZY_SCORE * field.weight);
+          continue;
+        }
+
+        const valTokens = valLower.split(/\s+/).filter(Boolean);
+        if (qTokens.length > 0 && valTokens.length >= qTokens.length) {
+          let tokenSimSum = 0;
+          let matchedCount = 0;
+
+          for (const qToken of qTokens) {
+            let maxTokenSim = 0;
+            for (const vToken of valTokens) {
+              const sim = algo.similarity(qToken, vToken);
+              if (sim > maxTokenSim) maxTokenSim = sim;
+            }
+            if (maxTokenSim >= threshold) {
+              tokenSimSum += maxTokenSim;
+              matchedCount++;
+            }
+          }
+
+          if (matchedCount === qTokens.length) {
+            const avgSim = tokenSimSum / qTokens.length;
+            totalScore = Math.max(totalScore, avgSim * MAX_FUZZY_SCORE * field.weight);
+          }
         }
       }
     }
@@ -85,14 +126,28 @@ const fuzzyStrategy: ScoringStrategy = {
 const phoneticStrategy: ScoringStrategy = {
   name: 'phonetic',
   score<TDoc>(ctx: ScoringContext<TDoc>): number {
-    if (!ctx.config.phonetic || !ctx.queryPhoneticCode) return 0;
-    const algo = phoneticAlgorithmRegistry[ctx.config.phonetic.algorithm];
+    const algo = phoneticAlgorithmRegistry[ctx.config.phonetic?.algorithm || 'metaphone'];
+    const qTokens = ctx.queryTokens;
     let totalScore = 0;
+
     for (const field of ctx.fields) {
       const values = getFieldValues(ctx.document, field.field);
       for (const val of values) {
-        if (algo.encode(val) === ctx.queryPhoneticCode) {
-          totalScore = Math.max(totalScore, PHONETIC_MATCH_SCORE * field.weight);
+        const valLower = val.toLowerCase();
+        const valTokens = valLower.split(/\s+/).filter(Boolean);
+
+        if (qTokens.length > 0 && valTokens.length >= qTokens.length) {
+          let tokenPhoneticMatches = 0;
+          for (const qToken of qTokens) {
+            const qCode = algo.encode(qToken);
+            if (valTokens.some(vToken => algo.encode(vToken) === qCode)) {
+              tokenPhoneticMatches++;
+            }
+          }
+
+          if (tokenPhoneticMatches === qTokens.length) {
+            totalScore = Math.max(totalScore, PHONETIC_MATCH_SCORE * field.weight);
+          }
         }
       }
     }
@@ -135,8 +190,7 @@ export class ScoringPipeline<TDoc> {
 
   scoreAll(query: string, documents: TDoc[], queryPhoneticCode?: string): SearchHit<TDoc>[] {
     const queryTokens = query.toLowerCase().split(/\s+/).filter(Boolean);
-    const hasFuzzyOrPhonetic = this.config.fuzzy || this.config.phonetic;
-    const threshold = hasFuzzyOrPhonetic ? FUZZY_PHONETIC_THRESHOLD : EXACT_ONLY_THRESHOLD;
+    const threshold = 10;
     
     const hits: SearchHit<TDoc>[] = [];
     
@@ -169,6 +223,7 @@ export class ScoringPipeline<TDoc> {
     return hits.sort((a, b) => b.score - a.score);
   }
 }
+
 
 export class MoreLikeThisStrategy<TDoc> {
   constructor(

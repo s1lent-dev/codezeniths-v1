@@ -18,17 +18,19 @@ export const GetModulesOutputSchema = z.array(
 export const GetSingleModuleInputSchema = z.object({
     slug: z.string().optional(),
     id: z.uuidv7().optional(),
-    userId: z.uuidv7(),
+    userId: z.uuidv7().optional(),
 }).refine((d) => d.slug || d.id, {
     message: 'At least one of slug or id must be provided',
 });
 
 const TopicStatsSchema = z.object({
+    id: z.uuidv7().optional(),
     title: z.string(),
     description: z.string().nullable().optional(),
     slug: z.string(),
     level: LevelSchema.nullable(),
     order: z.number().int(),
+    isBookmarked: z.boolean().default(false),
     problemsCount: z.number().int(),
     problemsCountByDifficulty: z.record(DifficultySchema, z.number().int()),
     problemsSolvedCount: z.number().int(),
@@ -38,9 +40,59 @@ const TopicStatsSchema = z.object({
 export const GetSingleModuleOutputSchema = z.object({
     id: z.uuidv7(),
     title: z.string(),
-    description: z.string().nullable(),
     slug: z.string(),
-    topics: z.array(TopicStatsSchema),
+    description: z.string().nullable().optional(),
+    isBookmarked: z.boolean().default(false),
+    tagCount: z.number().int().default(0),
+    topicCount: z.number().int().default(0),
+    progress: z.object({
+        problemsCount: z.number().int(),
+        problemsSolvedCount: z.number().int(),
+        problemsRevisitCount: z.number().int(),
+        problemNotSolvedCount: z.number().int(),
+        problemsSolvedPercentage: z.number(),
+        problemsCountByDifficulty: z.object({
+            easy: z.number().int(),
+            medium: z.number().int(),
+            hard: z.number().int(),
+        }),
+        problemsSolvedCountByDifficulty: z.object({
+            easy: z.number().int(),
+            medium: z.number().int(),
+            hard: z.number().int(),
+        }),
+    }),
+    topics: z.array(TopicStatsSchema).optional(),
+});
+
+// ─── toggleModuleBookmark ──────────────────────────────────────────────────────
+
+export const ToggleModuleBookmarkInputSchema = z.object({
+    moduleId: z.uuidv7().optional(),
+    moduleSlug: z.string().optional(),
+    userId: z.uuidv7(),
+}).refine((d) => d.moduleId || d.moduleSlug, {
+    message: 'At least one of moduleId or moduleSlug must be provided',
+});
+
+export const ToggleModuleBookmarkOutputSchema = z.object({
+    isBookmarked: z.boolean(),
+    moduleId: z.uuidv7(),
+});
+
+// ─── toggleTopicBookmark ───────────────────────────────────────────────────────
+
+export const ToggleTopicBookmarkInputSchema = z.object({
+    topicId: z.uuidv7().optional(),
+    topicSlug: z.string().optional(),
+    userId: z.uuidv7(),
+}).refine((d) => d.topicId || d.topicSlug, {
+    message: 'At least one of topicId or topicSlug must be provided',
+});
+
+export const ToggleTopicBookmarkOutputSchema = z.object({
+    isBookmarked: z.boolean(),
+    topicId: z.uuidv7(),
 });
 
 // ─── getSingleModuleProgress ───────────────────────────────────────────────────
@@ -75,3 +127,52 @@ export const GetSingleModuleProgressOutputSchema = z.object({
     problemsCountByTags: z.record(z.string(), z.number().int()),
     problemsSolvedCountByTags: z.record(z.string(), z.number().int()),
 });
+
+// ─── getRecentlySolvedModule ───────────────────────────────────────────────────
+export const GetRecentlySolvedModuleInputSchema = z.object({
+    userId: z.uuidv7(),
+});
+
+export const GetRecentlySolvedModuleOutputSchema = z.object({
+    module: z.object({
+        id: z.uuidv7(),
+        title: z.string(),
+        slug: z.string(),
+        description: z.string().nullable(),
+        problemsCount: z.number().int(),
+        problemsSolvedCount: z.number().int(),
+        problemsSolvedPercentage: z.number(),
+    }).nullable(),
+    lastProblem: z.object({
+        title: z.string(),
+        slug: z.string(),
+    }).nullable(),
+});
+
+// ─── getModulesWithTopics ──────────────────────────────────────────────────────
+export const GetModulesWithTopicsInputSchema = z.object({
+    userId: z.uuidv7().optional(),
+});
+
+export const GetModulesWithTopicsOutputSchema = z.array(
+    z.object({
+        id: z.uuidv7(),
+        title: z.string(),
+        slug: z.string(),
+        description: z.string().nullable(),
+        topicsCount: z.number().int(),
+        topics: z.array(
+            z.object({
+                id: z.uuidv7(),
+                title: z.string(),
+                slug: z.string(),
+                description: z.string().nullable(),
+                level: LevelSchema.nullable(),
+                order: z.number().int(),
+                problemsCount: z.number().int(),
+                problemsSolvedCount: z.number().int(),
+                problemsSolvedPercentage: z.number(),
+            }),
+        ),
+    }),
+);

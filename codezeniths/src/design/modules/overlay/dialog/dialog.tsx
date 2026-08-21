@@ -64,7 +64,7 @@ function DialogContent({
                 {children}
                 {showCloseButton && (
                     <DialogPrimitive.Close data-slot="dialog-close" asChild>
-                        <Button variant={ButtonVariant.GHOST} className="absolute top-2 right-2" size={ButtonSize.ICON_SM}>
+                        <Button variant={ButtonVariant.GHOST} className="absolute top-6 right-4" size={ButtonSize.ICON_SM}>
                             <XIcon
                             />
                             <span className="sr-only">Close</span>
@@ -133,7 +133,7 @@ function DialogDescription({
     return (
         <DialogPrimitive.Description
             data-slot="dialog-description"
-            className={cn('text-muted-light-shade2 dark:text-muted-dark-shade2 text-span *:[a]:hover:text-foreground-dark text-p *:[a]:underline *:[a]:underline-offset-3', className)}
+            className={cn('text-muted-light-shade2 dark:text-muted-dark-shade2 text-span *:[a]:hover:text-foreground-dark *:[a]:underline *:[a]:underline-offset-3', className)}
             {...props}
         />
     );

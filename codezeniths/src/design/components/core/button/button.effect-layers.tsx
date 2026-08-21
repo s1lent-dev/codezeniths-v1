@@ -9,8 +9,8 @@ export const ShimmerLayer: React.FC = () => {
     return (
         <>
             {/* Shimmer layer */}
-            <div className="-z-30 blur-[2px] [container-type:size] absolute inset-0 overflow-visible">
-                <div className="animate-shimmer-slide absolute inset-0 [aspect-ratio:1] h-[100cqh] [border-radius:0] [mask:none]">
+            <div className="-z-30 blur-[2px] @container-size absolute inset-0 overflow-visible">
+                <div className="animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none]">
                     <div
                         className="animate-spin-around absolute -inset-full w-auto [translate:0_0] rotate-0"
                         style={{
@@ -23,7 +23,7 @@ export const ShimmerLayer: React.FC = () => {
             <div
                 className={cn(
                     'absolute inset-0 size-full',
-                    'rounded-lg px-md-2 py-sm-2 text-p font-medium',
+                    'rounded-lg px-4 py-sm-2 text-p font-medium',
                     'shadow-[inset_0_-8px_10px_#ffffff1f]',
                     'transform-gpu transition-all duration-300 ease-in-out',
                     'group-hover:shadow-[inset_0_-6px_10px_#ffffff3f]',
@@ -31,7 +31,7 @@ export const ShimmerLayer: React.FC = () => {
                 )}
             />
             {/* Inner background cutout layer */}
-            <div className="absolute [inset:var(--cut)] -z-20 [border-radius:inherit] bg-[var(--bg)]" />
+            <div className="absolute inset-(--cut) -z-20 rounded-[inherit] bg-(--bg)" />
         </>
     );
 };

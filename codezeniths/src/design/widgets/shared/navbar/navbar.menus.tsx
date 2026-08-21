@@ -55,7 +55,7 @@ export const TagsMenuDesktop = () => {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="beginner">Beginner</SelectItem>
+                        <SelectItem value="fundamental">Fundamental</SelectItem>
                         <SelectItem value="intermediate">Intermediate</SelectItem>
                         <SelectItem value="advanced">Advanced</SelectItem>
                     </SelectContent>
@@ -150,7 +150,7 @@ export const TagsMenuMobile = () => {
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="all">All Levels</SelectItem>
-                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="fundamental">Fundamental</SelectItem>
                     <SelectItem value="intermediate">Intermediate</SelectItem>
                     <SelectItem value="advanced">Advanced</SelectItem>
                 </SelectContent>

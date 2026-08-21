@@ -1,6 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+'use client';
+
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
 import { queryKeys } from '../query-keys';
+import { CACHE_TIERS } from '../cache-config';
+import { CacheInvalidationService } from '../cache-invalidation.service';
 import type { IUserQueryService } from '../interfaces';
 import {
     GetProfileByIdInputSchema,
@@ -45,6 +49,40 @@ import {
     UpdateOnboardingStep3OutputSchema,
     ExtractResumeSkillsInputSchema,
     ExtractResumeSkillsOutputSchema,
+    GetActiveStreakTRPCOutputSchema,
+    GetUserStreakTRPCInputSchema,
+    GetUserStreakTRPCOutputSchema,
+    RecordDailyCheckInTRPCInputSchema,
+    RecordDailyCheckInTRPCOutputSchema,
+    FollowUserTRPCInputSchema,
+
+    FollowUserTRPCOutputSchema,
+    UnfollowUserTRPCInputSchema,
+    UnfollowUserTRPCOutputSchema,
+    GetFollowStatsTRPCInputSchema,
+    GetFollowStatsTRPCOutputSchema,
+    GetFollowersTRPCInputSchema,
+    GetFollowersTRPCOutputSchema,
+    GetFollowingTRPCInputSchema,
+    GetFollowingTRPCOutputSchema,
+    RecordProfileViewTRPCInputSchema,
+    RecordProfileViewTRPCOutputSchema,
+    GetProfileViewStatsTRPCInputSchema,
+    GetProfileViewStatsTRPCOutputSchema,
+    GetProfileViewersTRPCInputSchema,
+    GetProfileViewersTRPCOutputSchema,
+    GetUserYearlyActivityTRPCInputSchema,
+    GetUserYearlyActivityTRPCOutputSchema,
+    GetUserProfileDetailsTRPCInputSchema,
+    GetUserProfileDetailsTRPCOutputSchema,
+    UpdateUsernameInputSchema,
+    UpdateUsernameOutputSchema,
+    UpdateEmailInputSchema,
+    UpdateEmailOutputSchema,
+    UpdateUserPhoneNumberInputSchema,
+    UpdateUserPhoneNumberOutputSchema,
+    UpdateUserPreferencesInputSchema,
+    UpdateUserPreferencesOutputSchema,
 } from '@/schemas/trpc';
 import { UserSocialLinksSchema } from '@codezeniths/schemas/db';
 import { z } from 'zod';
@@ -58,6 +96,7 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.getProfileById.query(validatedInput);
                 return GetProfileByIdOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -69,6 +108,7 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.getProfileByUsername.query(validatedInput);
                 return GetProfileByUsernameOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -81,6 +121,7 @@ export class UserQueryService implements IUserQueryService {
                 return GetSettingsOutputSchema.parse(raw);
             },
             enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -92,9 +133,8 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.updateProfile.mutate(validatedInput);
                 return UpdateProfileOutputSchema.parse(raw);
             },
-            onSuccess: (_, variables) => {
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
             },
         });
     }
@@ -106,6 +146,7 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.getSocialLinks.query();
                 return UserSocialLinksSchema.nullable().parse(raw);
             },
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -117,10 +158,8 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.upsertSocialLinks.mutate(validatedInput);
                 return UpsertSocialLinksOutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.socials() });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
             },
         });
     }
@@ -133,10 +172,8 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.uploadAvatar.mutate(validatedInput);
                 return UploadAvatarOutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.avatar() });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
             },
         });
     }
@@ -149,10 +186,8 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.removeAvatar.mutate(validatedInput);
                 return RemoveAvatarOutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.avatar() });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
             },
         });
     }
@@ -165,9 +200,8 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.uploadResume.mutate(validatedInput);
                 return UploadResumeOutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
             },
         });
     }
@@ -180,9 +214,8 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.removeResume.mutate(validatedInput);
                 return RemoveResumeOutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
             },
         });
     }
@@ -195,6 +228,7 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.getAvatar.query(validatedInput);
                 return GetAvatarOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -218,8 +252,7 @@ export class UserQueryService implements IUserQueryService {
                 return CheckUserNameAvailabilityOutputSchema.parse(raw);
             },
             enabled: validation.success,
-            // Cache the availability check for a short time (e.g. 1 minute)
-            staleTime: 60 * 1000, 
+            ...CACHE_TIERS.DYNAMIC,
         });
     }
 
@@ -236,7 +269,7 @@ export class UserQueryService implements IUserQueryService {
                 return CheckEmailAvailabilityOutputSchema.parse(raw);
             },
             enabled: options?.enabled ?? validation.success,
-            staleTime: options?.staleTime ?? 60 * 1000,
+            ...CACHE_TIERS.DYNAMIC,
         });
     }
 
@@ -253,7 +286,7 @@ export class UserQueryService implements IUserQueryService {
                 return CheckPhoneAvailabilityOutputSchema.parse(raw);
             },
             enabled: options?.enabled ?? validation.success,
-            staleTime: options?.staleTime ?? 60 * 1000,
+            ...CACHE_TIERS.DYNAMIC,
         });
     }
 
@@ -265,6 +298,7 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.getOnboardingProfile.query(validatedInput);
                 return GetOnboardingProfileOutputSchema.parse(raw);
             },
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -276,9 +310,8 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.updateOnboardingStep0.mutate(validatedInput);
                 return UpdateOnboardingStep0OutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['user', 'onboardingProfile'] });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnOnboardingStepChange(queryClient);
             },
         });
     }
@@ -291,9 +324,8 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.updateOnboardingStep1.mutate(validatedInput);
                 return UpdateOnboardingStep1OutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['user', 'onboardingProfile'] });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnOnboardingStepChange(queryClient);
             },
         });
     }
@@ -306,9 +338,8 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.updateOnboardingStep2.mutate(validatedInput);
                 return UpdateOnboardingStep2OutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['user', 'onboardingProfile'] });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnOnboardingStepChange(queryClient);
             },
         });
     }
@@ -321,10 +352,8 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.updateOnboardingStep3.mutate(validatedInput);
                 return UpdateOnboardingStep3OutputSchema.parse(raw);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['user', 'onboardingProfile'] });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.profileById() });
-                queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() });
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnOnboardingStepChange(queryClient);
             },
         });
     }
@@ -349,8 +378,275 @@ export class UserQueryService implements IUserQueryService {
             },
             enabled: options?.enabled,
             refetchInterval: options?.refetchInterval,
+            ...CACHE_TIERS.DYNAMIC,
+        });
+    }
+
+    getActiveStreak() {
+        return useQuery({
+            queryKey: queryKeys.user.activeStreak(),
+            queryFn: async () => {
+                const raw = await trpcClient.user.getActiveStreak.query();
+                return GetActiveStreakTRPCOutputSchema.parse(raw);
+            },
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
+
+    getUserStreak(input?: { userId?: string }) {
+        return useQuery({
+            queryKey: queryKeys.user.streak(input?.userId),
+            queryFn: async () => {
+                const validatedInput = GetUserStreakTRPCInputSchema.parse(input ?? {});
+                const raw = await trpcClient.user.getUserStreak.query(validatedInput);
+                return GetUserStreakTRPCOutputSchema.parse(raw);
+            },
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
+
+    recordDailyCheckIn() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (variables?: z.infer<typeof RecordDailyCheckInTRPCInputSchema>) => {
+                const validatedInput = RecordDailyCheckInTRPCInputSchema.parse(variables ?? {});
+                const raw = await trpcClient.user.recordDailyCheckIn.mutate(validatedInput);
+                return RecordDailyCheckInTRPCOutputSchema.parse(raw);
+            },
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateStreak(queryClient);
+            },
+        });
+    }
+
+
+    getFollowStats(input: { userId: string }, options?: { enabled?: boolean }) {
+        return useQuery({
+            queryKey: queryKeys.user.followStats(input.userId),
+            queryFn: async () => {
+                const validatedInput = GetFollowStatsTRPCInputSchema.parse(input);
+                const raw = await trpcClient.user.getFollowStats.query(validatedInput);
+                return GetFollowStatsTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? Boolean(input.userId),
+            ...CACHE_TIERS.DYNAMIC,
+        });
+    }
+
+    getFollowers(input: { userId: string; page?: number; limit?: number }, options?: { enabled?: boolean }) {
+        return useQuery({
+            queryKey: queryKeys.user.followers(input.userId, input.page),
+            queryFn: async () => {
+                const validatedInput = GetFollowersTRPCInputSchema.parse(input);
+                const raw = await trpcClient.user.getFollowers.query(validatedInput);
+                return GetFollowersTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? Boolean(input.userId),
+            ...CACHE_TIERS.DYNAMIC,
+        });
+    }
+
+    getFollowing(input: { userId: string; page?: number; limit?: number }, options?: { enabled?: boolean }) {
+        return useQuery({
+            queryKey: queryKeys.user.following(input.userId, input.page),
+            queryFn: async () => {
+                const validatedInput = GetFollowingTRPCInputSchema.parse(input);
+                const raw = await trpcClient.user.getFollowing.query(validatedInput);
+                return GetFollowingTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? Boolean(input.userId),
+            ...CACHE_TIERS.DYNAMIC,
+        });
+    }
+
+    followUser() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (variables: z.infer<typeof FollowUserTRPCInputSchema>) => {
+                const validatedInput = FollowUserTRPCInputSchema.parse(variables);
+                const raw = await trpcClient.user.followUser.mutate(validatedInput);
+                return FollowUserTRPCOutputSchema.parse(raw);
+            },
+            onSuccess: async (_data, variables) => {
+                await CacheInvalidationService.invalidateOnFollowChange(queryClient, variables.targetUserId);
+            },
+        });
+    }
+
+    unfollowUser() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (variables: z.infer<typeof UnfollowUserTRPCInputSchema>) => {
+                const validatedInput = UnfollowUserTRPCInputSchema.parse(variables);
+                const raw = await trpcClient.user.unfollowUser.mutate(validatedInput);
+                return UnfollowUserTRPCOutputSchema.parse(raw);
+            },
+            onSuccess: async (_data, variables) => {
+                await CacheInvalidationService.invalidateOnFollowChange(queryClient, variables.targetUserId);
+            },
+        });
+    }
+
+    recordProfileView() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (variables: z.infer<typeof RecordProfileViewTRPCInputSchema>) => {
+                const validatedInput = RecordProfileViewTRPCInputSchema.parse(variables);
+                const raw = await trpcClient.user.recordProfileView.mutate(validatedInput);
+                return RecordProfileViewTRPCOutputSchema.parse(raw);
+            },
+            onSuccess: async (data) => {
+                if (data.recorded) {
+                    await CacheInvalidationService.invalidateOnProfileView(queryClient);
+                }
+            },
+        });
+    }
+
+    getProfileViewStats(input?: { userId?: string }, options?: { enabled?: boolean }) {
+        return useQuery({
+            queryKey: queryKeys.user.profileViews(input?.userId),
+            queryFn: async () => {
+                const validatedInput = GetProfileViewStatsTRPCInputSchema.parse(input ?? {});
+                const raw = await trpcClient.user.getProfileViewStats.query(validatedInput);
+                return GetProfileViewStatsTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.DYNAMIC,
+        });
+    }
+
+    getProfileViewers(
+        input?: { userId?: string; page?: number; limit?: number },
+        options?: { enabled?: boolean }
+    ) {
+        return useQuery({
+            queryKey: queryKeys.user.profileViewers(input?.userId, input?.page),
+            queryFn: async () => {
+                const validatedInput = GetProfileViewersTRPCInputSchema.parse(input ?? {});
+                const raw = await trpcClient.user.getProfileViewers.query(validatedInput);
+                return GetProfileViewersTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.DYNAMIC,
+        });
+    }
+
+    getProfileViewersInfinite(
+        input?: { userId?: string; limit?: number },
+        options?: { enabled?: boolean }
+    ) {
+        const limit = input?.limit ?? 6;
+        return useInfiniteQuery({
+            queryKey: queryKeys.user.profileViewersInfinite(input?.userId, limit),
+            queryFn: async ({ pageParam }) => {
+                const payload = {
+                    userId: input?.userId,
+                    limit,
+                    cursor: pageParam as string | undefined,
+                };
+                const validatedInput = GetProfileViewersTRPCInputSchema.parse(payload);
+                const raw = await trpcClient.user.getProfileViewers.query(validatedInput);
+                return GetProfileViewersTRPCOutputSchema.parse(raw);
+            },
+            initialPageParam: undefined as string | undefined,
+            getNextPageParam: (lastPage) => {
+                return lastPage.nextCursor ?? undefined;
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.DYNAMIC,
+        });
+    }
+
+    getUserYearlyActivity(
+        input?: { userId?: string; year?: number },
+        options?: { enabled?: boolean }
+    ) {
+        return useQuery({
+            queryKey: queryKeys.user.yearlyActivity(input?.userId, input?.year),
+            queryFn: async () => {
+                const validatedInput = GetUserYearlyActivityTRPCInputSchema.parse(input ?? {});
+                const raw = await trpcClient.user.getUserYearlyActivity.query(validatedInput);
+                return GetUserYearlyActivityTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
+
+    getUserProfileDetails(
+        input?: { username?: string; userId?: string },
+        options?: { enabled?: boolean }
+    ) {
+        const identifier = input?.username || input?.userId;
+        return useQuery({
+            queryKey: queryKeys.user.profileDetails(identifier),
+            queryFn: async () => {
+                const validatedInput = GetUserProfileDetailsTRPCInputSchema.parse(input ?? {});
+                const raw = await trpcClient.user.getUserProfileDetails.query(validatedInput);
+                return GetUserProfileDetailsTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
+
+    updateUsername() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (variables: z.infer<typeof UpdateUsernameInputSchema>) => {
+                const validatedInput = UpdateUsernameInputSchema.parse(variables);
+                const raw = await trpcClient.user.updateUsername.mutate(validatedInput);
+                return UpdateUsernameOutputSchema.parse(raw);
+            },
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
+            },
+        });
+    }
+
+    updateEmail() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (variables: z.infer<typeof UpdateEmailInputSchema>) => {
+                const validatedInput = UpdateEmailInputSchema.parse(variables);
+                const raw = await trpcClient.user.updateEmail.mutate(validatedInput);
+                return UpdateEmailOutputSchema.parse(raw);
+            },
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
+            },
+        });
+    }
+
+    updatePhoneNumber() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (variables: z.infer<typeof UpdateUserPhoneNumberInputSchema>) => {
+                const validatedInput = UpdateUserPhoneNumberInputSchema.parse(variables);
+                const raw = await trpcClient.user.updatePhoneNumber.mutate(validatedInput);
+                return UpdateUserPhoneNumberOutputSchema.parse(raw);
+            },
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
+            },
+        });
+    }
+
+    updateUserPreferences() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (variables: z.infer<typeof UpdateUserPreferencesInputSchema>) => {
+                const validatedInput = UpdateUserPreferencesInputSchema.parse(variables);
+                const raw = await trpcClient.user.updateUserPreferences.mutate(validatedInput);
+                return UpdateUserPreferencesOutputSchema.parse(raw);
+            },
+            onSuccess: async () => {
+                await CacheInvalidationService.invalidateOnProfileChange(queryClient);
+            },
         });
     }
 }
 
 export const userQueryService = new UserQueryService();
+

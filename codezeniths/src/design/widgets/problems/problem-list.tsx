@@ -41,7 +41,7 @@ import {
     ScrollArea,
 } from '@codezeniths/components';
 
-export type PageContext = 'problemset' | 'tags' | 'favourites';
+export type PageContext = 'problemset' | 'tags' | 'favourites' | 'topic' | 'playlist';
 export type ViewMode = 'infinite' | 'paginated';
 
 export interface ProblemListProps {
@@ -54,6 +54,7 @@ export interface ProblemListProps {
     onFilterChange?: (filters: ProblemFilterInput) => void;
     onSortingChange?: (sorting: ProblemSortingInput) => void;
     onToggleSolved?: (problemId: string, currentSolved: boolean) => void;
+    onToggleRevisit?: (problemId: string, currentRevisit: boolean) => void;
     onToggleFavourite?: (problemId: string, currentFavourite: boolean) => void;
     // Filter dropdown options primitives
     modulesOptions?: Array<{ id: string; title: string; slug: string }>;
@@ -83,6 +84,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
     onFilterChange,
     onSortingChange,
     onToggleSolved,
+    onToggleRevisit,
     onToggleFavourite,
     modulesOptions = [],
     topicsOptions = [],
@@ -452,7 +454,40 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                                     <SelectItem value="all" className="cursor-pointer">All Statuses</SelectItem>
                                                     <SelectItem value="solved" className="cursor-pointer">Solved</SelectItem>
                                                     <SelectItem value="not_solved" className="cursor-pointer">Not Solved</SelectItem>
-                                                    <SelectItem value="revisit" className="cursor-pointer">Revisit</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {/* Revisit Filter */}
+                                        <div>
+                                            <label className="text-muted-light dark:text-muted-dark font-medium block mb-1">Revisit</label>
+                                            <Select
+                                                value={
+                                                    filters.revisit === true
+                                                        ? 'revisit_only'
+                                                        : filters.revisit === false
+                                                        ? 'non_revisit'
+                                                        : 'all'
+                                                }
+                                                onValueChange={(val) =>
+                                                    onFilterChange?.({
+                                                        ...filters,
+                                                        revisit:
+                                                            val === 'revisit_only'
+                                                                ? true
+                                                                : val === 'non_revisit'
+                                                                ? false
+                                                                : undefined,
+                                                    })
+                                                }
+                                            >
+                                                <SelectTrigger className="w-full rounded-md h-8 text-xs bg-background-light dark:bg-background-dark border-foreground-light-shade3 dark:border-foreground-dark-shade3 cursor-pointer">
+                                                    <SelectValue placeholder="All Problems" />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-foreground-light dark:bg-foreground-dark border border-secondary p-1 z-350">
+                                                    <SelectItem value="all" className="cursor-pointer">All Problems</SelectItem>
+                                                    <SelectItem value="revisit_only" className="cursor-pointer">Revisit Only</SelectItem>
+                                                    <SelectItem value="non_revisit" className="cursor-pointer">Non-Revisit</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -645,6 +680,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                         problem={problem}
                                         index={index}
                                         onToggleSolved={onToggleSolved}
+                                        onToggleRevisit={onToggleRevisit}
                                         onToggleFavourite={onToggleFavourite}
                                     />
                                 ))}
@@ -702,6 +738,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                             problem={problem}
                                             index={virtualRow.index}
                                             onToggleSolved={onToggleSolved}
+                                            onToggleRevisit={onToggleRevisit}
                                             onToggleFavourite={onToggleFavourite}
                                         />
                                     );

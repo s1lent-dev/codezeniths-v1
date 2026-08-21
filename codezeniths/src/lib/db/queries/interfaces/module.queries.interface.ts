@@ -5,6 +5,14 @@ import {
     GetSingleModuleOutputSchema,
     GetSingleModuleProgressInputSchema,
     GetSingleModuleProgressOutputSchema,
+    GetRecentlySolvedModuleInputSchema,
+    GetRecentlySolvedModuleOutputSchema,
+    GetModulesWithTopicsInputSchema,
+    GetModulesWithTopicsOutputSchema,
+    ToggleModuleBookmarkInputSchema,
+    ToggleModuleBookmarkOutputSchema,
+    ToggleTopicBookmarkInputSchema,
+    ToggleTopicBookmarkOutputSchema,
 } from '@codezeniths/schemas/db';
 
 export interface IModuleQueries {
@@ -17,4 +25,20 @@ export interface IModuleQueries {
     getSingleModuleProgress: (
         payload: z.infer<typeof GetSingleModuleProgressInputSchema>,
     ) => Promise<z.infer<typeof GetSingleModuleProgressOutputSchema>>;
+
+    getRecentlySolvedModule: (
+        payload: z.infer<typeof GetRecentlySolvedModuleInputSchema>,
+    ) => Promise<z.infer<typeof GetRecentlySolvedModuleOutputSchema>>;
+
+    getModulesWithTopics: (
+        payload: z.infer<typeof GetModulesWithTopicsInputSchema>,
+    ) => Promise<z.infer<typeof GetModulesWithTopicsOutputSchema>>;
+
+    toggleModuleBookmark: (
+        payload: z.infer<typeof ToggleModuleBookmarkInputSchema>,
+    ) => Promise<z.infer<typeof ToggleModuleBookmarkOutputSchema>>;
+
+    toggleTopicBookmark: (
+        payload: z.infer<typeof ToggleTopicBookmarkInputSchema>,
+    ) => Promise<z.infer<typeof ToggleTopicBookmarkOutputSchema>>;
 }

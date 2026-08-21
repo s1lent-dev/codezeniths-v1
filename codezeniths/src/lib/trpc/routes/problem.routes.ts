@@ -7,7 +7,10 @@ import {
     UpdateProblemTRPCOutputSchema,
     GetProblemTablePrimitivesTRPCInputSchema,
     GetProblemTablePrimitivesTRPCOutputSchema,
+    GetProblemProgressTRPCInputSchema,
     GetProblemProgressTRPCOutputSchema,
+    GetRecentlySolvedProblemsTRPCInputSchema,
+    GetRecentlySolvedProblemsTRPCOutputSchema,
 } from '@/schemas/trpc';
 
 export const problemRouter = createTRPCRouter({
@@ -26,7 +29,13 @@ export const problemRouter = createTRPCRouter({
         .output(UpdateProblemTRPCOutputSchema)
         .mutation(({ ctx, input }) => ctx.controllers.problem.updateProblem({ ctx, input })),
 
-    getProblemProgress: protectedProcedure
+    getProblemProgress: publicProcedure
+        .input(GetProblemProgressTRPCInputSchema.optional())
         .output(GetProblemProgressTRPCOutputSchema)
-        .query(({ ctx }) => ctx.controllers.problem.getProblemProgress({ ctx })),
+        .query(({ ctx, input }) => ctx.controllers.problem.getProblemProgress({ ctx, input })),
+
+    getRecentlySolvedProblems: publicProcedure
+        .input(GetRecentlySolvedProblemsTRPCInputSchema)
+        .output(GetRecentlySolvedProblemsTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.problem.getRecentlySolvedProblems({ ctx, input })),
 });

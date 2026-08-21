@@ -9,18 +9,22 @@ export class TrieService {
 
     /**
      * Adds an array of prefixes to a given Redis Sorted Set.
+     * Deduplicates prefixes and bulk-inserts them in efficient batches.
      */
     public async addPrefixes(key: string, prefixes: string[]): Promise<void> {
         try {
-            const pipeline = this.client.pipeline();
-            for (const p of prefixes) {
-                pipeline.zadd(key, 0, p);
-            }
-            await pipeline.exec();
+            const uniquePrefixes = Array.from(
+                new Set(prefixes.map(p => p.toLowerCase().trim()).filter(p => p.length > 0))
+            );
+            if (uniquePrefixes.length === 0) return;
+
+            const entries = uniquePrefixes.map(p => ({ score: 0, member: p }));
+            await this.client.zaddMany(key, entries);
         } catch (error) {
             logger.error(`[redis:trie] Failed to add prefixes to key "${key}"`, error);
         }
     }
+
 
     /**
      * Searches the Sorted Set lexicographically for a given prefix.

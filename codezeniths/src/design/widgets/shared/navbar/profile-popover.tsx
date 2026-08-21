@@ -27,15 +27,15 @@ import {
     ButtonSize,
     Switch,
 } from '@codezeniths/components';
-import { Card, CardBackgroundEffect } from '@codezeniths/modules';
+import { Card, CardBackgroundEffect, useTheme } from '@codezeniths/modules';
 import { useAuth, authClient } from '@/lib/auth/auth';
-import { useTheme } from 'next-themes';
 import { useNavigationStore } from '../store/navigation.store';
 
 export const ProfilePopover = () => {
     const { user } = useAuth();
     const router = useRouter();
-    const { theme, setTheme } = useTheme();
+    const { isDark, toggleTheme } = useTheme();
+    const appearanceButtonRef = React.useRef<HTMLButtonElement>(null);
     const {
         isProfilePopoverOpen,
         setProfilePopoverOpen,
@@ -50,6 +50,25 @@ export const ProfilePopover = () => {
         await authClient.signOut();
         router.push('/');
     };
+
+    const handleThemeToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+        const rect = appearanceButtonRef.current?.getBoundingClientRect();
+        const x = rect ? rect.left + rect.width / 2 : event.clientX;
+        const y = rect ? rect.top + rect.height / 2 : event.clientY;
+        toggleTheme({ clientX: x, clientY: y });
+    };
+
+    const magicConfig = React.useMemo(() => {
+        return {
+            gradientSize: 180,
+            gradientColor: isDark
+                ? 'rgba(106, 124, 255, 0.12)'
+                : 'rgba(99, 102, 241, 0.22)',
+            gradientFrom: isDark ? '#6A7CFF' : '#6366f1',
+            gradientTo: isDark ? '#9E7AFF' : '#a855f7',
+            gradientOpacity: isDark ? 0.7 : 0.85,
+        };
+    }, [isDark]);
 
     const displayName = user?.name || user?.firstName || 'CodeZenith User';
     const displayUsername = user?.username ? `@${user.username}` : user?.email || '@zenith';
@@ -108,13 +127,7 @@ export const ProfilePopover = () => {
                     effectConfig={{
                         backgroundEffect: CardBackgroundEffect.MAGIC,
                         backgroundEffectProps: {
-                            [CardBackgroundEffect.MAGIC]: {
-                                gradientSize: 180,
-                                gradientColor: '#2B2F4C',
-                                gradientFrom: '#6A7CFF',
-                                gradientTo: '#9E7AFF',
-                                gradientOpacity: 0.6,
-                            },
+                            [CardBackgroundEffect.MAGIC]: magicConfig,
                         },
                     }}
                     className="relative overflow-hidden bg-foreground-light dark:bg-foreground-dark rounded-md p-3.5 shadow-md border border-primary/20 cursor-pointer group"
@@ -200,14 +213,15 @@ export const ProfilePopover = () => {
                         <Typography variant={TypographyVariant.P} className="text-xs font-medium">Settings</Typography>
                     </Link>
 
-                    {/* Appearance toggle */}
+                    {/* Appearance toggle using project theme manager */}
                     <button
                         type="button"
-                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        ref={appearanceButtonRef}
+                        onClick={handleThemeToggle}
                         className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-body-light dark:text-body-dark hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 rounded-sm transition-colors cursor-pointer"
                     >
                         <Container size="none" direction="row" align="center" padded={false} gap="3">
-                            {theme === 'dark' ? (
+                            {isDark ? (
                                 <Moon className="w-4 h-4 text-muted-light dark:text-muted-dark" />
                             ) : (
                                 <Sun className="w-4 h-4 text-muted-light dark:text-muted-dark" />
@@ -215,7 +229,7 @@ export const ProfilePopover = () => {
                             <Typography variant={TypographyVariant.P} className="text-xs font-medium">Appearance</Typography>
                         </Container>
                         <span className="text-[10px] uppercase font-bold text-muted-light dark:text-muted-dark px-1.5 py-0.5 rounded bg-foreground-light-shade2 dark:bg-foreground-dark-shade2">
-                            {theme}
+                            {isDark ? 'Dark' : 'Light'}
                         </span>
                     </button>
 

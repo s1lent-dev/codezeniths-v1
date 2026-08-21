@@ -23,6 +23,7 @@ export class FavouriteQueries implements IFavouriteQueries {
                 },
                 select: {
                     status: true,
+                    revisit: true,
                     problemId: true,
                     problem: {
                         select: {
@@ -37,10 +38,10 @@ export class FavouriteQueries implements IFavouriteQueries {
             const problemsCount = allProblems.length;
 
             const problemsSolvedCount = userFavourites.filter((p) => p.status === 'solved').length;
-            const problemsRevisitCount = userFavourites.filter((p) => p.status === 'revisit').length;
+            const problemsRevisitCount = userFavourites.filter((p) => p.revisit === true).length;
             const solvedProgress = userFavourites.filter((p) => p.status === 'solved' && p.problem);
 
-            const problemNotSolvedCount = Math.max(0, problemsCount - (problemsSolvedCount + problemsRevisitCount));
+            const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
             const problemsSolvedPercentage =
                 problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
 

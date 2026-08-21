@@ -1,0 +1,50 @@
+model Playlist {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  title         String
+  slug          String   @unique
+  description   String?
+  isPublic      Boolean  @default(true)
+  creatorId     String   @db.Uuid
+  bookmarkCount Int      @default(0)
+  viewCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  creator   User                   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  items     PlaylistItem[]
+  bookmarks UserPlaylistBookmark[]
+
+  @@index([creatorId])
+  @@index([isPublic, bookmarkCount(sort: Desc)])
+  @@map("playlist")
+}
+
+model PlaylistItem {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  playlistId String   @db.Uuid
+  problemId  String   @db.Uuid
+  order      Int      @default(0)
+  notes      String?
+  addedAt    DateTime @default(now())
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  problem  Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, problemId])
+  @@index([playlistId, order])
+  @@map("playlist_item")
+}
+
+model UserPlaylistBookmark {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  userId     String   @db.Uuid
+  playlistId String   @db.Uuid
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, playlistId])
+  @@index([userId])
+  @@map("user_playlist_bookmark")
+}

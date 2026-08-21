@@ -46,6 +46,40 @@ import {
     GetResumeDownloadUrlOutputSchema,
     GetUserMonthlyActivityInputSchema,
     GetUserMonthlyActivityOutputSchema,
+    GetActiveStreakTRPCOutputSchema,
+    GetUserStreakTRPCInputSchema,
+    GetUserStreakTRPCOutputSchema,
+    RecordDailyCheckInTRPCInputSchema,
+    RecordDailyCheckInTRPCOutputSchema,
+
+    FollowUserTRPCInputSchema,
+    FollowUserTRPCOutputSchema,
+    UnfollowUserTRPCInputSchema,
+    UnfollowUserTRPCOutputSchema,
+    GetFollowStatsTRPCInputSchema,
+    GetFollowStatsTRPCOutputSchema,
+    GetFollowersTRPCInputSchema,
+    GetFollowersTRPCOutputSchema,
+    GetFollowingTRPCInputSchema,
+    GetFollowingTRPCOutputSchema,
+    RecordProfileViewTRPCInputSchema,
+    RecordProfileViewTRPCOutputSchema,
+    GetProfileViewStatsTRPCInputSchema,
+    GetProfileViewStatsTRPCOutputSchema,
+    GetProfileViewersTRPCInputSchema,
+    GetProfileViewersTRPCOutputSchema,
+    GetUserYearlyActivityTRPCInputSchema,
+    GetUserYearlyActivityTRPCOutputSchema,
+    GetUserProfileDetailsTRPCInputSchema,
+    GetUserProfileDetailsTRPCOutputSchema,
+    UpdateUsernameInputSchema,
+    UpdateUsernameOutputSchema,
+    UpdateEmailInputSchema,
+    UpdateEmailOutputSchema,
+    UpdateUserPhoneNumberInputSchema,
+    UpdateUserPhoneNumberOutputSchema,
+    UpdateUserPreferencesInputSchema,
+    UpdateUserPreferencesOutputSchema,
 } from '@/schemas/trpc';
 import { z } from 'zod';
 
@@ -164,5 +198,90 @@ export interface IUserController {
         ctx: TRPCContext;
         input: z.infer<typeof GetUserMonthlyActivityInputSchema>;
     }): Promise<z.infer<typeof GetUserMonthlyActivityOutputSchema>>;
+
+    getActiveStreak(args: {
+        ctx: TRPCContext;
+    }): Promise<z.infer<typeof GetActiveStreakTRPCOutputSchema>>;
+
+    getUserStreak(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetUserStreakTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetUserStreakTRPCOutputSchema>>;
+
+    recordDailyCheckIn(args: {
+        ctx: TRPCContext;
+        input?: z.infer<typeof RecordDailyCheckInTRPCInputSchema>;
+    }): Promise<z.infer<typeof RecordDailyCheckInTRPCOutputSchema>>;
+
+
+    followUser(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof FollowUserTRPCInputSchema>;
+    }): Promise<z.infer<typeof FollowUserTRPCOutputSchema>>;
+
+    unfollowUser(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof UnfollowUserTRPCInputSchema>;
+    }): Promise<z.infer<typeof UnfollowUserTRPCOutputSchema>>;
+
+    getFollowStats(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetFollowStatsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetFollowStatsTRPCOutputSchema>>;
+
+    getFollowers(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetFollowersTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetFollowersTRPCOutputSchema>>;
+
+    getFollowing(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetFollowingTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetFollowingTRPCOutputSchema>>;
+
+    recordProfileView(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof RecordProfileViewTRPCInputSchema>;
+    }): Promise<z.infer<typeof RecordProfileViewTRPCOutputSchema>>;
+
+    getProfileViewStats(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetProfileViewStatsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetProfileViewStatsTRPCOutputSchema>>;
+
+    getProfileViewers(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetProfileViewersTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetProfileViewersTRPCOutputSchema>>;
+
+    getUserYearlyActivity(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetUserYearlyActivityTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetUserYearlyActivityTRPCOutputSchema>>;
+
+    getUserProfileDetails(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetUserProfileDetailsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetUserProfileDetailsTRPCOutputSchema>>;
+
+    updateUsername(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof UpdateUsernameInputSchema>;
+    }): Promise<z.infer<typeof UpdateUsernameOutputSchema>>;
+
+    updateEmail(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof UpdateEmailInputSchema>;
+    }): Promise<z.infer<typeof UpdateEmailOutputSchema>>;
+
+    updatePhoneNumber(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof UpdateUserPhoneNumberInputSchema>;
+    }): Promise<z.infer<typeof UpdateUserPhoneNumberOutputSchema>>;
+
+    updateUserPreferences(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof UpdateUserPreferencesInputSchema>;
+    }): Promise<z.infer<typeof UpdateUserPreferencesOutputSchema>>;
 }
 

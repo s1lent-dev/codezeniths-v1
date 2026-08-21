@@ -1,0 +1,41 @@
+model UserGlobalStats {
+  userId           String    @id @db.Uuid
+  score            Int       @default(0)
+  bestScore        Int       @default(0)
+  bestRank         Int?
+  bestPercentile   Float?
+  totalSolvedCount Int       @default(0)
+  easySolved       Int       @default(0)
+  mediumSolved     Int       @default(0)
+  hardSolved       Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([score(sort: Desc)])
+  @@map("user_global_stats")
+}
+
+model UserModuleStats {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  userId           String    @db.Uuid
+  moduleId         String    @db.Uuid
+  score            Int       @default(0)
+  bestScore        Int       @default(0)
+  bestRank         Int?
+  bestPercentile   Float?
+  totalSolvedCount Int       @default(0)
+  easySolved       Int       @default(0)
+  mediumSolved     Int       @default(0)
+  hardSolved       Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moduleId])
+  @@index([moduleId, score(sort: Desc)])
+  @@map("user_module_stats")
+}

@@ -5,7 +5,7 @@
 
 import { Resend } from 'resend';
 import { logger } from '@/service/logging';
-import { render } from '@react-email/render';
+import { render } from 'react-email';
 import * as React from 'react';
 import { ENV_CONFIG } from '@/config/config';
 import { EmailComponentFactory } from './templates';
@@ -188,3 +188,20 @@ export function createMailService() {
     }
   };
 }
+
+let _mailServiceInstance: ReturnType<typeof createMailService> | null = null;
+
+/**
+ * Returns the shared singleton mail service, initialising it on first call.
+ * Using a lazy getter avoids TDZ issues when the module is imported in test
+ * environments where mocks are hoisted after the module-level const would run.
+ */
+export const mailService = new Proxy({} as ReturnType<typeof createMailService>, {
+  get(_target, prop: string) {
+    if (!_mailServiceInstance) {
+      _mailServiceInstance = createMailService();
+    }
+    return (_mailServiceInstance as Record<string, unknown>)[prop];
+  },
+});
+

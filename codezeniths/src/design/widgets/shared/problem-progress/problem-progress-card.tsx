@@ -3,6 +3,7 @@
 import React from 'react';
 import { Card, ProblemProgress } from '@codezeniths/modules';
 import { cn } from '@codezeniths/design/cn';
+import { ProblemProgressCardSkeleton } from './problem-progress-skeleton';
 
 export interface ProblemProgressData {
     problemsCount: number;
@@ -29,22 +30,7 @@ export interface ProblemProgressCardProps {
     showCardWrapper?: boolean;
 }
 
-const BONE = 'rounded-md bg-foreground-light-shade3 dark:bg-foreground-dark-shade1 animate-pulse';
-
-export const ProblemProgressCardSkeleton: React.FC<{ className?: string }> = ({ className }) => (
-    <Card className={cn('rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark p-5 shadow-xs overflow-hidden h-full ring-0', className)}>
-        <div className="flex flex-row items-center justify-between gap-4 w-full h-full min-h-[160px]">
-            <div className="flex items-center justify-center shrink-0">
-                <div className={`${BONE} size-[120px] rounded-full`} />
-            </div>
-            <div className="flex flex-col items-stretch justify-center gap-2 flex-1 min-w-25 max-w-32.5">
-                <div className={`${BONE} rounded-md h-10 w-full`} />
-                <div className={`${BONE} rounded-md h-10 w-full`} />
-                <div className={`${BONE} rounded-md h-10 w-full`} />
-            </div>
-        </div>
-    </Card>
-);
+export { ProblemProgressSkeleton, ProblemProgressCardSkeleton } from './problem-progress-skeleton';
 
 export const ProblemProgressCard: React.FC<ProblemProgressCardProps> = ({
     progress,
@@ -53,7 +39,7 @@ export const ProblemProgressCard: React.FC<ProblemProgressCardProps> = ({
     showCardWrapper = true,
 }) => {
     if (isLoading) {
-        return <ProblemProgressCardSkeleton className={className} />;
+        return <ProblemProgressCardSkeleton className={className} showCardWrapper={showCardWrapper} />;
     }
 
     const easySolved = progress?.problemsSolvedCountByDifficulty?.easy || 0;
@@ -129,7 +115,7 @@ export const ProblemProgressCard: React.FC<ProblemProgressCardProps> = ({
     }
 
     return (
-        <Card className={cn('rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark p-5 shadow-xs overflow-hidden h-full ring-0', className)}>
+        <Card className={cn('rounded-md bg-foreground-light dark:bg-foreground-dark p-5 shadow-none overflow-hidden h-full ring-0', className)}>
             {content}
         </Card>
     );

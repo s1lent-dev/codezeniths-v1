@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
 import { cn } from '@codezeniths/design/cn';
 import {
     Card,
@@ -57,52 +58,14 @@ const CIRCLE_PALETTES = [
         circle1: 'bg-gradient-to-br from-rose-500/20 via-pink-500/10 to-transparent dark:from-rose-400/25 dark:via-pink-400/10 dark:to-transparent',
         circle2: 'bg-gradient-to-tl from-pink-400/25 via-rose-400/10 to-transparent dark:from-pink-300/30 dark:via-rose-300/10 dark:to-transparent',
     },
-    {
-        // 7. Sky & Cobalt
-        cardBg: 'bg-gradient-to-r from-sky-500/5 via-blue-500/5 to-transparent dark:from-sky-500/10 dark:via-blue-500/5 dark:to-transparent',
-        circle1: 'bg-gradient-to-br from-sky-500/20 via-blue-500/10 to-transparent dark:from-sky-400/25 dark:via-blue-400/10 dark:to-transparent',
-        circle2: 'bg-gradient-to-tl from-blue-400/25 via-sky-400/10 to-transparent dark:from-blue-300/30 dark:via-sky-300/10 dark:to-transparent',
-    },
-    {
-        // 8. Violet & Fuchsia
-        cardBg: 'bg-gradient-to-r from-violet-500/5 via-fuchsia-500/5 to-transparent dark:from-violet-500/10 dark:via-fuchsia-500/5 dark:to-transparent',
-        circle1: 'bg-gradient-to-br from-violet-500/20 via-fuchsia-500/10 to-transparent dark:from-violet-400/25 dark:via-fuchsia-400/10 dark:to-transparent',
-        circle2: 'bg-gradient-to-tl from-fuchsia-400/25 via-purple-400/10 to-transparent dark:from-fuchsia-300/30 dark:via-purple-300/10 dark:to-transparent',
-    },
-    {
-        // 9. Lime & Jade
-        cardBg: 'bg-gradient-to-r from-lime-500/5 via-emerald-500/5 to-transparent dark:from-lime-500/10 dark:via-emerald-500/5 dark:to-transparent',
-        circle1: 'bg-gradient-to-br from-lime-500/20 via-emerald-500/10 to-transparent dark:from-lime-400/25 dark:via-emerald-400/10 dark:to-transparent',
-        circle2: 'bg-gradient-to-tl from-emerald-400/25 via-lime-400/10 to-transparent dark:from-emerald-300/30 dark:via-lime-300/10 dark:to-transparent',
-    },
-    {
-        // 10. Orange & Sunset Coral
-        cardBg: 'bg-gradient-to-r from-orange-500/5 via-amber-500/5 to-transparent dark:from-orange-500/10 dark:via-amber-500/5 dark:to-transparent',
-        circle1: 'bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-transparent dark:from-orange-400/25 dark:via-amber-400/10 dark:to-transparent',
-        circle2: 'bg-gradient-to-tl from-rose-400/25 via-orange-400/10 to-transparent dark:from-rose-300/30 dark:via-orange-300/10 dark:to-transparent',
-    },
-    {
-        // 11. Slate & Platinum Glow
-        cardBg: 'bg-gradient-to-r from-slate-400/5 via-zinc-400/5 to-transparent dark:from-slate-400/10 dark:via-zinc-400/5 dark:to-transparent',
-        circle1: 'bg-gradient-to-br from-slate-400/25 via-zinc-400/10 to-transparent dark:from-slate-300/20 dark:via-zinc-300/10 dark:to-transparent',
-        circle2: 'bg-gradient-to-tl from-zinc-400/25 via-slate-400/10 to-transparent dark:from-zinc-300/25 dark:via-slate-300/10 dark:to-transparent',
-    },
-    {
-        // 12. Teal & Marine Blue
-        cardBg: 'bg-gradient-to-r from-teal-500/5 via-sky-500/5 to-transparent dark:from-teal-500/10 dark:via-sky-500/5 dark:to-transparent',
-        circle1: 'bg-gradient-to-br from-teal-500/20 via-sky-500/10 to-transparent dark:from-teal-400/25 dark:via-sky-400/10 dark:to-transparent',
-        circle2: 'bg-gradient-to-tl from-cyan-400/25 via-blue-400/10 to-transparent dark:from-cyan-300/30 dark:via-blue-300/10 dark:to-transparent',
-    },
-    {
-        // 13. Fuchsia & Crimson
-        cardBg: 'bg-gradient-to-r from-fuchsia-500/5 via-rose-500/5 to-transparent dark:from-fuchsia-500/10 dark:via-rose-500/5 dark:to-transparent',
-        circle1: 'bg-gradient-to-br from-fuchsia-500/20 via-rose-500/10 to-transparent dark:from-fuchsia-400/25 dark:via-rose-400/10 dark:to-transparent',
-        circle2: 'bg-gradient-to-tl from-rose-400/25 via-pink-400/10 to-transparent dark:from-rose-300/30 dark:via-pink-300/10 dark:to-transparent',
-    },
 ];
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({ module, index = 0, onSolve, className }) => {
     const palette = CIRCLE_PALETTES[index % CIRCLE_PALETTES.length];
+    const [imageError, setImageError] = useState(false);
+
+    const iconSlug = module.slug.startsWith('module-') ? module.slug : `module-${module.slug}`;
+    const iconPath = `/modules/${iconSlug}.svg`;
 
     return (
         <Card
@@ -111,7 +74,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ module, index = 0, onSol
                 borderEffect: CardBorderEffect.GRADIENT_HOVER,
             }}
             className={cn(
-                'relative rounded-2xl p-5 overflow-hidden border border-foreground-light-shade3 dark:border-foreground-dark-shade3 bg-foreground-light dark:bg-foreground-dark h-50 flex flex-col justify-between transition-all duration-200 hover:shadow-lg hover:from-primary/5 hover:to-transparent font-sans group cursor-pointer select-none w-full min-w-0 max-w-full',
+                'relative rounded-2xl p-5 overflow-hidden border border-foreground-light-shade3 dark:border-foreground-dark-shade3 bg-foreground-light dark:bg-foreground-dark h-50 flex flex-col justify-between transition-all duration-200 hover:shadow-l font-sans group cursor-pointer select-none w-full min-w-0 max-w-full',
                 palette.cardBg,
                 className
             )}
@@ -133,9 +96,20 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ module, index = 0, onSol
 
             {/* In-House Card Header Component */}
             <CardHeader className="p-0 space-y-1 relative z-10 pr-10 min-w-0 max-w-full">
-                <div className="w-10 h-10 rounded-md border border-white/10 flex items-center justify-center shrink-0 bg-primary/10">
-                    <Command className="w-5 h-5 text-primary" />
-                </div>
+                <>
+                    {!imageError ? (
+                        <Image
+                            src={iconPath}
+                            alt={module.title}
+                            width={20}
+                            height={20}
+                            className="w-10 h-10 object-contain rounded-sm"
+                            onError={() => setImageError(true)}
+                        />
+                    ) : (
+                        <Command className="w-5 h-5 text-primary" />
+                    )}
+                </>
                 <CardTitle className="text-[17px] font-bold tracking-tight text-heading-light dark:text-heading-dark truncate max-w-full">
                     {module.title}
                 </CardTitle>

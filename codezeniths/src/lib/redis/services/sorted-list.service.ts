@@ -17,6 +17,33 @@ export class SortedListService {
         }
     }
 
+    async incrBy(key: string, increment: number, member: string): Promise<number> {
+        try {
+            return await this.client.zincrby(this.buildKey(key), increment, member);
+        } catch (error) {
+            logger.error(`[redis:sorted-list] incrBy failed for key "${key}"`, error);
+            return 0;
+        }
+    }
+
+    async getRevRank(key: string, member: string): Promise<number | null> {
+        try {
+            return await this.client.zrevrank(this.buildKey(key), member);
+        } catch (error) {
+            logger.error(`[redis:sorted-list] getRevRank failed for key "${key}"`, error);
+            return null;
+        }
+    }
+
+    async getScore(key: string, member: string): Promise<number | null> {
+        try {
+            return await this.client.zscore(this.buildKey(key), member);
+        } catch (error) {
+            logger.error(`[redis:sorted-list] getScore failed for key "${key}"`, error);
+            return null;
+        }
+    }
+
     async range(
         key: string,
         min: number | string,
@@ -27,6 +54,24 @@ export class SortedListService {
             return await this.client.zrange(this.buildKey(key), min, max, options);
         } catch (error) {
             logger.error(`[redis:sorted-list] Range failed for key "${key}"`, error);
+            return [];
+        }
+    }
+
+    async getRevRange(key: string, start: number, stop: number): Promise<string[]> {
+        try {
+            return await this.client.zrevrange(this.buildKey(key), start, stop);
+        } catch (error) {
+            logger.error(`[redis:sorted-list] getRevRange failed for key "${key}"`, error);
+            return [];
+        }
+    }
+
+    async getRevRangeWithScores(key: string, start: number, stop: number): Promise<Array<{ member: string; score: number }>> {
+        try {
+            return await this.client.zrevrangeWithScores(this.buildKey(key), start, stop);
+        } catch (error) {
+            logger.error(`[redis:sorted-list] getRevRangeWithScores failed for key "${key}"`, error);
             return [];
         }
     }

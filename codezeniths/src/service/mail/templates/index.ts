@@ -1,21 +1,32 @@
-export * from './EmailLayout';
-export * from './WelcomeEmail';
-export * from './VerifyEmail';
-export * from './OtpEmail';
-export * from './MagicLinkEmail';
-export * from './ResetPasswordEmail';
-export * from './NewDeviceEmail';
-export * from './OauthLoginEmail';
-export * from './PasswordChangedEmail';
-export * from './SessionRevokedEmail';
-export * from './AccountDeactivatedEmail';
-export * from './AccountReactivatedEmail';
-export * from './WeeklyDigestEmail';
-export * from './StreakMilestoneEmail';
-export * from './SubscriptionConfirmedEmail';
-export * from './SubscriptionCancelledEmail';
-export * from './PaymentFailedEmail';
-export * from './PaymentReceiptEmail';
-export * from './AdminBroadcastEmail';
-export * from './PasswordlessCredentialsEmail';
+// Auth Templates
+export * from './auth/welcome-email';
+export * from './auth/verify-email';
+export * from './auth/otp-email';
+export * from './auth/magic-link-email';
+export * from './auth/reset-password-email';
+export * from './auth/new-device-email';
+export * from './auth/oauth-login-email';
+export * from './auth/password-changed-email';
+export * from './auth/session-revoked-email';
+export * from './auth/account-deactivated-email';
+export * from './auth/account-reactivated-email';
+export * from './auth/passwordless-credentials-email';
+
+// Progress Templates
+export * from './progress/streak-milestone-email';
+export * from './progress/weekly-digest-email';
+
+// Payment Templates
+export * from './payment/subscription-confirmed-email';
+export * from './payment/subscription-renewed-email';
+export * from './payment/subscription-cancelled-email';
+export * from './payment/subscription-expired-email';
+export * from './payment/payment-receipt-email';
+export * from './payment/payment-failed-email';
+export * from './payment/payment-refund-email';
+
+// Notification Templates
+export * from './notification/admin-broadcast-email';
+
+// Factory
 export * from './factory';

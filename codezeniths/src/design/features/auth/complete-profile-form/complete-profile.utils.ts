@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidPhoneNumber } from 'libphonenumber-js';
 import {
     GenderSchema,
     UserTypeSchema,
@@ -27,8 +28,21 @@ export const step1Schema = z.object({
     dob: z.date().nullable().optional(),
     gender: GenderSchema,
     location: z.string().min(2, 'Please select or enter your location'),
+    countryCode: z.string().optional(),
+    phone: z.string().optional(),
     phoneNumber: z.string().nullable().optional(),
     about: z.string().max(500, 'About section cannot exceed 500 characters').nullable().optional(),
+}).superRefine((data, ctx) => {
+    if (data.phone && data.phone.trim().length > 0) {
+        const fullNumber = (data.countryCode || '+1') + data.phone.trim().replace(/\s+/g, '');
+        if (!isValidPhoneNumber(fullNumber)) {
+            ctx.addIssue({
+                code: 'custom',
+                message: 'Please enter a valid phone number for the selected country code',
+                path: ['phone'],
+            });
+        }
+    }
 });
 
 export const step2Schema = z.object({
@@ -66,7 +80,9 @@ export const defaultCompleteProfileValues: z.infer<typeof completeProfileSchema>
     dob: null,
     gender: 'prefer_not_to_say' as Gender,
     location: '',
-    phoneNumber: '',
+    countryCode: '+1',
+    phone: '',
+    phoneNumber: null,
     about: '',
     userType: 'student' as UserType,
     experienceLevel: 'student' as ExperienceLevel,

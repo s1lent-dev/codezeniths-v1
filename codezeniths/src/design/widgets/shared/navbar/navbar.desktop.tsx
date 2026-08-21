@@ -72,7 +72,12 @@ export const NavbarDesktopButtons = () => {
     } else if (pathname === '/complete-profile') {
         buttonLabel = 'Home';
         buttonRoute = '/problemset';
-    } else if (pathname === '/verify-email' || pathname === '/verify-phone') {
+    } else if (
+        pathname === '/verify-email' ||
+        pathname === '/verify-phone' ||
+        pathname === '/forgot-password' ||
+        pathname === '/reset-password'
+    ) {
         if (isAuthenticated && user) {
             if (user.isOnboardingComplete) {
                 buttonLabel = 'Home';

@@ -2,6 +2,14 @@ import type { z } from 'zod';
 import type { CollectionDefinition } from './types/search.types';
 import { Collection } from './collections/collection';
 import { CollectionNotFoundError } from './utils/search.errors';
+import {
+  problemsCollection,
+  topicsCollection,
+  modulesCollection,
+  tagsCollection,
+  productsCollection,
+  usersCollection,
+} from './collections/collection.definitions';
 
 export class SearchClient<TCollections extends Record<string, CollectionDefinition<any>> = Record<string, never>> {
   private readonly collections = new Map<string, { definition: CollectionDefinition<any>; instance: Collection<any> }>();
@@ -21,6 +29,17 @@ export class SearchClient<TCollections extends Record<string, CollectionDefiniti
     if (!entry) throw new CollectionNotFoundError(name);
     return entry.instance as Collection<z.infer<TCollections[K]['schema']>>;
   }
+
+  getAllCollectionNames(): string[] {
+    return Array.from(this.collections.keys());
+  }
 }
 
-export const searchClient = new SearchClient();
+export const searchClient = new SearchClient()
+  .registerCollection(problemsCollection)
+  .registerCollection(topicsCollection)
+  .registerCollection(modulesCollection)
+  .registerCollection(tagsCollection)
+  .registerCollection(productsCollection)
+  .registerCollection(usersCollection);
+

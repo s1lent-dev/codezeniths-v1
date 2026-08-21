@@ -1,3 +1,5 @@
+'use client';
+
 import { tagQueryService, moduleQueryService, productQueryService } from '@/lib/tanstack';
 
 export const useLayoutData = () => {

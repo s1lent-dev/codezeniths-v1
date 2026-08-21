@@ -65,11 +65,12 @@ export const UpdateProblemTRPCInputSchema = z.object({
     problemId: z.uuidv7(),
     status: ProgressStatusSchema.optional(),
     notes: z.string().nullable().optional(),
+    revisit: z.boolean().optional(),
     favourite: z.boolean().optional(),
 }).refine(
-    (data) => data.status !== undefined || data.notes !== undefined || data.favourite !== undefined,
+    (data) => data.status !== undefined || data.notes !== undefined || data.revisit !== undefined || data.favourite !== undefined,
     {
-        message: 'At least one of status, notes, or favourite must be provided to update',
+        message: 'At least one of status, notes, revisit, or favourite must be provided to update',
     }
 );
 
@@ -78,6 +79,7 @@ export const UpdateProblemTRPCOutputSchema = z.object({
     problemId: z.uuidv7(),
     userId: z.uuidv7(),
     status: ProgressStatusSchema,
+    revisit: z.boolean(),
     favourite: z.boolean(),
     notes: z.string().nullable(),
     problemSlug: z.string(),
@@ -117,4 +119,24 @@ export const GetProblemTablePrimitivesTRPCOutputSchema = z.object({
 
 // ─── getProblemProgress ─────────────────────────────────────────────────────────
 
+export const GetProblemProgressTRPCInputSchema = z.object({
+    userId: z.string().uuid().optional(),
+});
+
 export const GetProblemProgressTRPCOutputSchema = GetProblemProgressOutputSchema;
+
+// ─── getRecentlySolvedProblems ───────────────────────────────────────────────
+
+export const GetRecentlySolvedProblemsTRPCInputSchema = z.object({
+    userId: z.string().uuid().optional(),
+    limit: z.number().int().min(1).max(50).default(10),
+});
+
+export const RecentlySolvedProblemItemTRPCSchema = z.object({
+    id: z.string().uuid(),
+    title: z.string(),
+    slug: z.string(),
+    solvedAt: z.coerce.date().nullable().optional(),
+});
+
+export const GetRecentlySolvedProblemsTRPCOutputSchema = z.array(RecentlySolvedProblemItemTRPCSchema);
