@@ -8,14 +8,18 @@ import { authClient } from '@codezeniths/lib/auth/auth';
 import { useToast } from '@codezeniths/modules';
 import { useRouter } from 'next/navigation';
 import { userQueryService } from '@/lib/tanstack/services/user.query-service';
-
-import { isValidPhoneNumber } from 'libphonenumber-js';
+import { validateCombinedPhone, formatToE164, splitE164 } from '@/utils/phone.utils';
 
 export const forgotPasswordSchema = z.object({
-    identifier: z.string().optional().or(z.literal('')),
+    identifier: z.string().min(1, 'Please enter your email or phone number'),
     type: z.enum(['email', 'phone']),
 }).superRefine((data, ctx) => {
     if (!data.identifier || data.identifier.trim() === '') {
+        ctx.addIssue({
+            code: 'custom',
+            message: data.type === 'email' ? 'Please enter your email address' : 'Please enter your phone number',
+            path: ['identifier'],
+        });
         return;
     }
     if (data.type === 'email') {
@@ -28,12 +32,11 @@ export const forgotPasswordSchema = z.object({
             });
         }
     } else if (data.type === 'phone') {
-        const fullNumber = data.identifier.replace(/\s+/g, '');
-        // Only validate if they've typed a reasonable amount, or just validate strictly
-        if (fullNumber.length > 4 && !isValidPhoneNumber(fullNumber)) {
+        const validation = validateCombinedPhone(data.identifier, true);
+        if (!validation.isValid) {
             ctx.addIssue({
                 code: 'custom',
-                message: 'Invalid phone number',
+                message: validation.error || 'Please enter a valid phone number',
                 path: ['identifier'],
             });
         }
@@ -87,8 +90,18 @@ export const useForgotPasswordForm = () => {
     }, [watchedIdentifier]);
 
     // Check availability
-    const { data: emailCheck, isFetching: isCheckingEmail } = userQueryService.checkEmailAvailability({ email: debouncedIdentifier });
-    const { data: phoneCheck, isFetching: isCheckingPhone } = userQueryService.checkPhoneAvailability({ phone: debouncedIdentifier.replace(/\s+/g, '') });
+    const isEmailValid = authType === 'email' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(debouncedIdentifier);
+    const isPhoneValid = authType === 'phone' && validateCombinedPhone(debouncedIdentifier, true).isValid;
+    const normalizedPhone = isPhoneValid ? validateCombinedPhone(debouncedIdentifier).normalizedE164 : '';
+
+    const { data: emailCheck, isFetching: isCheckingEmail } = userQueryService.checkEmailAvailability(
+        { email: debouncedIdentifier },
+        { enabled: isEmailValid && !!debouncedIdentifier, staleTime: 0 }
+    );
+    const { data: phoneCheck, isFetching: isCheckingPhone } = userQueryService.checkPhoneAvailability(
+        { phone: normalizedPhone || '' },
+        { enabled: isPhoneValid && !!normalizedPhone, staleTime: 0 }
+    );
 
     useEffect(() => {
         if (!debouncedIdentifier) {
@@ -119,8 +132,7 @@ export const useForgotPasswordForm = () => {
         }
 
         if (authType === 'phone' && phoneCheck?.available === true) {
-            const stripped = debouncedIdentifier.replace(/\s+/g, '');
-            if (stripped.length > 5 && isValidPhoneNumber(stripped)) {
+            if (isPhoneValid) {
                 requestForm.setError('identifier', { type: 'manual', message: "User doesn't exist with this phone number" });
             }
         } else if (authType === 'phone' && phoneCheck?.available === false) {
@@ -128,7 +140,7 @@ export const useForgotPasswordForm = () => {
                 requestForm.clearErrors('identifier');
             }
         }
-    }, [phoneCheck, debouncedIdentifier, authType, requestForm, toast]);
+    }, [phoneCheck, debouncedIdentifier, authType, requestForm, isPhoneValid, toast]);
 
     const verifyForm = useForm<ResetPasswordOtpFormData>({
         resolver: zodResolver(resetPasswordOtpSchema),

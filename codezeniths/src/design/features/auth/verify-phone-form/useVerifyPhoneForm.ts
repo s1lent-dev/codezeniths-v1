@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { isValidPhoneNumber } from 'libphonenumber-js';
 import { useAuth, authClient, refetchAuthSession } from '@/lib/auth/auth';
 import { useToast } from '@codezeniths/modules';
 import { userQueryService } from '@/lib/tanstack/services/user.query-service';
 import { verifyPhoneSchema, VerifyPhoneFormValues } from './verify-phone.types';
+import { DEFAULT_COUNTRY_CODE, splitE164, validatePhoneNumber } from '@/utils/phone.utils';
 
 export const useVerifyPhoneForm = () => {
     const router = useRouter();
@@ -22,7 +22,7 @@ export const useVerifyPhoneForm = () => {
     const form = useForm<VerifyPhoneFormValues>({
         resolver: zodResolver(verifyPhoneSchema),
         defaultValues: {
-            countryCode: '+1',
+            countryCode: DEFAULT_COUNTRY_CODE,
             phoneNumber: '',
             otp: ''
         },
@@ -34,41 +34,35 @@ export const useVerifyPhoneForm = () => {
     // Automatically set phone number from session once available
     useEffect(() => {
         if (user?.phoneNumber) {
-            try {
-                // We use parsePhoneNumber to split it into country code and national number
-                const { parsePhoneNumber } = require('libphonenumber-js');
-                const parsed = parsePhoneNumber(user.phoneNumber);
-                if (parsed) {
-                    setValue('countryCode', `+${parsed.countryCallingCode}`, { shouldValidate: true });
-                    setValue('phoneNumber', parsed.nationalNumber, { shouldValidate: true });
-                } else {
-                    setValue('phoneNumber', user.phoneNumber, { shouldValidate: true });
-                }
-            } catch (error) {
-                // Fallback to setting it directly if parsing fails
-                setValue('phoneNumber', user.phoneNumber, { shouldValidate: true });
-            }
+            const split = splitE164(user.phoneNumber);
+            setValue('countryCode', split.countryCode, { shouldValidate: true });
+            setValue('phoneNumber', split.nationalNumber, { shouldValidate: true });
         }
     }, [user, setValue]);
 
-    const watchedCountryCode = watch('countryCode');
+    const watchedCountryCode = watch('countryCode') || DEFAULT_COUNTRY_CODE;
     const watchedPhoneNumber = watch('phoneNumber') || '';
     const watchedOtp = watch('otp');
 
     const [debouncedPhone, setDebouncedPhone] = useState('');
     useEffect(() => {
         const timer = setTimeout(() => {
-            const combined = `${watchedCountryCode}${watchedPhoneNumber}`.replace(/\s+/g, '');
-            setDebouncedPhone(combined);
+            setDebouncedPhone(watchedPhoneNumber.trim());
         }, 500);
         return () => clearTimeout(timer);
-    }, [watchedPhoneNumber, watchedCountryCode]);
+    }, [watchedPhoneNumber]);
 
-    const isSessionPhone = !!user?.phoneNumber && user.phoneNumber === debouncedPhone;
+    const phoneValidation = validatePhoneNumber({
+        countryCode: watchedCountryCode,
+        nationalNumber: debouncedPhone,
+        isRequired: true,
+    });
+    const normalizedPhone = phoneValidation.isValid ? (phoneValidation.normalizedE164 || '') : '';
+    const isSessionPhone = Boolean(user?.phoneNumber && normalizedPhone && user.phoneNumber === normalizedPhone);
 
     const { data: phoneCheck, isFetching: isCheckingPhone } = userQueryService.checkPhoneAvailability(
-        { phone: debouncedPhone },
-        { enabled: !isSessionPhone && !!debouncedPhone, staleTime: 0 }
+        { phone: normalizedPhone },
+        { enabled: !isSessionPhone && Boolean(normalizedPhone), staleTime: 0 }
     );
 
     useEffect(() => {
@@ -80,8 +74,7 @@ export const useVerifyPhoneForm = () => {
         }
 
         if (phoneCheck?.available === true) {
-            const stripped = debouncedPhone;
-            if (stripped.length > 5 && isValidPhoneNumber(stripped)) {
+            if (phoneValidation.isValid) {
                 setError('phoneNumber', { type: 'manual', message: "User doesn't exist with this phone number" });
             }
         } else if (phoneCheck?.available === false) {
@@ -89,11 +82,22 @@ export const useVerifyPhoneForm = () => {
                 form.clearErrors('phoneNumber');
             }
         }
-    }, [phoneCheck, debouncedPhone, isSessionPhone, setError, errors.phoneNumber?.type, form]);
+    }, [phoneCheck, debouncedPhone, isSessionPhone, setError, errors.phoneNumber?.type, form, phoneValidation.isValid]);
 
     const handleSendOtp = async () => {
-        const isValid = await trigger('phoneNumber');
+        const isValid = await trigger(['countryCode', 'phoneNumber']);
         if (!isValid) return;
+
+        const validation = validatePhoneNumber({
+            countryCode: watchedCountryCode,
+            nationalNumber: watchedPhoneNumber,
+            isRequired: true,
+        });
+
+        if (!validation.isValid || !validation.normalizedE164) {
+            setError('phoneNumber', { type: 'manual', message: validation.error || 'Invalid phone number' });
+            return;
+        }
         
         if (!isSessionPhone && phoneCheck?.available === true) {
             setError('phoneNumber', { type: 'manual', message: "User doesn't exist with this phone number" });
@@ -104,7 +108,7 @@ export const useVerifyPhoneForm = () => {
         setIsSending(true);
         try {
             const res = await authClient.phoneNumber.sendOtp({
-                phoneNumber: `${watchedCountryCode}${watchedPhoneNumber}`.replace(/\s+/g, ''),
+                phoneNumber: validation.normalizedE164,
             });
             
             if (res.error) throw new Error(res.error.message);
@@ -119,8 +123,16 @@ export const useVerifyPhoneForm = () => {
     };
 
     const handleVerifyOtp = async () => {
-        const isValid = await trigger(['phoneNumber']);
-        if (!isValid) return;
+        const validation = validatePhoneNumber({
+            countryCode: watchedCountryCode,
+            nationalNumber: watchedPhoneNumber,
+            isRequired: true,
+        });
+
+        if (!validation.isValid || !validation.normalizedE164) {
+            setError('phoneNumber', { type: 'manual', message: validation.error || 'Invalid phone number' });
+            return;
+        }
 
         if (!watchedOtp || watchedOtp.length !== 6) {
             setError('otp', { type: 'manual', message: 'OTP must be 6 digits' });
@@ -130,7 +142,7 @@ export const useVerifyPhoneForm = () => {
         setIsVerifying(true);
         try {
             const res = await authClient.phoneNumber.verify({
-                phoneNumber: `${watchedCountryCode}${watchedPhoneNumber}`.replace(/\s+/g, ''),
+                phoneNumber: validation.normalizedE164,
                 code: watchedOtp || '',
             });
             

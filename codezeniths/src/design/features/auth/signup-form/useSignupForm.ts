@@ -10,6 +10,7 @@ import { authClient } from '@/lib/auth/auth';
 import { userQueryService } from '@/lib/tanstack/services/user.query-service';
 import { getPasswordStrength, generateUsernameSuggestions } from './signup.utils';
 import { SignupSchema, SignupFormValues, PasswordStrength } from './signup.types';
+import { DEFAULT_COUNTRY_CODE, validatePhoneNumber } from '@/utils/phone.utils';
 
 import { CacheInvalidationService } from '@/lib/tanstack/cache-invalidation.service';
 
@@ -32,7 +33,7 @@ export const useSignupForm = () => {
         defaultValues: {
             username: '',
             email: '',
-            countryCode: '+1',
+            countryCode: DEFAULT_COUNTRY_CODE,
             phone: '',
             password: '',
             confirmPassword: '',
@@ -64,7 +65,7 @@ export const useSignupForm = () => {
         return () => clearTimeout(timer);
     }, [watchedPhone]);
 
-    const watchedCountryCode = form.watch('countryCode');
+    const watchedCountryCode = form.watch('countryCode') || DEFAULT_COUNTRY_CODE;
 
     const { data: usernameCheck, isFetching: isCheckingUsername } = userQueryService.checkUserNameAvailability({ 
         username: debouncedUsername,
@@ -72,8 +73,17 @@ export const useSignupForm = () => {
     });
     const { data: emailCheck, isFetching: isCheckingEmail } = userQueryService.checkEmailAvailability({ email: debouncedEmail });
     
-    const combinedPhone = debouncedPhone ? `${watchedCountryCode}${debouncedPhone}`.replace(/\s+/g, '') : '';
-    const { data: phoneCheck, isFetching: isCheckingPhone } = userQueryService.checkPhoneAvailability({ phone: combinedPhone });
+    const phoneValidation = validatePhoneNumber({
+        countryCode: watchedCountryCode,
+        nationalNumber: debouncedPhone,
+        isRequired: false,
+    });
+    const normalizedPhone = phoneValidation.isValid && debouncedPhone.trim() ? phoneValidation.normalizedE164 : '';
+
+    const { data: phoneCheck, isFetching: isCheckingPhone } = userQueryService.checkPhoneAvailability(
+        { phone: normalizedPhone || '' },
+        { enabled: Boolean(normalizedPhone), staleTime: 0 }
+    );
 
     useEffect(() => {
         if (debouncedUsername && usernameCheck && !usernameCheck.available) {

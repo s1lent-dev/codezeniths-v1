@@ -9,6 +9,7 @@ import type { MessageContext } from '../shared/mq.types';
 import type { PayloadOf } from '../shared/mq.registry';
 import { MailTemplate } from '@/service/mail/mail.types';
 import { mailService } from '@/service/mail/mail.service';
+import { SmsTemplate, smsService } from '@/service/sms';
 import { prisma } from '@/lib/db/prisma.client';
 import { logger } from '@/service/logging';
 
@@ -34,6 +35,23 @@ async function getUserEmailContext(userId: string): Promise<{ name?: string; the
     } catch (error) {
         logger.warn('[auth:consumer] Failed to fetch user preferences, falling back to dark theme', { error, userId });
         return { theme: 'dark' };
+    }
+}
+
+async function getUserSmsContext(userId: string): Promise<{ name?: string }> {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                name: true,
+            },
+        });
+        return {
+            name: user?.name || undefined,
+        };
+    } catch (error) {
+        logger.warn('[auth:consumer] Failed to fetch user context for SMS', { error, userId });
+        return {};
     }
 }
 
@@ -326,7 +344,20 @@ export const authOtpSmsConsumer = createConsumer(
     'auth.sms.otp',
     async (payload: PayloadOf<'auth.sms.otp'>, context: MessageContext) => {
         try {
-            logger.info(`[SMS to ${payload.phoneNumber}]: Your CodeZeniths verification code is ${payload.code}. Valid for 10 minutes.`);
+            const result = await smsService.sendTemplatedSms(
+                SmsTemplate.OTP,
+                payload.phoneNumber,
+                {
+                    code: payload.code,
+                    expiryMinutes: 10,
+                },
+                { dedupeKey: payload.correlationId }
+            );
+
+            if (result.status === 'failed') {
+                throw result.error;
+            }
+
             context.ack();
         } catch (error) {
             logger.error('[auth:sms:otp] Failed to send OTP SMS', error);
@@ -340,7 +371,21 @@ export const authMagicLinkSmsConsumer = createConsumer(
     'auth.sms.magic_link',
     async (payload: PayloadOf<'auth.sms.magic_link'>, context: MessageContext) => {
         try {
-            logger.info(`[SMS to ${payload.phoneNumber}]: Sign in to CodeZeniths: ${payload.url}`);
+            const userCtx = await getUserSmsContext(payload.userId);
+            const result = await smsService.sendTemplatedSms(
+                SmsTemplate.MAGIC_LINK,
+                payload.phoneNumber,
+                {
+                    name: userCtx.name || 'Developer',
+                    loginUrl: payload.url,
+                },
+                { dedupeKey: payload.correlationId }
+            );
+
+            if (result.status === 'failed') {
+                throw result.error;
+            }
+
             context.ack();
         } catch (error) {
             logger.error('[auth:sms:magic_link] Failed to send magic link SMS', error);
@@ -354,7 +399,19 @@ export const authPasswordlessCredentialsSmsConsumer = createConsumer(
     'auth.sms.passwordless_credentials',
     async (payload: PayloadOf<'auth.sms.passwordless_credentials'>, context: MessageContext) => {
         try {
-            logger.info(`[SMS to ${payload.phoneNumber}]: Your temporary CodeZeniths password is: ${payload.password}`);
+            const result = await smsService.sendTemplatedSms(
+                SmsTemplate.PASSWORDLESS_CREDENTIALS,
+                payload.phoneNumber,
+                {
+                    password: payload.password,
+                },
+                { dedupeKey: payload.correlationId }
+            );
+
+            if (result.status === 'failed') {
+                throw result.error;
+            }
+
             context.ack();
         } catch (error) {
             logger.error('[auth:sms:credentials] Failed to send credentials SMS', error);
@@ -368,7 +425,22 @@ export const authNewDeviceSmsConsumer = createConsumer(
     'auth.sms.new_device',
     async (payload: PayloadOf<'auth.sms.new_device'>, context: MessageContext) => {
         try {
-            logger.warn(`[SMS to ${payload.phoneNumber}]: Security Alert - New sign-in from ${payload.deviceName}. If this wasn't you, secure your account immediately.`);
+            const userCtx = await getUserSmsContext(payload.userId);
+            const result = await smsService.sendTemplatedSms(
+                SmsTemplate.NEW_DEVICE,
+                payload.phoneNumber,
+                {
+                    name: userCtx.name || 'Developer',
+                    deviceName: payload.deviceName,
+                    time: new Date().toLocaleString(),
+                },
+                { dedupeKey: payload.correlationId }
+            );
+
+            if (result.status === 'failed') {
+                throw result.error;
+            }
+
             context.ack();
         } catch (error) {
             logger.error('[auth:sms:new_device] Failed to send new device SMS alert', error);
@@ -382,7 +454,22 @@ export const authAccountLockedSmsConsumer = createConsumer(
     'auth.sms.account_locked',
     async (payload: PayloadOf<'auth.sms.account_locked'>, context: MessageContext) => {
         try {
-            logger.warn(`[SMS to ${payload.phoneNumber}]: Your CodeZeniths account has been temporarily locked due to multiple failed login attempts.`);
+            const userCtx = await getUserSmsContext(payload.userId);
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://codezeniths.com';
+            const result = await smsService.sendTemplatedSms(
+                SmsTemplate.ACCOUNT_LOCKED,
+                payload.phoneNumber,
+                {
+                    name: userCtx.name || 'Developer',
+                    unlockLink: `${appUrl}/forgot-password`,
+                },
+                { dedupeKey: payload.correlationId }
+            );
+
+            if (result.status === 'failed') {
+                throw result.error;
+            }
+
             context.ack();
         } catch (error) {
             logger.error('[auth:sms:account_locked] Failed to send account locked SMS', error);

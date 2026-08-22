@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isValidPhoneNumber } from 'libphonenumber-js';
+import { validatePhoneNumber } from '@/utils/phone.utils';
 import {
     GenderSchema,
     UserTypeSchema,
@@ -34,11 +34,15 @@ export const step1Schema = z.object({
     about: z.string().max(500, 'About section cannot exceed 500 characters').nullable().optional(),
 }).superRefine((data, ctx) => {
     if (data.phone && data.phone.trim().length > 0) {
-        const fullNumber = (data.countryCode || '+1') + data.phone.trim().replace(/\s+/g, '');
-        if (!isValidPhoneNumber(fullNumber)) {
+        const validation = validatePhoneNumber({
+            countryCode: data.countryCode || '+1',
+            nationalNumber: data.phone,
+            isRequired: false,
+        });
+        if (!validation.isValid) {
             ctx.addIssue({
                 code: 'custom',
-                message: 'Please enter a valid phone number for the selected country code',
+                message: validation.error || 'Please enter a valid phone number for the selected country code',
                 path: ['phone'],
             });
         }

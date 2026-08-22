@@ -19,18 +19,9 @@ import { DatePicker } from '@codezeniths/modules';
 import { LocationInput, UploadInput } from '@codezeniths/widgets';
 import { Step0Values } from '../useCompleteProfileForm';
 import { GENDER_OPTIONS } from '../complete-profile.utils';
+import { COUNTRY_OPTIONS, DEFAULT_COUNTRY_CODE } from '@/utils/phone.utils';
 
-export const COUNTRY_CODE_OPTIONS = [
-    { code: 'US', label: 'US (+1)', value: '+1' },
-    { code: 'IN', label: 'IN (+91)', value: '+91' },
-    { code: 'UK', label: 'UK (+44)', value: '+44' },
-    { code: 'AU', label: 'AU (+61)', value: '+61' },
-    { code: 'DE', label: 'DE (+49)', value: '+49' },
-    { code: 'FR', label: 'FR (+33)', value: '+33' },
-    { code: 'SG', label: 'SG (+65)', value: '+65' },
-    { code: 'AE', label: 'AE (+971)', value: '+971' },
-    { code: 'JP', label: 'JP (+81)', value: '+81' },
-];
+export const COUNTRY_CODE_OPTIONS = COUNTRY_OPTIONS;
 
 interface Step1Props {
     form: UseFormReturn<Step0Values>;
@@ -230,7 +221,10 @@ export const Step1PersonalDetails: React.FC<Step1Props> = ({
                                 type="tel"
                                 label="Phone Number (Optional)"
                                 value={currentPhone || ''}
-                                onChange={(e) => setValue('phone', e.target.value, { shouldValidate: true, shouldDirty: true })}
+                                onChange={(e) => {
+                                    const raw = e.target.value.replace(/[^\d\s-]/g, '');
+                                    setValue('phone', raw, { shouldValidate: true, shouldDirty: true });
+                                }}
                                 error={hasPhoneError}
                                 className={isCheckingPhone || (currentPhone && phoneCheck?.available && !hasPhoneError) ? 'pr-28' : ''}
                             />

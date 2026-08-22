@@ -151,14 +151,17 @@ export const VerifyPhoneForm = () => {
                                 <div className="relative w-full">
                                     <PhoneInput
                                         countryCode={watchedCountryCode}
-                                        onCountryCodeChange={(val) => form.setValue('countryCode', val)}
+                                        onCountryCodeChange={(val) => form.setValue('countryCode', val, { shouldValidate: true })}
                                         value={watchedPhoneNumber}
-                                        onChange={(e) => form.setValue('phoneNumber', e.target.value, { shouldValidate: true })}
+                                        onChange={(e) => {
+                                            const raw = e.target.value.replace(/[^\d\s-]/g, '');
+                                            form.setValue('phoneNumber', raw, { shouldValidate: true });
+                                        }}
                                         placeholder="Enter your phone number"
                                         inputClassName={errors.phoneNumber ? '!border-destructive pr-10' : 'pr-10'}
                                     />
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
-                                        {(isCheckingPhone || (watchedPhoneNumber && `${watchedCountryCode}${watchedPhoneNumber}`.replace(/\s+/g, '') !== debouncedPhoneNumber)) ? (
+                                        {(isCheckingPhone || (watchedPhoneNumber && watchedPhoneNumber.trim() !== debouncedPhoneNumber)) ? (
                                             <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                                         ) : (watchedPhoneNumber && watchedPhoneNumber.length > 0 && phoneCheck?.available === false && !errors.phoneNumber) ? (
                                             <CheckCircle2 size={20} className="text-green-500 animate-in zoom-in duration-300" />

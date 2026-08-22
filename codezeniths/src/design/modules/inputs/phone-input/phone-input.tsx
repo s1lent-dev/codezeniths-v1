@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Input, Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@codezeniths/components"
 import { cn } from "@codezeniths/design/cn"
+import { COUNTRY_OPTIONS, DEFAULT_COUNTRY_CODE } from "@/utils/phone.utils"
 
 export interface PhoneInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   countryCode?: string;
@@ -9,21 +10,20 @@ export interface PhoneInputProps extends React.InputHTMLAttributes<HTMLInputElem
 }
 
 export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ className, countryCode = "+1", onCountryCodeChange, inputClassName, ...props }, ref) => {
+  ({ className, countryCode = DEFAULT_COUNTRY_CODE, onCountryCodeChange, inputClassName, ...props }, ref) => {
     return (
       <div className={cn("flex w-full items-end gap-4", className)}>
         <Select value={countryCode} onValueChange={onCountryCodeChange}>
           <SelectTrigger className="w-24 sm:w-28 h-14 border-0 border-b hover:bg-transparent dark:hover:bg-transparent border-muted-light/25 dark:border-muted-dark/25 focus-visible:border-none dark:focus-visible:border-none rounded-none bg-transparent px-0! shadow-none cursor-pointer text-base font-normal flex items-end pb-4">
             <SelectValue placeholder="Code" />
           </SelectTrigger>
-          <SelectContent className="border border-muted-light/50 dark:border-muted-dark/50">
+          <SelectContent className="border border-muted-light/50 dark:border-muted-dark/50 max-h-60">
             <SelectGroup>
-              <SelectItem value="+1" className="cursor-pointer">US +1</SelectItem>
-              <SelectItem value="+44" className="cursor-pointer">UK +44</SelectItem>
-              <SelectItem value="+91" className="cursor-pointer">IN +91</SelectItem>
-              <SelectItem value="+61" className="cursor-pointer">AU +61</SelectItem>
-              <SelectItem value="+81" className="cursor-pointer">JP +81</SelectItem>
-              <SelectItem value="+49" className="cursor-pointer">DE +49</SelectItem>
+              {COUNTRY_OPTIONS.map((country) => (
+                <SelectItem key={`${country.code}-${country.value}`} value={country.value} className="cursor-pointer">
+                  {country.label}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -40,3 +40,4 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
   }
 )
 PhoneInput.displayName = "PhoneInput"
+

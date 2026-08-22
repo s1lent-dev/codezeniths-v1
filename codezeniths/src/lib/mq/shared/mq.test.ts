@@ -95,5 +95,23 @@ describe('Message Queue Unit Tests', () => {
             const consumer = new Consumer('auth.email.welcome', handler, { queue: MqQueue.AUTH_EMAIL_WELCOME });
             expect(consumer).toBeDefined();
         });
+
+        it('sms otp producer and consumer should be defined with proper types', async () => {
+            const producer = new Producer({
+                exchange: MqExchange.AUTH,
+                messageKey: 'auth.sms.otp',
+                routingKey: MqRoutingKey.AUTH_SMS_OTP,
+            });
+            const success = await producer.publish({
+                userId: 'd3b07384-d113-4956-a56e-86164749f99f',
+                phoneNumber: '+12064567891',
+                code: '123456',
+            });
+            expect(success).toBe(true);
+
+            const handler = vi.fn();
+            const consumer = new Consumer('auth.sms.otp', handler, { queue: MqQueue.AUTH_SMS_OTP });
+            expect(consumer).toBeDefined();
+        });
     });
 });

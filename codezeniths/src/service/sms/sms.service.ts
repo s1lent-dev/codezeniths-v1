@@ -99,13 +99,16 @@ export function createSmsService() {
     const apiSecret = ENV_CONFIG.VONAGE_API_SECRET;
 
     if (!apiKey || !apiSecret) {
-      throw new SmsValidationError('Missing Vonage credentials. Both VONAGE_API_KEY and VONAGE_API_SECRET must be set.');
+      if (!ENV_CONFIG.SMS_DRY_RUN) {
+        throw new SmsValidationError('Missing Vonage credentials. Both VONAGE_API_KEY and VONAGE_API_SECRET must be set.');
+      }
+      logger.warn('[sms:service] Vonage credentials not configured; operating in SMS_DRY_RUN mode.');
+    } else {
+      vonageClient = new Vonage({
+        apiKey,
+        apiSecret,
+      });
     }
-
-    vonageClient = new Vonage({
-      apiKey,
-      apiSecret,
-    });
   }
 
   const provider = new VonageSmsProvider();
@@ -149,7 +152,7 @@ export function createSmsService() {
     sendSms: (payload: SmsPayload, options?: SendOptions) => executeSend(payload, options),
     sendTemplatedSms: async <K extends keyof SmsTemplateRegistry>(
       name: K, to: string, data: SmsTemplateData<K>, options?: SendOptions
-    ) => {
+    ): Promise<SmsResult> => {
       const entry = smsTemplateRegistry[name];
       if (!entry) throw new SmsValidationError(`Template '${name}' not found`);
       
@@ -166,3 +169,20 @@ export function createSmsService() {
     }
   };
 }
+
+let _smsServiceInstance: ReturnType<typeof createSmsService> | null = null;
+
+/**
+ * Returns the shared singleton SMS service, initialising it on first call.
+ * Using a lazy getter avoids TDZ issues when the module is imported in test
+ * environments where mocks are hoisted after the module-level const would run.
+ */
+export const smsService = new Proxy({} as ReturnType<typeof createSmsService>, {
+  get(_target, prop: string) {
+    if (!_smsServiceInstance) {
+      _smsServiceInstance = createSmsService();
+    }
+    return (_smsServiceInstance as Record<string, unknown>)[prop];
+  },
+});
+

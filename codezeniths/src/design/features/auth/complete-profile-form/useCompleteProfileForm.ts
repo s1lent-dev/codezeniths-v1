@@ -19,6 +19,7 @@ import {
     step3Schema,
     step4Schema,
 } from './complete-profile.utils';
+import { DEFAULT_COUNTRY_CODE, splitE164, validatePhoneNumber } from '@/utils/phone.utils';
 
 export type Step0Values = z.infer<typeof step1Schema>;
 export type Step1Values = z.infer<typeof step2Schema>;
@@ -73,7 +74,7 @@ export const useCompleteProfileForm = () => {
             dob: null,
             gender: 'prefer_not_to_say',
             location: '',
-            countryCode: '+1',
+            countryCode: DEFAULT_COUNTRY_CODE,
             phone: '',
             phoneNumber: '',
             about: '',
@@ -84,16 +85,23 @@ export const useCompleteProfileForm = () => {
     // Phone debounce and live availability check for step 1
     const [debouncedPhone, setDebouncedPhone] = useState('');
     const watchedPhone = step0Form.watch('phone');
-    const watchedCountryCode = step0Form.watch('countryCode') || '+1';
+    const watchedCountryCode = step0Form.watch('countryCode') || DEFAULT_COUNTRY_CODE;
 
     useEffect(() => {
         const timer = setTimeout(() => setDebouncedPhone(watchedPhone || ''), 500);
         return () => clearTimeout(timer);
     }, [watchedPhone]);
 
-    const combinedPhone = debouncedPhone ? `${watchedCountryCode}${debouncedPhone}`.replace(/\s+/g, '') : '';
+    const phoneValidation = validatePhoneNumber({
+        countryCode: watchedCountryCode,
+        nationalNumber: debouncedPhone,
+        isRequired: false,
+    });
+    const normalizedPhone = phoneValidation.isValid && debouncedPhone.trim() ? phoneValidation.normalizedE164 : '';
+
     const { data: phoneCheck, isFetching: isCheckingPhone } = userQueryService.checkPhoneAvailability(
-        { phone: combinedPhone }
+        { phone: normalizedPhone || '' },
+        { enabled: Boolean(normalizedPhone), staleTime: 0 }
     );
 
     useEffect(() => {
@@ -147,17 +155,7 @@ export const useCompleteProfileForm = () => {
 
             const db0 = onboardingProfile.step0;
             if (db0) {
-                let initialCountryCode = '+1';
-                let initialPhone = '';
-                if (db0.phoneNumber) {
-                    const match = db0.phoneNumber.match(/^(\+\d{1,4})(.*)$/);
-                    if (match) {
-                        initialCountryCode = match[1];
-                        initialPhone = match[2];
-                    } else {
-                        initialPhone = db0.phoneNumber;
-                    }
-                }
+                const parsedPhone = splitE164(db0.phoneNumber);
 
                 step0Form.reset({
                     image: onboardingProfile.image || draft0.image || null,
@@ -167,8 +165,8 @@ export const useCompleteProfileForm = () => {
                     dob: draft0.dob ? new Date(draft0.dob) : (db0.dob ? new Date(db0.dob) : null),
                     gender: (draft0.gender ?? (db0.gender as any)) || 'prefer_not_to_say',
                     location: draft0.location ?? (db0.location || ''),
-                    countryCode: draft0.countryCode ?? initialCountryCode,
-                    phone: draft0.phone ?? initialPhone,
+                    countryCode: draft0.countryCode ?? parsedPhone.countryCode,
+                    phone: draft0.phone ?? parsedPhone.nationalNumber,
                     phoneNumber: draft0.phoneNumber ?? (db0.phoneNumber || ''),
                     about: draft0.about ?? (db0.about || ''),
                 });

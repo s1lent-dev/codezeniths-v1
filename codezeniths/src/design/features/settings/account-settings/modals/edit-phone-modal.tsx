@@ -29,14 +29,29 @@ import {
 } from '@codezeniths/components';
 import { userQueryService } from '@/lib/tanstack/services/user.query-service';
 import { CheckCircle2, AlertCircle, Loader2, Phone, Info } from 'lucide-react';
+import {
+    COUNTRY_OPTIONS,
+    DEFAULT_COUNTRY_CODE,
+    splitE164,
+    validatePhoneNumber,
+} from '@/utils/phone.utils';
 
 const phoneFormSchema = z.object({
     countryCode: z.string().min(1, 'Please select a country code'),
-    phone: z
-        .string()
-        .min(7, 'Please enter a valid phone number')
-        .max(15, 'Phone number cannot exceed 15 digits')
-        .regex(/^[0-9]+$/, 'Phone number must contain only numbers'),
+    phone: z.string().min(1, 'Please enter a phone number'),
+}).superRefine((data, ctx) => {
+    const validation = validatePhoneNumber({
+        countryCode: data.countryCode,
+        nationalNumber: data.phone,
+        isRequired: true,
+    });
+    if (!validation.isValid) {
+        ctx.addIssue({
+            code: 'custom',
+            message: validation.error || 'Please enter a valid phone number for the selected country',
+            path: ['phone'],
+        });
+    }
 });
 
 type PhoneFormValues = z.infer<typeof phoneFormSchema>;
@@ -47,19 +62,6 @@ interface EditPhoneModalProps {
     currentPhoneNumber?: string | null;
     onSuccess?: () => void;
 }
-
-const COUNTRY_CODES = [
-    { code: '+1', label: 'US/CA (+1)' },
-    { code: '+44', label: 'UK (+44)' },
-    { code: '+91', label: 'IN (+91)' },
-    { code: '+61', label: 'AU (+61)' },
-    { code: '+49', label: 'DE (+49)' },
-    { code: '+33', label: 'FR (+33)' },
-    { code: '+81', label: 'JP (+81)' },
-    { code: '+86', label: 'CN (+86)' },
-    { code: '+971', label: 'AE (+971)' },
-    { code: '+65', label: 'SG (+65)' },
-];
 
 export const EditPhoneModal: React.FC<EditPhoneModalProps> = ({
     isOpen,
@@ -72,13 +74,8 @@ export const EditPhoneModal: React.FC<EditPhoneModalProps> = ({
 
     // Parse initial country code and phone digits if present
     const parseInitialPhone = (phoneStr?: string | null) => {
-        if (!phoneStr) return { countryCode: '+91', phone: '' };
-        for (const c of COUNTRY_CODES) {
-            if (phoneStr.startsWith(c.code)) {
-                return { countryCode: c.code, phone: phoneStr.slice(c.code.length).trim() };
-            }
-        }
-        return { countryCode: '+91', phone: phoneStr.replace(/^\+/, '') };
+        const split = splitE164(phoneStr, DEFAULT_COUNTRY_CODE);
+        return { countryCode: split.countryCode, phone: split.nationalNumber };
     };
 
     const initial = parseInitialPhone(currentPhoneNumber);
@@ -102,7 +99,7 @@ export const EditPhoneModal: React.FC<EditPhoneModalProps> = ({
     } = form;
 
     const watchedPhone = watch('phone');
-    const watchedCountryCode = watch('countryCode');
+    const watchedCountryCode = watch('countryCode') || DEFAULT_COUNTRY_CODE;
     const [debouncedPhone, setDebouncedPhone] = useState('');
     const [isSelectOpen, setIsSelectOpen] = useState(false);
 
@@ -122,20 +119,37 @@ export const EditPhoneModal: React.FC<EditPhoneModalProps> = ({
         }
     }, [isOpen, currentPhoneNumber, reset]);
 
-    const combinedNumber = debouncedPhone ? `${watchedCountryCode}${debouncedPhone}` : '';
-    const isSameAsCurrent = combinedNumber === (currentPhoneNumber || '');
-    const shouldCheck = debouncedPhone.length >= 7 && !isSameAsCurrent;
+    const phoneValidation = validatePhoneNumber({
+        countryCode: watchedCountryCode,
+        nationalNumber: debouncedPhone,
+        isRequired: true,
+    });
+    const normalizedNumber = phoneValidation.isValid ? (phoneValidation.normalizedE164 || '') : '';
+    const isSameAsCurrent = Boolean(normalizedNumber && normalizedNumber === (currentPhoneNumber || ''));
+    const shouldCheck = Boolean(normalizedNumber && !isSameAsCurrent);
 
     const { data: availability, isFetching: isCheckingAvailability } =
-        userQueryService.checkPhoneAvailability({
-            phone: combinedNumber,
-        });
+        userQueryService.checkPhoneAvailability(
+            { phone: normalizedNumber },
+            { enabled: shouldCheck, staleTime: 0 }
+        );
 
     const isPhoneTaken = shouldCheck && availability !== undefined && !availability.available;
 
     const onSubmit = async (values: PhoneFormValues) => {
-        const fullPhone = `${values.countryCode}${values.phone.trim()}`;
-        if (isSameAsCurrent) {
+        const validation = validatePhoneNumber({
+            countryCode: values.countryCode,
+            nationalNumber: values.phone,
+            isRequired: true,
+        });
+
+        if (!validation.isValid || !validation.normalizedE164) {
+            toast.error('Invalid phone number', validation.error || 'Please enter a valid phone number.');
+            return;
+        }
+
+        const fullPhone = validation.normalizedE164;
+        if (fullPhone === currentPhoneNumber) {
             onClose();
             return;
         }
@@ -206,9 +220,9 @@ export const EditPhoneModal: React.FC<EditPhoneModalProps> = ({
                                             <SelectTrigger className="w-full! h-full! justify-between items-center border-0! px-0! bg-transparent! shadow-none text-sm font-normal focus:ring-0 cursor-pointer">
                                                 <SelectValue placeholder="" />
                                             </SelectTrigger>
-                                            <SelectContent position="popper" className="w-full min-w-40 z-250">
-                                                {COUNTRY_CODES.map((c) => (
-                                                    <SelectItem key={c.code} value={c.code} className="cursor-pointer text-xs">
+                                            <SelectContent position="popper" className="w-full min-w-40 z-250 max-h-60">
+                                                {COUNTRY_OPTIONS.map((c) => (
+                                                    <SelectItem key={`${c.code}-${c.value}`} value={c.value} className="cursor-pointer text-xs">
                                                         {c.label}
                                                     </SelectItem>
                                                 ))}
@@ -225,7 +239,10 @@ export const EditPhoneModal: React.FC<EditPhoneModalProps> = ({
                                             type="tel"
                                             label="Phone Number"
                                             value={watchedPhone || ''}
-                                            onChange={(e) => setValue('phone', e.target.value, { shouldValidate: true, shouldDirty: true })}
+                                            onChange={(e) => {
+                                                const raw = e.target.value.replace(/[^\d\s-]/g, '');
+                                                setValue('phone', raw, { shouldValidate: true, shouldDirty: true });
+                                            }}
                                             error={Boolean(errors.phone) || isPhoneTaken}
                                             className={isCheckingAvailability || (shouldCheck && availability?.available && !errors.phone) ? 'pr-28' : ''}
                                         />

@@ -281,9 +281,12 @@ export const SignupForm = () => {
                     <div className="relative group w-full pt-2">
                         <PhoneInput 
                             countryCode={watchedValues.countryCode}
-                            onCountryCodeChange={(val) => form.setValue('countryCode', val)}
+                            onCountryCodeChange={(val) => form.setValue('countryCode', val, { shouldValidate: true })}
                             value={watchedValues.phone}
-                            onChange={(e) => form.setValue('phone', e.target.value, { shouldValidate: true })}
+                            onChange={(e) => {
+                                const raw = e.target.value.replace(/[^\d\s-]/g, '');
+                                form.setValue('phone', raw, { shouldValidate: true });
+                            }}
                             placeholder="Phone Number (Optional)"
                             inputClassName={hasPhoneError ? '!border-destructive' : ''}
                         />

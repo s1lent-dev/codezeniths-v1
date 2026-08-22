@@ -9,19 +9,28 @@ import type { MessageContext } from '../shared/mq.types';
 import type { PayloadOf } from '../shared/mq.registry';
 import { MailTemplate } from '@/service/mail/mail.types';
 import { mailService } from '@/service/mail/mail.service';
+import { SmsTemplate, smsService } from '@/service/sms';
 import { prisma } from '@/lib/db/prisma.client';
 import { logger } from '@/service/logging';
 
-async function getUserEmailContext(userId: string): Promise<{ name?: string; email?: string; theme?: 'dark' | 'light' }> {
+async function getUserNotificationContext(userId: string): Promise<{
+    name?: string;
+    email?: string;
+    phoneNumber?: string;
+    smsNotifications?: boolean;
+    theme?: 'dark' | 'light';
+}> {
     try {
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: {
                 name: true,
                 email: true,
+                phoneNumber: true,
                 preferences: {
                     select: {
                         theme: true,
+                        smsNotifications: true,
                     },
                 },
             },
@@ -31,10 +40,12 @@ async function getUserEmailContext(userId: string): Promise<{ name?: string; ema
         return {
             name: user?.name || undefined,
             email: user?.email || undefined,
+            phoneNumber: user?.phoneNumber || undefined,
+            smsNotifications: user?.preferences?.smsNotifications ?? false,
             theme,
         };
     } catch (error) {
-        logger.warn('[payment:consumer] Failed to fetch user email context', { error, userId });
+        logger.warn('[payment:consumer] Failed to fetch user notification context', { error, userId });
         return { theme: 'dark' };
     }
 }
@@ -71,7 +82,7 @@ export const paymentConfirmedConsumer = createConsumer(
     'payment.confirmed',
     async (payload: PayloadOf<'payment.confirmed'>, context: MessageContext) => {
         try {
-            const userCtx = await getUserEmailContext(payload.userId);
+            const userCtx = await getUserNotificationContext(payload.userId);
             if (userCtx.email) {
                 await mailService.sendTemplatedEmail(
                     MailTemplate.PAYMENT_RECEIPT,
@@ -97,7 +108,9 @@ export const paymentFailedConsumer = createConsumer(
     'payment.failed',
     async (payload: PayloadOf<'payment.failed'>, context: MessageContext) => {
         try {
-            const userCtx = await getUserEmailContext(payload.userId);
+            const userCtx = await getUserNotificationContext(payload.userId);
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://codezeniths.com';
+
             if (userCtx.email) {
                 await mailService.sendTemplatedEmail(
                     MailTemplate.PAYMENT_FAILED,
@@ -110,6 +123,21 @@ export const paymentFailedConsumer = createConsumer(
                     }
                 );
             }
+
+            if (userCtx.phoneNumber && userCtx.smsNotifications) {
+                await smsService.sendTemplatedSms(
+                    SmsTemplate.PAYMENT_FAILED,
+                    userCtx.phoneNumber,
+                    {
+                        name: userCtx.name || 'Developer',
+                        amount: `$${(payload.amount / 100).toFixed(2)}`,
+                        planName: 'CodeZeniths Subscription',
+                        retryLink: `${appUrl}/settings/account-settings`,
+                    },
+                    { dedupeKey: payload.correlationId }
+                );
+            }
+
             context.ack();
         } catch (error) {
             logger.error('[payment:failed] Failed to process payment failure event', error);
@@ -137,7 +165,7 @@ export const paymentRefundConsumer = createConsumer(
     'payment.refund',
     async (payload: PayloadOf<'payment.refund'>, context: MessageContext) => {
         try {
-            const userCtx = await getUserEmailContext(payload.userId);
+            const userCtx = await getUserNotificationContext(payload.userId);
             if (userCtx.email) {
                 await mailService.sendTemplatedEmail(
                     MailTemplate.PAYMENT_REFUND,
@@ -163,7 +191,7 @@ export const paymentSubscriptionCreatedConsumer = createConsumer(
     'payment.subscription.created',
     async (payload: PayloadOf<'payment.subscription.created'>, context: MessageContext) => {
         try {
-            const userCtx = await getUserEmailContext(payload.userId);
+            const userCtx = await getUserNotificationContext(payload.userId);
             if (userCtx.email) {
                 await mailService.sendTemplatedEmail(
                     MailTemplate.SUBSCRIPTION_CONFIRMED,
@@ -189,7 +217,7 @@ export const paymentSubscriptionRenewedConsumer = createConsumer(
     'payment.subscription.renewed',
     async (payload: PayloadOf<'payment.subscription.renewed'>, context: MessageContext) => {
         try {
-            const userCtx = await getUserEmailContext(payload.userId);
+            const userCtx = await getUserNotificationContext(payload.userId);
             if (userCtx.email) {
                 await mailService.sendTemplatedEmail(
                     MailTemplate.SUBSCRIPTION_RENEWED,
@@ -203,6 +231,21 @@ export const paymentSubscriptionRenewedConsumer = createConsumer(
                     }
                 );
             }
+
+            if (userCtx.phoneNumber && userCtx.smsNotifications) {
+                await smsService.sendTemplatedSms(
+                    SmsTemplate.SUBSCRIPTION_RENEWAL,
+                    userCtx.phoneNumber,
+                    {
+                        name: userCtx.name || 'Developer',
+                        planName: 'CodeZeniths Pro',
+                        amount: '$9.99',
+                        renewDate: payload.expiryDate,
+                    },
+                    { dedupeKey: payload.correlationId }
+                );
+            }
+
             context.ack();
         } catch (error) {
             logger.error('[payment:sub_renewed] Failed to process subscription renewal', error);
@@ -216,7 +259,7 @@ export const paymentSubscriptionCancelledConsumer = createConsumer(
     'payment.subscription.cancelled',
     async (payload: PayloadOf<'payment.subscription.cancelled'>, context: MessageContext) => {
         try {
-            const userCtx = await getUserEmailContext(payload.userId);
+            const userCtx = await getUserNotificationContext(payload.userId);
             if (userCtx.email) {
                 await mailService.sendTemplatedEmail(
                     MailTemplate.SUBSCRIPTION_CANCELLED,
@@ -242,7 +285,7 @@ export const paymentSubscriptionExpiredConsumer = createConsumer(
     'payment.subscription.expired',
     async (payload: PayloadOf<'payment.subscription.expired'>, context: MessageContext) => {
         try {
-            const userCtx = await getUserEmailContext(payload.userId);
+            const userCtx = await getUserNotificationContext(payload.userId);
             if (userCtx.email) {
                 await mailService.sendTemplatedEmail(
                     MailTemplate.SUBSCRIPTION_EXPIRED,

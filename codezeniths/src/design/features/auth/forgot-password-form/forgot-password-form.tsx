@@ -15,6 +15,7 @@ import {
 import { InputOTP, InputOTPGroup, InputOTPSlot, PhoneInput } from '@codezeniths/modules';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useForgotPasswordForm } from './useForgotPasswordForm';
+import { DEFAULT_COUNTRY_CODE, validateCombinedPhone } from '@/utils/phone.utils';
 
 export const ForgotPasswordForm = () => {
     const {
@@ -42,6 +43,13 @@ export const ForgotPasswordForm = () => {
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
     const inputClassName = "border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-lg w-full";
+
+    const rawIdentifier = requestForm.watch('identifier') || '';
+    const currentCountryCode = rawIdentifier.startsWith('+') ? (rawIdentifier.split(' ')[0] || DEFAULT_COUNTRY_CODE) : DEFAULT_COUNTRY_CODE;
+    const currentNationalNumber = rawIdentifier.includes(' ') ? rawIdentifier.split(' ').slice(1).join(' ') : (rawIdentifier.startsWith('+') ? '' : rawIdentifier);
+    const isIdentifierValid = authType === 'phone'
+        ? validateCombinedPhone(rawIdentifier, true).isValid
+        : Boolean(rawIdentifier && !requestForm.formState.errors.identifier);
 
     return (
         <Card variant={CardVariant.FLAT} className="w-[95%] md:w-[80%] sm:w-[75%] max-w-2xl p-8 md:p-12 border border-secondary rounded-2xl bg-foreground-light dark:bg-foreground-dark mx-auto lg:mt-12 md:mt-8 sm:mt-4 shadow-none">
@@ -125,21 +133,20 @@ export const ForgotPasswordForm = () => {
                                     ) : (
                                         <div className="relative group w-full">
                                             <PhoneInput
-                                                countryCode={requestForm.watch('identifier')?.split(' ')[0] || '+1'}
+                                                countryCode={currentCountryCode}
                                                 onCountryCodeChange={(val) => {
-                                                    const parts = requestForm.watch('identifier')?.split(' ') || [];
-                                                    requestForm.setValue('identifier', `${val} ${parts.slice(1).join(' ')}`.trim(), { shouldValidate: true });
+                                                    requestForm.setValue('identifier', currentNationalNumber ? `${val} ${currentNationalNumber}` : val, { shouldValidate: true });
                                                 }}
-                                                value={requestForm.watch('identifier')?.split(' ').slice(1).join(' ') || ''}
+                                                value={currentNationalNumber}
                                                 onChange={(e) => {
-                                                    const code = requestForm.watch('identifier')?.split(' ')[0] || '+1';
-                                                    requestForm.setValue('identifier', `${code} ${e.target.value}`.trim(), { shouldValidate: true });
+                                                    const raw = e.target.value.replace(/[^\d\s-]/g, '');
+                                                    requestForm.setValue('identifier', `${currentCountryCode} ${raw}`.trim(), { shouldValidate: true });
                                                 }}
                                                 placeholder="Enter phone number"
                                                 inputClassName={requestForm.formState.errors.identifier ? '!border-destructive' : ''}
                                             />
                                             {isCheckingPhone && <Typography variant={TypographyVariant.CAPTION} className='text-warning dark:text-warning pt-1 absolute right-3 top-1/2 -translate-y-1/2'>checking...</Typography>}
-                                            {!isCheckingPhone && requestForm.watch('identifier') && (requestForm.watch('identifier') || '').length > 4 && phoneCheck?.available === false && !requestForm.formState.errors.identifier && (
+                                            {!isCheckingPhone && isIdentifierValid && phoneCheck?.available === false && !requestForm.formState.errors.identifier && (
                                                 <CheckCircle2 size={20} className="text-green-500 animate-in zoom-in duration-300 absolute right-3 top-1/2 -translate-y-1/2" />
                                             )}
                                         </div>
@@ -171,7 +178,7 @@ export const ForgotPasswordForm = () => {
                                 pulseColor={'rgb(99 102 241 / 0.25)'}
                                 pulseDuration={'1.5s'}
                                 isLoading={isSending}
-                                disabled={!requestForm.watch('identifier') || isSending || !!requestForm.formState.errors.identifier || !turnstileToken}
+                                disabled={!isIdentifierValid || isSending || !!requestForm.formState.errors.identifier || !turnstileToken}
                                 className="w-full h-12 text-foreground-dark dark:text-foreground-light shadow-md mt-2 cursor-pointer disabled:cursor-not-allowed"
                             >
                                 Send Reset Code
