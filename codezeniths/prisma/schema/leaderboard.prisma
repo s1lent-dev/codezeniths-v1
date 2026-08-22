@@ -13,7 +13,7 @@ model UserGlobalStats {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([score(sort: Desc)])
+  @@index([score(sort: Desc), updatedAt(sort: Asc)])
   @@map("user_global_stats")
 }
 
@@ -36,6 +36,6 @@ model UserModuleStats {
   module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   @@unique([userId, moduleId])
-  @@index([moduleId, score(sort: Desc)])
+  @@index([moduleId, score(sort: Desc), updatedAt(sort: Asc)])
   @@map("user_module_stats")
 }

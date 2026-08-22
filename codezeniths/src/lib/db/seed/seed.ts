@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { prisma } from '@codezeniths/lib/db/prisma.client';
 import fs from 'fs/promises';
 import path from 'path';

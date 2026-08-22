@@ -15,6 +15,29 @@ import { calculatePercentile } from './utils/leaderboard.utils';
 import { getRankProgress, getRankFromScore } from '@/utils/rank.utils';
 import { formatUserProfiles } from '@/utils/user.formatter';
 
+function parseCursor(cursor?: string | null): { id?: string; rankOffset: number } {
+    if (!cursor) return { rankOffset: 0 };
+    try {
+        if (cursor.includes(':')) {
+            const [id, rankStr] = cursor.split(':');
+            const rankOffset = parseInt(rankStr, 10);
+            return { id, rankOffset: isNaN(rankOffset) ? 0 : rankOffset };
+        }
+        const decoded = Buffer.from(cursor, 'base64url').toString('utf-8');
+        const parsed = JSON.parse(decoded);
+        if (parsed && typeof parsed.id === 'string') {
+            return { id: parsed.id, rankOffset: typeof parsed.rank === 'number' ? parsed.rank : 0 };
+        }
+    } catch {
+        // Fallback to raw string ID
+    }
+    return { id: cursor, rankOffset: 0 };
+}
+
+function encodeCursor(id: string, rank: number): string {
+    return Buffer.from(JSON.stringify({ id, rank })).toString('base64url');
+}
+
 export class LeaderboardQueries implements ILeaderboardQueries {
     getLeaderboard = qRPC()
         .input(GetLeaderboardInputSchema)
@@ -70,6 +93,7 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                 scopedUserIds = [];
             }
 
+            const scoreWhere = { score: { gte: 10 } };
             const scopeWhere = scopedUserIds !== null ? { userId: { in: scopedUserIds } } : {};
 
             const searchWhere = search?.trim()
@@ -88,6 +112,7 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                 // Module Leaderboard Query
                 const where = {
                     moduleId,
+                    ...scoreWhere,
                     ...searchWhere,
                     ...scopeWhere,
                 };
@@ -98,6 +123,8 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                 let hasNextPage = false;
                 let nextCursor: string | null = null;
                 let skip = 0;
+
+                const cursorData = parseCursor(cursor);
 
                 if (mode === 'paginated') {
                     skip = (page - 1) * limit;
@@ -118,13 +145,13 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                         },
                     });
                 } else {
-                    // Infinite mode — cursor is the last item's id
+                    // Infinite mode — cursor is decoded
                     itemsRaw = await prisma.userModuleStats.findMany({
                         where,
                         orderBy: [{ score: 'desc' }, { updatedAt: 'asc' }],
                         take: limit + 1,
-                        skip: cursor ? 1 : 0,
-                        cursor: cursor ? { id: cursor } : undefined,
+                        skip: cursorData.id ? 1 : 0,
+                        cursor: cursorData.id ? { id: cursorData.id } : undefined,
                         include: {
                             user: {
                                 select: {
@@ -139,13 +166,12 @@ export class LeaderboardQueries implements ILeaderboardQueries {
 
                     if (itemsRaw.length > limit) {
                         hasNextPage = true;
-                        const nextItem = itemsRaw.pop();
-                        nextCursor = nextItem.id;
+                        itemsRaw.pop();
                     }
                 }
 
                 const totalPages = Math.ceil(total / limit);
-                const startRank = mode === 'paginated' ? skip + 1 : 1;
+                const startRank = mode === 'paginated' ? skip + 1 : cursorData.rankOffset + 1;
 
                 const items = itemsRaw.map((stat, index) => {
                     const rank = startRank + index;
@@ -170,6 +196,12 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                     };
                 });
 
+                if (hasNextPage && itemsRaw.length > 0) {
+                    const lastItem = itemsRaw[itemsRaw.length - 1];
+                    const lastRank = startRank + itemsRaw.length - 1;
+                    nextCursor = encodeCursor(lastItem.id, lastRank);
+                }
+
                 const formattedItems = await formatUserProfiles(items);
 
                 return {
@@ -193,6 +225,7 @@ export class LeaderboardQueries implements ILeaderboardQueries {
 
             // Global Leaderboard Query
             const where = {
+                ...scoreWhere,
                 ...searchWhere,
                 ...scopeWhere,
             };
@@ -202,6 +235,8 @@ export class LeaderboardQueries implements ILeaderboardQueries {
             let hasNextPage = false;
             let nextCursor: string | null = null;
             let skip = 0;
+
+            const cursorData = parseCursor(cursor);
 
             if (mode === 'paginated') {
                 skip = (page - 1) * limit;
@@ -227,8 +262,8 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                     where,
                     orderBy: [{ score: 'desc' }, { updatedAt: 'asc' }],
                     take: limit + 1,
-                    skip: cursor ? 1 : 0,
-                    cursor: cursor ? { userId: cursor } : undefined,
+                    skip: cursorData.id ? 1 : 0,
+                    cursor: cursorData.id ? { userId: cursorData.id } : undefined,
                     include: {
                         user: {
                             select: {
@@ -243,13 +278,12 @@ export class LeaderboardQueries implements ILeaderboardQueries {
 
                 if (itemsRaw.length > limit) {
                     hasNextPage = true;
-                    const nextItem = itemsRaw.pop();
-                    nextCursor = nextItem.userId;
+                    itemsRaw.pop();
                 }
             }
 
             const totalPages = Math.ceil(total / limit);
-            const startRank = mode === 'paginated' ? skip + 1 : 1;
+            const startRank = mode === 'paginated' ? skip + 1 : cursorData.rankOffset + 1;
 
             const items = itemsRaw.map((stat, index) => {
                 const rank = startRank + index;
@@ -273,6 +307,13 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                     rankBadgeClass: rankMeta.badgeClass,
                 };
             });
+
+            if (hasNextPage && itemsRaw.length > 0) {
+                const lastItem = itemsRaw[itemsRaw.length - 1];
+                const lastRank = startRank + itemsRaw.length - 1;
+                nextCursor = encodeCursor(lastItem.userId, lastRank);
+            }
+
             const formattedItems = await formatUserProfiles(items);
 
             return {
@@ -317,11 +358,11 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                 where: { userId },
             });
 
-            // 2. Fetch total ranked users globally
+            // 2. Fetch total ranked users globally (minimum score 10 to be ranked in Guardian I)
             let globalTotalUsers: number = await redisService.sortedList.len('leaderboard:global');
             if (globalTotalUsers === 0) {
                 globalTotalUsers = await prisma.userGlobalStats.count({
-                    where: { score: { gt: 0 } },
+                    where: { score: { gte: 10 } },
                 });
             }
 
@@ -332,14 +373,14 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                 let modTotal = await redisService.sortedList.len(modKey);
                 if (modTotal === 0) {
                     modTotal = await prisma.userModuleStats.count({
-                        where: { moduleId, score: { gt: 0 } },
+                        where: { moduleId, score: { gte: 10 } },
                     });
                 }
                 moduleTotalUsers = modTotal;
             }
 
-            // 3. Check if user has not solved any problem yet -> Unranked
-            const isUnranked = !userGlobalStats || (userGlobalStats.score <= 0 && userGlobalStats.totalSolvedCount <= 0);
+            // 3. Check if user has not solved any problem yet -> Unranked (< 10 points)
+            const isUnranked = !userGlobalStats || userGlobalStats.score < 10;
 
             if (isUnranked) {
                 return {
@@ -357,9 +398,9 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                     moduleBestRank: null,
                     moduleBestPercentile: null,
                     moduleBestScore: 0,
-                    score: 0,
-                    totalSolvedCount: 0,
-                    rankProgress: getRankProgress(0),
+                    score: userGlobalStats?.score ?? 0,
+                    totalSolvedCount: userGlobalStats?.totalSolvedCount ?? 0,
+                    rankProgress: getRankProgress(userGlobalStats?.score ?? 0),
                     bestModule: null,
                 };
             }
@@ -429,7 +470,7 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                     where: { userId_moduleId: { userId, moduleId } },
                 });
 
-                if (userModStats && (userModStats.score > 0 || userModStats.totalSolvedCount > 0)) {
+                if (userModStats && userModStats.score >= 10) {
                     const modKey = `leaderboard:module:${moduleId}`;
                     let modRankZero = await redisService.sortedList.getRevRank(modKey, userId);
 
@@ -451,7 +492,7 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                         moduleBestRank = moduleRank;
                         hasModImprovement = true;
                     }
-                    if (modulePercentile && (moduleBestPercentile === null || modulePercentile < moduleBestPercentile)) {
+                    if (modulePercentile && (moduleBestPercentile === null || moduleBestPercentile < moduleBestPercentile)) {
                         moduleBestPercentile = modulePercentile;
                         hasModImprovement = true;
                     }
@@ -477,7 +518,7 @@ export class LeaderboardQueries implements ILeaderboardQueries {
                 }
             }
 
-            // 6. Fetch user's best performing module overall (highest score)
+            // 6. Fetch user's best performing module overall (highest score >= 10)
             let bestModule: {
                 id: string;
                 title: string;
@@ -487,7 +528,7 @@ export class LeaderboardQueries implements ILeaderboardQueries {
             } | null = null;
 
             const topModuleStat = await prisma.userModuleStats.findFirst({
-                where: { userId, score: { gt: 0 } },
+                where: { userId, score: { gte: 10 } },
                 orderBy: [{ score: 'desc' }, { updatedAt: 'asc' }],
                 include: {
                     module: {
@@ -497,7 +538,7 @@ export class LeaderboardQueries implements ILeaderboardQueries {
             });
 
             if (topModuleStat && topModuleStat.module) {
-                const modTotal = await prisma.userModuleStats.count({ where: { moduleId: topModuleStat.moduleId, score: { gt: 0 } } });
+                const modTotal = await prisma.userModuleStats.count({ where: { moduleId: topModuleStat.moduleId, score: { gte: 10 } } });
                 const higherCount = await prisma.userModuleStats.count({
                     where: { moduleId: topModuleStat.moduleId, score: { gt: topModuleStat.score } },
                 });

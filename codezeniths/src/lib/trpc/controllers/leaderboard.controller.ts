@@ -9,7 +9,6 @@ import {
 } from '@/schemas/trpc';
 import { ILeaderboardController } from './interfaces/leaderboard.controller.interface';
 import { leaderboardQueries } from '@/lib/db/queries/leaderboard.queries';
-import { formatUserProfiles } from '@/utils/user.formatter';
 import { z } from 'zod';
 
 export class LeaderboardController implements ILeaderboardController {
@@ -22,12 +21,10 @@ export class LeaderboardController implements ILeaderboardController {
     }): Promise<z.infer<typeof GetLeaderboardTRPCOutputSchema>> {
         logger.info('Executing getLeaderboard controller', { input, userId: ctx.user?.id });
         try {
-            const result = await leaderboardQueries.getLeaderboard({
+            return await leaderboardQueries.getLeaderboard({
                 ...input,
                 currentViewerId: ctx.user?.id,
             });
-            result.items = await formatUserProfiles(result.items);
-            return result;
         } catch (error: any) {
             logger.error('Error in getLeaderboard controller', { error: error?.message, input });
             throw new TRPCError({

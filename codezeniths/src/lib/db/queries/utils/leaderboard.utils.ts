@@ -171,14 +171,14 @@ export async function processScoreTransition({
         // 4. Update Redis ZSETs & publish rank promotion via Progress MQ Producer
         void (async () => {
             try {
-                if (txResult.newGlobalScore <= 0) {
+                if (txResult.newGlobalScore < 10) {
                     await redisService.sortedList.remove('leaderboard:global', userId);
                 } else {
                     await redisService.sortedList.add('leaderboard:global', txResult.newGlobalScore, userId);
                 }
 
                 if (moduleId && txResult.newModScore !== undefined) {
-                    if (txResult.newModScore <= 0) {
+                    if (txResult.newModScore < 10) {
                         await redisService.sortedList.remove(`leaderboard:module:${moduleId}`, userId);
                     } else {
                         await redisService.sortedList.add(`leaderboard:module:${moduleId}`, txResult.newModScore, userId);
