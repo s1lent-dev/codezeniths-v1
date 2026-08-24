@@ -5,6 +5,7 @@ import { problemQueryService } from '@/lib/tanstack/services/problem.query-servi
 import { ProblemFilterInput, ProblemSortingInput } from '@codezeniths/schemas/db/queries/shared/problem-filter.schema';
 import { ProblemItem } from '@codezeniths/widgets';
 import { ViewMode, PageContext, UseProblemsReturn } from './problems-section.types';
+import { useProblemActionManager } from './useProblemActionManager';
 
 export interface UseProblemsOptions {
     pageContext?: PageContext;
@@ -99,25 +100,8 @@ export function useProblems({
 
     const infiniteQuery = problemQueryService.getProblemsInfinite(effectiveFilters, sorting, infiniteLimit);
 
-    // 5. Update Mutation
-    const updateProblemMutation = problemQueryService.updateProblem();
-
-    // Toggle Solved Status
-    const toggleSolved = async (problemId: string, currentSolved: boolean) => {
-        const nextStatus = currentSolved ? 'not_solved' : 'solved';
-        await updateProblemMutation.mutateAsync({
-            problemId,
-            status: nextStatus,
-        });
-    };
-
-    // Toggle Favourite Status
-    const toggleFavourite = async (problemId: string, currentFavourite: boolean) => {
-        await updateProblemMutation.mutateAsync({
-            problemId,
-            favourite: !currentFavourite,
-        });
-    };
+    // 5. Actions with instant optimistic cache updates and per-problem debounced network sync
+    const { toggleSolved, toggleFavourite, toggleRevisit, isProblemBusy } = useProblemActionManager();
 
     const isScopedContext = Boolean(
         fixedPlaylistSlug || fixedTopicSlug || fixedTagSlug || fixedModuleSlug || pageContext !== 'problemset'
@@ -195,5 +179,7 @@ export function useProblems({
 
         toggleSolved,
         toggleFavourite,
+        toggleRevisit,
+        isProblemBusy,
     };
 }

@@ -8,6 +8,7 @@ export interface PlaylistInfoSectionProps {
     playlist?: PlaylistInfoCardProps['playlist'];
     isLoading?: boolean;
     onToggleBookmark?: () => void;
+    isBookmarkBusy?: boolean;
     onEdit?: () => void;
     onDelete?: () => void;
     className?: string;
@@ -17,6 +18,7 @@ export const PlaylistInfoSection: React.FC<PlaylistInfoSectionProps> = ({
     playlist,
     isLoading = false,
     onToggleBookmark,
+    isBookmarkBusy = false,
     onEdit,
     onDelete,
     className,
@@ -27,6 +29,7 @@ export const PlaylistInfoSection: React.FC<PlaylistInfoSectionProps> = ({
                 playlist={playlist}
                 isLoading={isLoading}
                 onToggleBookmark={onToggleBookmark}
+                isBookmarkBusy={isBookmarkBusy}
                 onEdit={onEdit}
                 onDelete={onDelete}
             />

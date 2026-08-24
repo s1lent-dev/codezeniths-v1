@@ -23,6 +23,7 @@ import { IModuleQueries } from './interfaces/module.queries.interface';
 
 import { redisService } from '@codezeniths/lib/redis';
 import { z } from 'zod';
+import { createCache } from '@/hooks/performance-hooks/cache/cache';
 
 const modulesCache = redisService.cache.createStore<z.infer<typeof GetModulesOutputSchema>>({
     namespace: 'modules',
@@ -30,12 +31,35 @@ const modulesCache = redisService.cache.createStore<z.infer<typeof GetModulesOut
     schema: GetModulesOutputSchema,
 });
 
+const modulesL1Cache = createCache<z.infer<typeof GetModulesOutputSchema>>({
+    strategy: 'adaptive',
+    maxSize: 10,
+    ttl: 1000 * 60 * 15, // 15 minutes in RAM
+});
+
+const modulesWithTopicsCache = redisService.cache.createStore<any>({
+    namespace: 'modules_with_topics',
+    ttlSeconds: 86400, // 24 hours
+});
+
+const modulesWithTopicsL1Cache = createCache<any>({
+    strategy: 'adaptive',
+    maxSize: 10,
+    ttl: 1000 * 60 * 15, // 15 minutes in RAM
+});
+
 export class ModuleQueries implements IModuleQueries {
     getModules = qRPC()
         .output(GetModulesOutputSchema)
         .handler(async () => {
             logger.info('Executing getModules query');
-            return await modulesCache.getOrSet('all_modules', async () => {
+
+            // Tier 1: L1 Adaptive Memory Cache (0ms)
+            const l1Cached = modulesL1Cache.get('all_modules');
+            if (l1Cached) return l1Cached;
+
+            // Tier 2: L2 Redis CacheStore + DB Fallback
+            const data = await modulesCache.getOrSet('all_modules', async () => {
                 const modules = await prisma.module.findMany({
                     select: {
                         id: true,
@@ -49,6 +73,9 @@ export class ModuleQueries implements IModuleQueries {
                 });
                 return modules;
             });
+
+            if (data) modulesL1Cache.set('all_modules', data);
+            return data;
         })
         .build();
 
@@ -522,19 +549,10 @@ export class ModuleQueries implements IModuleQueries {
             logger.info('Executing getRecentlySolvedModule query', { payload });
             const { userId } = payload;
 
-            const userExists = await prisma.user.findUnique({
-                where: { id: userId },
-            });
-            if (!userExists) {
-                throw new AppErrorBuilder('User not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
-            }
-
             const latestProgress = await prisma.problemProgress.findFirst({
-                where: { userId },
+                where: { userId, status: 'solved' },
                 orderBy: { updatedAt: 'desc' },
-                include: {
+                select: {
                     problem: {
                         select: {
                             title: true,
@@ -547,6 +565,13 @@ export class ModuleQueries implements IModuleQueries {
                                             title: true,
                                             slug: true,
                                             description: true,
+                                            topics: {
+                                                select: {
+                                                    problems: {
+                                                        select: { id: true },
+                                                    },
+                                                },
+                                            },
                                         },
                                     },
                                 },
@@ -561,17 +586,8 @@ export class ModuleQueries implements IModuleQueries {
             }
 
             const targetModule = latestProgress.problem.topic.module;
-
-            const allModuleProblems = await prisma.problem.findMany({
-                where: {
-                    topic: {
-                        moduleId: targetModule.id,
-                    },
-                },
-                select: { id: true },
-            });
-
-            const allModuleProblemIds = allModuleProblems.map((p) => p.id);
+            const allModuleProblemIds = targetModule.topics.flatMap((t) => t.problems.map((p) => p.id));
+            const problemsCount = allModuleProblemIds.length;
 
             const solvedCount = await prisma.problemProgress.count({
                 where: {
@@ -581,8 +597,8 @@ export class ModuleQueries implements IModuleQueries {
                 },
             });
 
-            const problemsCount = allModuleProblemIds.length;
-            const problemsSolvedPercentage = problemsCount > 0 ? parseFloat(((solvedCount / problemsCount) * 100).toFixed(2)) : 0;
+            const problemsSolvedPercentage =
+                problemsCount > 0 ? parseFloat(((solvedCount / problemsCount) * 100).toFixed(2)) : 0;
 
             return {
                 module: {
@@ -609,34 +625,94 @@ export class ModuleQueries implements IModuleQueries {
             logger.info('Executing getModulesWithTopics query', { payload });
             const { userId } = payload;
 
-            const modules = await prisma.module.findMany({
-                orderBy: { title: 'asc' },
-                include: {
-                    topics: {
-                        orderBy: { order: 'asc' },
-                        include: {
-                            problems: {
-                                select: { id: true },
+            const catalogCacheKey = 'catalog_with_topics';
+
+            // Tier 1: L1 Adaptive Memory Cache (0ms)
+            let catalog = modulesWithTopicsL1Cache.get(catalogCacheKey);
+
+            // Tier 2: L2 Redis CacheStore (~15ms)
+            if (!catalog) {
+                catalog = await modulesWithTopicsCache.get(catalogCacheKey);
+                if (catalog) {
+                    modulesWithTopicsL1Cache.set(catalogCacheKey, catalog);
+                }
+            }
+
+            // Tier 3: Database Query Fallback
+            if (!catalog) {
+                const modules = await prisma.module.findMany({
+                    orderBy: { title: 'asc' },
+                    include: {
+                        topics: {
+                            orderBy: { order: 'asc' },
+                            include: {
+                                problems: {
+                                    select: { id: true },
+                                },
                             },
                         },
                     },
-                },
-            });
-
-            let solvedProblemIds = new Set<string>();
-            if (userId) {
-                const userProgress = await prisma.problemProgress.findMany({
-                    where: { userId, status: 'solved' },
-                    select: { problemId: true },
                 });
-                solvedProblemIds = new Set(userProgress.map((p) => p.problemId));
+
+                catalog = modules.map((m) => ({
+                    id: m.id,
+                    title: m.title,
+                    slug: m.slug,
+                    description: m.description,
+                    topics: m.topics.map((t) => ({
+                        id: t.id,
+                        title: t.title,
+                        slug: t.slug,
+                        description: t.description,
+                        level: t.level,
+                        order: t.order,
+                        problemIds: t.problems.map((p) => p.id),
+                    })),
+                }));
+
+                modulesWithTopicsL1Cache.set(catalogCacheKey, catalog);
+                void modulesWithTopicsCache.set(catalogCacheKey, catalog);
             }
 
-            return modules.map((m) => {
-                const topics = m.topics.map((t) => {
-                    const problemsCount = t.problems.length;
-                    const problemsSolvedCount = t.problems.filter((p) => solvedProblemIds.has(p.id)).length;
-                    const problemsSolvedPercentage = problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
+            // If public / unauthenticated user: Return immediately in 0.01ms (0 DB queries)
+            if (!userId) {
+                return catalog.map((m: any) => {
+                    const topics = m.topics.map((t: any) => ({
+                        id: t.id,
+                        title: t.title,
+                        slug: t.slug,
+                        description: t.description,
+                        level: t.level,
+                        order: t.order,
+                        problemsCount: t.problemIds.length,
+                        problemsSolvedCount: 0,
+                        problemsSolvedPercentage: 0,
+                    }));
+
+                    return {
+                        id: m.id,
+                        title: m.title,
+                        slug: m.slug,
+                        description: m.description,
+                        topicsCount: topics.length,
+                        topics,
+                    };
+                });
+            }
+
+            // For authenticated user: 1 fast indexed query for solved problem IDs
+            const userProgress = await prisma.problemProgress.findMany({
+                where: { userId, status: 'solved' },
+                select: { problemId: true },
+            });
+            const solvedProblemIds = new Set(userProgress.map((p) => p.problemId));
+
+            return catalog.map((m: any) => {
+                const topics = m.topics.map((t: any) => {
+                    const problemsCount = t.problemIds.length;
+                    const problemsSolvedCount = t.problemIds.filter((id: string) => solvedProblemIds.has(id)).length;
+                    const problemsSolvedPercentage =
+                        problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
 
                     return {
                         id: t.id,

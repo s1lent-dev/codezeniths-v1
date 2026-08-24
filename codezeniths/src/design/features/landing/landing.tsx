@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { HeroSection } from './hero-section';
@@ -15,19 +17,19 @@ const SectionLoader = () => (
 );
 
 const StatsSection = dynamic(() => import('./stats-section').then((mod) => mod.StatsSection), { 
-    ssr: true,
+    ssr: false,
     loading: () => <SectionLoader />
 });
 const TestimonialsSection = dynamic(() => import('./testimonials-section').then((mod) => mod.TestimonialsSection), { 
-    ssr: true,
+    ssr: false,
     loading: () => <SectionLoader />
 });
 const PricingSection = dynamic(() => import('./pricing-section').then((mod) => mod.PricingSection), { 
-    ssr: true,
+    ssr: false,
     loading: () => <SectionLoader />
 });
 const ContactSection = dynamic(() => import('./contact-section').then((mod) => mod.ContactSection), { 
-    ssr: true,
+    ssr: false,
     loading: () => <SectionLoader />
 });
 

@@ -33,82 +33,111 @@ import {
 import { IProblemQueries } from './interfaces/problem.queries.interface';
 import { Prisma } from '@prisma/client';
 import { recordProblemSolvedAndSyncStreak, revertProblemSolvedAndSyncStreak } from './utils/streak.utils';
-
 import { processScoreTransition } from './utils/leaderboard.utils';
+import { createCache } from '@/hooks/performance-hooks/cache/cache';
+import { z } from 'zod';
+
+// ─── Multi-Tiered Caches: L1 Adaptive In-Memory + L2 Redis CacheStore ───────────
+
+// L2 Redis Stores (Persists across worker processes and Render container restarts)
+const primitivesCache = redisService.cache.createStore<z.infer<typeof GetProblemTablePrimitivesOutputSchema>>({
+    namespace: 'problem_primitives',
+    ttlSeconds: 86400, // 24 hours
+    schema: GetProblemTablePrimitivesOutputSchema,
+});
+
+const difficultyTotalsCache = redisService.cache.createStore<any>({
+    namespace: 'problem_difficulty_totals',
+    ttlSeconds: 86400, // 24 hours
+});
+
+// L1 Adaptive In-Memory Caches (< 2MB RAM, 0ms hit time)
+const primitivesL1Cache = createCache<any>({
+    strategy: 'adaptive',
+    maxSize: 50,
+    ttl: 1000 * 60 * 10, // 10 minutes in RAM
+});
+
+const difficultyTotalsL1Cache = createCache<any>({
+    strategy: 'adaptive',
+    maxSize: 10,
+    ttl: 1000 * 60 * 30, // 30 minutes in RAM
+});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
- * Resolves and attaches user solved status to problems.
+ * Reusable single-pass projection that fetches problem fields and joins user progress in 1 query.
  */
-async function attachUserProgress(
-    problems: any[],
-    userId?: string,
-): Promise<any[]> {
-    if (!userId || problems.length === 0) {
-        return problems.map((problem) => ({
-            id: problem.id,
-            title: problem.title,
-            slug: problem.slug,
-            difficulty: problem.difficulty,
-            order: problem.order,
-            articleUrl: problem.articleUrl ?? null,
-            problemUrl: problem.problemUrl ?? null,
-            favouriteCount: problem.favouriteCount ?? 0,
-            topicId: problem.topicId ?? problem.topic?.id ?? null,
-            topicSlug: problem.topic?.slug ?? null,
-            tags: problem.tags.map((pt: any) => ({
-                id: pt.tag.id,
-                name: pt.tag.name,
-                slug: pt.tag.slug,
-            })),
-            status: null,
-            revisit: null,
-            favourite: null,
-        }));
-    }
-
-    const problemIds = problems.map((p) => p.id);
-    const progresses = await prisma.problemProgress.findMany({
-        where: {
-            userId,
-            problemId: { in: problemIds },
+function getProblemSelect(userId?: string) {
+    return {
+        id: true,
+        title: true,
+        slug: true,
+        difficulty: true,
+        order: true,
+        articleUrl: true,
+        problemUrl: true,
+        favouriteCount: true,
+        topicId: true,
+        topic: {
+            select: {
+                id: true,
+                slug: true,
+            },
         },
-        select: {
-            problemId: true,
-            status: true,
-            revisit: true,
-            favourite: true,
+        tags: {
+            select: {
+                tag: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                    },
+                },
+            },
         },
-    });
+        ...(userId
+            ? {
+                  progresses: {
+                      where: { userId },
+                      select: {
+                          status: true,
+                          revisit: true,
+                          favourite: true,
+                      },
+                      take: 1,
+                  },
+              }
+            : {}),
+    } as const;
+}
 
-    const progressMap = new Map(
-        progresses.map((p) => [p.problemId, { status: p.status, revisit: p.revisit, favourite: p.favourite }])
-    );
-
-    return problems.map((problem) => {
-        const progress = progressMap.get(problem.id);
-        return {
-            id: problem.id,
-            title: problem.title,
-            slug: problem.slug,
-            difficulty: problem.difficulty,
-            order: problem.order,
-            articleUrl: problem.articleUrl ?? null,
-            problemUrl: problem.problemUrl ?? null,
-            favouriteCount: problem.favouriteCount ?? 0,
-            topicId: problem.topicId ?? problem.topic?.id ?? null,
-            topicSlug: problem.topic?.slug ?? null,
-            tags: problem.tags.map((pt: any) => ({
-                id: pt.tag.id,
-                name: pt.tag.name,
-                slug: pt.tag.slug,
-            })),
-            status: progress?.status || 'not_solved',
-            revisit: progress?.revisit ?? false,
-            favourite: progress?.favourite ?? false,
-        };
-    });
+/**
+ * Maps single-pass query result into standard schema output.
+ */
+function mapProblem(problem: any) {
+    const progress = problem.progresses?.[0];
+    return {
+        id: problem.id,
+        title: problem.title,
+        slug: problem.slug,
+        difficulty: problem.difficulty,
+        order: problem.order,
+        articleUrl: problem.articleUrl ?? null,
+        problemUrl: problem.problemUrl ?? null,
+        favouriteCount: problem.favouriteCount ?? 0,
+        topicId: problem.topicId ?? problem.topic?.id ?? null,
+        topicSlug: problem.topic?.slug ?? null,
+        tags: (problem.tags || []).map((pt: any) => ({
+            id: pt.tag.id,
+            name: pt.tag.name,
+            slug: pt.tag.slug,
+        })),
+        status: progress?.status ?? (progress ? 'not_solved' : null),
+        revisit: progress?.revisit ?? false,
+        favourite: progress?.favourite ?? false,
+    };
 }
 
 // ─── ProblemQueries ───────────────────────────────────────────────────────────
@@ -138,23 +167,11 @@ export class ProblemQueries implements IProblemQueries {
                 prisma.problem.findMany({
                     where,
                     orderBy,
-                    include: {
-                        topic: {
-                            select: {
-                                id: true,
-                                slug: true,
-                            },
-                        },
-                        tags: {
-                            include: {
-                                tag: true,
-                            },
-                        },
-                    },
+                    select: getProblemSelect(userId),
                 }),
             ]);
 
-            const mappedProblems = await attachUserProgress(problems, userId);
+            const mappedProblems = problems.map(mapProblem);
 
             return {
                 problems: mappedProblems,
@@ -190,23 +207,11 @@ export class ProblemQueries implements IProblemQueries {
                     orderBy,
                     skip: (page - 1) * limit,
                     take: limit,
-                    include: {
-                        topic: {
-                            select: {
-                                id: true,
-                                slug: true,
-                            },
-                        },
-                        tags: {
-                            include: {
-                                tag: true,
-                            },
-                        },
-                    },
+                    select: getProblemSelect(userId),
                 }),
             ]);
 
-            const mappedProblems = await attachUserProgress(problems, userId);
+            const mappedProblems = problems.map(mapProblem);
 
             return {
                 items: mappedProblems,
@@ -247,19 +252,7 @@ export class ProblemQueries implements IProblemQueries {
                     cursor: cursor ? { id: cursor } : undefined,
                     skip: cursor ? 1 : 0,
                     take: limit + 1,
-                    include: {
-                        topic: {
-                            select: {
-                                id: true,
-                                slug: true,
-                            },
-                        },
-                        tags: {
-                            include: {
-                                tag: true,
-                            },
-                        },
-                    },
+                    select: getProblemSelect(userId),
                 }),
             ]);
 
@@ -267,7 +260,7 @@ export class ProblemQueries implements IProblemQueries {
             const items = hasNextPage ? problems.slice(0, limit) : problems;
             const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
-            const mappedItems = await attachUserProgress(items, userId);
+            const mappedItems = items.map(mapProblem);
 
             return {
                 items: mappedItems,
@@ -301,17 +294,11 @@ export class ProblemQueries implements IProblemQueries {
                 prisma.problem.findMany({
                     where,
                     orderBy,
-                    include: {
-                        tags: {
-                            include: {
-                                tag: true,
-                            },
-                        },
-                    },
+                    select: getProblemSelect(userId),
                 }),
             ]);
 
-            const mappedProblems = await attachUserProgress(problems, userId);
+            const mappedProblems = problems.map(mapProblem);
             const problemsCount = mappedProblems.length;
 
             const problemsCountByDifficulty = {
@@ -760,46 +747,66 @@ export class ProblemQueries implements IProblemQueries {
             logger.info('Executing getProblemTablePrimitives query', { payload });
             const { userId } = payload;
 
-            const [modules, tags, totalProblems, userSolvedCount] = await Promise.all([
-                prisma.module.findMany({
-                    select: {
-                        id: true,
-                        title: true,
-                        slug: true,
-                        topics: {
-                            select: {
-                                id: true,
-                                title: true,
-                                slug: true,
+            const cacheKey = 'static_primitives';
+            
+            // Tier 1: L1 In-Memory Adaptive Cache (0ms)
+            let staticCatalog = primitivesL1Cache.get(cacheKey);
+
+            // Tier 2: L2 Redis CacheStore (persisted across workers and restarts)
+            if (!staticCatalog) {
+                staticCatalog = await primitivesCache.get(cacheKey);
+                if (staticCatalog) {
+                    primitivesL1Cache.set(cacheKey, staticCatalog);
+                }
+            }
+
+            // Tier 3: PostgreSQL Database Fallback
+            if (!staticCatalog) {
+                const [modules, tags, totalProblems] = await Promise.all([
+                    prisma.module.findMany({
+                        select: {
+                            id: true,
+                            title: true,
+                            slug: true,
+                            topics: {
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    slug: true,
+                                },
+                                orderBy: { order: 'asc' },
                             },
-                            orderBy: { order: 'asc' },
                         },
-                    },
-                    orderBy: { createdAt: 'asc' },
-                }),
+                        orderBy: { createdAt: 'asc' },
+                    }),
 
-                prisma.tag.findMany({
-                    select: {
-                        id: true,
-                        name: true,
-                        slug: true,
-                    },
-                    orderBy: { name: 'asc' },
-                }),
+                    prisma.tag.findMany({
+                        select: {
+                            id: true,
+                            name: true,
+                            slug: true,
+                        },
+                        orderBy: { name: 'asc' },
+                    }),
 
-                prisma.problem.count(),
+                    prisma.problem.count(),
+                ]);
 
-                userId
-                    ? prisma.problemProgress.count({
-                          where: { userId, status: 'solved' },
-                      })
-                    : Promise.resolve(0),
-            ]);
+                staticCatalog = { modules, tags, totalProblems };
+                primitivesL1Cache.set(cacheKey, staticCatalog);
+                void primitivesCache.set(cacheKey, staticCatalog);
+            }
+
+            const userSolvedCount = userId
+                ? await prisma.problemProgress.count({
+                      where: { userId, status: 'solved' },
+                  })
+                : 0;
 
             return {
-                modules,
-                tags,
-                totalProblems,
+                modules: staticCatalog.modules,
+                tags: staticCatalog.tags,
+                totalProblems: staticCatalog.totalProblems,
                 solvedProblems: userSolvedCount,
             };
         })
@@ -812,25 +819,32 @@ export class ProblemQueries implements IProblemQueries {
             logger.info('Executing getProblemProgress query', { payload });
             const { userId } = payload;
 
-            const userExists = await prisma.user.findUnique({
-                where: { id: userId },
-                select: { id: true },
-            });
-            if (!userExists) {
-                logger.warn('User not found while getting problem progress', { userId });
-                throw new AppErrorBuilder('User not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
+            // 1. Static difficulty totals with Multi-Tier Cache (L1 Memory -> L2 Redis -> DB)
+            const totalsCacheKey = 'difficulty_totals';
+            
+            // Tier 1: L1 Memory (0ms)
+            let difficultyGroupCounts = difficultyTotalsL1Cache.get(totalsCacheKey);
+
+            // Tier 2: L2 Redis CacheStore
+            if (!difficultyGroupCounts) {
+                difficultyGroupCounts = await difficultyTotalsCache.get(totalsCacheKey);
+                if (difficultyGroupCounts) {
+                    difficultyTotalsL1Cache.set(totalsCacheKey, difficultyGroupCounts);
+                }
             }
 
-            // High-performance parallel queries leveraging native database aggregation and indexes
-            const [difficultyGroupCounts, userSolvedProgress, problemsRevisitCount] = await Promise.all([
-                // 1. Total problem counts grouped by difficulty directly in PostgreSQL
-                prisma.problem.groupBy({
+            // Tier 3: PostgreSQL Database Fallback
+            if (!difficultyGroupCounts) {
+                difficultyGroupCounts = await prisma.problem.groupBy({
                     by: ['difficulty'],
                     _count: { _all: true },
-                }),
-                // 2. User's solved problems (indexed on [userId, status])
+                });
+                difficultyTotalsL1Cache.set(totalsCacheKey, difficultyGroupCounts);
+                void difficultyTotalsCache.set(totalsCacheKey, difficultyGroupCounts);
+            }
+
+            // 2. Parallel user queries (Both indexed)
+            const [userSolvedProgress, problemsRevisitCount] = await Promise.all([
                 prisma.problemProgress.findMany({
                     where: {
                         userId,
@@ -844,7 +858,6 @@ export class ProblemQueries implements IProblemQueries {
                         },
                     },
                 }),
-                // 3. User's revisit count (indexed on [userId, revisit])
                 prisma.problemProgress.count({
                     where: {
                         userId,

@@ -98,7 +98,34 @@ export class ModuleQueryService implements IModuleQueryService {
             mutationFn: async (input: z.infer<typeof ToggleTopicBookmarkTRPCInputSchema>) => {
                 return await trpcClient.module.toggleTopicBookmark.mutate(input);
             },
-            onSuccess: async () => {
+            onMutate: async (variables) => {
+                const key = variables.topicSlug || variables.topicId;
+                await queryClient.cancelQueries({ queryKey: ['topic'] });
+
+                const previousSingleTopic = key ? queryClient.getQueryData(queryKeys.topic.single(key)) : undefined;
+
+                if (key) {
+                    queryClient.setQueryData(queryKeys.topic.single(key), (old: any) => {
+                        if (!old) return old;
+                        return {
+                            ...old,
+                            isBookmarked: !old.isBookmarked,
+                        };
+                    });
+                }
+
+                return { previousSingleTopic, key };
+            },
+            onError: (_err, _variables, context) => {
+                if (context?.key && context?.previousSingleTopic) {
+                    queryClient.setQueryData(queryKeys.topic.single(context.key), context.previousSingleTopic);
+                }
+            },
+            onSettled: async (_data, _error, variables) => {
+                const key = variables.topicSlug || variables.topicId;
+                if (key) {
+                    queryClient.invalidateQueries({ queryKey: queryKeys.topic.single(key) });
+                }
                 await CacheInvalidationService.invalidateOnModuleBookmarkChange(queryClient);
             },
         });

@@ -24,8 +24,15 @@ export const ProblemPlaylistSubmenu: React.FC<ProblemPlaylistSubmenuProps> = ({ 
     });
 
     const toggleMutation = playlistQueryService.toggleProblemInPlaylist();
+    const [busyPlaylistIds, setBusyPlaylistIds] = React.useState<Set<string>>(new Set());
+    const busyRef = React.useRef<Set<string>>(new Set());
 
     const handleToggle = async (playlistId: string, playlistTitle: string) => {
+        // Throttling guard: block if mutation is already in-flight for this playlist
+        if (busyRef.current.has(playlistId)) return;
+        busyRef.current.add(playlistId);
+        setBusyPlaylistIds(new Set(busyRef.current));
+
         try {
             const res = await toggleMutation.mutateAsync({
                 playlistId,
@@ -39,6 +46,9 @@ export const ProblemPlaylistSubmenu: React.FC<ProblemPlaylistSubmenuProps> = ({ 
             }
         } catch (error: any) {
             toast.error('Failed to Update', error?.message || 'Could not update playlist.');
+        } finally {
+            busyRef.current.delete(playlistId);
+            setBusyPlaylistIds(new Set(busyRef.current));
         }
     };
 
@@ -72,32 +82,39 @@ export const ProblemPlaylistSubmenu: React.FC<ProblemPlaylistSubmenuProps> = ({ 
                     </div>
                 ) : (
                     <div className="max-h-48 overflow-y-auto space-y-0.5">
-                        {playlists.map((playlist) => (
-                            <DropdownMenuItem
-                                key={playlist.id}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    handleToggle(playlist.id, playlist.title);
-                                }}
-                                className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-primary hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none"
-                            >
-                                <div className="flex items-center gap-2 min-w-0 flex-1">
-                                    <ListMusic className="size-3.5 text-muted-light dark:text-muted-dark shrink-0" />
-                                    <span className="truncate">{playlist.title}</span>
-                                </div>
-
-                                <div
+                        {playlists.map((playlist) => {
+                            const isBusy = busyPlaylistIds.has(playlist.id);
+                            return (
+                                <DropdownMenuItem
+                                    key={playlist.id}
+                                    disabled={isBusy}
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        if (!isBusy) handleToggle(playlist.id, playlist.title);
+                                    }}
                                     className={cn(
-                                        'size-4 rounded-xs border flex items-center justify-center shrink-0 transition-colors',
-                                        playlist.isContained
-                                            ? 'bg-primary border-primary text-white'
-                                            : 'border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-transparent'
+                                        'flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-primary hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none',
+                                        isBusy && 'opacity-50 pointer-events-none cursor-not-allowed'
                                     )}
                                 >
-                                    {playlist.isContained && <Check className="size-3 stroke-3" />}
-                                </div>
-                            </DropdownMenuItem>
-                        ))}
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                        <ListMusic className="size-3.5 text-muted-light dark:text-muted-dark shrink-0" />
+                                        <span className="truncate">{playlist.title}</span>
+                                    </div>
+
+                                    <div
+                                        className={cn(
+                                            'size-4 rounded-xs border flex items-center justify-center shrink-0 transition-colors',
+                                            playlist.isContained
+                                                ? 'bg-primary border-primary text-white'
+                                                : 'border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-transparent'
+                                        )}
+                                    >
+                                        {playlist.isContained && <Check className="size-3 stroke-3" />}
+                                    </div>
+                                </DropdownMenuItem>
+                            );
+                        })}
                     </div>
                 )}
             </DropdownMenuSubContent>

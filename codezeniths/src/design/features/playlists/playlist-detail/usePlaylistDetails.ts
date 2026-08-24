@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { playlistQueryService } from '@/lib/tanstack';
 import { toast } from '@codezeniths/modules';
@@ -25,9 +25,20 @@ export function usePlaylistDetails(slugProp?: string) {
     );
 
     const toggleBookmarkMutation = playlistQueryService.toggleBookmark();
+    const [isBookmarkBusy, setIsBookmarkBusy] = useState(false);
+    const busyRef = useRef(false);
 
-    const handleToggleBookmark = async () => {
-        if (!playlist) return;
+    useEffect(() => {
+        return () => {
+            busyRef.current = false;
+        };
+    }, []);
+
+    const handleToggleBookmark = useCallback(async () => {
+        if (!playlist || busyRef.current) return;
+        busyRef.current = true;
+        setIsBookmarkBusy(true);
+
         try {
             const result = await toggleBookmarkMutation.mutateAsync({
                 playlistId: playlist.id,
@@ -38,11 +49,13 @@ export function usePlaylistDetails(slugProp?: string) {
                     ? 'Saved to your bookmarked playlists.'
                     : 'Removed from your bookmarked playlists.'
             );
-            refetch();
         } catch (err: any) {
             toast.error('Action Failed', err?.message || 'Unable to toggle bookmark.');
+        } finally {
+            busyRef.current = false;
+            setIsBookmarkBusy(false);
         }
-    };
+    }, [playlist, toggleBookmarkMutation]);
 
     const handleDeleteSuccess = () => {
         router.push('/playlists');
@@ -63,6 +76,7 @@ export function usePlaylistDetails(slugProp?: string) {
         setDeleteDialogOpen,
 
         handleToggleBookmark,
+        isBookmarkBusy,
         handleDeleteSuccess,
     };
 }

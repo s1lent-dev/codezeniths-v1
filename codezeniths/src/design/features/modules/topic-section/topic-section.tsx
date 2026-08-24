@@ -10,7 +10,16 @@ import { TopicInfoSection } from './topic-info-section';
 import { ProblemsSection } from '@codezeniths/design/features/shared/problem-list-section';
 
 export const TopicSection: React.FC = () => {
-    const { moduleSlug, topicSlug, topicDetails, isLoading, isError, error, handleToggleBookmark } = useTopicDetails();
+    const {
+        moduleSlug,
+        topicSlug,
+        topicDetails,
+        isLoading,
+        isError,
+        error,
+        isBookmarkBusy,
+        handleToggleBookmark,
+    } = useTopicDetails();
 
     if (isError || (!isLoading && !topicDetails)) {
         return (
@@ -50,7 +59,12 @@ export const TopicSection: React.FC = () => {
             <div className="flex flex-col lg:flex-row gap-6 w-full max-w-full min-w-0 items-start">
                 {/* Left Column: Topic Info Section (TopicInfoCard + TopicSuggestions) */}
                 <div className="w-full lg:w-82.5 xl:w-90 shrink-0">
-                    <TopicInfoSection topicDetails={topicDetails} isLoading={isLoading} onToggleBookmark={handleToggleBookmark} />
+                    <TopicInfoSection
+                        topicDetails={topicDetails}
+                        isLoading={isLoading}
+                        onToggleBookmark={handleToggleBookmark}
+                        isBookmarkBusy={isBookmarkBusy}
+                    />
                 </div>
 
                 {/* Right Column: Problem List Component */}

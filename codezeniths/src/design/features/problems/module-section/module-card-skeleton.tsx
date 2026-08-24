@@ -55,12 +55,12 @@ export const ModuleCardSkeleton: React.FC<ModuleCardSkeletonProps> = ({ classNam
                     <motion.div
                         animate={{ opacity: [0.4, 0.8, 0.4] }}
                         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
-                        className="h-2.5 sm:h-3 w-full bg-foreground-light-shade3 dark:border-foreground-dark-shade3 rounded-md"
+                        className="h-2.5 sm:h-3 w-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
                     />
                     <motion.div
                         animate={{ opacity: [0.4, 0.8, 0.4] }}
                         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.25 }}
-                        className="h-2.5 sm:h-3 w-5/6 bg-foreground-light-shade3 dark:border-foreground-dark-shade3 rounded-md"
+                        className="h-2.5 sm:h-3 w-5/6 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
                     />
                 </div>
             </div>

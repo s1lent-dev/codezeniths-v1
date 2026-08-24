@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { searchClient } from '../service/search';
 import { searchQueries } from '../lib/db/queries/search.queries';
+import { redisService } from '../lib/redis';
 
 
 async function main() {
@@ -26,6 +27,9 @@ async function main() {
 
             if (result.ok) {
                 const data = result.value;
+                if (name === 'problems') {
+                    await redisService.client.set('search:problems:version', Date.now().toString()).catch(() => {});
+                }
                 console.log(`✅ OK (${data.documentsIndexed} docs, ${data.autocompleteEntries} prefixes, ${data.tookMs}ms)`);
                 summary[name] = {
                     ok: true,

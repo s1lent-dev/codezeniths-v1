@@ -8,12 +8,23 @@ export interface TopicInfoSectionProps {
     topicDetails?: TopicInfoCardProps['topicDetails'];
     isLoading?: boolean;
     onToggleBookmark?: () => void;
+    isBookmarkBusy?: boolean;
 }
 
-export const TopicInfoSection: React.FC<TopicInfoSectionProps> = ({ topicDetails, isLoading = false, onToggleBookmark }) => {
+export const TopicInfoSection: React.FC<TopicInfoSectionProps> = ({
+    topicDetails,
+    isLoading = false,
+    onToggleBookmark,
+    isBookmarkBusy = false,
+}) => {
     return (
         <div className="space-y-6 w-full">
-            <TopicInfoCard topicDetails={topicDetails} isLoading={isLoading} onToggleBookmark={onToggleBookmark} />
+            <TopicInfoCard
+                topicDetails={topicDetails}
+                isLoading={isLoading}
+                onToggleBookmark={onToggleBookmark}
+                isBookmarkBusy={isBookmarkBusy}
+            />
             {isLoading ? (
                 <TopicSuggestions isLoading={true} />
             ) : (

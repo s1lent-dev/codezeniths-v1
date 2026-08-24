@@ -9,18 +9,9 @@ export class CacheInvalidationService {
      */
     static async invalidateOnProblemProgressChange(queryClient: QueryClient) {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['problem'] }),
-            queryClient.invalidateQueries({ queryKey: ['module'] }),
-            queryClient.invalidateQueries({ queryKey: ['topic'] }),
-            queryClient.invalidateQueries({ queryKey: ['tag'] }),
-            queryClient.invalidateQueries({ queryKey: ['favourite'] }),
-            queryClient.invalidateQueries({ queryKey: ['playlist'] }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.problem.progress() }),
             queryClient.invalidateQueries({ queryKey: queryKeys.user.activeStreak() }),
             queryClient.invalidateQueries({ queryKey: ['user', 'streak'] }),
-            queryClient.invalidateQueries({ queryKey: ['user', 'yearlyActivity'] }),
-            queryClient.invalidateQueries({ queryKey: ['user', 'monthlyActivity'] }),
-            queryClient.invalidateQueries({ queryKey: ['leaderboard'] }),
-            queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
         ]);
     }
 

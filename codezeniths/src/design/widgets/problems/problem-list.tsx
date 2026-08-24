@@ -56,6 +56,7 @@ export interface ProblemListProps {
     onToggleSolved?: (problemId: string, currentSolved: boolean) => void;
     onToggleRevisit?: (problemId: string, currentRevisit: boolean) => void;
     onToggleFavourite?: (problemId: string, currentFavourite: boolean) => void;
+    isProblemBusy?: (problemId: string) => boolean;
     // Filter dropdown options primitives
     modulesOptions?: Array<{ id: string; title: string; slug: string }>;
     topicsOptions?: Array<{ id: string; title: string; slug: string }>;
@@ -86,6 +87,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
     onToggleSolved,
     onToggleRevisit,
     onToggleFavourite,
+    isProblemBusy,
     modulesOptions = [],
     topicsOptions = [],
     tagsOptions = [],
@@ -121,7 +123,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
             ...filters,
             search: query.trim() ? query.trim() : undefined,
         });
-    }, 300);
+    }, 500);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -679,6 +681,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                         key={problem.id}
                                         problem={problem}
                                         index={index}
+                                        isBusy={isProblemBusy?.(problem.id)}
                                         onToggleSolved={onToggleSolved}
                                         onToggleRevisit={onToggleRevisit}
                                         onToggleFavourite={onToggleFavourite}
@@ -737,6 +740,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                             data-index={virtualRow.index}
                                             problem={problem}
                                             index={virtualRow.index}
+                                            isBusy={isProblemBusy?.(problem.id)}
                                             onToggleSolved={onToggleSolved}
                                             onToggleRevisit={onToggleRevisit}
                                             onToggleFavourite={onToggleFavourite}

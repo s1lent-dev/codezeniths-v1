@@ -10,7 +10,15 @@ import { TagInfoSection } from './tag-info-section';
 import { ProblemsSection } from '@codezeniths/design/features/shared/problem-list-section';
 
 export const TagSection: React.FC = () => {
-    const { tagSlug, tagDetails, isLoading, isError, error, handleToggleBookmark } = useTagDetails();
+    const {
+        tagSlug,
+        tagDetails,
+        isLoading,
+        isError,
+        error,
+        isBookmarkBusy,
+        handleToggleBookmark,
+    } = useTagDetails();
 
     if (isError || (!isLoading && !tagDetails)) {
         return (
@@ -46,7 +54,12 @@ export const TagSection: React.FC = () => {
             <div className="flex flex-col lg:flex-row gap-6 w-full max-w-full min-w-0 items-start">
                 {/* Left Column: Tag Info Section (TagInfoCard + TagSuggestions) */}
                 <div className="w-full lg:w-82.5 xl:w-90 shrink-0">
-                    <TagInfoSection tagDetails={tagDetails} isLoading={isLoading} onToggleBookmark={handleToggleBookmark} />
+                    <TagInfoSection
+                        tagDetails={tagDetails}
+                        isLoading={isLoading}
+                        onToggleBookmark={handleToggleBookmark}
+                        isBookmarkBusy={isBookmarkBusy}
+                    />
                 </div>
 
                 {/* Right Column: Problem List Component */}

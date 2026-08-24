@@ -413,7 +413,7 @@ export class LeaderboardQueries implements ILeaderboardQueries {
             if (globalRankZero === null) {
                 // Fallback to PostgreSQL
                 const higherScoreCount = await prisma.userGlobalStats.count({
-                    where: { score: { gt: score } },
+                    where: { score: { gt: score, gte: 10 } },
                 });
                 globalRankZero = higherScoreCount;
             }
@@ -476,7 +476,7 @@ export class LeaderboardQueries implements ILeaderboardQueries {
 
                     if (modRankZero === null) {
                         const higherModScoreCount = await prisma.userModuleStats.count({
-                            where: { moduleId, score: { gt: userModStats.score } },
+                            where: { moduleId, score: { gt: userModStats.score, gte: 10 } },
                         });
                         modRankZero = higherModScoreCount;
                     }

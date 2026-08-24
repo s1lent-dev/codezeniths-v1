@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import {
     Typography,
     TypographyVariant,
@@ -203,15 +204,19 @@ export const AccountCredentialsCard: React.FC<AccountCredentialsCardProps> = ({
                         value={email || 'No email associated'}
                         badge={
                             emailVerified ? (
-                                <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
+                                <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 mb-1 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
                                     <CheckCircle2 className="size-2.5" />
                                     Verified
                                 </span>
                             ) : (
-                                <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20">
+                                <Link
+                                    href="/verify-email"
+                                    title="Click to verify email"
+                                    className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 mb-1 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/30 transition-colors cursor-pointer select-none"
+                                >
                                     <AlertCircle className="size-2.5" />
                                     Unverified
-                                </span>
+                                </Link>
                             )
                         }
                         onEdit={() => setIsEditEmailOpen(true)}
@@ -229,15 +234,19 @@ export const AccountCredentialsCard: React.FC<AccountCredentialsCardProps> = ({
                         badge={
                             phoneNumber ? (
                                 phoneNumberVerified ? (
-                                    <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
+                                    <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 mb-2 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
                                         <CheckCircle2 className="size-2.5" />
                                         Verified
                                     </span>
                                 ) : (
-                                    <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20">
+                                    <Link
+                                        href="/verify-phone"
+                                        title="Click to verify phone number"
+                                        className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 mb-1 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/30 transition-colors cursor-pointer select-none"
+                                    >
                                         <AlertCircle className="size-2.5" />
                                         Unverified
-                                    </span>
+                                    </Link>
                                 )
                             ) : undefined
                         }

@@ -5,7 +5,7 @@ export const buttonVariants = cva(
     [
         'inline-flex items-center justify-center gap-2',
         'whitespace-nowrap rounded-md text-sm font-medium',
-        'transition-colors duration-200',
+        '',
         'disabled:pointer-events-none disabled:opacity-60 cursor-pointer',
         '[&_svg]:pointer-events-none [&_svg]:shrink-0',
         'outline-none focus-visible:ring-0 focus-visible:ring-none focus-visible:ring-offset-0 focus-visible:ring-offset-none',

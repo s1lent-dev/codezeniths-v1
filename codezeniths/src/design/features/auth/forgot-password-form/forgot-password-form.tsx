@@ -143,7 +143,7 @@ export const ForgotPasswordForm = () => {
                                                     requestForm.setValue('identifier', `${currentCountryCode} ${raw}`.trim(), { shouldValidate: true });
                                                 }}
                                                 placeholder="Enter phone number"
-                                                inputClassName={requestForm.formState.errors.identifier ? '!border-destructive' : ''}
+                                                inputClassName={`${inputClassName} pr-10 ${requestForm.formState.errors.identifier ? '!border-destructive' : ''}`}
                                             />
                                             {isCheckingPhone && <Typography variant={TypographyVariant.CAPTION} className='text-warning dark:text-warning pt-1 absolute right-3 top-1/2 -translate-y-1/2'>checking...</Typography>}
                                             {!isCheckingPhone && isIdentifierValid && phoneCheck?.available === false && !requestForm.formState.errors.identifier && (

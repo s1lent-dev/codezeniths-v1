@@ -44,6 +44,8 @@ export interface UseProblemsReturn {
     tagsOptions: Array<{ id: string; name: string; slug: string }>;
 
     // Mutations
-    toggleSolved: (problemId: string, currentSolved: boolean) => Promise<void>;
-    toggleFavourite: (problemId: string, currentFavourite: boolean) => Promise<void>;
+    toggleSolved: (problemId: string, currentSolved: boolean) => void | Promise<void>;
+    toggleFavourite: (problemId: string, currentFavourite: boolean) => void | Promise<void>;
+    toggleRevisit: (problemId: string, currentRevisit: boolean) => void | Promise<void>;
+    isProblemBusy?: (problemId: string) => boolean;
 }

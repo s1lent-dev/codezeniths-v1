@@ -71,6 +71,8 @@ export const ModuleProblemSection: React.FC<ModuleProblemSectionProps> = ({
         resetFilters,
         handleToggleSolved,
         handleToggleFavourite,
+        handleToggleRevisit,
+        isProblemBusy,
         handleToggleTopicBookmark,
         totalProblemsCount,
         solvedProblemsCount,
@@ -219,7 +221,9 @@ export const ModuleProblemSection: React.FC<ModuleProblemSectionProps> = ({
                                 isOpen={expandedTopicIds.has(topic.id)}
                                 onToggle={() => toggleTopic(topic.id)}
                                 onToggleSolved={handleToggleSolved}
+                                onToggleRevisit={handleToggleRevisit}
                                 onToggleFavourite={handleToggleFavourite}
+                                isProblemBusy={isProblemBusy}
                                 onToggleBookmark={handleToggleTopicBookmark}
                             />
                         ))}

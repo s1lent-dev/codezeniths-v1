@@ -25,7 +25,14 @@ const FUZZY_PHONETIC_THRESHOLD = 10;
 function getFieldValues<TDoc>(doc: TDoc, field: keyof TDoc): string[] {
   const val = doc[field];
   if (typeof val === 'string') return [val];
-  if (Array.isArray(val)) return val.filter((v): v is string => typeof v === 'string');
+  if (Array.isArray(val)) {
+    return val.map((v) => {
+      if (typeof v === 'string') return v;
+      if (v && typeof v === 'object' && 'name' in v) return String((v as any).name);
+      if (v && typeof v === 'object' && 'title' in v) return String((v as any).title);
+      return '';
+    }).filter(Boolean);
+  }
   return [];
 }
 

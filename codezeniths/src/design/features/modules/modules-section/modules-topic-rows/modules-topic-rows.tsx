@@ -148,7 +148,7 @@ const SingleModuleRowBottomNav: React.FC<{ moduleItem: ModuleWithTopicsItem }> =
     );
 };
 
-const SingleModuleRow: React.FC<{ moduleItem: ModuleWithTopicsItem }> = ({ moduleItem }) => {
+const SingleModuleRowComponent: React.FC<{ moduleItem: ModuleWithTopicsItem }> = ({ moduleItem }) => {
     return (
         <div className="w-full space-y-3 sm:space-y-4 font-sans">
             <Carousel
@@ -192,6 +192,8 @@ const SingleModuleRow: React.FC<{ moduleItem: ModuleWithTopicsItem }> = ({ modul
         </div>
     );
 };
+
+const SingleModuleRow = React.memo(SingleModuleRowComponent);
 
 export const ModulesTopicRows: React.FC<ModulesTopicRowsProps> = ({
     modulesWithTopics,

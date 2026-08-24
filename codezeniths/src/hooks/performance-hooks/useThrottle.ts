@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import throttle from 'lodash/throttle';
 
 /**
@@ -120,4 +120,33 @@ const useThrottleLodash = <T extends (...args: Array<any>) => any>(
     return throttledCallback;
 };
 
-export { useThrottle, useThrottleLodash };
+/**
+ * @function useAsyncThrottle
+ * Wraps an async function so that subsequent invocations are throttled/locked
+ * while the previous invocation is still in flight (awaiting server response).
+ */
+const useAsyncThrottle = <T extends (...args: any[]) => Promise<any>>(
+    asyncCallback: T
+): [((...args: Parameters<T>) => Promise<ReturnType<T> | undefined>), boolean] => {
+    const [isPending, setIsPending] = useState(false);
+    const isPendingRef = useRef(false);
+
+    const throttledFn = useCallback(
+        async (...args: Parameters<T>): Promise<ReturnType<T> | undefined> => {
+            if (isPendingRef.current) return undefined;
+            isPendingRef.current = true;
+            setIsPending(true);
+            try {
+                return await asyncCallback(...args);
+            } finally {
+                isPendingRef.current = false;
+                setIsPending(false);
+            }
+        },
+        [asyncCallback]
+    );
+
+    return [throttledFn, isPending];
+};
+
+export { useThrottle, useThrottleLodash, useAsyncThrottle };

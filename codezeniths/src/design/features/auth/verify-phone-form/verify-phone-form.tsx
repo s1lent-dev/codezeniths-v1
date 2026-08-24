@@ -158,7 +158,7 @@ export const VerifyPhoneForm = () => {
                                             form.setValue('phoneNumber', raw, { shouldValidate: true });
                                         }}
                                         placeholder="Enter your phone number"
-                                        inputClassName={errors.phoneNumber ? '!border-destructive pr-10' : 'pr-10'}
+                                        inputClassName={`${inputClassName} pr-10 ${errors.phoneNumber ? '!border-destructive pr-10' : 'pr-10'}`}
                                     />
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
                                         {(isCheckingPhone || (watchedPhoneNumber && watchedPhoneNumber.trim() !== debouncedPhoneNumber)) ? (

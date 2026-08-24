@@ -35,6 +35,7 @@ export interface PlaylistInfoCardProps {
     playlist?: PlaylistInfoData;
     isLoading?: boolean;
     onToggleBookmark?: () => void;
+    isBookmarkBusy?: boolean;
     onEdit?: () => void;
     onDelete?: () => void;
     className?: string;
@@ -44,6 +45,7 @@ export const PlaylistInfoCard: React.FC<PlaylistInfoCardProps> = ({
     playlist,
     isLoading = false,
     onToggleBookmark,
+    isBookmarkBusy = false,
     onEdit,
     onDelete,
     className,
@@ -166,12 +168,16 @@ export const PlaylistInfoCard: React.FC<PlaylistInfoCardProps> = ({
                             size={ButtonSize.ICON}
                             variant={ButtonVariant.OUTLINE}
                             title={playlist.isBookmarked ? 'Remove Bookmark' : 'Bookmark Playlist'}
-                            onClick={onToggleBookmark}
+                            onClick={() => {
+                                if (!isBookmarkBusy) onToggleBookmark();
+                            }}
+                            disabled={isBookmarkBusy}
                             className={cn(
                                 'size-9 rounded-full transition-colors border cursor-pointer',
                                 playlist.isBookmarked
                                     ? 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20'
-                                    : 'bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 text-muted-light dark:text-muted-dark hover:text-body-light-shade3 dark:hover:text-body-dark hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 border-foreground-light-shade3/30 dark:border-foreground-dark-shade1/40'
+                                    : 'bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 text-muted-light dark:text-muted-dark hover:text-body-light-shade3 dark:hover:text-body-dark hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 border-foreground-light-shade3/30 dark:border-foreground-dark-shade1/40',
+                                isBookmarkBusy && 'opacity-60 cursor-not-allowed pointer-events-none'
                             )}
                         >
                             <Bookmark

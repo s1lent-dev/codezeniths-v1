@@ -8,9 +8,23 @@ export const GetSearchProblemsOutputSchema = z.array(
         title: z.string(),
         slug: z.string(),
         difficulty: z.enum(Object.values(Difficulty) as [string, ...string[]]),
-        tags: z.array(z.string()),
-        topic: z.string().nullable(),
-        module: z.string().nullable(),
+        order: z.number().int().default(0),
+        articleUrl: z.string().url().nullable().optional(),
+        problemUrl: z.string().url().nullable().optional(),
+        favouriteCount: z.number().int().default(0),
+        topicId: z.string().nullable().optional(),
+        topicSlug: z.string().nullable().optional(),
+        topic: z.string().nullable().optional(),
+        moduleId: z.string().nullable().optional(),
+        moduleSlug: z.string().nullable().optional(),
+        module: z.string().nullable().optional(),
+        tags: z.array(
+            z.object({
+                id: z.string(),
+                name: z.string(),
+                slug: z.string(),
+            })
+        ),
         phoneticTitle: z.string().optional(),
     })
 );

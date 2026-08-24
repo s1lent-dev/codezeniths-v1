@@ -29,6 +29,7 @@ export const PlaylistDetailSection: React.FC<PlaylistDetailProps> = ({
         setDeleteDialogOpen,
 
         handleToggleBookmark,
+        isBookmarkBusy,
         handleDeleteSuccess,
     } = usePlaylistDetails(slugProp);
 
@@ -70,6 +71,7 @@ export const PlaylistDetailSection: React.FC<PlaylistDetailProps> = ({
                         playlist={playlist}
                         isLoading={isLoading}
                         onToggleBookmark={handleToggleBookmark}
+                        isBookmarkBusy={isBookmarkBusy}
                         onEdit={() => setEditModalOpen(true)}
                         onDelete={() => setDeleteDialogOpen(true)}
                     />

@@ -9,14 +9,26 @@ export interface TagInfoSectionProps {
     tagDetails?: TagInfoCardProps['tagDetails'];
     isLoading?: boolean;
     onToggleBookmark?: () => void;
+    isBookmarkBusy?: boolean;
     className?: string;
 }
 
-export const TagInfoSection: React.FC<TagInfoSectionProps> = ({ tagDetails, isLoading = false, onToggleBookmark, className }) => {
+export const TagInfoSection: React.FC<TagInfoSectionProps> = ({
+    tagDetails,
+    isLoading = false,
+    onToggleBookmark,
+    isBookmarkBusy = false,
+    className,
+}) => {
     return (
         <div className={cn('w-full space-y-6', className)}>
             {/* Tag Info & Progress Card */}
-            <TagInfoCard tagDetails={tagDetails} isLoading={isLoading} onToggleBookmark={onToggleBookmark} />
+            <TagInfoCard
+                tagDetails={tagDetails}
+                isLoading={isLoading}
+                onToggleBookmark={onToggleBookmark}
+                isBookmarkBusy={isBookmarkBusy}
+            />
 
             {/* Separate Tag Suggestions / Similar Tags Card */}
             {isLoading ? (

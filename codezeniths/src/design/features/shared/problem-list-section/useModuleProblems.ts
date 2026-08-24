@@ -6,6 +6,7 @@ import { moduleQueryService } from '@/lib/tanstack/services/module.query-service
 import { ProblemFilterInput, ProblemSortingInput } from '@codezeniths/schemas/db/queries/shared/problem-filter.schema';
 import { SearchScope, TopicAccordionData, ProblemItem } from '@codezeniths/design/widgets/problems';
 import { useDebouncedValue } from '@/hooks/performance-hooks/useDebounce';
+import { useProblemActionManager } from './useProblemActionManager';
 
 export interface UseModuleProblemsProps {
     moduleSlug: string;
@@ -50,7 +51,12 @@ export function useModuleProblems({ moduleSlug, topicsMeta = [] }: UseModuleProb
         },
     });
 
-    const updateProblemMutation = problemQueryService.updateProblem();
+    const {
+        toggleSolved: handleToggleSolved,
+        toggleFavourite: handleToggleFavourite,
+        toggleRevisit: handleToggleRevisit,
+        isProblemBusy,
+    } = useProblemActionManager();
     const toggleTopicBookmarkMutation = moduleQueryService.toggleTopicBookmark();
 
     const allProblems: ProblemItem[] = useMemo(() => {
@@ -212,20 +218,6 @@ export function useModuleProblems({ moduleSlug, topicsMeta = [] }: UseModuleProb
         setExpandedTopicIds(new Set());
     };
 
-    const handleToggleSolved = (problemId: string, currentSolved: boolean) => {
-        updateProblemMutation.mutate({
-            problemId,
-            status: currentSolved ? 'not_solved' : 'solved',
-        });
-    };
-
-    const handleToggleFavourite = (problemId: string, currentFavourite: boolean) => {
-        updateProblemMutation.mutate({
-            problemId,
-            favourite: !currentFavourite,
-        });
-    };
-
     const handleToggleTopicBookmark = (topicId: string) => {
         toggleTopicBookmarkMutation.mutate({
             topicId,
@@ -260,6 +252,8 @@ export function useModuleProblems({ moduleSlug, topicsMeta = [] }: UseModuleProb
         resetFilters,
         handleToggleSolved,
         handleToggleFavourite,
+        handleToggleRevisit,
+        isProblemBusy,
         handleToggleTopicBookmark,
         totalProblemsCount,
         solvedProblemsCount,

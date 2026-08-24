@@ -24,11 +24,18 @@ import { ITagQueries } from './interfaces/tag.queries.interface';
 
 import { redisService } from '@codezeniths/lib/redis';
 import { z } from 'zod';
+import { createCache } from '@/hooks/performance-hooks/cache/cache';
 
 const tagsCache = redisService.cache.createStore<z.infer<typeof GetTagsOutputSchema>>({
     namespace: 'tags',
     ttlSeconds: 86400, // 24 hours
     schema: GetTagsOutputSchema,
+});
+
+const tagsL1Cache = createCache<z.infer<typeof GetTagsOutputSchema>>({
+    strategy: 'adaptive',
+    maxSize: 10,
+    ttl: 1000 * 60 * 15, // 15 minutes in RAM
 });
 
 export class TagQueries implements ITagQueries {
@@ -37,7 +44,12 @@ export class TagQueries implements ITagQueries {
         .handler(async () => {
             logger.info('Executing getTags query');
 
-            return await tagsCache.getOrSet('all_tags', async () => {
+            // Tier 1: L1 Adaptive Memory Cache (0ms)
+            const l1Cached = tagsL1Cache.get('all_tags');
+            if (l1Cached) return l1Cached;
+
+            // Tier 2: L2 Redis CacheStore + DB Fallback
+            const data = await tagsCache.getOrSet('all_tags', async () => {
                 const tags = await prisma.tag.findMany({
                     include: {
                         module: {
@@ -63,6 +75,9 @@ export class TagQueries implements ITagQueries {
                     };
                 });
             });
+
+            if (data) tagsL1Cache.set('all_tags', data);
+            return data;
         })
         .build();
 

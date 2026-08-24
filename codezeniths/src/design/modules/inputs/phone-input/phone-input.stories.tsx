@@ -30,7 +30,7 @@ export const Default: Story = {
         const [phone, setPhone] = useState('');
         
         return (
-            <div className="w-[400px] p-6 bg-foreground-light dark:bg-foreground-dark rounded-xl">
+            <div className="w-100 p-6 bg-foreground-light dark:bg-foreground-dark rounded-xl">
                 <PhoneInput 
                     {...args}
                     countryCode={code}

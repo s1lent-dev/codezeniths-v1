@@ -26,6 +26,7 @@ export interface TopicProblemListProps {
     onToggleSolved?: (problemId: string, currentSolved: boolean) => void;
     onToggleRevisit?: (problemId: string, currentRevisit: boolean) => void;
     onToggleFavourite?: (problemId: string, currentFavourite: boolean) => void;
+    isProblemBusy?: (problemId: string) => boolean;
     className?: string;
 }
 
@@ -34,6 +35,7 @@ export const TopicProblemList: React.FC<TopicProblemListProps> = ({
     onToggleSolved,
     onToggleRevisit,
     onToggleFavourite,
+    isProblemBusy,
     className,
 }) => {
     if (!topic || !topic.problems || topic.problems.length === 0) {
@@ -81,6 +83,7 @@ export const TopicProblemList: React.FC<TopicProblemListProps> = ({
                                     key={problem.id}
                                     problem={problem}
                                     index={index}
+                                    isBusy={isProblemBusy?.(problem.id)}
                                     onToggleSolved={onToggleSolved}
                                     onToggleRevisit={onToggleRevisit}
                                     onToggleFavourite={onToggleFavourite}

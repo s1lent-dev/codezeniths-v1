@@ -88,8 +88,10 @@ export class CacheStore<T> {
 
     async getOrSet(key: string, fetcher: () => Promise<T>, ttlSeconds?: number): Promise<T> {
         const cached = await this.get(key);
+        logger.info(`[redis:cache:${this.namespace}] Cache hit for key "${key}"`, { ttlSeconds });
+        
         if (cached !== null) return cached;
-
+        
         const fresh = await fetcher();
         void this.set(key, fresh, ttlSeconds);
         return fresh;

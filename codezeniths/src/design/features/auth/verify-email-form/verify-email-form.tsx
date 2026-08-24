@@ -31,6 +31,7 @@ export const VerifyEmailForm = () => {
         isAuthLoading,
         isSending,
         isVerifying,
+        isVerified,
         otpSent,
         linkSent,
         cooldown,
@@ -48,7 +49,6 @@ export const VerifyEmailForm = () => {
     } = useVerifyEmailForm();
 
     const { register, formState: { errors } } = form;
-    const isVerified = Boolean(user?.emailVerified || emailCheck?.isVerified);
 
     const inputClassName =
         'border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 xs:h-12 sm:h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm xs:text-base sm:text-lg';
@@ -58,52 +58,76 @@ export const VerifyEmailForm = () => {
             variant={CardVariant.FLAT}
             className="w-full max-w-2xl p-4.5 xs:p-6 sm:p-10 md:p-14 border border-secondary rounded-xs bg-foreground-light dark:bg-foreground-dark mx-auto shadow-none"
         >
-            <CardHeader className="flex flex-col items-center justify-center mb-6 sm:mb-8 p-0 border-none shrink-0 w-full">
-                <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 sm:mb-6">
-                    <Mail className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 text-primary" />
-                </div>
-                <Typography
-                    variant={TypographyVariant.H3}
-                    className="font-bold text-xl xs:text-2xl sm:text-3xl lg:text-4xl text-body-light dark:text-body-dark mb-2 text-center"
-                >
-                    Verify Your Email
-                </Typography>
-                <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark max-w-xl text-xs xs:text-sm sm:text-base leading-relaxed">
-                    {isVerified
-                        ? 'You have already verified your email address.'
-                        : linkSent
-                            ? `We've sent a verification link to ${watchedEmail}.`
-                            : otpSent
-                                ? `We've sent a 6-digit verification code to ${watchedEmail}.`
-                                : user?.email
-                                    ? `Please verify your email address (${user.email}) to secure your account.`
-                                    : 'Enter your email address and select your preferred verification method.'}
-                </Typography>
-            </CardHeader>
-
-            <CardContent className="p-0 w-full flex flex-col items-center gap-6 sm:gap-8">
-                {isAuthLoading ? (
-                    <div className="py-8 text-muted-light dark:text-muted-dark text-sm">Loading session...</div>
-                ) : isVerified ? (
-                    /* ── Success State ─────────────────────────────────────── */
-                    <div className="w-full flex flex-col items-center gap-4 sm:gap-6 py-4">
-                        <CheckCircle2 size={48} className="text-success mb-1 animate-in zoom-in duration-500 sm:size-16" />
-                        <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark font-medium text-base sm:text-lg">
-                            Your email is successfully verified!
-                        </Typography>
-                        <Button
-                            onClick={handleNavigatePostVerification}
-                            variant={ButtonVariant.SECONDARY}
-                            effect={ButtonEffect.SHIMMER}
-                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md mt-2 mx-auto"
-                        >
-                            {user?.emailVerified
-                                ? (!user.isOnboardingComplete ? 'Complete Profile' : 'Go to Problemset')
-                                : 'Go to Sign In'}
-                            <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />
-                        </Button>
+            {isVerifying ? (
+                /* ── Dedicated Centered Verifying Account State ────────────── */
+                <div className="w-full flex flex-col items-center justify-center text-center gap-5 sm:gap-6 py-8 sm:py-12 animate-in fade-in duration-300">
+                    <div className="relative flex items-center justify-center mx-auto">
+                        <div className="size-16 sm:size-20 rounded-full border-3 border-primary/20 border-t-primary animate-spin" />
+                        <Mail className="size-7 sm:size-8 text-primary absolute" />
                     </div>
-                ) : (
+                    <div className="space-y-2 text-center max-w-md mx-auto flex flex-col items-center justify-center">
+                        <Typography
+                            variant={TypographyVariant.H3}
+                            className="font-bold text-xl xs:text-2xl sm:text-3xl text-body-light dark:text-body-dark text-center"
+                        >
+                            Verifying your account...
+                        </Typography>
+                        <Typography
+                            variant={TypographyVariant.P}
+                            className="text-xs sm:text-sm text-muted-light dark:text-muted-dark leading-relaxed text-center max-w-sm mx-auto"
+                        >
+                            Please wait a moment while we synchronize your session and confirm your email verification.
+                        </Typography>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <CardHeader className="flex flex-col items-center justify-center mb-6 sm:mb-8 p-0 border-none shrink-0 w-full text-center">
+                        <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 sm:mb-6 mx-auto">
+                            <Mail className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 text-primary" />
+                        </div>
+                        <Typography
+                            variant={TypographyVariant.H3}
+                            className="font-bold text-xl xs:text-2xl sm:text-3xl lg:text-4xl text-body-light dark:text-body-dark mb-2 text-center"
+                        >
+                            {isVerified ? 'Email Verified' : 'Verify Your Email'}
+                        </Typography>
+                        <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark max-w-xl text-xs xs:text-sm sm:text-base leading-relaxed mx-auto">
+                            {isVerified
+                                ? 'You have already verified your email address.'
+                                : linkSent
+                                    ? `We've sent a verification link to ${watchedEmail}.`
+                                    : otpSent
+                                        ? `We've sent a 6-digit verification code to ${watchedEmail}.`
+                                        : user?.email
+                                            ? `Please verify your email address (${user.email}) to secure your account.`
+                                            : 'Enter your email address and select your preferred verification method.'}
+                        </Typography>
+                    </CardHeader>
+
+                    <CardContent className="p-0 w-full flex flex-col items-center gap-6 sm:gap-8">
+                        {isAuthLoading ? (
+                            <div className="py-8 text-muted-light dark:text-muted-dark text-sm text-center">Loading session...</div>
+                        ) : isVerified ? (
+                            /* ── Success State ─────────────────────────────────────── */
+                            <div className="w-full flex flex-col items-center justify-center text-center gap-4 sm:gap-6 py-4 animate-in zoom-in-95 duration-500">
+                                <CheckCircle2 size={48} className="text-success mb-1 sm:size-16" />
+                                <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark font-medium text-base sm:text-lg">
+                                    Your email is successfully verified!
+                                </Typography>
+                                <Button
+                                    onClick={handleNavigatePostVerification}
+                                    variant={ButtonVariant.SECONDARY}
+                                    effect={ButtonEffect.SHIMMER}
+                                    className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md mt-2 mx-auto"
+                                >
+                                    {user?.emailVerified
+                                        ? (!user.isOnboardingComplete ? 'Complete Profile' : 'Go to Problemset')
+                                        : 'Go to Sign In'}
+                                    <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />
+                                </Button>
+                            </div>
+                        ) : (
                     /* ── Active Verification State ─────────────────────────── */
                     <div className="w-full flex flex-col items-center gap-5 sm:gap-6">
                         {/* Non-Session Email Input */}
@@ -303,6 +327,8 @@ export const VerifyEmailForm = () => {
                     </div>
                 )}
             </CardContent>
+                </>
+            )}
         </Card>
     );
 };

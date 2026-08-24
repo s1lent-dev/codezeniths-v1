@@ -90,7 +90,30 @@ export class TagQueryService implements ITagQueryService {
             mutationFn: async (input: z.infer<typeof ToggleTagBookmarkTRPCInputSchema>) => {
                 return await trpcClient.tag.toggleTagBookmark.mutate(input);
             },
-            onSuccess: (_data, variables) => {
+            onMutate: async (variables) => {
+                const key = variables.tagSlug || variables.tagId;
+                await queryClient.cancelQueries({ queryKey: ['tag'] });
+
+                const previousSingleTag = key ? queryClient.getQueryData(queryKeys.tag.single(key)) : undefined;
+
+                if (key) {
+                    queryClient.setQueryData(queryKeys.tag.single(key), (old: any) => {
+                        if (!old) return old;
+                        return {
+                            ...old,
+                            isBookmarked: !old.isBookmarked,
+                        };
+                    });
+                }
+
+                return { previousSingleTag, key };
+            },
+            onError: (_err, _variables, context) => {
+                if (context?.key && context?.previousSingleTag) {
+                    queryClient.setQueryData(queryKeys.tag.single(context.key), context.previousSingleTag);
+                }
+            },
+            onSettled: (_data, _error, variables) => {
                 const key = variables.tagSlug || variables.tagId;
                 if (key) {
                     queryClient.invalidateQueries({ queryKey: queryKeys.tag.single(key) });

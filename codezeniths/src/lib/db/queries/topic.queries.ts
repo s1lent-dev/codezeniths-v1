@@ -11,6 +11,21 @@ import {
     GetSingleTopicProgressOutputSchema,
 } from '@codezeniths/schemas/db';
 import { ITopicQueries } from './interfaces/topic.queries.interface';
+import { redisService } from '@codezeniths/lib/redis';
+import { z } from 'zod';
+import { createCache } from '@/hooks/performance-hooks/cache/cache';
+
+// Multi-Tier Caches for Semantic Topic Suggestions
+const topicSuggestionsCache = redisService.cache.createStore<any>({
+    namespace: 'topic_suggestions',
+    ttlSeconds: 86400, // 24 hours
+});
+
+const topicSuggestionsL1Cache = createCache<any>({
+    strategy: 'adaptive',
+    maxSize: 100,
+    ttl: 1000 * 60 * 30, // 30 minutes in RAM
+});
 
 export class TopicQueries implements ITopicQueries {
     getSingleTopic = qRPC()
@@ -19,18 +34,6 @@ export class TopicQueries implements ITopicQueries {
         .handler(async (payload) => {
             logger.info('Executing getSingleTopic query', { payload });
             const { id, slug, userId } = payload;
-
-            if (userId) {
-                const userExists = await prisma.user.findUnique({
-                    where: { id: userId },
-                });
-                if (!userExists) {
-                    logger.warn('User not found while getting single topic', { userId });
-                    throw new AppErrorBuilder('User not found')
-                        .setCode(ErrorCode.NOT_FOUND)
-                        .build();
-                }
-            }
 
             // Find topic with module and problems
             const topic = await prisma.topic.findFirst({
@@ -121,66 +124,81 @@ export class TopicQueries implements ITopicQueries {
                 hard: problemsSolvedCountByDifficultyRaw.hard || 0,
             };
 
-            // ── Semantic Similarity Ranking for Top 10 Similar Topics ────────────
-            const activeProblemIdsSet = new Set(allProblemIds);
+            // ── Semantic Similarity Ranking for Top 10 Similar Topics (Multi-Tier Cached) ──
+            const suggestionsCacheKey = `sim:${topic.id}`;
+            let top10SimilarTopics = topicSuggestionsL1Cache.get(suggestionsCacheKey);
 
-            // Fetch candidate topics (excluding current topic)
-            const candidates = await prisma.topic.findMany({
-                where: {
-                    id: { not: topic.id },
-                },
-                include: {
-                    module: {
-                        select: {
-                            title: true,
-                            slug: true,
+            if (!top10SimilarTopics) {
+                top10SimilarTopics = await topicSuggestionsCache.get(suggestionsCacheKey);
+                if (top10SimilarTopics) {
+                    topicSuggestionsL1Cache.set(suggestionsCacheKey, top10SimilarTopics);
+                }
+            }
+
+            if (!top10SimilarTopics) {
+                const activeProblemIdsSet = new Set(allProblemIds);
+
+                // Fetch candidate topics (excluding current topic)
+                const candidates = await prisma.topic.findMany({
+                    where: {
+                        id: { not: topic.id },
+                    },
+                    include: {
+                        module: {
+                            select: {
+                                title: true,
+                                slug: true,
+                            },
+                        },
+                        problems: {
+                            select: {
+                                id: true,
+                            },
                         },
                     },
-                    problems: {
-                        select: {
-                            id: true,
-                        },
-                    },
-                },
-            });
+                });
 
-            // Score each candidate topic
-            const scoredCandidates = candidates.map((cand) => {
-                let score = 0;
+                // Score each candidate topic
+                const scoredCandidates = candidates.map((cand) => {
+                    let score = 0;
 
-                // 1. Same Module match (+40)
-                if (topic.moduleId && cand.moduleId === topic.moduleId) {
-                    score += 40;
-                }
+                    // 1. Same Module match (+40)
+                    if (topic.moduleId && cand.moduleId === topic.moduleId) {
+                        score += 40;
+                    }
 
-                // 2. Shared problem co-occurrence (+10 per shared problem, max 30)
-                const sharedCount = cand.problems.filter((p) => activeProblemIdsSet.has(p.id)).length;
-                score += Math.min(30, sharedCount * 10);
+                    // 2. Shared problem co-occurrence (+10 per shared problem, max 30)
+                    const sharedCount = cand.problems.filter((p) => activeProblemIdsSet.has(p.id)).length;
+                    score += Math.min(30, sharedCount * 10);
 
-                // 3. Same Proficiency Level match (+20)
-                if (topic.level && cand.level === topic.level) {
-                    score += 20;
-                }
+                    // 3. Same Proficiency Level match (+20)
+                    if (topic.level && cand.level === topic.level) {
+                        score += 20;
+                    }
 
-                // 4. Popularity bonus based on problem count (+10 max)
-                score += Math.min(10, cand.problems.length);
+                    // 4. Popularity bonus based on problem count (+10 max)
+                    score += Math.min(10, cand.problems.length);
 
-                return {
-                    id: cand.id,
-                    title: cand.title,
-                    slug: cand.slug,
-                    level: cand.level,
-                    moduleTitle: cand.module?.title,
-                    moduleSlug: cand.module?.slug,
-                    problemsCount: cand.problems.length,
-                    score,
-                };
-            });
+                    return {
+                        id: cand.id,
+                        title: cand.title,
+                        slug: cand.slug,
+                        level: cand.level,
+                        moduleTitle: cand.module?.title,
+                        moduleSlug: cand.module?.slug,
+                        problemsCount: cand.problems.length,
+                        score,
+                    };
+                });
 
-            // Sort by score DESC, then title ASC
-            scoredCandidates.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title));
+                // Sort by score DESC, then title ASC
+                scoredCandidates.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title));
 
-            const top10SimilarTopics = scoredCandidates.slice(0, 10).map(({ score, ...rest }) => rest);
+                top10SimilarTopics = scoredCandidates.slice(0, 10).map(({ score, ...rest }) => rest);
+
+                topicSuggestionsL1Cache.set(suggestionsCacheKey, top10SimilarTopics);
+                void topicSuggestionsCache.set(suggestionsCacheKey, top10SimilarTopics);
+            }
 
             let isBookmarked = false;
             if (userId) {

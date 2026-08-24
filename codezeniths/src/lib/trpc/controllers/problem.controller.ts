@@ -15,7 +15,6 @@ import {
 import { TRPCError } from '@trpc/server';
 import { logger } from '@/service/logging';
 import { z } from 'zod';
-
 export class ProblemController implements IProblemController {
     async getProblems({
         ctx,
@@ -29,8 +28,6 @@ export class ProblemController implements IProblemController {
         const userId = ctx.user?.id;
 
         try {
-            // TODO: [Redis] Implement caching logic based on user presence and filter parameters
-
             switch (input.mode) {
                 case 'paginated': {
                     const result = await ctx.queries.problem.getProblemsPaginated({
@@ -111,9 +108,11 @@ export class ProblemController implements IProblemController {
         const { problemId, status, notes, revisit, favourite } = input;
 
         try {
+            let lastResult: any;
+
             // Apply status update if provided
             if (status !== undefined) {
-                await ctx.queries.problem.updateProblemStatus({
+                lastResult = await ctx.queries.problem.updateProblemStatus({
                     userId,
                     problemId,
                     status,
@@ -122,7 +121,7 @@ export class ProblemController implements IProblemController {
 
             // Apply revisit toggle/set if provided
             if (revisit !== undefined) {
-                await ctx.queries.problem.updateProblemRevisit({
+                lastResult = await ctx.queries.problem.updateProblemRevisit({
                     userId,
                     problemId,
                     revisit,
@@ -131,7 +130,7 @@ export class ProblemController implements IProblemController {
 
             // Apply favourite toggle/set if provided
             if (favourite !== undefined) {
-                await ctx.queries.problem.updateProblemFavourite({
+                lastResult = await ctx.queries.problem.updateProblemFavourite({
                     userId,
                     problemId,
                     favourite,
@@ -140,14 +139,26 @@ export class ProblemController implements IProblemController {
 
             // Apply notes update if provided
             if (notes !== undefined) {
-                await ctx.queries.problem.updateProblemNote({
+                lastResult = await ctx.queries.problem.updateProblemNote({
                     userId,
                     problemId,
                     notes,
                 });
             }
 
-            // Fetch the final merged state of the progress
+            if (lastResult) {
+                return {
+                    id: lastResult.id,
+                    problemId: lastResult.problemId,
+                    userId: lastResult.userId,
+                    status: lastResult.status,
+                    revisit: lastResult.revisit,
+                    favourite: lastResult.favourite,
+                    notes: lastResult.notes ?? null,
+                    problemSlug: lastResult.problemSlug,
+                };
+            }
+
             const progress = await ctx.prisma.problemProgress.findUnique({
                 where: {
                     userId_problemId: { userId, problemId },
@@ -168,11 +179,6 @@ export class ProblemController implements IProblemController {
                     message: 'Problem progress record could not be established.',
                 });
             }
-
-            // TODO: [Redis] Invalidate user progress or activity cache
-            // e.g., await redis.del(`user:${userId}:progress`);
-
-            // TODO: [MQ] Publish progress-updated events if necessary (e.g. badge awards)
 
             return {
                 id: progress.id,

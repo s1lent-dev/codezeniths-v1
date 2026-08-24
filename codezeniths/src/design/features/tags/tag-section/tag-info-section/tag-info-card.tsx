@@ -37,9 +37,15 @@ export interface TagInfoCardProps {
     };
     isLoading?: boolean;
     onToggleBookmark?: () => void;
+    isBookmarkBusy?: boolean;
 }
 
-export const TagInfoCard: React.FC<TagInfoCardProps> = ({ tagDetails, isLoading = false, onToggleBookmark }) => {
+export const TagInfoCard: React.FC<TagInfoCardProps> = ({
+    tagDetails,
+    isLoading = false,
+    onToggleBookmark,
+    isBookmarkBusy = false,
+}) => {
     if (isLoading || !tagDetails) {
         return <DetailInfoCardSkeleton />;
     }
@@ -58,6 +64,7 @@ export const TagInfoCard: React.FC<TagInfoCardProps> = ({ tagDetails, isLoading 
                 type: 'tag',
             }}
             onBookmarkClick={onToggleBookmark}
+            isBookmarkBusy={isBookmarkBusy}
         />
     );
 };

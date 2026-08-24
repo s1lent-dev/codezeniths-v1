@@ -157,7 +157,75 @@ export class PlaylistQueryService implements IPlaylistQueryService {
                 const raw = await trpcClient.playlist.toggleBookmark.mutate(validatedInput);
                 return TogglePlaylistBookmarkTRPCOutputSchema.parse(raw);
             },
-            onSuccess: async () => {
+            onMutate: async (variables) => {
+                await queryClient.cancelQueries({ queryKey: ['playlist'] });
+
+                const snapshot = queryClient.getQueriesData({ queryKey: ['playlist'] });
+
+                queryClient.setQueriesData({ queryKey: ['playlist'] }, (old: any) => {
+                    if (!old) return old;
+
+                    // 1. Single Playlist Info: { id, title, slug, isBookmarked, bookmarkCount, ... }
+                    if (old.id === variables.playlistId || ('slug' in old && 'isBookmarked' in old)) {
+                        const wasBookmarked = Boolean(old.isBookmarked);
+                        const nextBookmarked = !wasBookmarked;
+                        const prevCount = old.bookmarkCount ?? 0;
+                        return {
+                            ...old,
+                            isBookmarked: nextBookmarked,
+                            bookmarkCount: nextBookmarked ? prevCount + 1 : Math.max(0, prevCount - 1),
+                        };
+                    }
+
+                    // 2. Paginated / List of Playlists: { items: Playlist[] }
+                    if (Array.isArray(old.items)) {
+                        const newItems = old.items.map((item: any) => {
+                            if (item.id !== variables.playlistId) return item;
+                            const wasBookmarked = Boolean(item.isBookmarked);
+                            const nextBookmarked = !wasBookmarked;
+                            const prevCount = item.bookmarkCount ?? 0;
+                            return {
+                                ...item,
+                                isBookmarked: nextBookmarked,
+                                bookmarkCount: nextBookmarked ? prevCount + 1 : Math.max(0, prevCount - 1),
+                            };
+                        });
+                        return { ...old, items: newItems };
+                    }
+
+                    // 3. Infinite Pages: { pages: [{ items: Playlist[] }] }
+                    if (Array.isArray(old.pages)) {
+                        const newPages = old.pages.map((page: any) => {
+                            if (!Array.isArray(page.items)) return page;
+                            const newItems = page.items.map((item: any) => {
+                                if (item.id !== variables.playlistId) return item;
+                                const wasBookmarked = Boolean(item.isBookmarked);
+                                const nextBookmarked = !wasBookmarked;
+                                const prevCount = item.bookmarkCount ?? 0;
+                                return {
+                                    ...item,
+                                    isBookmarked: nextBookmarked,
+                                    bookmarkCount: nextBookmarked ? prevCount + 1 : Math.max(0, prevCount - 1),
+                                };
+                            });
+                            return { ...page, items: newItems };
+                        });
+                        return { ...old, pages: newPages };
+                    }
+
+                    return old;
+                });
+
+                return { snapshot };
+            },
+            onError: (_err, _variables, context) => {
+                if (context?.snapshot) {
+                    context.snapshot.forEach(([queryKey, data]) => {
+                        queryClient.setQueryData(queryKey, data);
+                    });
+                }
+            },
+            onSettled: async () => {
                 await CacheInvalidationService.invalidateOnPlaylistChange(queryClient);
             },
         });
@@ -171,7 +239,37 @@ export class PlaylistQueryService implements IPlaylistQueryService {
                 const raw = await trpcClient.playlist.toggleProblemInPlaylist.mutate(validatedInput);
                 return ToggleProblemInPlaylistTRPCOutputSchema.parse(raw);
             },
-            onSuccess: async () => {
+            onMutate: async (variables) => {
+                const queryKey = ['playlist', 'forProblem', variables.problemId];
+                await queryClient.cancelQueries({ queryKey });
+
+                const previousPlaylists = queryClient.getQueryData<Array<any>>(queryKey);
+
+                queryClient.setQueryData<Array<any>>(queryKey, (old) => {
+                    if (!old) return old;
+                    return old.map((item) => {
+                        if (item.id === variables.playlistId) {
+                            const nextContained = !item.isContained;
+                            return {
+                                ...item,
+                                isContained: nextContained,
+                                problemsCount: nextContained
+                                    ? (item.problemsCount ?? 0) + 1
+                                    : Math.max(0, (item.problemsCount ?? 1) - 1),
+                            };
+                        }
+                        return item;
+                    });
+                });
+
+                return { previousPlaylists, queryKey };
+            },
+            onError: (_err, _variables, context) => {
+                if (context?.previousPlaylists && context.queryKey) {
+                    queryClient.setQueryData(context.queryKey, context.previousPlaylists);
+                }
+            },
+            onSettled: async () => {
                 await CacheInvalidationService.invalidateOnPlaylistChange(queryClient);
                 await queryClient.invalidateQueries({ queryKey: ['problem'] });
             },

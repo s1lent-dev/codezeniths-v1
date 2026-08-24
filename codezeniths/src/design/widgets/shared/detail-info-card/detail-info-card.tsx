@@ -51,6 +51,7 @@ export interface DetailInfoCardProps {
     onPracticeClick?: () => void;
     onStarClick?: () => void;
     onBookmarkClick?: () => void;
+    isBookmarkBusy?: boolean;
     onForkClick?: () => void;
     onShareClick?: () => void;
     className?: string;
@@ -82,6 +83,7 @@ export const DetailInfoCard: React.FC<DetailInfoCardProps> = ({
     onPracticeClick,
     onStarClick,
     onBookmarkClick,
+    isBookmarkBusy = false,
     onForkClick,
     onShareClick,
     className,
@@ -114,14 +116,14 @@ export const DetailInfoCard: React.FC<DetailInfoCardProps> = ({
                 className
             )}
         >
-            {/* Ambient glow — inherits level or favourite accent color */}
+            {/* Ambient Background Glow */}
             <div
-                className="absolute -right-16 -top-16 w-48 h-48 rounded-full pointer-events-none blur-3xl opacity-[0.14]"
-                style={{ background: isFavourite ? '#F59E0B' : lvl.color }}
+                className="absolute -right-16 -top-16 size-48 rounded-full pointer-events-none blur-3xl opacity-15"
+                style={{ background: 'var(--color-primary)' }}
             />
 
-            <div className="space-y-5 relative z-10">
-                {/* 1] Top Row: Category Icon on Left, Level Badge on Right */}
+            <div className="space-y-4 relative z-10">
+                {/* 1] Top Row: Left Icon & Right Level Badge */}
                 <div className="flex items-start justify-between gap-4">
                     {data.customIcon ? (
                         data.customIcon
@@ -194,12 +196,16 @@ export const DetailInfoCard: React.FC<DetailInfoCardProps> = ({
                             size={ButtonSize.ICON}
                             variant={ButtonVariant.OUTLINE}
                             title={data.isBookmarked ? 'Remove Bookmark' : 'Bookmark'}
-                            onClick={onBookmarkClick}
+                            onClick={() => {
+                                if (!isBookmarkBusy) onBookmarkClick();
+                            }}
+                            disabled={isBookmarkBusy}
                             className={cn(
                                 'size-9 rounded-full transition-colors border cursor-pointer',
                                 data.isBookmarked
                                     ? 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20'
-                                    : 'bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 text-muted-light dark:text-muted-dark hover:text-body-light-shade3 dark:hover:text-body-dark hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 border-foreground-light-shade3/30 dark:border-foreground-dark-shade1/40'
+                                    : 'bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 text-muted-light dark:text-muted-dark hover:text-body-light-shade3 dark:hover:text-body-dark hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 border-foreground-light-shade3/30 dark:border-foreground-dark-shade1/40',
+                                isBookmarkBusy && 'opacity-60 cursor-not-allowed pointer-events-none'
                             )}
                         >
                             <Bookmark className={cn('size-4', data.isBookmarked && 'fill-current')} />

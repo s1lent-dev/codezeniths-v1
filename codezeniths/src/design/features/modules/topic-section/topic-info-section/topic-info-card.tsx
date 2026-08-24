@@ -38,9 +38,15 @@ export interface TopicInfoCardProps {
     };
     isLoading?: boolean;
     onToggleBookmark?: () => void;
+    isBookmarkBusy?: boolean;
 }
 
-export const TopicInfoCard: React.FC<TopicInfoCardProps> = ({ topicDetails, isLoading = false, onToggleBookmark }) => {
+export const TopicInfoCard: React.FC<TopicInfoCardProps> = ({
+    topicDetails,
+    isLoading = false,
+    onToggleBookmark,
+    isBookmarkBusy = false,
+}) => {
     if (isLoading || !topicDetails) {
         return <DetailInfoCardSkeleton />;
     }
@@ -59,6 +65,7 @@ export const TopicInfoCard: React.FC<TopicInfoCardProps> = ({ topicDetails, isLo
                 type: 'topic',
             }}
             onBookmarkClick={onToggleBookmark}
+            isBookmarkBusy={isBookmarkBusy}
         />
     );
 };

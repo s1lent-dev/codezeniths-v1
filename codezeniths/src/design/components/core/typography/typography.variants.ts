@@ -10,7 +10,7 @@ import {
 
 export const typographyVariants = cva(
     [
-        'transition-colors duration-200',
+        '',
     ],
     {
         variants: {

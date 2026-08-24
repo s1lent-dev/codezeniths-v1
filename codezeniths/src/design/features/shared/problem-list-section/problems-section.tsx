@@ -43,6 +43,8 @@ export const ProblemsSection: React.FC<ProblemsSectionProps> = ({
         tagsOptions,
         toggleSolved,
         toggleFavourite,
+        toggleRevisit,
+        isProblemBusy,
     } = useProblems({
         pageContext,
         fixedModuleSlug,
@@ -82,7 +84,9 @@ export const ProblemsSection: React.FC<ProblemsSectionProps> = ({
                 onFilterChange={setFilters}
                 onSortingChange={setSorting}
                 onToggleSolved={toggleSolved}
+                onToggleRevisit={toggleRevisit}
                 onToggleFavourite={toggleFavourite}
+                isProblemBusy={isProblemBusy}
                 modulesOptions={modulesOptions}
                 topicsOptions={topicsOptions}
                 tagsOptions={tagsOptions}

@@ -60,15 +60,15 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
     const mediumTrackLength = Math.max(0, mediumAlloc - strokeWidthVal);
     const hardTrackLength = Math.max(0, hardAlloc - strokeWidthVal);
 
-    // Exact linear fill lengths with rounded linecap scaling
+    // Exact linear fill lengths with rounded linecap scaling (ensuring min dot visibility for solved > 0)
     const easyFillLength = easy.total > 0 && easy.solved > 0
-        ? easyTrackLength * Math.min(1, Math.max(0, easy.solved / easy.total))
+        ? Math.max(0.5, easyTrackLength * Math.min(1, Math.max(0, easy.solved / easy.total)))
         : 0;
     const mediumFillLength = medium.total > 0 && medium.solved > 0
-        ? mediumTrackLength * Math.min(1, Math.max(0, medium.solved / medium.total))
+        ? Math.max(0.5, mediumTrackLength * Math.min(1, Math.max(0, medium.solved / medium.total)))
         : 0;
     const hardFillLength = hard.total > 0 && hard.solved > 0
-        ? hardTrackLength * Math.min(1, Math.max(0, hard.solved / hard.total))
+        ? Math.max(0.5, hardTrackLength * Math.min(1, Math.max(0, hard.solved / hard.total)))
         : 0;
 
     // Rotational offsets (shifted by strokeCapRadius so rounded start caps align precisely with segment start)
@@ -80,29 +80,50 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
     const offsetMedium = -(posMedium + strokeCapRadius);
     const offsetHard = -(posHard + strokeCapRadius);
 
-    // ── STATUS DISTRIBUTION MODE: Solved (Green), Revisit (Amber), Unsolved (Dim) ──
-    const solvedShare = Math.min(1, Math.max(0, solved / calcTotalProblems));
-    const revisitShare = Math.min(1 - solvedShare, Math.max(0, revisitCount / calcTotalProblems));
-    const unsolvedShare = Math.min(1 - solvedShare - revisitShare, Math.max(0, unsolved / calcTotalProblems));
+    // ── STATUS DISTRIBUTION MODE: Solved (Green) & Unsolved (Dim Slate) ──
+    const safeSolved = Math.max(0, Math.min(actualTotalProblems, solved));
+    const safeUnsolved = Math.max(0, actualTotalProblems - safeSolved);
 
-    const activeStatusSegmentsCount = (solvedShare > 0 ? 1 : 0) + (revisitShare > 0 ? 1 : 0) + (unsolvedShare > 0 ? 1 : 0);
+    const activeStatusSegmentsCount = (safeSolved > 0 ? 1 : 0) + (safeUnsolved > 0 ? 1 : 0);
     const totalStatusGapsPx = activeStatusSegmentsCount > 1 ? (activeStatusSegmentsCount - 1) * gapPx : 0;
     const availableStatusLength = Math.max(0, totalGaugeArcLength - totalStatusGapsPx);
 
-    const solvedAlloc = availableStatusLength * solvedShare;
-    const revisitAlloc = availableStatusLength * revisitShare;
-    const unsolvedAlloc = availableStatusLength * unsolvedShare;
+    // Minimum visible allocation for a rounded cap dot (~4px = strokeWidthVal + 0.5)
+    // Ensures a single solved or unsolved problem is always visibly rendered even with thousands of problems
+    const minSegmentAlloc = strokeWidthVal + 0.5;
 
-    const distSolvedLength = Math.max(0, solvedAlloc - strokeWidthVal);
-    const distRevisitLength = Math.max(0, revisitAlloc - strokeWidthVal);
-    const distUnsolvedLength = Math.max(0, unsolvedAlloc - strokeWidthVal);
+    let solvedAlloc = 0;
+    let unsolvedAlloc = 0;
+
+    if (activeStatusSegmentsCount === 2) {
+        const rawSolvedAlloc = availableStatusLength * (safeSolved / calcTotalProblems);
+        const rawUnsolvedAlloc = availableStatusLength * (safeUnsolved / calcTotalProblems);
+
+        if (rawSolvedAlloc < minSegmentAlloc) {
+            solvedAlloc = minSegmentAlloc;
+            unsolvedAlloc = Math.max(0, availableStatusLength - solvedAlloc);
+        } else if (rawUnsolvedAlloc < minSegmentAlloc) {
+            unsolvedAlloc = minSegmentAlloc;
+            solvedAlloc = Math.max(0, availableStatusLength - unsolvedAlloc);
+        } else {
+            solvedAlloc = rawSolvedAlloc;
+            unsolvedAlloc = rawUnsolvedAlloc;
+        }
+    } else if (safeSolved > 0) {
+        solvedAlloc = availableStatusLength;
+        unsolvedAlloc = 0;
+    } else if (safeUnsolved > 0) {
+        solvedAlloc = 0;
+        unsolvedAlloc = availableStatusLength;
+    }
+
+    const distSolvedLength = safeSolved > 0 ? Math.max(0.2, solvedAlloc - strokeWidthVal) : 0;
+    const distUnsolvedLength = safeUnsolved > 0 ? Math.max(0.2, unsolvedAlloc - strokeWidthVal) : 0;
 
     const posDistSolved = 0;
-    const posDistRevisit = solvedShare > 0 ? solvedAlloc + gapPx : 0;
-    const posDistUnsolved = (solvedShare > 0 ? solvedAlloc + gapPx : 0) + (revisitShare > 0 ? revisitAlloc + gapPx : 0);
+    const posDistUnsolved = safeSolved > 0 ? solvedAlloc + gapPx : 0;
 
     const offsetDistSolved = -(posDistSolved + strokeCapRadius);
-    const offsetDistRevisit = -(posDistRevisit + strokeCapRadius);
     const offsetDistUnsolved = -(posDistUnsolved + strokeCapRadius);
 
     // Format Completion Percentage integer and decimal parts
@@ -287,7 +308,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 )}
                             </motion.g>
                         ) : (
-                            /* MODE 2: Status Distribution Mode (Solved = Green, Revisit = Amber, Unsolved = Dim) with Rounded Linecaps */
+                            /* MODE 2: Status Distribution Mode (Solved = Green, Unsolved = Dim) with Rounded Linecaps */
                             <motion.g
                                 key="status-arcs"
                                 className="transform rotate-135 origin-[50px_50px]"
@@ -297,7 +318,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 transition={{ duration: 0.2 }}
                             >
                                 {/* 1. Solved Share Arc (Green) */}
-                                {solved > 0 && (
+                                {safeSolved > 0 && distSolvedLength > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -315,27 +336,8 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                     />
                                 )}
 
-                                {/* 2. Revisit Share Arc (Amber) */}
-                                {revisitCount > 0 && (
-                                    <motion.circle
-                                        cx="50"
-                                        cy="50"
-                                        r={radius}
-                                        strokeWidth={strokeWidthVal}
-                                        fill="none"
-                                        stroke="var(--color-warning)"
-                                        filter="url(#glow-cp-medium)"
-                                        strokeLinecap="round"
-                                        strokeDasharray={`${distRevisitLength} ${circumference - distRevisitLength}`}
-                                        strokeDashoffset={offsetDistRevisit}
-                                        initial={{ strokeDasharray: `0 ${circumference}` }}
-                                        animate={{ strokeDasharray: `${distRevisitLength} ${circumference - distRevisitLength}` }}
-                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.08 }}
-                                    />
-                                )}
-
-                                {/* 3. Unsolved Share Arc (Dim Slate/Grey) */}
-                                {unsolved > 0 && (
+                                {/* 2. Unsolved Share Arc (Dim Slate/Grey) */}
+                                {safeUnsolved > 0 && distUnsolvedLength > 0 && (
                                     <motion.circle
                                         cx="50"
                                         cy="50"
@@ -348,7 +350,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                         strokeDashoffset={offsetDistUnsolved}
                                         initial={{ strokeDasharray: `0 ${circumference}` }}
                                         animate={{ strokeDasharray: `${distUnsolvedLength} ${circumference - distUnsolvedLength}` }}
-                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.16 }}
+                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: safeSolved > 0 ? 0.08 : 0 }}
                                     />
                                 )}
                             </motion.g>

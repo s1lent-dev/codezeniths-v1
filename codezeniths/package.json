@@ -20,7 +20,8 @@
     "search:reindex": "pnpx tsx src/scripts/run-reindex.ts",
     "search:reindex-users": "pnpx tsx src/scripts/reindex-users.ts",
     "mq:reset": "pnpx tsx src/scripts/mq-reset.ts",
-    "redis:flush": "pnpx tsx src/scripts/flush-redis.ts"
+    "redis:flush": "pnpx tsx src/scripts/flush-redis.ts",
+    "db:clean-users": "pnpx tsx src/scripts/clean-users.ts"
   },
   "pnpm": {
     "overrides": {

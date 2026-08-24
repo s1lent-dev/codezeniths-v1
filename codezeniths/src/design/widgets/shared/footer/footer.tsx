@@ -112,10 +112,10 @@ const Footer = () => {
 
     return (
         <motion.footer 
-            initial={{ opacity: 0, y: 40, filter: "blur(5px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="relative mt-6 pt-16 pb-8 bg-foreground-light-shade2 dark:bg-foreground-dark-shade2 border-t border-muted-light/10 dark:border-muted-dark/10"
         >
             {/* Newsletter Banner - Absolute positioned to overlap the top */}

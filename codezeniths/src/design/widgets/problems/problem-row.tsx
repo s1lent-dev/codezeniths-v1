@@ -40,13 +40,14 @@ export interface ProblemRowProps extends React.HTMLAttributes<HTMLTableRowElemen
     isSolved?: boolean;
     isRevisit?: boolean;
     isFavourite?: boolean;
+    isBusy?: boolean;
     onToggleSolved?: (problemId: string, currentSolved: boolean) => void;
     onToggleRevisit?: (problemId: string, currentRevisit: boolean) => void;
     onToggleFavourite?: (problemId: string, currentFavourite: boolean) => void;
     className?: string;
 }
 
-export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>(
+const ProblemRowComponent = React.forwardRef<HTMLTableRowElement, ProblemRowProps>(
     (
         {
             problem,
@@ -55,6 +56,7 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
             isSolved = problem.status === 'solved',
             isRevisit = Boolean(problem.revisit),
             isFavourite = Boolean(problem.favourite),
+            isBusy = false,
             onToggleSolved,
             onToggleRevisit,
             onToggleFavourite,
@@ -85,8 +87,14 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
                 <TableCell className="w-10 sm:w-12 min-w-[40px] sm:min-w-[48px] max-w-[40px] sm:max-w-[48px] pl-2.5 sm:pl-4 py-2.5 sm:py-3 text-center align-middle rounded-l-md border-0">
                     <Checkbox
                         checked={isSolved}
-                        onCheckedChange={() => onToggleSolved?.(problem.id, isSolved)}
-                        className="mx-auto cursor-pointer"
+                        disabled={isBusy}
+                        onCheckedChange={() => {
+                            if (!isBusy) onToggleSolved?.(problem.id, isSolved);
+                        }}
+                        className={cn(
+                            'mx-auto cursor-pointer',
+                            isBusy && 'opacity-60 cursor-not-allowed pointer-events-none'
+                        )}
                     />
                 </TableCell>
 
@@ -156,8 +164,15 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
                             >
                                 {/* Toggle Favourite */}
                                 <DropdownMenuItem
-                                    onClick={() => onToggleFavourite?.(problem.id, isFavourite)}
-                                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-amber-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none"
+                                    disabled={isBusy}
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        if (!isBusy) onToggleFavourite?.(problem.id, isFavourite);
+                                    }}
+                                    className={cn(
+                                        'flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-amber-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none',
+                                        isBusy && 'opacity-50 pointer-events-none cursor-not-allowed'
+                                    )}
                                 >
                                     <Star
                                         className={cn(
@@ -170,8 +185,15 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
 
                                 {/* Toggle Revisit */}
                                 <DropdownMenuItem
-                                    onClick={() => onToggleRevisit?.(problem.id, isRevisit)}
-                                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-blue-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none"
+                                    disabled={isBusy}
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        if (!isBusy) onToggleRevisit?.(problem.id, isRevisit);
+                                    }}
+                                    className={cn(
+                                        'flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-blue-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none',
+                                        isBusy && 'opacity-50 pointer-events-none cursor-not-allowed'
+                                    )}
                                 >
                                     <Bookmark
                                         className={cn(
@@ -181,6 +203,7 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
                                     />
                                     <span>{isRevisit ? 'Remove from Revisit' : 'Mark for Revisit'}</span>
                                 </DropdownMenuItem>
+
 
                                 <DropdownMenuSeparator className="my-1 bg-foreground-light-shade3 dark:bg-foreground-dark-shade1 h-px" />
 
@@ -195,4 +218,6 @@ export const ProblemRow = React.forwardRef<HTMLTableRowElement, ProblemRowProps>
     }
 );
 
-ProblemRow.displayName = 'ProblemRow';
+ProblemRowComponent.displayName = 'ProblemRow';
+
+export const ProblemRow = React.memo(ProblemRowComponent);

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
-import { motion } from 'motion/react';
 import { Nav, Container } from '@codezeniths/components';
 import { NavbarMenus, NavbarDesktopButtons } from './navbar.desktop';
 import { NavbarMobileToggle } from './navbar.mobile';
@@ -11,14 +10,9 @@ import { HomeNavbar } from './home-navbar';
 
 export const NavbarAnimator = ({ children }: { children: React.ReactNode }) => {
     return (
-        <motion.div
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full relative z-60"
-        >
+        <div className="w-full relative z-60">
             {children}
-        </motion.div>
+        </div>
     );
 };
 

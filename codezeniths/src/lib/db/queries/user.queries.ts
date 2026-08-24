@@ -1316,13 +1316,20 @@ export class UserQueries implements IUserQueries {
                 }),
             ]);
 
-            // Calculate global rank if user has stats
+            // Calculate global rank if user has stats and minimum score (score >= 10 for Guardian I)
             let globalRank: number | null = null;
-            if (globalStats) {
-                const higherCount = await prisma.userGlobalStats.count({
-                    where: { score: { gt: globalStats.score } },
-                });
-                globalRank = higherCount;
+            if (globalStats && globalStats.score >= 10) {
+                const redisRank = await redisService.sortedList.getRevRank('leaderboard:global', targetUserId);
+                if (redisRank !== null) {
+                    globalRank = redisRank + 1;
+                } else {
+                    const higherCount = await prisma.userGlobalStats.count({
+                        where: { score: { gt: globalStats.score, gte: 10 } },
+                    });
+                    globalRank = higherCount + 1;
+                }
+            } else {
+                globalRank = null;
             }
 
             const topSkills = user.userSkills

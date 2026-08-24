@@ -38,6 +38,7 @@ export class SearchQueries implements ISearchQueries {
         .handler(async (payload) => {
             logger.info('Executing getSearchProblems query', { payload });
             const problems = await prisma.problem.findMany({
+                orderBy: { order: 'asc' },
                 include: {
                     tags: {
                         include: { tag: true },
@@ -53,9 +54,21 @@ export class SearchQueries implements ISearchQueries {
                 title: p.title,
                 slug: p.slug,
                 difficulty: p.difficulty,
-                tags: p.tags.map((t) => t.tag.name),
+                order: p.order ?? 0,
+                articleUrl: p.articleUrl || null,
+                problemUrl: p.problemUrl || null,
+                favouriteCount: p.favouriteCount ?? 0,
+                topicId: p.topicId || p.topic?.id || null,
+                topicSlug: p.topic?.slug || null,
                 topic: p.topic?.title || null,
+                moduleId: p.topic?.module?.id || null,
+                moduleSlug: p.topic?.module?.slug || null,
                 module: p.topic?.module?.title || null,
+                tags: p.tags.map((t) => ({
+                    id: t.tag.id,
+                    name: t.tag.name,
+                    slug: t.tag.slug,
+                })),
                 phoneticTitle: p.title,
             }));
         })

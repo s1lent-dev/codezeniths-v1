@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@codezeniths/design/cn';
 import { backgroundWrapperVariants, backgroundPresets } from './background.variants';
-import { BACKGROUND_VARIANT_REGISTRY, useAllVariantHooks } from './background.effect-registry';
+import { BACKGROUND_VARIANT_REGISTRY } from './background.effect-registry';
 import { BackgroundVariant, BACKGROUND_EFFECT_PROP_KEYS } from './background.types';
 import type { BackgroundProps } from './background.types';
 import {
@@ -41,6 +41,12 @@ function omitEffectProps(props: Record<string, any>) {
     return result;
 }
 
+const VariantHost = ({ registry, props }: { registry: any; props: any }) => {
+    const effectProps = extractEffectProps(props);
+    const hookData = registry.useVariantHook(effectProps);
+    return <>{registry.renderVariant(hookData, props)}</>;
+};
+
 const Background = ({
     fill = true,
     wrapperClassName,
@@ -48,18 +54,7 @@ const Background = ({
     ...props
 }: BackgroundProps) => {
     const { variant } = props;
-
-    // Separate effect props from wrapper props
-    const effectProps = extractEffectProps(props);
-
-    // Call all variant hooks unconditionally
-    const { activeData } = useAllVariantHooks(variant, effectProps);
-
     const activeRegistry = variant ? BACKGROUND_VARIANT_REGISTRY[variant] : undefined;
-
-    // Render active variant using the registry, passing the full props object
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const renderedVariant = activeRegistry ? activeRegistry.renderVariant(activeData as any, props as any) : null;
 
     return (
         <div
@@ -67,7 +62,7 @@ const Background = ({
             data-variant={variant}
             className={cn(backgroundWrapperVariants({ fill, variant }), wrapperClassName)}
         >
-            {renderedVariant}
+            {activeRegistry && <VariantHost registry={activeRegistry} props={props} />}
             {children}
         </div>
     );

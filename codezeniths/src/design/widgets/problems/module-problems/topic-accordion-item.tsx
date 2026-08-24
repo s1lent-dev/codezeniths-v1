@@ -26,8 +26,10 @@ export interface TopicAccordionItemProps {
     isOpen: boolean;
     onToggle: () => void;
     onToggleSolved?: (problemId: string, currentSolved: boolean) => void;
+    onToggleRevisit?: (problemId: string, currentRevisit: boolean) => void;
     onToggleFavourite?: (problemId: string, currentFavourite: boolean) => void;
     onToggleBookmark?: (topicId: string, currentBookmarked: boolean) => void;
+    isProblemBusy?: (problemId: string) => boolean;
     className?: string;
 }
 
@@ -36,8 +38,10 @@ const TopicAccordionItemComponent: React.FC<TopicAccordionItemProps> = ({
     isOpen,
     onToggle,
     onToggleSolved,
+    onToggleRevisit,
     onToggleFavourite,
     onToggleBookmark,
+    isProblemBusy,
     className,
 }) => {
     const renderLevelBadge = (level?: 'fundamental' | 'intermediate' | 'advanced' | null) => {
@@ -148,7 +152,9 @@ const TopicAccordionItemComponent: React.FC<TopicAccordionItemProps> = ({
                                         key={problem.id}
                                         problem={problem}
                                         index={idx}
+                                        isBusy={isProblemBusy?.(problem.id)}
                                         onToggleSolved={onToggleSolved}
+                                        onToggleRevisit={onToggleRevisit}
                                         onToggleFavourite={onToggleFavourite}
                                     />
                                 ))}
