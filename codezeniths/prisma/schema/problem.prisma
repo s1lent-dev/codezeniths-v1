@@ -35,6 +35,7 @@ model ProblemProgress {
   @@unique([userId, problemId])
   @@index([userId, status])
   @@index([userId, revisit])
+  @@index([userId, status, solvedAt(sort: Desc)])
   @@map("problem_progress")
 }
 

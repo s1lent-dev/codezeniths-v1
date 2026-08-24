@@ -2,7 +2,7 @@ import { cva } from 'class-variance-authority';
 import { CarouselAxis, CarouselEffect } from './types';
 
 export const carouselVariants = cva(
-  'relative w-full',
+  'relative w-full min-w-0 max-w-full',
   {
     variants: {
       axis: {
@@ -17,7 +17,7 @@ export const carouselVariants = cva(
 );
 
 export const carouselContentVariants = cva(
-  'overflow-hidden',
+  'overflow-hidden w-full min-w-0 max-w-full',
   {
     variants: {
       effect: {

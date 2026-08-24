@@ -78,7 +78,14 @@ export const RankCard: React.FC<RankCardProps> = ({
     return (
         <Card
             variant={CardVariant.FLAT}
-            effectConfig={{ borderEffect: CardBorderEffect.GRADIENT_HOVER }}
+            effectConfig={{
+                borderEffect: CardBorderEffect.GRADIENT_HOVER,
+                borderEffectProps: {
+                    [CardBorderEffect.GRADIENT_HOVER]: {
+                        gradientColor: currentRank.color || '#6A7CFF',
+                    },
+                },
+            }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             className={cn(

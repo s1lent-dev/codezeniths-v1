@@ -78,7 +78,7 @@ export const PlaylistDetailSection: React.FC<PlaylistDetailProps> = ({
                 {/* Right Column: Unified Problem List Component */}
                 <div
                     id="problems-list-section"
-                    className="w-0 flex-1 min-w-0 max-w-full lg:max-w-[calc(100%-354px)] xl:max-w-[calc(100%-384px)] space-y-6"
+                    className="w-full lg:w-0 lg:flex-1 min-w-0 max-w-full lg:max-w-[calc(100%-354px)] xl:max-w-[calc(100%-384px)] space-y-6"
                 >
                     <ProblemsSection pageContext="playlist" fixedPlaylistSlug={slug} />
                 </div>

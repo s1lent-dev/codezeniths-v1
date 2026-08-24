@@ -83,7 +83,7 @@ export const ModuleProblemSection: React.FC<ModuleProblemSectionProps> = ({
         <TooltipProvider delayDuration={100}>
             <div
                 className={cn(
-                    'w-full font-sans bg-foreground-light dark:bg-foreground-dark text-heading-light dark:text-heading-dark p-5 sm:p-6 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-sm space-y-5',
+                    'w-full font-sans bg-foreground-light dark:bg-foreground-dark text-heading-light dark:text-heading-dark p-2.5 xs:p-3 sm:p-5 md:p-6 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-sm space-y-4 sm:space-y-5',
                     className
                 )}
             >

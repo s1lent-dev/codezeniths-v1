@@ -50,7 +50,14 @@ export const StreakCard: React.FC<StreakCardProps> = ({
     return (
         <Card
             variant={CardVariant.FLAT}
-            effectConfig={{ borderEffect: CardBorderEffect.GRADIENT_HOVER }}
+            effectConfig={{
+                borderEffect: CardBorderEffect.GRADIENT_HOVER,
+                borderEffectProps: {
+                    [CardBorderEffect.GRADIENT_HOVER]: {
+                        gradientColor: '#f59e0b',
+                    },
+                },
+            }}
             className={cn(
                 'rounded-md bg-foreground-light dark:bg-foreground-dark p-6 flex flex-col justify-between border relative overflow-hidden shadow-xs cursor-pointer font-sans',
                 className

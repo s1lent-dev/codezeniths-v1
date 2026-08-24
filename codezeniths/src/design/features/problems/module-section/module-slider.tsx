@@ -67,40 +67,43 @@ export const ModuleSlider: React.FC<ModuleSliderProps> = ({
     if (!modules || modules.length === 0) return null;
 
     return (
-        <div className={cn('relative w-full max-w-full min-w-0 group/slider', className)}>
-            {/* Left Navigation Arrow — fully visible inside slider bounds */}
+        <div className={cn('relative flex items-center gap-1.5 sm:gap-2.5 w-full max-w-full min-w-0 group/slider select-none', className)}>
+            {/* Left Navigation Arrow */}
             <button
                 type="button"
                 onClick={scrollPrev}
                 disabled={!canScrollPrev}
                 aria-label="Previous modules"
                 className={cn(
-                    'absolute left-1 top-1/2 -translate-y-1/2 z-30 w-7 h-7 rounded-full bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 shadow-md flex items-center justify-center text-muted-light dark:text-muted-dark transition-all cursor-pointer',
+                    'shrink-0 size-7 sm:size-7.5 rounded-full bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 shadow-md flex items-center justify-center text-muted-light dark:text-muted-dark transition-all cursor-pointer z-10',
                     canScrollPrev ? 'hover:text-heading-light dark:hover:text-heading-dark hover:border-primary opacity-90 hover:opacity-100' : 'opacity-30 cursor-not-allowed'
                 )}
             >
                 <ChevronLeft className="w-4 h-4" />
             </button>
 
-            {/* Embla Carousel Viewport — 2 slides per view */}
-            <div className="overflow-hidden w-full min-w-0 max-w-full rounded-sm p-2" ref={emblaRef}>
-                <div className="flex -ml-4 touch-pan-y select-none">
+            {/* Embla Carousel Viewport — Contained between both navigation buttons */}
+            <div className="overflow-hidden flex-1 min-w-0 w-0 max-w-full rounded-sm py-1" ref={emblaRef}>
+                <div className="flex -ml-2 sm:-ml-3 touch-pan-y">
                     {modules.map((module, index) => (
-                        <div key={module.id} className="flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_50%] min-w-0 pl-4">
+                        <div
+                            key={module.id}
+                            className="min-w-0 shrink-0 pl-2 sm:pl-3 module-slide-basis max-w-full"
+                        >
                             <ModuleCard module={module} index={index} onSolve={onSolve} />
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Right Navigation Arrow — fully visible inside slider bounds */}
+            {/* Right Navigation Arrow */}
             <button
                 type="button"
                 onClick={scrollNext}
                 disabled={!canScrollNext}
                 aria-label="Next modules"
                 className={cn(
-                    'absolute right-1 top-1/2 -translate-y-1/2 z-30 w-7 h-7 rounded-full bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 shadow-md flex items-center justify-center text-muted-light dark:text-muted-dark transition-all cursor-pointer',
+                    'shrink-0 size-7 sm:size-7.5 rounded-full bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 shadow-md flex items-center justify-center text-muted-light dark:text-muted-dark transition-all cursor-pointer z-10',
                     canScrollNext ? 'hover:text-heading-light dark:hover:text-heading-dark hover:border-primary opacity-90 hover:opacity-100' : 'opacity-30 cursor-not-allowed'
                 )}
             >

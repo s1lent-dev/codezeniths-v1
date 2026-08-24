@@ -1322,7 +1322,7 @@ export class UserQueries implements IUserQueries {
                 const higherCount = await prisma.userGlobalStats.count({
                     where: { score: { gt: globalStats.score } },
                 });
-                globalRank = higherCount + 1;
+                globalRank = higherCount;
             }
 
             const topSkills = user.userSkills

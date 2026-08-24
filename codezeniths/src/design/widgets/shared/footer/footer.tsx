@@ -120,10 +120,10 @@ const Footer = () => {
         >
             {/* Newsletter Banner - Absolute positioned to overlap the top */}
             
-            <Container size="7xl" className="mx-auto px-12 lg:px-16">
-                <Grid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10 lg:gap-8 border-b border-muted-light/20 dark:border-muted-dark/20 pb-12">
+            <Container size="7xl" className="mx-auto px-4 xs:px-6 sm:px-10 lg:px-16">
+                <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-8 border-b border-muted-light/20 dark:border-muted-dark/20 pb-12">
                     {/* Left Column: Logo, Description, Social */}
-                    <div className="lg:col-span-2 flex flex-col gap-6">
+                    <div className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 flex flex-col gap-6">
                         <Logo />
                         <Typography variant={TypographyVariant.P} className="text-muted-light-shade1 dark:text-muted-dark-shade1 max-w-sm mt-2 text-sm leading-relaxed">
                             CodeZeniths is the all-in-one CS platform to solve DSA, compete, build, and prep for interviews.
@@ -149,7 +149,7 @@ const Footer = () => {
                     </div>
 
                     {/* Products Column */}
-                    <div className="flex flex-col gap-5 lg:ml-8">
+                    <div className="flex flex-col gap-5 lg:ml-0 xl:ml-8">
                         <Typography variant={TypographyVariant.H6} className="font-bold text-foreground-dark-shade3 dark:text-foreground-light-shade3 text-base">
                             Products
                         </Typography>
@@ -195,7 +195,7 @@ const Footer = () => {
                 </Grid>
 
                 {/* Bottom Footer */}
-                <div className="flex flex-col md:flex-row justify-between items-center pt-8 gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left pt-8 gap-4">
                     <Typography variant={TypographyVariant.P} className="text-muted-light-shade1 dark:text-muted-dark-shade1 font-medium text-xs">
                         © Copyright by CodeZeniths. All rights reserved.
                     </Typography>

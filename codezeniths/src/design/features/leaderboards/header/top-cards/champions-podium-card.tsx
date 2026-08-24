@@ -44,7 +44,15 @@ export const ChampionsPodiumCard: React.FC<ChampionsPodiumCardProps> = ({
     return (
         <Card
             variant={CardVariant.FLAT}
-            effectConfig={{ borderEffect: CardBorderEffect.GRADIENT_HOVER }}
+            effectConfig={{
+                borderEffect: CardBorderEffect.GRADIENT_HOVER,
+                borderEffectProps: {
+                    [CardBorderEffect.GRADIENT_HOVER]: {
+                        gradientColor: '#a855f7',
+                        gradientSize: 200,
+                    },
+                },
+            }}
             className={cn(
                 'group rounded-xl bg-foreground-light dark:bg-foreground-dark border border-secondary/20 p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden shadow-sm font-sans gap-5 transition-all duration-300 hover:shadow-xl select-none w-full h-full min-h-110 cursor-pointer',
                 className

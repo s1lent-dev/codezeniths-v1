@@ -26,7 +26,6 @@ import { useTagsGrid } from './useTags';
 import { TagsGrid } from './TagsGrid';
 import { TagsQuickTabs } from './tags-quick-tabs';
 import { Level } from '@prisma/client';
-import { BrandSection } from '@codezeniths/design/features/landing';
 
 export const TagsGridSection: React.FC = () => {
     const {
@@ -52,7 +51,7 @@ export const TagsGridSection: React.FC = () => {
     } = useTagsGrid();
 
     return (
-        <div className="w-full space-y-6">
+        <div className="w-full max-w-full min-w-0 space-y-6">
             {/* Mediator Component: Popular Topic Categories Quick Tabs */}
             <TagsQuickTabs
                 selectedModuleSlug={selectedModuleSlug}

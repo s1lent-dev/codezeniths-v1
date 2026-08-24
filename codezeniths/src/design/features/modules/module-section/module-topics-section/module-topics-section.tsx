@@ -39,28 +39,28 @@ const ModuleTopicsSliderHeader: React.FC = () => {
     const { scrollPrev, scrollNext, canScrollPrev, canScrollNext } = useCarouselContext();
 
     return (
-        <div className="flex items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-                <div className="size-8 rounded-md bg-primary/10 text-primary flex items-center justify-center">
-                    <Layers className="size-4.5" />
+        <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="size-7 sm:size-8 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <Layers className="size-4 sm:size-4.5" />
                 </div>
                 <Typography
                     variant={TypographyVariant.H2}
                     weight={TypographyWeight.BOLD}
-                    className="text-lg sm:text-xl text-body-light dark:text-body-dark"
+                    className="text-base sm:text-lg md:text-xl text-body-light dark:text-body-dark"
                 >
                     Module Topics
                 </Typography>
             </div>
 
-            {/* Navigation Arrows Only */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            {/* Navigation Arrows (Desktop / Tablet view) */}
+            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
                 <Button
                     variant={ButtonVariant.OUTLINE}
                     size={ButtonSize.ICON_XS}
                     disabled={!canScrollPrev}
                     onClick={scrollPrev}
-                    className="size-8 rounded-full border-primary/20 hover:border-primary text-heading-light dark:text-heading-dark transition-all disabled:opacity-40"
+                    className="size-8 rounded-full border-primary/20 hover:border-primary text-heading-light dark:text-heading-dark transition-all disabled:opacity-40 cursor-pointer"
                     aria-label="Previous topics"
                 >
                     <ChevronLeft className="size-4" />
@@ -70,12 +70,41 @@ const ModuleTopicsSliderHeader: React.FC = () => {
                     size={ButtonSize.ICON_XS}
                     disabled={!canScrollNext}
                     onClick={scrollNext}
-                    className="size-8 rounded-full border-primary/20 hover:border-primary text-heading-light dark:text-heading-dark transition-all disabled:opacity-40"
+                    className="size-8 rounded-full border-primary/20 hover:border-primary text-heading-light dark:text-heading-dark transition-all disabled:opacity-40 cursor-pointer"
                     aria-label="Next topics"
                 >
                     <ChevronRight className="size-4" />
                 </Button>
             </div>
+        </div>
+    );
+};
+
+const ModuleTopicsSliderBottomNav: React.FC = () => {
+    const { scrollPrev, scrollNext, canScrollPrev, canScrollNext } = useCarouselContext();
+
+    return (
+        <div className="flex sm:hidden items-center justify-start gap-1.5 pt-1">
+            <Button
+                variant={ButtonVariant.OUTLINE}
+                size={ButtonSize.ICON_XS}
+                disabled={!canScrollPrev}
+                onClick={scrollPrev}
+                className="size-8 rounded-full border-primary/20 hover:border-primary text-heading-light dark:text-heading-dark transition-all disabled:opacity-40 cursor-pointer"
+                aria-label="Previous topics"
+            >
+                <ChevronLeft className="size-4" />
+            </Button>
+            <Button
+                variant={ButtonVariant.OUTLINE}
+                size={ButtonSize.ICON_XS}
+                disabled={!canScrollNext}
+                onClick={scrollNext}
+                className="size-8 rounded-full border-primary/20 hover:border-primary text-heading-light dark:text-heading-dark transition-all disabled:opacity-40 cursor-pointer"
+                aria-label="Next topics"
+            >
+                <ChevronRight className="size-4" />
+            </Button>
         </div>
     );
 };
@@ -91,7 +120,7 @@ export const ModuleTopicsSection: React.FC<ModuleTopicsSectionProps> = ({
 
     if (isLoading) {
         return (
-            <div className="w-full space-y-4 pt-2">
+            <div className="w-full space-y-3 sm:space-y-4 pt-2">
                 <Carousel
                     options={{
                         align: 'start',
@@ -100,20 +129,20 @@ export const ModuleTopicsSection: React.FC<ModuleTopicsSectionProps> = ({
                     plugins={[autoplayPlugin.current]}
                     className="w-full relative"
                 >
-
                     <ModuleTopicsSliderHeader />
                     <div className="w-full relative">
                         <CarouselContent className="-ml-4 py-2">
                             {[1, 2, 3].map((idx) => (
                                 <CarouselItem
                                     key={idx}
-                                    className="pl-4 basis-full sm:basis-1/2 md:basis-1/3"
+                                    className="pl-4 basis-full sm:basis-1/2 md:basis-full min-[840px]:basis-1/2 min-[1240px]:basis-1/3"
                                 >
                                     <CategoryCardSkeleton index={idx - 1} />
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
                     </div>
+                    <ModuleTopicsSliderBottomNav />
                 </Carousel>
             </div>
         );
@@ -124,7 +153,7 @@ export const ModuleTopicsSection: React.FC<ModuleTopicsSectionProps> = ({
     }
 
     return (
-        <div className="w-full space-y-4 pt-2">
+        <div className="w-full space-y-3 sm:space-y-4 pt-2">
             <Carousel
                 options={{
                     align: 'start',
@@ -133,14 +162,13 @@ export const ModuleTopicsSection: React.FC<ModuleTopicsSectionProps> = ({
                 plugins={[autoplayPlugin.current]}
                 className="w-full relative"
             >
-
                 <ModuleTopicsSliderHeader />
                 <div className="w-full relative">
                     <CarouselContent className="-ml-4 py-2">
                         {topics.map((topic, idx) => (
                             <CarouselItem
                                 key={topic.id || topic.slug || idx}
-                                className="pl-4 basis-full sm:basis-1/2 md:basis-1/3"
+                                className="pl-4 basis-full sm:basis-1/2 md:basis-full min-[840px]:basis-1/2 min-[1240px]:basis-1/3"
                             >
                                 <CategoryCard
                                     data={{
@@ -161,6 +189,7 @@ export const ModuleTopicsSection: React.FC<ModuleTopicsSectionProps> = ({
                         ))}
                     </CarouselContent>
                 </div>
+                <ModuleTopicsSliderBottomNav />
             </Carousel>
         </div>
     );

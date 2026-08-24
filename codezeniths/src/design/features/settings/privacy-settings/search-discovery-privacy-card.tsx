@@ -96,11 +96,11 @@ export const SearchDiscoveryPrivacyCard: React.FC<SearchDiscoveryPrivacyCardProp
     onToggle,
 }) => {
     return (
-        <Card className="w-full p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-7">
+        <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
             {/* Section Header */}
             <div className="flex items-center gap-3">
-                <div className="p-3 rounded-sm bg-primary/10 text-primary shrink-0">
-                    <Compass className="size-6" />
+                <div className="p-2.5 sm:p-3 rounded-sm bg-primary/10 text-primary shrink-0">
+                    <Compass className="size-5 sm:size-6" />
                 </div>
                 <div>
                     <Typography
@@ -122,7 +122,7 @@ export const SearchDiscoveryPrivacyCard: React.FC<SearchDiscoveryPrivacyCardProp
             </div>
 
             {/* Discovery Toggles Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 pt-4 sm:pt-6">
                 {/* 1. Search Engine Indexing */}
                 <DiscoveryToggleItem
                     title="Search Engine Indexing (SEO)"

@@ -240,7 +240,7 @@ export const ProfilePopover = () => {
                         className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 rounded-sm transition-colors cursor-pointer"
                     >
                         <LogOut className="w-4 h-4" />
-                        <Typography variant={TypographyVariant.P} className="text-xs font-medium text-destructive">Logout</Typography>
+                        <Typography variant={TypographyVariant.P} className="text-xs font-medium text-destructive-shade1 dark:text-destructive-shade1 hover:text-destructive dark:hover:text-destructive">Logout</Typography>
                     </button>
                 </div>
             </PopoverContent>

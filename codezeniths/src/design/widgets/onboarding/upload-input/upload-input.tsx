@@ -215,11 +215,11 @@ export const UploadInput: React.FC<UploadInputProps> = ({
                 >
                     <Avatar className={cn("w-full h-full", shapeClass)}>
                         {previewUrl && <AvatarImage src={previewUrl} alt={title} className="object-cover" />}
-                        <AvatarFallback className="bg-primary/50 text-primary font-bold flex items-center justify-center">
+                        <AvatarFallback className="bg-primary/10 border border-primary/20 text-primary font-bold flex items-center justify-center">
                             {fallbackInitials ? (
                                 fallbackInitials.toUpperCase()
                             ) : (
-                                <FallbackIcon className="w-1/2 h-1/2 text-background-dark-shade3 dark:text-background-light-shade3" />
+                                <FallbackIcon className="w-1/2 h-1/2 text-primary dark:text-primary" />
                             )}
                         </AvatarFallback>
                     </Avatar>

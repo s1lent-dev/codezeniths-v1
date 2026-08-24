@@ -52,7 +52,7 @@ export const ModulesSummaryGrid: React.FC<ModulesSummaryGridProps> = ({
     const lastProblem = recentModuleData?.lastProblem;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full font-sans">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full font-sans">
             {/* Card 1: Active Streak Card */}
             <StreakCard
                 streakData={streakData}
@@ -84,8 +84,15 @@ export const ModulesSummaryGrid: React.FC<ModulesSummaryGridProps> = ({
                 return (
                     <Card
                         variant={CardVariant.FLAT}
-                        effectConfig={{ borderEffect: CardBorderEffect.GRADIENT_HOVER }}
-                        className="rounded-md bg-foreground-light dark:bg-foreground-dark p-6 flex flex-col justify-between border relative overflow-hidden shadow-xs cursor-pointer"
+                        effectConfig={{
+                            borderEffect: CardBorderEffect.GRADIENT_HOVER,
+                            borderEffectProps: {
+                                [CardBorderEffect.GRADIENT_HOVER]: {
+                                    gradientColor: '#10b981',
+                                },
+                            },
+                        }}
+                        className="rounded-md bg-foreground-light dark:bg-foreground-dark p-6 flex flex-col justify-between border relative overflow-hidden shadow-xs cursor-pointer font-sans"
                     >
                         <div
                             className="absolute -right-12 -top-12 w-48 h-48 rounded-full pointer-events-none blur-3xl opacity-[0.12] bg-emerald-400"
@@ -93,22 +100,22 @@ export const ModulesSummaryGrid: React.FC<ModulesSummaryGridProps> = ({
                         {/* Header */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <div className="size-8 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                                    <BookOpen className="size-4" />
+                                <div className="size-9 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                                    <BookOpen className="size-5" />
                                 </div>
                                 <span className="text-xs font-bold tracking-wider text-emerald-600 dark:text-emerald-400">
                                     {recentModule ? 'Resume Learning' : 'Featured Module'}
                                 </span>
                             </div>
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                                 <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 <span>{recentModule ? 'In Progress' : 'Recommended'}</span>
                             </div>
                         </div>
 
-                        {/* Center Content */}
-                        <div className="mt-6 py-4 space-y-4">
-                            <div className="space-y-1.5">
+                        {/* Center Content: Cleanly Centered */}
+                        <div className="my-auto py-3 flex flex-col justify-center gap-8 w-full">
+                            <div className="space-y-1">
                                 <Typography
                                     variant={TypographyVariant.H3}
                                     weight={TypographyWeight.BOLD}
@@ -141,7 +148,7 @@ export const ModulesSummaryGrid: React.FC<ModulesSummaryGridProps> = ({
                         </div>
 
                         {/* Footer */}
-                        <div className="pt-4 border-t border-primary/5 flex items-center justify-between text-xs text-muted-light dark:text-muted-dark font-medium">
+                        <div className="pt-2 border-t border-primary/5 flex items-center justify-between text-xs text-muted-light dark:text-muted-dark font-medium">
                             <span className="flex items-center gap-1.5">
                                 <BookOpen className="size-3.5 text-emerald-500" />
                                 Module Progress

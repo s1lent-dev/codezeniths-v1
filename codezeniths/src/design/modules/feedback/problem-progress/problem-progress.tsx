@@ -122,7 +122,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
             onMouseLeave={() => interactive && setIsHovered(false)}
         >
             {/* SVG Semi-Circle Gauge Container */}
-            <div className="relative size-44 flex items-center justify-center">
+            <div className="relative size-36 xs:size-40 sm:size-44 flex items-center justify-center">
                 <svg
                     className="size-full overflow-visible"
                     viewBox="0 0 100 100"

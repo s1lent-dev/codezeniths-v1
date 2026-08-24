@@ -51,24 +51,24 @@ export const VerifyEmailForm = () => {
     const isVerified = Boolean(user?.emailVerified || emailCheck?.isVerified);
 
     const inputClassName =
-        'border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-lg';
+        'border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 xs:h-12 sm:h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm xs:text-base sm:text-lg';
 
     return (
         <Card
             variant={CardVariant.FLAT}
-            className="w-[95%] md:w-[80%] sm:w-[75%] max-w-2xl p-8 md:p-12 border border-secondary rounded-2xl bg-foreground-light dark:bg-foreground-dark mx-auto lg:mt-12 md:mt-8 sm:mt-4 shadow-none"
+            className="w-full max-w-2xl p-4.5 xs:p-6 sm:p-10 md:p-14 border border-secondary rounded-xs bg-foreground-light dark:bg-foreground-dark mx-auto shadow-none"
         >
-            <CardHeader className="flex flex-col items-center justify-center mb-8 p-0 border-none shrink-0 w-full">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                    <Mail className="w-8 h-8 text-primary" />
+            <CardHeader className="flex flex-col items-center justify-center mb-6 sm:mb-8 p-0 border-none shrink-0 w-full">
+                <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <Mail className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 text-primary" />
                 </div>
                 <Typography
                     variant={TypographyVariant.H3}
-                    className="font-bold text-2xl sm:text-3xl lg:text-4xl text-body-light dark:text-body-dark mb-2 text-center"
+                    className="font-bold text-xl xs:text-2xl sm:text-3xl lg:text-4xl text-body-light dark:text-body-dark mb-2 text-center"
                 >
                     Verify Your Email
                 </Typography>
-                <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark max-w-xl text-sm sm:text-base leading-relaxed">
+                <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark max-w-xl text-xs xs:text-sm sm:text-base leading-relaxed">
                     {isVerified
                         ? 'You have already verified your email address.'
                         : linkSent
@@ -81,21 +81,21 @@ export const VerifyEmailForm = () => {
                 </Typography>
             </CardHeader>
 
-            <CardContent className="p-0 w-full flex flex-col items-center gap-8">
+            <CardContent className="p-0 w-full flex flex-col items-center gap-6 sm:gap-8">
                 {isAuthLoading ? (
-                    <div className="py-8 text-muted-light dark:text-muted-dark">Loading session...</div>
+                    <div className="py-8 text-muted-light dark:text-muted-dark text-sm">Loading session...</div>
                 ) : isVerified ? (
                     /* ── Success State ─────────────────────────────────────── */
-                    <div className="w-full flex flex-col items-center gap-6 py-4">
-                        <CheckCircle2 size={64} className="text-success mb-2 animate-in zoom-in duration-500" />
-                        <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark font-medium text-lg">
+                    <div className="w-full flex flex-col items-center gap-4 sm:gap-6 py-4">
+                        <CheckCircle2 size={48} className="text-success mb-1 animate-in zoom-in duration-500 sm:size-16" />
+                        <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark font-medium text-base sm:text-lg">
                             Your email is successfully verified!
                         </Typography>
                         <Button
                             onClick={handleNavigatePostVerification}
                             variant={ButtonVariant.SECONDARY}
                             effect={ButtonEffect.SHIMMER}
-                            className="w-full sm:w-auto min-w-50 h-12 text-foreground-dark dark:text-foreground-light-shade3 shadow-md mt-2"
+                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md mt-2 mx-auto"
                         >
                             {user?.emailVerified
                                 ? (!user.isOnboardingComplete ? 'Complete Profile' : 'Go to Problemset')
@@ -105,10 +105,10 @@ export const VerifyEmailForm = () => {
                     </div>
                 ) : (
                     /* ── Active Verification State ─────────────────────────── */
-                    <div className="w-full flex flex-col items-center gap-6">
+                    <div className="w-full flex flex-col items-center gap-5 sm:gap-6">
                         {/* Non-Session Email Input */}
                         {!user?.email && (
-                            <Container direction="col" size="none" padded={false} centered={false} className="w-full sm:w-[85%] md:w-[75%] space-y-2 mb-2">
+                            <Container direction="col" size="none" padded={false} centered={false} className="w-full sm:w-[90%] md:w-[80%] space-y-2 mb-2">
                                 <div className="relative w-full">
                                     <Input
                                         type="email"
@@ -139,7 +139,7 @@ export const VerifyEmailForm = () => {
                                     type="button"
                                     onClick={() => setChannel('otp')}
                                     className={cn(
-                                        'px-4 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer',
+                                        'px-3 sm:px-4 py-1.5 rounded-md text-[11px] xs:text-xs font-semibold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer',
                                         channel === 'otp'
                                             ? 'bg-primary text-white shadow-xs'
                                             : 'text-muted-light dark:text-muted-dark hover:text-heading-light dark:hover:text-heading-dark'
@@ -153,7 +153,7 @@ export const VerifyEmailForm = () => {
                                     type="button"
                                     onClick={() => setChannel('link')}
                                     className={cn(
-                                        'px-4 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer',
+                                        'px-3 sm:px-4 py-1.5 rounded-md text-[11px] xs:text-xs font-semibold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer',
                                         channel === 'link'
                                             ? 'bg-primary text-white shadow-xs'
                                             : 'text-muted-light dark:text-muted-dark hover:text-heading-light dark:hover:text-heading-dark'
@@ -167,33 +167,33 @@ export const VerifyEmailForm = () => {
 
                         {/* ── Channel 1: Verification Code (OTP) ────────────── */}
                         {channel === 'otp' && (
-                            <div className="w-full flex flex-col items-center gap-6 mt-2">
+                            <div className="w-full flex flex-col items-center gap-5 sm:gap-6 mt-1 sm:mt-2">
                                 {otpSent ? (
                                     <form
                                         onSubmit={(e) => {
-                                            e.preventDefault();
+                                             e.preventDefault();
                                             handleVerifyOtp();
                                         }}
-                                        className="w-full flex flex-col items-center gap-6"
+                                        className="w-full flex flex-col items-center gap-5 sm:gap-6"
                                     >
-                                        <Container direction="col" align="center" size="none" padded={false} centered={false} className="w-full gap-2">
+                                        <Container direction="col" align="center" size="none" padded={false} centered={false} className="w-full gap-2 overflow-x-auto py-1">
                                             <InputOTP
                                                 maxLength={6}
                                                 value={watchedOtp || ''}
                                                 onChange={setOtpValue}
-                                                containerClassName="gap-2 sm:gap-4 flex justify-center w-full"
+                                                containerClassName="gap-1 xs:gap-1.5 sm:gap-3 flex justify-center w-full"
                                             >
-                                                <InputOTPGroup className="gap-2 sm:gap-4 flex justify-center w-full">
-                                                    <InputOTPSlot index={0} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                                    <InputOTPSlot index={1} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                                    <InputOTPSlot index={2} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                                    <InputOTPSlot index={3} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                                    <InputOTPSlot index={4} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                                    <InputOTPSlot index={5} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                                <InputOTPGroup className="gap-1 xs:gap-1.5 sm:gap-3 flex justify-center w-full">
+                                                    <InputOTPSlot index={0} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                                    <InputOTPSlot index={1} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                                    <InputOTPSlot index={2} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                                    <InputOTPSlot index={3} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                                    <InputOTPSlot index={4} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                                    <InputOTPSlot index={5} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
                                                 </InputOTPGroup>
                                             </InputOTP>
                                             {errors.otp && (
-                                                <Typography variant={TypographyVariant.CAPTION} className="text-red-500 dark:text-red-400 mt-2">
+                                                <Typography variant={TypographyVariant.CAPTION} className="text-red-500 dark:text-red-400 mt-2 text-center">
                                                     {errors.otp.message}
                                                 </Typography>
                                             )}
@@ -205,13 +205,13 @@ export const VerifyEmailForm = () => {
                                             effect={ButtonEffect.SHIMMER}
                                             isLoading={isVerifying}
                                             disabled={!watchedOtp || watchedOtp.length !== 6 || isVerifying}
-                                            className="w-full sm:w-auto min-w-50 h-12 text-foreground-dark dark:text-foreground-light-shade3 shadow-md"
+                                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md mx-auto"
                                         >
                                             Verify Code
                                             {!isVerifying && <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />}
                                         </Button>
 
-                                        <Typography variant={TypographyVariant.P} className="text-sm text-center text-muted-light dark:text-muted-dark mt-2">
+                                        <Typography variant={TypographyVariant.P} className="text-xs xs:text-sm text-center text-muted-light dark:text-muted-dark mt-1">
                                             Didn't receive the code?{' '}
                                             <button
                                                 type="button"
@@ -225,7 +225,7 @@ export const VerifyEmailForm = () => {
                                     </form>
                                 ) : (
                                     <div className="w-full flex flex-col items-center gap-4">
-                                        <Typography variant={TypographyVariant.P} className="text-sm text-center text-muted-light dark:text-muted-dark max-w-sm">
+                                        <Typography variant={TypographyVariant.P} className="text-xs xs:text-sm text-center text-muted-light dark:text-muted-dark max-w-sm">
                                             We will send a 6-digit verification code to your email. Enter the code on the screen to verify immediately.
                                         </Typography>
                                         <Button
@@ -237,7 +237,7 @@ export const VerifyEmailForm = () => {
                                             pulseDuration={'1.5s'}
                                             isLoading={isSending}
                                             disabled={!watchedEmail || isSending || !!errors.email}
-                                            className="w-full sm:w-auto min-w-50 mt-6 h-12 text-foreground-dark dark:text-foreground-light-shade3 shadow-md cursor-pointer disabled:cursor-not-allowed"
+                                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 mt-3 sm:mt-6 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md cursor-pointer disabled:cursor-not-allowed mx-auto"
                                         >
                                             Send Verification Code
                                             {!isSending && <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />}
@@ -249,17 +249,17 @@ export const VerifyEmailForm = () => {
 
                         {/* ── Channel 2: Verification Link ──────────────────── */}
                         {channel === 'link' && (
-                            <div className="w-full flex flex-col items-center justify-center gap-6 mt-2">
+                            <div className="w-full flex flex-col items-center justify-center gap-5 sm:gap-6 mt-1 sm:mt-2">
                                 {linkSent ? (
-                                    <div className="w-full max-w-lg flex flex-col items-center justify-center gap-5 p-8 rounded-2xl bg-foreground-light-shade1/50 dark:bg-foreground-dark-shade1/50 border border-secondary/20 text-center animate-in fade-in-50 duration-300">
-                                        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-xs">
-                                            <Mail className="w-7 h-7 text-primary" />
+                                    <div className="w-full max-w-lg flex flex-col items-center justify-center gap-4 sm:gap-5 p-5 sm:p-8 rounded-2xl bg-foreground-light-shade1/50 dark:bg-foreground-dark-shade1/50 border border-secondary/20 text-center animate-in fade-in-50 duration-300">
+                                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-xs">
+                                            <Mail className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
                                         </div>
-                                        <div className="space-y-4.5 flex flex-col items-center justify-center">
-                                            <Typography variant={TypographyVariant.H4} className="font-bold text-xl text-heading-light dark:text-heading-dark">
+                                        <div className="space-y-2 sm:space-y-3 flex flex-col items-center justify-center">
+                                            <Typography variant={TypographyVariant.H4} className="font-bold text-lg sm:text-xl text-heading-light dark:text-heading-dark">
                                                 Verification Link Sent!
                                             </Typography>
-                                            <Typography variant={TypographyVariant.P} className="text-xs lg:text-xs sm:text-base text-muted-light dark:text-muted-dark max-w-sm leading-relaxed text-center">
+                                            <Typography variant={TypographyVariant.P} className="text-xs sm:text-sm text-muted-light dark:text-muted-dark max-w-sm leading-relaxed text-center">
                                                 Please check your inbox at <span className="font-semibold text-body-light dark:text-body-dark">{watchedEmail}</span> and click the link to verify your account.
                                             </Typography>
                                         </div>
@@ -271,7 +271,7 @@ export const VerifyEmailForm = () => {
                                             effect={ButtonEffect.SHIMMER}
                                             isLoading={isSending}
                                             disabled={isSending || cooldown > 0}
-                                            className="h-11 px-5 mt-2 text-foreground-dark dark:text-foreground-light-shade3 shadow-sm text-xs sm:text-sm font-medium"
+                                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 px-4 xs:px-5 mt-2 text-foreground-dark dark:text-foreground-light-shade3 shadow-sm text-xs sm:text-sm font-medium mx-auto"
                                         >
                                             <RotateCcw className="w-4 h-4 mr-2" />
                                             {cooldown > 0 ? `Resend Link (${cooldown}s)` : 'Resend Verification Link'}
@@ -279,7 +279,7 @@ export const VerifyEmailForm = () => {
                                     </div>
                                 ) : (
                                     <div className="w-full flex flex-col items-center gap-4">
-                                        <Typography variant={TypographyVariant.P} className="text-sm text-center text-muted-light dark:text-muted-dark max-w-sm">
+                                        <Typography variant={TypographyVariant.P} className="text-xs xs:text-sm text-center text-muted-light dark:text-muted-dark max-w-sm">
                                             We will email you a secure, single-click verification link. Simply click the link in your email to verify instantly.
                                         </Typography>
                                         <Button
@@ -291,7 +291,7 @@ export const VerifyEmailForm = () => {
                                             pulseDuration={'1.5s'}
                                             isLoading={isSending}
                                             disabled={!watchedEmail || isSending || !!errors.email}
-                                            className="w-full sm:w-auto min-w-50 h-12 mt-6 text-foreground-dark dark:text-foreground-light-shade3 shadow-md cursor-pointer disabled:cursor-not-allowed"
+                                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 mt-3 sm:mt-6 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md cursor-pointer disabled:cursor-not-allowed mx-auto"
                                         >
                                             Send Verification Link
                                             {!isSending && <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />}

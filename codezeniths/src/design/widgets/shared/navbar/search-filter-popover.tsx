@@ -12,10 +12,13 @@ import {
 } from '@codezeniths/components';
 import { useNavigationStore } from '../store/navigation.store';
 
-export const SearchFilterPopover = () => {
+interface SearchFilterPopoverProps {
+    align?: 'start' | 'center' | 'end';
+}
+
+export const SearchFilterPopover = ({ align = 'center' }: SearchFilterPopoverProps) => {
+    const [isOpen, setIsOpen] = React.useState(false);
     const {
-        isSearchFilterOpen,
-        setSearchFilterOpen,
         searchFilters,
         setSearchFilters,
         resetSearchFilters,
@@ -24,7 +27,7 @@ export const SearchFilterPopover = () => {
     const activeFilterCount = searchFilters.type && searchFilters.type !== 'all' ? 1 : 0;
 
     return (
-        <Popover open={isSearchFilterOpen} onOpenChange={setSearchFilterOpen}>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
                 <button
                     type="button"
@@ -40,9 +43,9 @@ export const SearchFilterPopover = () => {
                 </button>
             </PopoverTrigger>
             <PopoverContent
-                align="end"
+                align={align}
                 sideOffset={8}
-                className="w-72 p-4 bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 rounded-xl shadow-xl z-999 space-y-4"
+                className="w-72 max-w-[calc(100vw-3rem)] p-4 bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 rounded-xl shadow-2xl z-999 space-y-4 font-sans"
             >
                 <div className="flex items-center justify-between border-b border-foreground-light-shade3 dark:border-foreground-dark-shade3 m-2 pb-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-heading-light dark:text-heading-dark flex items-center gap-2">
@@ -51,6 +54,7 @@ export const SearchFilterPopover = () => {
                     </span>
                     {activeFilterCount > 0 && (
                         <button
+                            type="button"
                             onClick={resetSearchFilters}
                             className="text-xs text-primary hover:underline font-medium cursor-pointer"
                         >
@@ -65,7 +69,7 @@ export const SearchFilterPopover = () => {
                     <label className="text-xs font-semibold text-muted-light dark:text-muted-dark">
                         Category
                     </label>
-                    <div className="grid grid-cols-2 gap-1.5">
+                    <div className="grid grid-cols-2 gap-1.5 mt-2">
                         {(['all', 'problems', 'topics', 'modules', 'tags', 'products', 'users'] as const).map((cat) => {
                             const isSelected = (searchFilters.type || 'all') === cat;
                             return (
@@ -92,7 +96,7 @@ export const SearchFilterPopover = () => {
                     <Button
                         variant={ButtonVariant.DEFAULT}
                         size={ButtonSize.NONE}
-                        onClick={() => setSearchFilterOpen(false)}
+                        onClick={() => setIsOpen(false)}
                         className="w-full py-1.5 text-xs font-medium bg-primary text-white hover:bg-primary-shade2 rounded-lg"
                     >
                         Apply Filters

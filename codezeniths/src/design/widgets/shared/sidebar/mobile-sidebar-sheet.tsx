@@ -80,7 +80,7 @@ export const MobileSidebarSheet = () => {
             <SheetContent
                 side="left"
                 showCloseButton={true}
-                className="w-80 max-w-[85vw] bg-foreground-light dark:bg-foreground-dark p-0 border-r border-foreground-light-shade3 dark:border-foreground-dark-shade3"
+                className="w-80! max-w-[65vw]! bg-foreground-light dark:bg-foreground-dark p-0 border-r border-foreground-light-shade3 dark:border-foreground-dark-shade3 z-150"
             >
                 {/* Header */}
                 <SheetHeader className="px-6 h-16 border-b border-foreground-light-shade3 dark:border-foreground-dark-shade3 flex-row items-center justify-between">
@@ -181,10 +181,10 @@ export const MobileSidebarSheet = () => {
                                     type="button"
                                     variant={ButtonVariant.GHOST}
                                     onClick={handleSignOut}
-                                    className="w-full flex items-center justify-start gap-4 px-4 py-2.5 rounded-lg cursor-pointer transition-all duration-200 group text-destructive hover:bg-destructive/10 h-auto"
+                                    className="w-full flex items-center justify-start gap-5 px-4 py-2.5 rounded-md cursor-pointer transition-all duration-300 group text-destructive hover:bg-destructive/10 dark:text-destructive dark:hover:bg-destructive/10 h-auto"
                                 >
                                     <LogOut className="w-5 h-5 transition-colors" />
-                                    <Typography variant={TypographyVariant.P} className="text-sm font-medium text-destructive">
+                                    <Typography variant={TypographyVariant.P} className="text-sm font-medium text-destructive-shade1 dark:text-destructive-shade1 hover:text-destructive dark:hover:text-destructive">
                                         Sign Out
                                     </Typography>
                                 </Button>

@@ -54,7 +54,7 @@ export const TopicSection: React.FC = () => {
                 </div>
 
                 {/* Right Column: Problem List Component */}
-                <div className="w-0 flex-1 min-w-0 max-w-full lg:max-w-[calc(100%-354px)] xl:max-w-[calc(100%-384px)] space-y-6">
+                <div className="w-full lg:w-0 lg:flex-1 min-w-0 max-w-full lg:max-w-[calc(100%-354px)] xl:max-w-[calc(100%-384px)] space-y-6">
                     <ProblemsSection pageContext="topic" fixedTopicSlug={topicSlug} />
                 </div>
             </div>

@@ -56,13 +56,13 @@ export const ModuleSlider: React.FC<ModuleSliderProps> = ({
                 plugins={[autoplayPlugin]}
                 className="w-full relative z-10"
             >
-                <CarouselContent className="h-[380px] items-center">
+                <CarouselContent className="h-[300px] xs:h-[310px] sm:h-[330px] md:h-[340px] lg:h-[360px] 2xl:h-[380px] items-center">
                     {modules.map((module, index) => (
                         <CarouselItem
                             key={module.id || module.slug || index}
-                            className="basis-[580px] transform-gpu flex justify-center items-center"
+                            className="basis-[84vw] max-w-[320px] xs:basis-[340px] xs:max-w-none sm:basis-[380px] md:basis-[410px] lg:basis-[480px] xl:basis-[530px] 2xl:basis-[580px] transform-gpu flex justify-center items-center shrink-0"
                         >
-                            <div className="interactive-3d-wrapper will-change-transform transform-gpu flex justify-center items-center w-[580px] h-[340px] rounded-3xl">
+                            <div className="interactive-3d-wrapper will-change-transform transform-gpu flex justify-center items-center w-full h-[270px] xs:h-[280px] sm:h-[295px] md:h-[305px] lg:h-[320px] 2xl:h-[340px] rounded-2xl sm:rounded-3xl">
                                 <ModuleCard module={module} index={index} onSolve={onSolve} />
                             </div>
                         </CarouselItem>

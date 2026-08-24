@@ -89,7 +89,7 @@ export const BrandSection = () => {
             whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="py-12 border-y border-muted-light/10 dark:border-muted-dark/10 bg-background-light-shade1/30 dark:bg-background-dark-shade1/30 overflow-hidden relative"
+            className="py-8 sm:py-12 border-y border-muted-light/10 dark:border-muted-dark/10 bg-background-light-shade1/30 dark:bg-background-dark-shade1/30 overflow-hidden relative"
         >
             <Container size="7xl" className="mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col items-center justify-center gap-8">
@@ -106,8 +106,8 @@ export const BrandSection = () => {
                         >
                             <CarouselContent className="flex items-center ml-0">
                                 {BRANDS.map((brand, idx) => (
-                                    <CarouselItem key={idx} className="pl-4 md:pl-8 basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 flex justify-center items-center">
-                                        <div className="relative h-12 w-32 opacity-60 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer">
+                                    <CarouselItem key={idx} className="pl-3 xs:pl-4 md:pl-8 basis-1/2 xs:basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 flex justify-center items-center">
+                                        <div className="relative h-9 w-24 xs:h-11 xs:w-28 sm:h-12 sm:w-32 opacity-60 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer">
                                             <Image 
                                                 src={brand.src} 
                                                 alt={brand.name} 
@@ -121,8 +121,8 @@ export const BrandSection = () => {
                         </Carousel>
                         
                         {/* Gradient masks for smooth fade on edges */}
-                        <div className="absolute inset-y-0 left-0 w-24 bg-linear-to-r from-background-light dark:from-background-dark to-transparent z-10 pointer-events-none" />
-                        <div className="absolute inset-y-0 right-0 w-24 bg-linear-to-l from-background-light dark:from-background-dark to-transparent z-10 pointer-events-none" />
+                        <div className="absolute inset-y-0 left-0 w-8 xs:w-12 sm:w-16 md:w-24 bg-linear-to-r from-background-light dark:from-background-dark to-transparent z-10 pointer-events-none" />
+                        <div className="absolute inset-y-0 right-0 w-8 xs:w-12 sm:w-16 md:w-24 bg-linear-to-l from-background-light dark:from-background-dark to-transparent z-10 pointer-events-none" />
                     </div>
                 </div>
             </Container>

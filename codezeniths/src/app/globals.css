@@ -224,6 +224,7 @@ body {
   --radius-xxl: 1.5rem;
 
   /* Breakpoints */
+  --breakpoint-xs: 480px;
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
@@ -308,6 +309,59 @@ body {
   line-height: var(--text-label--line-height);
   letter-spacing: var(--text-label--letter-spacing);
   font-weight: var(--text-label--font-weight);
+}
+
+@utility module-slide-basis {
+  flex: 0 0 100%;
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .module-slide-basis {
+    flex: 0 0 50% !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  .module-slide-basis {
+    flex: 0 0 100% !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .module-slide-basis {
+    flex: 0 0 50% !important;
+  }
+}
+
+@utility module-grid-cols {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .module-grid-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .module-skeleton-second {
+    display: block !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  .module-grid-cols {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  .module-skeleton-second {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .module-grid-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .module-skeleton-second {
+    display: block !important;
+  }
 }
 
 /* Button Layer Styles */

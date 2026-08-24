@@ -58,7 +58,7 @@ const TopicAccordionItemComponent: React.FC<TopicAccordionItemProps> = ({
         return (
             <span
                 className={cn(
-                    'px-2 py-0.5 rounded-full text-[9px] font-medium border tracking-wider shrink-0',
+                    'hidden md:inline-flex px-2 py-0.5 rounded-full text-[9px] font-medium border tracking-wider shrink-0',
                     colorClasses
                 )}
             >
@@ -72,7 +72,7 @@ const TopicAccordionItemComponent: React.FC<TopicAccordionItemProps> = ({
     return (
         <div
             className={cn(
-                'w-full p-2 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade3/60 bg-background-light/50 dark:bg-background-dark/50 overflow-hidden transition-all duration-200',
+                'w-full p-1 sm:p-2 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade3/60 bg-background-light/50 dark:bg-background-dark/50 overflow-hidden transition-all duration-200',
                 isOpen ? 'ring-1 ring-primary/30 border-primary/40' : 'hover:border-primary/30',
                 className
             )}
@@ -81,11 +81,11 @@ const TopicAccordionItemComponent: React.FC<TopicAccordionItemProps> = ({
             <button
                 type="button"
                 onClick={onToggle}
-                className="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between gap-4 text-left cursor-pointer transition-colors hover:bg-foreground-light-shade1/40 dark:hover:bg-foreground-dark-shade1/40"
+                className="w-full px-2.5 xs:px-3.5 sm:px-5 py-2.5 sm:py-3.5 flex items-center justify-between gap-2.5 sm:gap-4 text-left cursor-pointer transition-colors hover:bg-foreground-light-shade1/40 dark:hover:bg-foreground-dark-shade1/40"
                 aria-expanded={isOpen}
             >
                 {/* Left Side: Chevron + Title + Level Badge */}
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
                     <div
                         className={cn(
                             'size-5 rounded-md flex items-center justify-center text-muted-light dark:text-muted-dark transition-transform duration-200 shrink-0',
@@ -95,7 +95,7 @@ const TopicAccordionItemComponent: React.FC<TopicAccordionItemProps> = ({
                         <ChevronRight className="size-4" />
                     </div>
 
-                    <h3 className="text-sm sm:text-base font-normal text-foreground-dark-shade3 dark:text-foreground-light-shade3 truncate line-clamp-1">
+                    <h3 className="text-xs xs:text-sm sm:text-base font-medium text-foreground-dark-shade3 dark:text-foreground-light-shade3 truncate">
                         {topic.title}
                     </h3>
 
@@ -103,13 +103,13 @@ const TopicAccordionItemComponent: React.FC<TopicAccordionItemProps> = ({
                 </div>
 
                 {/* Right Side: Progress Fraction + Progress Component + Bookmark Icon */}
-                <div className="flex items-center gap-3.5 sm:gap-4 shrink-0">
-                    <span className="text-xs font-semibold text-muted-light dark:text-muted-dark shrink-0">
+                <div className="flex items-center gap-2 xs:gap-3 sm:gap-4 shrink-0">
+                    <span className="text-[11px] sm:text-xs font-semibold text-muted-light dark:text-muted-dark shrink-0">
                         {topic.problemsSolvedCount} / {topic.problemsCount}
                     </span>
 
-                    {/* Official Progress Component from @codezeniths/components */}
-                    <div className="w-36 sm:w-56 md:w-72 xs:block shrink-0">
+                    {/* Progress Component: hidden below 1024px, compact on 1024px-1279px, full on 1280px+ */}
+                    <div className="hidden lg:block lg:w-28 xl:w-52 2xl:w-64 shrink-0">
                         <Progress
                             value={topic.problemsSolvedPercentage}
                             className="h-2 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
@@ -125,7 +125,7 @@ const TopicAccordionItemComponent: React.FC<TopicAccordionItemProps> = ({
                             onToggleBookmark?.(topic.id, !!topic.isBookmarked);
                         }}
                         className={cn(
-                            'size-7 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-1',
+                            'size-7 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0',
                             topic.isBookmarked
                                 ? 'text-primary bg-primary/10 hover:bg-primary/20'
                                 : 'text-muted-light dark:text-muted-dark hover:text-primary hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1'
@@ -137,11 +137,11 @@ const TopicAccordionItemComponent: React.FC<TopicAccordionItemProps> = ({
                 </div>
             </button>
 
-            {/* Accordion Content Area - Fully Expanded without Scroll Truncation */}
+            {/* Accordion Content Area - Responsively Fluid Problem Rows */}
             {isOpen && (
-                <div className="border-t border-foreground-light-shade3 dark:border-foreground-dark-shade3/60 bg-foreground-light dark:bg-foreground-dark p-3 sm:p-4 pt-1">
+                <div className="border-t border-foreground-light-shade3 dark:border-foreground-dark-shade3/60 bg-foreground-light dark:bg-foreground-dark p-1 sm:p-3 md:p-4 pt-1">
                     {hasProblems ? (
-                        <Table className="w-full border-separate border-spacing-y-1.5 border-spacing-x-0">
+                        <Table className="w-full table-fixed border-separate border-spacing-y-1.5 border-spacing-x-0">
                             <TableBody>
                                 {topic.problems.map((problem, idx) => (
                                     <ProblemRow

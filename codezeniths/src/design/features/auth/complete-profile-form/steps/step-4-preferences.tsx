@@ -83,29 +83,29 @@ const ThemeCard: React.FC<ThemeCardProps> = ({
             }}
             onClick={() => onSelect(value)}
             className={cn(
-                "cursor-pointer transition-all duration-300 relative overflow-hidden group border p-5 rounded-sm bg-transparent",
+                "cursor-pointer transition-all duration-300 relative overflow-hidden group border p-3.5 xs:p-4 sm:p-5 rounded-sm bg-transparent",
                 isSelected
                     ? "border-primary bg-primary/10 dark:bg-primary/15 shadow-sm ring-1 ring-primary/40"
                     : "bg-primary/3 hover:border-primary/60 hover:bg-linear-to-r hover:from-primary/5 hover:to-transparent"
             )}
         >
-            <div className="w-full flex items-center justify-between gap-4">
+            <div className="w-full flex items-center justify-between gap-3 sm:gap-4">
                 {/* Left: Icon Badge */}
                 <div className={cn(
-                    "p-3 rounded-sm transition-colors shrink-0",
+                    "p-2.5 xs:p-3 rounded-sm transition-colors shrink-0",
                     isSelected
                         ? "bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                         : "bg-primary/5 text-body-light dark:text-body-dark group-hover:bg-primary/10 group-hover:text-primary"
                 )}>
-                    <IconComponent className="w-5 h-5" />
+                    <IconComponent className="w-4.5 h-4.5 xs:w-5 xs:h-5" />
                 </div>
 
                 {/* Middle: Title & Description */}
-                <div className="space-y-1 min-w-0 flex-1">
-                    <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
+                <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
+                    <h4 className={cn("text-xs xs:text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
                         {title}
                     </h4>
-                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
+                    <p className="text-[11px] xs:text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {description}
                     </p>
                 </div>
@@ -113,13 +113,13 @@ const ThemeCard: React.FC<ThemeCardProps> = ({
                 {/* Right: Pure Visual Check Indicator */}
                 <div
                     className={cn(
-                        "rounded-xs size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
+                        "rounded-xs size-4.5 xs:size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
                         isSelected
                             ? "bg-primary border-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                             : "border-muted-light/70 dark:border-muted-dark/70 bg-primary/5 group-hover:border-primary/50"
                     )}
                 >
-                    {isSelected && <Check className="w-3.5 h-3.5 stroke-3" />}
+                    {isSelected && <Check className="w-3 h-3 xs:w-3.5 xs:h-3.5 stroke-3" />}
                 </div>
             </div>
         </Card>
@@ -155,29 +155,29 @@ const VisibilityCard: React.FC<VisibilityCardProps> = ({
             }}
             onClick={() => onSelect(value)}
             className={cn(
-                "cursor-pointer transition-all duration-300 relative overflow-hidden group border p-5 rounded-sm bg-transparent",
+                "cursor-pointer transition-all duration-300 relative overflow-hidden group border p-3.5 xs:p-4 sm:p-5 rounded-sm bg-transparent",
                 isSelected
                     ? "border-primary bg-primary/10 dark:bg-primary/15 shadow-sm ring-1 ring-primary/40"
                     : "bg-primary/3 hover:border-primary/60 hover:bg-linear-to-r hover:from-primary/5 hover:to-transparent"
             )}
         >
-            <div className="w-full flex items-center justify-between gap-4">
+            <div className="w-full flex items-center justify-between gap-3 sm:gap-4">
                 {/* Left: Icon Badge */}
                 <div className={cn(
-                    "p-3 rounded-sm transition-colors shrink-0",
+                    "p-2.5 xs:p-3 rounded-sm transition-colors shrink-0",
                     isSelected
                         ? "bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                         : "bg-primary/5 text-body-light dark:text-body-dark group-hover:bg-primary/10 group-hover:text-primary"
                 )}>
-                    <IconComponent className="w-5 h-5" />
+                    <IconComponent className="w-4.5 h-4.5 xs:w-5 xs:h-5" />
                 </div>
 
                 {/* Middle: Title & Description */}
-                <div className="space-y-1 min-w-0 flex-1">
-                    <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
+                <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
+                    <h4 className={cn("text-xs xs:text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
                         {label}
                     </h4>
-                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
+                    <p className="text-[11px] xs:text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {description}
                     </p>
                 </div>
@@ -185,13 +185,13 @@ const VisibilityCard: React.FC<VisibilityCardProps> = ({
                 {/* Right: Pure Visual Check Indicator */}
                 <div
                     className={cn(
-                        "rounded-xs size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
+                        "rounded-xs size-4.5 xs:size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
                         isSelected
                             ? "bg-primary border-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                             : "border-muted-light/70 dark:border-muted-dark/70 bg-primary/5 group-hover:border-primary/50"
                     )}
                 >
-                    {isSelected && <Check className="w-3.5 h-3.5 stroke-3" />}
+                    {isSelected && <Check className="w-3 h-3 xs:w-3.5 xs:h-3.5 stroke-3" />}
                 </div>
             </div>
         </Card>
@@ -227,27 +227,27 @@ const NotificationToggleCard: React.FC<NotificationToggleCardProps> = ({
             }}
             onClick={() => onCheckedChange(!checked)}
             className={cn(
-                "cursor-pointer transition-all duration-300 relative overflow-hidden group border p-4.5 rounded-sm bg-transparent",
+                "cursor-pointer transition-all duration-300 relative overflow-hidden group border p-3.5 xs:p-4 sm:p-4.5 rounded-sm bg-transparent",
                 checked
                     ? "border-primary/60 bg-primary/10 dark:bg-primary/15 shadow-sm ring-1 ring-primary/30"
                     : "bg-primary/3 hover:border-primary/50 hover:bg-linear-to-r hover:from-primary/5 hover:to-transparent"
             )}
         >
-            <div className="w-full flex items-center justify-between gap-4">
+            <div className="w-full flex items-center justify-between gap-3 sm:gap-4">
                 {/* Left: Icon Badge */}
                 <div className={cn(
-                    "p-3 rounded-sm transition-colors shrink-0",
+                    "p-2.5 xs:p-3 rounded-sm transition-colors shrink-0",
                     checked
                         ? "bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                         : "bg-primary/5 text-body-light dark:text-body-dark group-hover:bg-primary/10 group-hover:text-primary"
                 )}>
-                    <IconComponent className="w-5 h-5" />
+                    <IconComponent className="w-4.5 h-4.5 xs:w-5 xs:h-5" />
                 </div>
 
                 {/* Middle: Title & Description */}
                 <div className="space-y-0.5 min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                        <h4 className={cn("text-sm font-bold truncate", checked ? "text-primary" : "text-foreground")}>
+                        <h4 className={cn("text-xs xs:text-sm font-bold truncate", checked ? "text-primary" : "text-foreground")}>
                             {title}
                         </h4>
                         {badgeText && (
@@ -256,13 +256,13 @@ const NotificationToggleCard: React.FC<NotificationToggleCardProps> = ({
                             </span>
                         )}
                     </div>
-                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
+                    <p className="text-[11px] xs:text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {description}
                     </p>
                 </div>
 
                 {/* Right: Switch Control */}
-                <div className="shrink-0 pl-2 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="shrink-0 pl-1 sm:pl-2 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                     <Switch
                         checked={checked}
                         onCheckedChange={onCheckedChange}
@@ -402,31 +402,31 @@ export const Step4Preferences: React.FC<Step4Props> = ({ form }) => {
     }, [setValue]);
 
     return (
-        <Container direction="col" size="none" gap="0" padded={false} centered={false} className="w-full space-y-8 flex flex-col gap-8 p-6">
+        <Container direction="col" size="none" gap="0" padded={false} centered={false} className="w-full space-y-6 sm:space-y-8 flex flex-col gap-6 sm:gap-8 p-1 xs:p-2 sm:p-6">
             {/* Header Description */}
-            <div className="text-center space-y-2 w-full flex flex-col items-center mx-auto pt-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-2">
+            <div className="text-center space-y-2 w-full flex flex-col items-center mx-auto pt-1 sm:pt-4">
+                <div className="inline-flex items-center gap-1.5 xs:gap-2 px-2.5 xs:px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] xs:text-xs font-semibold mb-1 xs:mb-2">
                     <Sliders className="w-3.5 h-3.5" />
                     <span>Account & Workspace Settings</span>
                 </div>
-                <Typography as="h3" variant={TypographyVariant.H3} weight={TypographyWeight.BOLD} className="text-2xl sm:text-3xl tracking-tight text-body-light dark:text-body-dark">
+                <Typography as="h3" variant={TypographyVariant.H3} weight={TypographyWeight.BOLD} className="text-xl xs:text-2xl sm:text-3xl tracking-tight text-body-light dark:text-body-dark">
                     Personalize Your Experience
                 </Typography>
-                <Typography as="p" variant={TypographyVariant.P} color={TypographyColor.MUTED} className="block w-full max-w-lg text-center text-sm text-muted-light dark:text-muted-dark mx-auto leading-relaxed">
+                <Typography as="p" variant={TypographyVariant.P} color={TypographyColor.MUTED} className="block w-full max-w-lg text-center text-xs xs:text-sm text-muted-light dark:text-muted-dark mx-auto leading-relaxed">
                     Configure your theme, privacy controls, and notification preferences. You can update these anytime in your settings.
                 </Typography>
             </div>
 
             {/* 1] Section: Theme Preference */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center gap-2 pb-1 border-b border-secondary/40">
                     <Sparkles className="w-4 h-4 text-primary" />
-                    <Typography as="h4" variant={TypographyVariant.H4} weight={TypographyWeight.BOLD} className="text-sm tracking-tight">
+                    <Typography as="h4" variant={TypographyVariant.H4} weight={TypographyWeight.BOLD} className="text-xs xs:text-sm tracking-tight">
                         Interface Theme
                     </Typography>
                 </div>
 
-                <Grid cols={1} className="sm:grid-cols-2 gap-4">
+                <Grid cols={1} className="sm:grid-cols-2 gap-3 sm:gap-4">
                     <ThemeCard
                         value="dark"
                         title="Dark Mode"
@@ -447,15 +447,15 @@ export const Step4Preferences: React.FC<Step4Props> = ({ form }) => {
             </div>
 
             {/* 2] Section: Profile Visibility & Privacy */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center gap-2 pb-1 border-b border-secondary/40">
                     <Shield className="w-4 h-4 text-primary" />
-                    <Typography as="h4" variant={TypographyVariant.H4} weight={TypographyWeight.BOLD} className="text-sm tracking-tight">
+                    <Typography as="h4" variant={TypographyVariant.H4} weight={TypographyWeight.BOLD} className="text-xs xs:text-sm tracking-tight">
                         Profile Privacy & Visibility
                     </Typography>
                 </div>
 
-                <Grid cols={1} className="sm:grid-cols-2 gap-4">
+                <Grid cols={1} className="sm:grid-cols-2 gap-3 sm:gap-4">
                     {PROFILE_VISIBILITY_OPTIONS.map((option) => {
                         const IconComponent = option.value === 'public' ? Globe : Lock;
                         const isSelected = profileVisibility === option.value;
@@ -475,15 +475,15 @@ export const Step4Preferences: React.FC<Step4Props> = ({ form }) => {
             </div>
 
             {/* 3] Section: Notifications & Alerts */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center gap-2 pb-1 border-b border-secondary/40">
                     <Bell className="w-4 h-4 text-primary" />
-                    <Typography as="h4" variant={TypographyVariant.H4} weight={TypographyWeight.BOLD} className="text-sm tracking-tight">
+                    <Typography as="h4" variant={TypographyVariant.H4} weight={TypographyWeight.BOLD} className="text-xs xs:text-sm tracking-tight">
                         Notification & Alert Channels
                     </Typography>
                 </div>
 
-                <Grid cols={1} className="gap-3.5">
+                <Grid cols={1} className="gap-3 sm:gap-3.5">
                     <NotificationToggleCard
                         title="Browser Push Notifications"
                         description="Real-time alerts for AlgoWars contests, solution reviews & achievements"
@@ -512,9 +512,9 @@ export const Step4Preferences: React.FC<Step4Props> = ({ form }) => {
             </div>
 
             {/* Bottom Complete Note */}
-            <div className="pt-2 flex items-center justify-center text-xs text-body-light dark:text-body-dark font-medium gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-primary" />
-                <span>Preferences set! Click &quot;Complete Profile&quot; below to finish onboarding.</span>
+            <div className="pt-2 flex items-center justify-center text-[11px] xs:text-xs text-body-light dark:text-body-dark font-medium gap-1.5 text-center">
+                <CheckCircle2 className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-primary shrink-0" />
+                <span>Preferences set! Click &quot;Complete Setup&quot; below to finish onboarding.</span>
             </div>
 
             {/* In-House AlertDialog Modal for Web Push Notification Permission */}

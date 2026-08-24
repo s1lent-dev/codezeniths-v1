@@ -74,7 +74,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ data, className }) =
                             <Typography
                                 variant={TypographyVariant.H3}
                                 weight={TypographyWeight.BOLD}
-                                className="text-base sm:text-lg text-body-light-shade3 dark:text-body-dark group-hover:text-heading-light dark:group-hover:text-heading-dark transition-colors leading-tight truncate"
+                                className="text-h4! sm:text-h6! xs:text-h6! text-body-light-shade3 dark:text-body-dark group-hover:text-heading-light dark:group-hover:text-heading-dark transition-colors leading-tight truncate"
                             >
                                 {data.title}
                             </Typography>

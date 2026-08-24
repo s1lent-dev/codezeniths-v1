@@ -92,7 +92,7 @@ export function AdaptiveDropdownMenuContent({
         return (
             <div
                 className={cn(
-                    'flex flex-col gap-2 mt-1 mb-2 ml-6 mr-2 px-4 py-2 bg-foreground-light-shade1/50 dark:bg-foreground-dark-shade1/50 rounded-md border-l-2 border-l-primary/30 max-h-48 overflow-y-auto',
+                    'flex flex-col gap-2 mt-1 mb-2 w-full px-4 py-2 bg-foreground-light-shade1/50 dark:bg-foreground-dark-shade1/50 rounded-md max-h-48 overflow-y-auto',
                     className
                 )}
                 {...(props as any)}

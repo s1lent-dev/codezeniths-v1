@@ -50,7 +50,7 @@ const Navbar = () => {
     return (
         <NavbarAnimator>
             <Nav className="fixed p-2 top-0 left-0 right-0 z-50 border-b border-b-foreground-light-shade3 dark:border-b-foreground-dark-shade3 bg-background/80 backdrop-blur-sm">
-                <Container size="7xl" direction="row" align="center" padded={false} className="h-16 px-6 lg:px-8 mx-auto xl:justify-between lg:justify-around md:justify-between sm:justify-between">
+                <Container size="7xl" direction="row" align="center" padded={false} className="h-16 px-6 lg:px-8 mx-auto justify-between xl:justify-between lg:justify-around md:justify-between sm:justify-between">
                     {/* Left: Logo */}
                     <Logo />
 

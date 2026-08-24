@@ -488,10 +488,10 @@ CREATE TABLE "user_search_histories" (
 );
 
 -- CreateIndex
-CREATE INDEX "user_global_stats_score_idx" ON "user_global_stats"("score" DESC);
+CREATE INDEX "user_global_stats_score_updatedAt_idx" ON "user_global_stats"("score" DESC, "updatedAt" ASC);
 
 -- CreateIndex
-CREATE INDEX "user_module_stats_moduleId_score_idx" ON "user_module_stats"("moduleId", "score" DESC);
+CREATE INDEX "user_module_stats_moduleId_score_updatedAt_idx" ON "user_module_stats"("moduleId", "score" DESC, "updatedAt" ASC);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_module_stats_userId_moduleId_key" ON "user_module_stats"("userId", "moduleId");
@@ -543,6 +543,9 @@ CREATE INDEX "problem_progress_userId_status_idx" ON "problem_progress"("userId"
 
 -- CreateIndex
 CREATE INDEX "problem_progress_userId_revisit_idx" ON "problem_progress"("userId", "revisit");
+
+-- CreateIndex
+CREATE INDEX "problem_progress_userId_status_solvedAt_idx" ON "problem_progress"("userId", "status", "solvedAt" DESC);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "problem_progress_userId_problemId_key" ON "problem_progress"("userId", "problemId");

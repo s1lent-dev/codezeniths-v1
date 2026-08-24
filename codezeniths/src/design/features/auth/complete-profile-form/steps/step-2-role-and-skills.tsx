@@ -128,29 +128,29 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             }}
             onClick={() => onSelect(option.value)}
             className={cn(
-                "cursor-pointer transition-all duration-300 relative overflow-hidden group border p-4.5 rounded-sm bg-transparent",
+                "cursor-pointer transition-all duration-300 relative overflow-hidden group border p-3.5 xs:p-4 sm:p-4.5 rounded-sm bg-transparent",
                 isSelected
                     ? "border-primary bg-primary/10 dark:bg-primary/15 shadow-sm ring-1 ring-primary/40"
                     : "bg-primary/3 hover:border-primary/60 hover:bg-linear-to-r hover:from-primary/5 hover:to-transparent"
             )}
         >
-            <div className="w-full flex items-center justify-between gap-3.5">
+            <div className="w-full flex items-center justify-between gap-3 sm:gap-3.5">
                 {/* Left: Icon Avatar */}
                 <div className={cn(
-                    "p-2.5 rounded-sm transition-colors shrink-0",
+                    "p-2 xs:p-2.5 rounded-sm transition-colors shrink-0",
                     isSelected
                         ? "bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                         : "bg-primary/5 text-body-light dark:text-body-dark group-hover:bg-primary/10 group-hover:text-primary"
                 )}>
-                    <IconComponent className="w-5 h-5" />
+                    <IconComponent className="w-4.5 h-4.5 xs:w-5 xs:h-5" />
                 </div>
 
                 {/* Middle: Title & Description */}
                 <div className="space-y-0.5 min-w-0 flex-1">
-                    <h4 className={cn("text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
+                    <h4 className={cn("text-xs xs:text-sm font-bold truncate", isSelected ? "text-primary" : "text-foreground")}>
                         {option.label}
                     </h4>
-                    <p className="text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
+                    <p className="text-[11px] xs:text-xs text-body-light dark:text-body-dark leading-relaxed line-clamp-2">
                         {option.description}
                     </p>
                 </div>
@@ -158,13 +158,13 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 {/* Right: Pure Visual Square Checkbox Indicator */}
                 <div
                     className={cn(
-                        "rounded-xs size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
+                        "rounded-xs size-4.5 xs:size-5 border transition-all shrink-0 self-center flex items-center justify-center pointer-events-none",
                         isSelected
                             ? "bg-primary border-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                             : "border-muted-light/70 dark:border-muted-dark/70 bg-primary/5 group-hover:border-primary/50"
                     )}
                 >
-                    {isSelected && <Check className="w-3.5 h-3.5 stroke-3" />}
+                    {isSelected && <Check className="w-3 h-3 xs:w-3.5 xs:h-3.5 stroke-3" />}
                 </div>
             </div>
         </Card>
@@ -312,10 +312,10 @@ const RenderActiveQuestion: React.FC<RenderActiveQuestionProps> = ({
                         const isDisabled = isSkillsFull || hasAlreadyExtracted || isExtractingSkills;
 
                         return (
-                            <div className="py-6 px-4 border border-primary/20 bg-primary/5 rounded-xl flex flex-row items-center justify-between">
+                            <div className="py-4 xs:py-5 sm:py-6 px-3.5 xs:px-4 sm:px-5 border border-primary/20 bg-primary/5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-3">
                                 <div className="flex items-center gap-3">
                                     <div className={cn(
-                                        'p-2.5 rounded-lg',
+                                        'p-2.5 rounded-lg shrink-0',
                                         hasAlreadyExtracted ? 'bg-success/15 text-success' :
                                         isSkillsFull ? 'bg-warning/15 text-warning' :
                                         'bg-primary/15 text-primary'
@@ -329,14 +329,14 @@ const RenderActiveQuestion: React.FC<RenderActiveQuestionProps> = ({
                                         )}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-body-light dark:text-body-dark">
+                                        <p className="text-xs xs:text-sm font-bold text-body-light dark:text-body-dark">
                                             {hasAlreadyExtracted
                                                 ? 'Skills Extracted from Resume'
                                                 : isSkillsFull
                                                 ? 'Skill Capacity Full (15/15)'
                                                 : 'Auto-Extract Skills with AI'}
                                         </p>
-                                        <p className="text-xs text-body-light dark:text-body-dark">
+                                        <p className="text-[11px] xs:text-xs text-body-light dark:text-body-dark">
                                             {hasAlreadyExtracted
                                                 ? 'Skills have been extracted and added to your list below.'
                                                 : isSkillsFull
@@ -357,7 +357,7 @@ const RenderActiveQuestion: React.FC<RenderActiveQuestionProps> = ({
                                     } : {})}
                                     size={ButtonSize.DEFAULT}
                                     onClick={onExtractResumeSkills}
-                                    className="text-xs font-semibold"
+                                    className="w-full sm:w-auto text-xs font-semibold shrink-0"
                                 >
                                     {isExtractingSkills ? (
                                         <>
@@ -639,11 +639,11 @@ export const Step2RoleAndSkills: React.FC<Step2Props> = ({
     }, [setValue]);
 
     return (
-        <Container direction="col" size="none" gap="0" padded={false} centered={false} className="w-full space-y-8 flex flex-col gap-8 p-6">
+        <Container direction="col" size="none" gap="0" padded={false} centered={false} className="w-full space-y-6 sm:space-y-8 flex flex-col gap-6 sm:gap-8 p-1 xs:p-2 sm:p-6">
             {/* 1] Top Non-Clickable Progress Lines & Answered Counter */}
-            <div className="w-full space-y-2 mt-12 flex flex-col gap-2">
+            <div className="w-full space-y-2 mt-2 xs:mt-4 sm:mt-8 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                    <Typography as="span" variant={TypographyVariant.SPAN} color={TypographyColor.MUTED} className="text-[0.750rem] font-normal uppercase tracking-wider text-body-light dark:text-body-dark">
+                    <Typography as="span" variant={TypographyVariant.SPAN} color={TypographyColor.MUTED} className="text-[0.70rem] xs:text-[0.750rem] font-normal uppercase tracking-wider text-body-light dark:text-body-dark">
                         Questionnaire Progress
                     </Typography>
                     <Typography as="span" variant={TypographyVariant.SPAN} color={TypographyColor.PRIMARY} weight={TypographyWeight.BOLD} className="text-xs text-body-light dark:text-body-dark">
@@ -655,7 +655,7 @@ export const Step2RoleAndSkills: React.FC<Step2Props> = ({
                         <div
                             key={stepIdx}
                             className={cn(
-                                "h-2 rounded-full transition-all duration-300 pointer-events-none",
+                                "h-1.5 xs:h-2 rounded-full transition-all duration-300 pointer-events-none",
                                 stepIdx <= activeSubStep
                                     ? "bg-primary shadow-xs"
                                     : "bg-background-light-shade3/40 dark:bg-background-dark-shade3/40"
@@ -666,13 +666,13 @@ export const Step2RoleAndSkills: React.FC<Step2Props> = ({
             </div>
 
             {/* 2] Centered Question Title & Subtext Header */}
-            <div className="text-center space-y-2 mx-auto py-2 mt-8 w-full flex flex-col gap-2 items-center">
-                <Typography as="h3" variant={TypographyVariant.H3} weight={TypographyWeight.BOLD} className="text-2xl sm:text-3xl tracking-tight text-body-light dark:text-body-dark">
+            <div className="text-center space-y-2 mx-auto py-1 sm:py-2 mt-2 xs:mt-4 sm:mt-6 w-full flex flex-col gap-1.5 sm:gap-2 items-center">
+                <Typography as="h3" variant={TypographyVariant.H3} weight={TypographyWeight.BOLD} className="text-xl xs:text-2xl sm:text-3xl tracking-tight text-body-light dark:text-body-dark">
                     {activeSubStep === 0 && "Who are you using CodeZeniths as?"}
                     {activeSubStep === 1 && "What is your current experience level?"}
                     {activeSubStep === 2 && "Skills & Tech Stack"}
                 </Typography>
-                <Typography as="p" variant={TypographyVariant.P} color={TypographyColor.MUTED} className="block w-full max-w-sm text-center text-sm text-muted-light dark:text-muted-dark mx-auto leading-relaxed">
+                <Typography as="p" variant={TypographyVariant.P} color={TypographyColor.MUTED} className="block w-full max-w-sm text-center text-xs xs:text-sm text-muted-light dark:text-muted-dark mx-auto leading-relaxed">
                     {activeSubStep === 0 && "Choose the developer persona that best describes your current focus."}
                     {activeSubStep === 1 && "This helps us calibrate problem difficulty and customize your learning path."}
                     {activeSubStep === 2 && "Search and select the technologies you work with or want to master."}
@@ -708,7 +708,7 @@ export const Step2RoleAndSkills: React.FC<Step2Props> = ({
             />
 
             {/* Bottom Sub-flow Controls */}
-            <div className="flex items-center justify-between pt-4 border-t border-secondary/20">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0 pt-4 border-t border-secondary/20">
                 {activeSubStep > 0 ? (
                     <Button
                         type="button"
@@ -716,7 +716,7 @@ export const Step2RoleAndSkills: React.FC<Step2Props> = ({
                         size={ButtonSize.DEFAULT}
                         onClick={() => setActiveSubStep((prev) => (prev - 1) as 0 | 1 | 2)}
                         leftIcon={<ChevronLeft className="w-4 h-4" />}
-                        className="rounded-sm text-xs font-semibold"
+                        className="w-full sm:w-auto rounded-sm text-xs font-semibold"
                     >
                         Previous Question
                     </Button>
@@ -731,12 +731,12 @@ export const Step2RoleAndSkills: React.FC<Step2Props> = ({
                         size={ButtonSize.DEFAULT}
                         onClick={() => setActiveSubStep((prev) => (prev + 1) as 0 | 1 | 2)}
                         rightIcon={<ChevronRight className="w-4 h-4" />}
-                        className="rounded-sm text-xs font-semibold shadow-xs"
+                        className="w-full sm:w-auto rounded-sm text-xs font-semibold shadow-xs"
                     >
                         Next Question
                     </Button>
                 ) : (
-                    <span className="text-xs text-body-light dark:text-body-dark font-medium flex items-center gap-1.5">
+                    <span className="text-xs text-body-light dark:text-body-dark font-medium flex items-center justify-center sm:justify-start gap-1.5 text-center sm:text-left py-1">
                         <Check className="w-3.5 h-3.5 text-primary stroke-3" />
                         Questionnaire complete! Click &quot;Continue&quot; below to proceed.
                     </span>

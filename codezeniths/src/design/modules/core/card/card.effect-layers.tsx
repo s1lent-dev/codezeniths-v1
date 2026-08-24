@@ -499,6 +499,7 @@ export const GradientHoverBorderLayer: React.FC<{
     gradientColor?: string;
     gradientSize?: number;
     gradientOpacity?: number;
+    borderWidth?: number;
 }> = (props) => {
     const hookData = useGradientHoverBorderEffect({
         gradientColor: props.gradientColor,
@@ -508,11 +509,12 @@ export const GradientHoverBorderLayer: React.FC<{
     const overlayRef = props.data?.overlayRef ?? props.overlayRef ?? hookData.overlayRef;
     const background = props.data?.background ?? props.background ?? hookData.background;
     const gradientOpacity = props.gradientOpacity ?? 0.6;
+    const borderWidth = props.borderWidth ?? 1.5;
 
     return (
         <motion.div
             ref={overlayRef}
-            className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover/card:opacity-100"
+            className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 group-hover:opacity-100"
             style={{
                 background,
                 opacity: gradientOpacity,
@@ -520,7 +522,7 @@ export const GradientHoverBorderLayer: React.FC<{
                 WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                 WebkitMaskComposite: 'xor',
                 maskComposite: 'exclude',
-                padding: '1px',
+                padding: `${borderWidth}px`,
             }}
         />
     );

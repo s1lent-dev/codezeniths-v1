@@ -50,14 +50,14 @@ export const TagsMenuDesktop = () => {
         <div className="flex flex-col w-200 p-4 gap-4">
             <div className="flex flex-row justify-between items-center gap-4">
                 <Select value={level} onValueChange={setLevel}>
-                    <SelectTrigger className="w-45">
+                    <SelectTrigger className="w-45 cursor-pointer rounded-sm">
                         <SelectValue placeholder="Select Level" />
                     </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="fundamental">Fundamental</SelectItem>
-                        <SelectItem value="intermediate">Intermediate</SelectItem>
-                        <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectContent className="z-150 border border-secondary cursor-pointer rounded-sm">
+                        <SelectItem value="all" className='cursor-pointer'>All Levels</SelectItem>
+                        <SelectItem value="fundamental" className='cursor-pointer'>Fundamental</SelectItem>
+                        <SelectItem value="intermediate" className='cursor-pointer'>Intermediate</SelectItem>
+                        <SelectItem value="advanced" className='cursor-pointer'>Advanced</SelectItem>
                     </SelectContent>
                 </Select>
                 
@@ -67,7 +67,7 @@ export const TagsMenuDesktop = () => {
                         placeholder="Search tags..." 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-8"
+                        className="pl-8 rounded-full border border-secondary transition-all shadow-2xs"
                     />
                 </div>
             </div>

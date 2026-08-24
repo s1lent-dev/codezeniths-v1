@@ -13,11 +13,13 @@ import { cn } from '@codezeniths/design/cn';
 export interface NavbarSearchProps {
     className?: string;
     dropdownAlign?: 'center' | 'right' | 'left';
+    behavior?: 'floating' | 'inline';
 }
 
 export const NavbarSearch: React.FC<NavbarSearchProps> = ({
     className,
     dropdownAlign = 'center',
+    behavior = 'floating',
 }) => {
     const {
         isMobileSearchOpen,
@@ -191,14 +193,14 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({
                     )}
                 </Container>
             ) : (
-                /* ─── DESKTOP CENTERED SEARCH BAR ──────────────────────────────── */
+                /* ─── CENTERED SEARCH BAR ──────────────────────────────── */
                 <Container
                     size="none"
-                    direction="row"
+                    direction="col"
                     align="center"
                     padded={false}
                     centered={true}
-                    className="hidden md:flex flex-1 justify-center w-full mx-auto relative"
+                    className="flex flex-col flex-1 justify-center w-full mx-auto relative"
                 >
                     <div className="flex items-center gap-2 px-3.5 py-1.5 bg-primary/5 border border-foreground-light-shade3 dark:border-foreground-dark-shade3 rounded-md w-full focus-within:ring-2 focus-within:ring-primary/30 transition-all shadow-sm relative">
 
@@ -249,7 +251,7 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({
                                 <X className="w-3.5 h-3.5" />
                             </button>
                         )}
-                        <SearchFilterPopover />
+                        <SearchFilterPopover align={behavior === 'inline' ? 'center' : 'end'} />
                     </div>
 
                     {isDropdownOpen && (
@@ -266,6 +268,7 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({
                             onSelectSuggestion={handleSelectSuggestion}
                             onClose={handleClearSearch}
                             align={dropdownAlign}
+                            behavior={behavior}
                         />
                     )}
                 </Container>

@@ -36,21 +36,21 @@ export const VerifyPhoneForm = () => {
     } = useVerifyPhoneForm();
 
     const { register, formState: { errors } } = form;
-    const inputClassName = "border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-lg";
+    const inputClassName = "border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 xs:h-12 sm:h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm xs:text-base sm:text-lg";
 
     return (
-        <Card variant={CardVariant.FLAT} className="w-[95%] md:w-[80%] sm:w-[75%] max-w-2xl p-8 md:p-12 border border-secondary rounded-2xl bg-foreground-light dark:bg-foreground-dark mx-auto lg:mt-12 md:mt-8 sm:mt-4 shadow-none">
-            <CardHeader className="flex flex-col items-center justify-center mb-8 p-0 border-none shrink-0 w-full">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                    <Phone className="w-8 h-8 text-primary" />
+        <Card variant={CardVariant.FLAT} className="w-full max-w-2xl p-4.5 xs:p-6 sm:p-10 md:p-14 border border-secondary rounded-xs bg-foreground-light dark:bg-foreground-dark mx-auto shadow-none">
+            <CardHeader className="flex flex-col items-center justify-center mb-6 sm:mb-8 p-0 border-none shrink-0 w-full">
+                <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <Phone className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 text-primary" />
                 </div>
                 <Typography
                     variant={TypographyVariant.H3}
-                    className="font-bold text-2xl sm:text-3xl lg:text-4xl text-body-light dark:text-body-dark mb-2 text-center"
+                    className="font-bold text-xl xs:text-2xl sm:text-3xl lg:text-4xl text-body-light dark:text-body-dark mb-2 text-center"
                 >
                     Verify Your Phone
                 </Typography>
-                <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark max-w-sm">
+                <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark max-w-sm text-xs xs:text-sm sm:text-base leading-relaxed">
                     {(user?.phoneNumberVerified || phoneCheck?.isVerified)
                         ? 'You have already verified your phone number.'
                         : otpSent 
@@ -59,14 +59,14 @@ export const VerifyPhoneForm = () => {
                     }
                 </Typography>
             </CardHeader>
-            <CardContent className="p-0 w-full flex flex-col items-center gap-8">
+            <CardContent className="p-0 w-full flex flex-col items-center gap-6 sm:gap-8">
                 
                 {isAuthLoading ? (
-                    <div className="py-8 text-muted-light dark:text-muted-dark">Loading session...</div>
+                    <div className="py-8 text-muted-light dark:text-muted-dark text-sm">Loading session...</div>
                 ) : (user?.phoneNumberVerified || phoneCheck?.isVerified) ? (
-                    <div className="w-full flex flex-col items-center gap-6 py-4">
-                        <CheckCircle2 size={64} className="text-success mb-2 animate-in zoom-in duration-500" />
-                        <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark font-medium text-lg">
+                    <div className="w-full flex flex-col items-center gap-4 sm:gap-6 py-4">
+                        <CheckCircle2 size={48} className="text-success mb-1 animate-in zoom-in duration-500 sm:size-16" />
+                        <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark font-medium text-base sm:text-lg">
                             Your phone is successfully verified!
                         </Typography>
                         <Button
@@ -83,7 +83,7 @@ export const VerifyPhoneForm = () => {
                             }}
                             variant={ButtonVariant.SECONDARY}
                             effect={ButtonEffect.SHIMMER}
-                            className="w-full sm:w-auto min-w-50 h-12 text-foreground-dark dark:text-foreground-light-shade3 shadow-md mt-2"
+                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md mt-2 mx-auto"
                         >
                             {user?.phoneNumberVerified ? (!user.isOnboardingComplete ? 'Complete Profile' : 'Go to Home') : 'Go to Sign In'}
                             <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />
@@ -92,26 +92,26 @@ export const VerifyPhoneForm = () => {
                 ) : otpSent ? (
                     <form 
                         onSubmit={(e) => { e.preventDefault(); handleVerifyOtp(); }} 
-                        className="w-full flex flex-col items-center gap-8"
+                        className="w-full flex flex-col items-center gap-5 sm:gap-6"
                     >
-                        <Container direction="col" align="center" size="none" padded={false} centered={false} className="w-full gap-2">
+                        <Container direction="col" align="center" size="none" padded={false} centered={false} className="w-full gap-2 overflow-x-auto py-1">
                             <InputOTP 
                                 maxLength={6} 
                                 value={watchedOtp || ''} 
                                 onChange={setOtpValue}
-                                containerClassName="gap-2 sm:gap-4 flex justify-center w-full"
+                                containerClassName="gap-1 xs:gap-1.5 sm:gap-3 flex justify-center w-full"
                             >
-                                <InputOTPGroup className="gap-2 sm:gap-4 flex justify-center w-full">
-                                    <InputOTPSlot index={0} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={1} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={2} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={3} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={4} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={5} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                <InputOTPGroup className="gap-1 xs:gap-1.5 sm:gap-3 flex justify-center w-full">
+                                    <InputOTPSlot index={0} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                    <InputOTPSlot index={1} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                    <InputOTPSlot index={2} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                    <InputOTPSlot index={3} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                    <InputOTPSlot index={4} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                    <InputOTPSlot index={5} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
                                 </InputOTPGroup>
                             </InputOTP>
                             {errors.otp && (
-                                <Typography variant={TypographyVariant.CAPTION} className="text-red-500 dark:text-red-400 mt-2">
+                                <Typography variant={TypographyVariant.CAPTION} className="text-red-500 dark:text-red-400 mt-2 text-center">
                                     {errors.otp.message}
                                 </Typography>
                             )}
@@ -123,19 +123,19 @@ export const VerifyPhoneForm = () => {
                             effect={ButtonEffect.SHIMMER}
                             isLoading={isVerifying}
                             disabled={!watchedOtp || watchedOtp.length !== 6 || isVerifying}
-                            className="w-full sm:w-auto min-w-50 h-12 text-foreground-dark dark:text-foreground-light-shade3 shadow-md"
+                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md mx-auto"
                         >
                             Verify Code
                             {!isVerifying && <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />}
                         </Button>
 
-                        <Typography variant={TypographyVariant.P} className="text-sm text-center text-muted-light dark:text-muted-dark mt-4">
+                        <Typography variant={TypographyVariant.P} className="text-xs xs:text-sm text-center text-muted-light dark:text-muted-dark mt-2">
                             Didn't receive an SMS?{' '}
                             <button 
                                 type="button"
                                 onClick={handleSendOtp}
                                 disabled={isSending}
-                                className="text-heading-light dark:text-heading-dark font-medium hover:underline disabled:opacity-50"
+                                className="text-heading-light dark:text-heading-dark font-medium hover:underline disabled:opacity-50 cursor-pointer"
                             >
                                 Resend
                             </button>
@@ -144,10 +144,10 @@ export const VerifyPhoneForm = () => {
                 ) : (
                     <form 
                         onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }} 
-                        className="w-full flex flex-col items-center gap-8"
+                        className="w-full flex flex-col items-center gap-5 sm:gap-6"
                     >
                         {!user?.phoneNumber && (
-                            <Container direction="col" size="none" padded={false} centered={false} className="w-full sm:w-[80%] md:w-[70%] space-y-2">
+                            <Container direction="col" size="none" padded={false} centered={false} className="w-full sm:w-[90%] md:w-[80%] space-y-2">
                                 <div className="relative w-full">
                                     <PhoneInput
                                         countryCode={watchedCountryCode}
@@ -175,19 +175,19 @@ export const VerifyPhoneForm = () => {
                                 )}
                             </Container>
                         )}
-                            <Button
-                                type="submit"
-                                variant={ButtonVariant.SECONDARY}
-                                effect={ButtonEffect.PULSATING}
-                                pulseColor={'rgb(99 102 241 / 0.25)'}
-                                pulseDuration={'1.5s'}
-                                isLoading={isSending}
-                                disabled={!watchedPhoneNumber || isSending || !!form.formState.errors.phoneNumber}
-                                className="w-full sm:w-auto min-w-50 h-12 text-foreground-dark dark:text-foreground-light-shade3 shadow-md cursor-pointer disabled:cursor-not-allowed"
-                            >
-                                Send Verification Code
-                                {!isSending && <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />}
-                            </Button>
+                        <Button
+                            type="submit"
+                            variant={ButtonVariant.SECONDARY}
+                            effect={ButtonEffect.PULSATING}
+                            pulseColor={'rgb(99 102 241 / 0.25)'}
+                            pulseDuration={'1.5s'}
+                            isLoading={isSending}
+                            disabled={!watchedPhoneNumber || isSending || !!form.formState.errors.phoneNumber}
+                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md cursor-pointer disabled:cursor-not-allowed mx-auto"
+                        >
+                            Send Verification Code
+                            {!isSending && <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />}
+                        </Button>
                     </form>
                 )}
                 

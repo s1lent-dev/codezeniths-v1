@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Container, Typography, TypographyVariant, Badge } from '@codezeniths/components';
+import { Container, Typography, TypographyVariant, TypographyAlign, Badge } from '@codezeniths/components';
 import { Card, CardHeader, CardTitle, CardDescription, CardVariant, CardBackgroundEffect, useTheme } from '@codezeniths/modules';
 import { Users, Building, Trophy, Code2, GraduationCap, BookOpen } from 'lucide-react';
 import { motion, useInView } from 'motion/react';
@@ -95,7 +95,7 @@ export const StatsSection = () => {
     return (
         <section 
             ref={sectionRef} 
-            className="py-32 mt-16 bg-background-light dark:bg-background-dark relative overflow-hidden min-h-225 flex flex-col justify-center"
+            className="py-16 sm:py-24 lg:py-32 mt-8 lg:mt-16 bg-background-light dark:bg-background-dark relative overflow-hidden min-h-auto lg:min-h-225 flex flex-col justify-center"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -110,33 +110,35 @@ export const StatsSection = () => {
             {/* Radial Gradient for Spotlight effect */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-200 h-125 bg-linear-to-b from-primary/30 via-primary/5 to-transparent opacity-60 blur-[100px] z-1 pointer-events-none" />
 
-            <Container size="7xl" className="mx-auto px-6 lg:px-8 relative z-10 pointer-events-none">
+            <Container size="7xl" className="mx-auto px-4 xs:px-6 lg:px-8 relative z-10 pointer-events-none">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="flex flex-col items-center text-center max-w-2xl mx-auto mb-16 gap-4"
+                    className="flex flex-col items-center text-center max-w-2xl mx-auto mb-10 sm:mb-16 gap-4"
                 >
-                    <Badge variant="outline" className="rounded-full px-8 py-1.5 text-sm font-semibold bg-foreground-light dark:bg-foreground-dark text-body-light dark:text-body-dark border-secondary backdrop-blur-md">
+                    <Badge variant="outline" className="mx-auto rounded-full px-6 sm:px-8 py-1.5 text-xs sm:text-sm font-semibold bg-foreground-light dark:bg-foreground-dark text-body-light dark:text-body-dark border-secondary backdrop-blur-md">
                         Global Impact
                     </Badge>
                     <Typography
                         variant={TypographyVariant.H2}
-                        className="font-bold text-3xl sm:text-5xl text-foreground-dark-shade3 dark:text-foreground-light-shade3 mt-4 items-center text-center"
+                        align={TypographyAlign.CENTER}
+                        className="font-bold text-2xl xs:text-3xl sm:text-4xl lg:text-5xl text-foreground-dark-shade3 dark:text-foreground-light-shade3 mt-4 text-center"
                     >
                         Empowering the next generation of engineers
                     </Typography>
                     <Typography
                         variant={TypographyVariant.P}
-                        className="text-[1rem] leading-7 font-light text-muted-light-shade1 dark:text-muted-dark-shade1 mt-2 items-center text-center max-w-3xl mx-auto"
+                        align={TypographyAlign.CENTER}
+                        className="text-xs xs:text-sm sm:text-base leading-relaxed sm:leading-7 font-light text-muted-light-shade1 dark:text-muted-dark-shade1 mt-2 text-center max-w-3xl mx-auto"
                     >
                         From mastering complex data structures to visualizing full-stack architectures, see how our ecosystem is transforming the way developers learn, build, and conquer challenges worldwide.
                     </Typography>
                 </motion.div>
 
                 {/* Symmetric Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-6 lg:gap-8 max-w-6xl mx-auto">
                     {STATS.map((stat, idx) => {
                         const Icon = stat.icon;
 
@@ -146,7 +148,7 @@ export const StatsSection = () => {
                                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                 animate={isInView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
                                 transition={{ duration: 0.6, delay: idx * 0.1, ease: "easeOut" }}
-                                className="relative flex flex-col p-px rounded-[1.5rem] overflow-hidden bg-foreground-dark-shade3/5 dark:bg-white/5 backdrop-blur-md pointer-events-auto shadow-lg transition-all duration-300 hover:scale-[1.03] group col-span-1"
+                                className="relative flex flex-col p-px rounded-xl sm:rounded-2xl lg:rounded-[1.5rem] overflow-hidden bg-foreground-dark-shade3/5 dark:bg-white/5 backdrop-blur-md pointer-events-auto shadow-lg transition-all duration-300 hover:scale-[1.03] group col-span-1"
                             >
                                 <Card
                                     variant={CardVariant.FLAT}
@@ -164,19 +166,19 @@ export const StatsSection = () => {
                                             }
                                         }
                                     }
-                                    className="relative z-10 cursor-pointer h-full w-full bg-foreground-light/70 dark:bg-foreground-dark/70 rounded-[calc(1.5rem-1px)] border-none flex flex-col p-6 lg:p-8 justify-start overflow-hidden"
+                                    className="relative z-10 cursor-pointer h-full w-full bg-foreground-light/70 dark:bg-foreground-dark/70 rounded-[calc(0.75rem-1px)] sm:rounded-[calc(1rem-1px)] lg:rounded-[calc(1.5rem-1px)] border-none flex flex-col p-4 xs:p-6 lg:p-8 justify-start overflow-hidden"
                                 >
                                     <CardHeader className="flex-col gap-2 w-full p-0 relative z-20 items-center text-center">
-                                        <div className="rounded-md bg-primary/10 flex items-center justify-center text-primary mb-3 border border-primary/20 backdrop-blur-md transition-transform duration-500 group-hover:scale-110 w-12 h-12">
-                                            <Icon className="w-6 h-6" />
+                                        <div className="rounded-md bg-primary/10 flex items-center justify-center text-primary mb-3 border border-primary/20 backdrop-blur-md transition-transform duration-500 group-hover:scale-110 w-10 h-10 sm:w-12 sm:h-12">
+                                            <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                                         </div>
-                                        <CardTitle className="font-bold text-body-light dark:text-body-dark mb-1 tracking-tight text-3xl lg:text-4xl">
+                                        <CardTitle className="font-bold text-body-light dark:text-body-dark mb-1 tracking-tight text-2xl xs:text-3xl lg:text-4xl">
                                             <CountUpStat value={stat.value} inView={isInView} />
                                         </CardTitle>
-                                        <div className="font-semibold text-body-light dark:text-foreground-light-shade3 mb-2 text-start text-base lg:text-lg">
+                                        <div className="font-semibold text-body-light dark:text-foreground-light-shade3 mb-2 text-center sm:text-start text-sm xs:text-base lg:text-lg">
                                             {stat.label}
                                         </div>
-                                        <CardDescription className="text-muted-light dark:text-muted-dark leading-relaxed text-sm">
+                                        <CardDescription className="text-muted-light dark:text-muted-dark leading-relaxed text-xs sm:text-sm">
                                             {stat.description}
                                         </CardDescription>
                                     </CardHeader>

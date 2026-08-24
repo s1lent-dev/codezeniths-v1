@@ -24,11 +24,11 @@ export const InvoicesHistoryTable: React.FC<InvoicesHistoryTableProps> = ({
     onDownloadInvoice,
 }) => {
     return (
-        <Card className="w-full p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-7">
+        <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
             {/* Section Header */}
             <div className="flex items-center gap-3">
-                <div className="p-3 rounded-sm bg-primary/10 text-primary shrink-0">
-                    <History className="size-6" />
+                <div className="p-2.5 sm:p-3 rounded-sm bg-primary/10 text-primary shrink-0">
+                    <History className="size-5 sm:size-6" />
                 </div>
                 <div>
                     <Typography

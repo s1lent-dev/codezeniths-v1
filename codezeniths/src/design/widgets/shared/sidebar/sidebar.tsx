@@ -259,7 +259,7 @@ export function Sidebar({ className }: { className?: string }) {
                                                 type="button"
                                                 variant={ButtonVariant.GHOST}
                                                 onClick={handleSignOut}
-                                                className="w-full flex items-center justify-center p-3 rounded-md cursor-pointer transition-all duration-300 group text-destructive hover:bg-destructive/10 h-auto"
+                                                className="w-full flex items-center justify-center p-3 rounded-md cursor-pointer transition-all duration-300 group text-destructive hover:bg-destructive/10 dark:text-destructive dark:hover:bg-destructive/10 h-auto"
                                             >
                                                 <LogOut className="w-5 h-5 transition-colors shrink-0" />
                                             </Button>

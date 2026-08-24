@@ -100,10 +100,10 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
     return (
         <div className="space-y-6 sm:space-y-7">
             {/* 1. Personal Details Card */}
-            <Card className="w-full p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-7">
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
                 <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-sm bg-primary/10 text-primary shrink-0">
-                        <User className="size-6" />
+                    <div className="p-2.5 sm:p-3 rounded-sm bg-primary/10 text-primary shrink-0">
+                        <User className="size-5 sm:size-6" />
                     </div>
                     <div>
                         <Typography
@@ -124,7 +124,7 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-7 gap-x-8 pt-6">
+                <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 gap-y-5 xs:gap-y-6 sm:gap-y-7 gap-x-6 sm:gap-x-8 pt-4 sm:pt-6">
                     <DetailItem label="First Name" value={profile?.firstName || '—'} />
                     <DetailItem label="Last Name" value={profile?.lastName || '—'} />
                     <DetailItem label="Date of Birth" value={formattedDob} />
@@ -152,11 +152,11 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
             </Card>
 
             {/* 2. Professional & Background Card */}
-            <Card className="w-full p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-10">
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-8 sm:space-y-10">
                 <div className='w-full flex flex-col gap-3'>
                 <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-sm bg-primary/10 text-primary shrink-0">
-                        <Briefcase className="size-6" />
+                    <div className="p-2.5 sm:p-3 rounded-sm bg-primary/10 text-primary shrink-0">
+                        <Briefcase className="size-5 sm:size-6" />
                     </div>
                     <div>
                         <Typography
@@ -177,7 +177,7 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-7 gap-x-8 pt-6">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-y-5 xs:gap-y-6 sm:gap-y-7 gap-x-6 sm:gap-x-8 pt-4 sm:pt-6">
                     <DetailItem label="User Type" value={formatUserType(profile?.userType)} />
                     <DetailItem label="Experience Level" value={formatExperienceLevel(profile?.experienceLevel)} />
                 </div>
@@ -296,10 +296,10 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
             </Card>
 
             {/* 3. Social Profiles Card */}
-            <Card className="w-full p-6 sm:p-8 rounded-md border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-7">
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
                 <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-sm bg-primary/10 text-primary shrink-0">
-                        <Globe className="size-6" />
+                    <div className="p-2.5 sm:p-3 rounded-sm bg-primary/10 text-primary shrink-0">
+                        <Globe className="size-5 sm:size-6" />
                     </div>
                     <div>
                         <Typography
@@ -320,7 +320,7 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 pt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 pt-4 sm:pt-6">
                     {/* GitHub */}
                     <div className="p-4 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2.5">

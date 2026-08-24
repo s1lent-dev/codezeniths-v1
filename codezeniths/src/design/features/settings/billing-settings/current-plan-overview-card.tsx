@@ -54,12 +54,12 @@ export const CurrentPlanOverviewCard: React.FC<CurrentPlanOverviewCardProps> = (
     const details = planDetails[currentPlan];
 
     return (
-        <Card className="w-full p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-7">
-            <div className="space-y-7 flex flex-col w-full">
+        <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
+            <div className="space-y-6 sm:space-y-7 flex flex-col w-full">
                 {/* Section Header */}
             <div className="flex items-center gap-3">
-                <div className="p-3 rounded-sm bg-primary/10 text-primary shrink-0">
-                    <Zap className="size-6" />
+                <div className="p-2.5 sm:p-3 rounded-sm bg-primary/10 text-primary shrink-0">
+                    <Zap className="size-5 sm:size-6" />
                 </div>
                 <div>
                     <Typography
@@ -81,10 +81,10 @@ export const CurrentPlanOverviewCard: React.FC<CurrentPlanOverviewCardProps> = (
             </div>
 
             {/* Active Plan Detail Box */}
-            <div className="p-5 rounded-md bg-linear-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2">
+            <div className="p-4 sm:p-5 rounded-md bg-linear-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-1 sm:mt-2">
                 <div className="space-y-1.5 min-w-0">
                     <div className="flex items-center gap-2">
-                        <span className="text-base font-bold text-heading-light dark:text-heading-dark">
+                        <span className="text-sm sm:text-base font-bold text-heading-light dark:text-heading-dark">
                             {details.name}
                         </span>
                         <Badge variant="success" className="px-2 py-0.5 text-[10px] h-5 rounded-xs font-semibold">
@@ -96,13 +96,13 @@ export const CurrentPlanOverviewCard: React.FC<CurrentPlanOverviewCardProps> = (
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2 self-start md:self-center shrink-0">
+                <div className="flex items-center gap-2 self-start sm:self-center shrink-0 w-full sm:w-auto">
                     <Button
                         type="button"
                         variant={ButtonVariant.DEFAULT}
                         size={ButtonSize.SM}
                         onClick={onChangePlanClick}
-                        className="text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-foreground-dark-shade3 dark:text-foreground-light-shade3 px-4 py-2"
+                        className="w-full sm:w-auto text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-foreground-dark-shade3 dark:text-foreground-light-shade3 px-4 py-2"
                     >
                         Upgrade / Switch Tier
                     </Button>

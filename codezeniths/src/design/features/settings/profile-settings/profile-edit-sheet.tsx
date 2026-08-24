@@ -86,8 +86,8 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
                     )}
 
                     {/* Header */}
-                    <SheetHeader className="px-8 py-6 sm:px-10 sm:py-6 border-b border-foreground-light-shade3 dark:border-foreground-dark-shade1 shrink-0">
-                        <SheetTitle className="text-xl font-bold text-heading-light dark:text-heading-dark">
+                    <SheetHeader className="px-4.5 py-5 sm:px-8 sm:py-6 md:px-10 md:py-6 border-b border-foreground-light-shade3 dark:border-foreground-dark-shade1 shrink-0">
+                        <SheetTitle className="text-lg sm:text-xl font-bold text-heading-light dark:text-heading-dark">
                             Edit Profile Details
                         </SheetTitle>
                         <SheetDescription className="text-xs text-muted-light dark:text-muted-dark mt-1">
@@ -97,7 +97,7 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
 
                     {/* Scrollable Form Content with in-house ScrollArea and ScrollBar */}
                     <ScrollArea className="flex-1 w-full">
-                        <div className="px-8 py-8 sm:px-10 sm:py-10">
+                        <div className="px-4.5 py-6 sm:px-8 sm:py-8 md:px-10 md:py-10">
                             <form id="profile-edit-form" onSubmit={onSubmit}>
                                 <ProfileEditForm
                                     form={form}
@@ -116,7 +116,7 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
                     </ScrollArea>
 
                     {/* Sticky Footer */}
-                    <SheetFooter className="px-8 py-5 sm:px-10 sm:py-5 border-t border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light/95 dark:bg-foreground-dark/95 backdrop-blur-xs flex flex-row items-center justify-end gap-3.5 shrink-0">
+                    <SheetFooter className="px-4.5 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 border-t border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light/95 dark:bg-foreground-dark/95 backdrop-blur-xs flex flex-row items-center justify-end gap-3.5 shrink-0">
                         <Button
                             type="button"
                             variant={ButtonVariant.GHOST}

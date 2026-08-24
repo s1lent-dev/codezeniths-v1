@@ -45,11 +45,11 @@ export const ProfileVisibilitySettings: React.FC<ProfileVisibilitySettingsProps>
     onConfirmVisibility,
 }) => {
     return (
-        <Card className="w-full p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-7">
+        <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
             {/* Section Header */}
             <div className="flex items-center gap-3">
-                <div className="p-3 rounded-sm bg-primary/10 text-primary shrink-0">
-                    <Eye className="size-6" />
+                <div className="p-2.5 sm:p-3 rounded-sm bg-primary/10 text-primary shrink-0">
+                    <Eye className="size-5 sm:size-6" />
                 </div>
                 <div>
                     <Typography
@@ -71,7 +71,7 @@ export const ProfileVisibilitySettings: React.FC<ProfileVisibilitySettingsProps>
             </div>
 
             {/* Visibility Option Cards with Gradient Hover */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 pt-4 sm:pt-6">
                 {VISIBILITY_OPTIONS.map((opt) => {
                     const isSelected = selectedVisibility === opt.value;
                     const IconComponent = opt.icon;
@@ -98,7 +98,7 @@ export const ProfileVisibilitySettings: React.FC<ProfileVisibilitySettingsProps>
                                     isSelected
                                         ? "bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 shadow-xs"
                                         : "bg-primary/5 text-body-light dark:text-body-dark group-hover:bg-primary/10 group-hover:text-primary"
-                                )}>
+                                    )}>
                                     <IconComponent className="w-5 h-5" />
                                 </div>
 
@@ -157,7 +157,7 @@ export const ProfileVisibilitySettings: React.FC<ProfileVisibilitySettingsProps>
                         onClick={onConfirmVisibility}
                         isLoading={isUpdatingVisibility}
                         loadingText="Saving..."
-                        className="text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-foreground-dark-shade3 dark:text-foreground-light-shade3 self-end sm:self-center shrink-0 min-w-28 px-4 py-2"
+                        className="w-full sm:w-auto text-xs font-medium rounded-sm border-none bg-primary hover:bg-primary/90 text-foreground-dark-shade3 dark:text-foreground-light-shade3 self-start sm:self-center shrink-0 min-w-28 px-4 py-2"
                     >
                         Confirm Change
                     </Button>

@@ -28,12 +28,12 @@ export const PaymentMethodsCard: React.FC<PaymentMethodsCardProps> = ({
     onAddClick,
 }) => {
     return (
-        <Card className="w-full p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-7">
+        <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
             {/* Section Header with Add Card Action */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-sm bg-primary/10 text-primary shrink-0">
-                        <Wallet className="size-6" />
+                    <div className="p-2.5 sm:p-3 rounded-sm bg-primary/10 text-primary shrink-0">
+                        <Wallet className="size-5 sm:size-6" />
                     </div>
                     <div>
                         <Typography
@@ -60,7 +60,7 @@ export const PaymentMethodsCard: React.FC<PaymentMethodsCardProps> = ({
                     size={ButtonSize.SM}
                     onClick={onAddClick}
                     leftIcon={<Plus className="size-3.5" />}
-                    className="text-xs font-medium rounded-sm border-none bg-primary/10 hover:bg-primary/15 text-heading-light dark:text-heading-dark self-start sm:self-center px-3.5 py-1.5"
+                    className="w-full sm:w-auto text-xs font-medium rounded-sm border-none bg-primary/10 hover:bg-primary/15 text-heading-light dark:text-heading-dark self-start sm:self-center px-3.5 py-1.5"
                 >
                     Add Payment Method
                 </Button>

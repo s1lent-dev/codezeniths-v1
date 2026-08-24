@@ -14,7 +14,7 @@ export const ModuleCardSkeleton: React.FC<ModuleCardSkeletonProps> = ({ classNam
         <Card
             variant={CardVariant.FLAT}
             className={cn(
-                'relative rounded-3xl p-6 sm:p-8 overflow-hidden border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark h-80 w-full max-w-145 flex flex-col justify-between shadow-xs font-sans select-none',
+                'relative rounded-2xl sm:rounded-3xl p-4.5 xs:p-5 sm:p-6 2xl:p-8 overflow-hidden border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark h-full w-full max-w-full flex flex-col justify-between shadow-xs font-sans select-none',
                 className
             )}
         >
@@ -37,56 +37,51 @@ export const ModuleCardSkeleton: React.FC<ModuleCardSkeletonProps> = ({ classNam
             />
 
             {/* Top Card Section Skeleton */}
-            <div className="relative z-10 space-y-4 pr-6">
+            <div className="relative z-10 space-y-3 sm:space-y-4 pr-3 sm:pr-6">
                 {/* Header Row: Icon + Problem Count Pill */}
                 <div className="flex items-center justify-between">
                     <motion.div
                         animate={{ opacity: [0.4, 0.85, 0.4] }}
                         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                        className="size-14 rounded-md bg-foreground-light-shade2 dark:bg-foreground-dark-shade1 border border-foreground-light-shade3/40 dark:border-foreground-dark-shade3/40 ml-2"
+                        className="size-9 xs:size-11 sm:size-13 2xl:size-15 rounded-md bg-foreground-light-shade2 dark:bg-foreground-dark-shade1 border border-foreground-light-shade3/40 dark:border-foreground-dark-shade3/40 ml-1 sm:ml-2"
                     />
 
                     <motion.div
                         animate={{ opacity: [0.4, 0.8, 0.4] }}
                         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
-                        className="h-7 w-28 rounded-full bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 border border-foreground-light-shade3/40 dark:border-foreground-dark-shade3/40"
+                        className="h-6 sm:h-7 w-24 sm:w-28 rounded-full bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 border border-foreground-light-shade3/40 dark:border-foreground-dark-shade3/40"
                     />
                 </div>
 
                 {/* Module Title & Description Bones */}
-                <div className="space-y-2 pt-1">
+                <div className="space-y-1 sm:space-y-2 pt-1">
                     <motion.div
                         animate={{ opacity: [0.4, 0.9, 0.4] }}
                         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 }}
-                        className="h-7 w-2/3 bg-primary/20 dark:bg-primary/30 rounded-md"
+                        className="h-6 sm:h-7 w-2/3 bg-primary/20 dark:bg-primary/30 rounded-md"
                     />
 
                     <div className="space-y-1.5 pt-1">
                         <motion.div
                             animate={{ opacity: [0.4, 0.8, 0.4] }}
                             transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
-                            className="h-3.5 w-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
+                            className="h-3 sm:h-3.5 w-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
                         />
                         <motion.div
                             animate={{ opacity: [0.4, 0.8, 0.4] }}
                             transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.25 }}
-                            className="h-3.5 w-5/6 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
-                        />
-                        <motion.div
-                            animate={{ opacity: [0.4, 0.8, 0.4] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-                            className="h-3.5 w-4/6 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
+                            className="h-3 sm:h-3.5 w-5/6 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
                         />
                     </div>
                 </div>
             </div>
 
             {/* Bottom Action Footer Skeleton */}
-            <div className="relative z-10 pt-4 flex items-center justify-between border-t border-foreground-light-shade3/50 dark:border-foreground-dark-shade3/50">
+            <div className="relative z-10 pt-3 sm:pt-4 flex items-center justify-between border-t border-foreground-light-shade3/50 dark:border-foreground-dark-shade3/50">
                 <motion.div
                     animate={{ opacity: [0.4, 0.9, 0.4] }}
                     transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.35 }}
-                    className="ml-2 h-9 w-36 rounded-full bg-primary/20 dark:bg-primary/30"
+                    className="ml-1 sm:ml-2 h-7 sm:h-9 w-28 sm:w-36 rounded-full bg-primary/20 dark:bg-primary/30"
                 />
             </div>
         </Card>

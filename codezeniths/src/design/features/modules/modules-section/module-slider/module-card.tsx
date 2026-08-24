@@ -39,6 +39,7 @@ const CIRCLE_PALETTES = [
         shimmerColor: { light: 'rgba(6, 182, 212, 0.7)', dark: 'rgba(103, 232, 249, 0.85)' },
         buttonBorder: 'border-cyan-500/30 dark:border-cyan-400/30 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/20 dark:hover:bg-cyan-500/35',
         titleHover: 'group-hover:text-cyan-700 dark:group-hover:text-cyan-300',
+        hoverBorderColor: '#06b6d4',
     },
     {
         // 2. Purple & Indigo
@@ -51,6 +52,7 @@ const CIRCLE_PALETTES = [
         shimmerColor: { light: 'rgba(147, 51, 234, 0.7)', dark: 'rgba(196, 181, 253, 0.85)' },
         buttonBorder: 'border-purple-500/30 dark:border-purple-400/30 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 dark:hover:bg-purple-500/35',
         titleHover: 'group-hover:text-purple-700 dark:group-hover:text-purple-300',
+        hoverBorderColor: '#a855f7',
     },
     {
         // 3. Primary Zenith Blue
@@ -63,6 +65,7 @@ const CIRCLE_PALETTES = [
         shimmerColor: { light: 'rgba(59, 130, 246, 0.7)', dark: 'rgba(147, 197, 253, 0.85)' },
         buttonBorder: 'border-blue-500/30 dark:border-blue-400/30 text-blue-700 dark:text-blue-300 hover:bg-blue-500/20 dark:hover:bg-blue-500/35',
         titleHover: 'group-hover:text-blue-700 dark:group-hover:text-blue-300',
+        hoverBorderColor: '#6A7CFF',
     },
     {
         // 4. Emerald & Mint
@@ -75,6 +78,7 @@ const CIRCLE_PALETTES = [
         shimmerColor: { light: 'rgba(16, 185, 129, 0.7)', dark: 'rgba(110, 231, 183, 0.85)' },
         buttonBorder: 'border-emerald-500/30 dark:border-emerald-400/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/35',
         titleHover: 'group-hover:text-emerald-700 dark:group-hover:text-emerald-300',
+        hoverBorderColor: '#10b981',
     },
     {
         // 5. Zesty Orange & Coral (#FC8454)
@@ -87,6 +91,7 @@ const CIRCLE_PALETTES = [
         shimmerColor: { light: 'rgba(249, 115, 22, 0.7)', dark: 'rgba(253, 186, 116, 0.85)' },
         buttonBorder: 'border-orange-500/30 dark:border-orange-400/30 text-orange-700 dark:text-orange-300 hover:bg-orange-500/20 dark:hover:bg-orange-500/35',
         titleHover: 'group-hover:text-orange-700 dark:group-hover:text-orange-300',
+        hoverBorderColor: '#f97316',
     },
     {
         // 6. Rose & Magenta
@@ -99,11 +104,76 @@ const CIRCLE_PALETTES = [
         shimmerColor: { light: 'rgba(244, 63, 94, 0.7)', dark: 'rgba(253, 164, 175, 0.85)' },
         buttonBorder: 'border-rose-500/30 dark:border-rose-400/30 text-rose-700 dark:text-rose-300 hover:bg-rose-500/20 dark:hover:bg-rose-500/35',
         titleHover: 'group-hover:text-rose-700 dark:group-hover:text-rose-300',
+        hoverBorderColor: '#f43f5e',
     },
 ];
 
+function getPaletteForModule(slug?: string, fallbackIndex: number = 0) {
+    if (!slug) return CIRCLE_PALETTES[fallbackIndex % CIRCLE_PALETTES.length];
+    const cleanSlug = slug.replace(/^module-/, '').toLowerCase();
+    switch (cleanSlug) {
+        // Cyan & Teal (#06b6d4) -> AI, Database
+        case 'ai':
+        case 'ai-ml':
+        case 'artificial-intelligence':
+        case 'database':
+        case 'db':
+        case 'sql':
+        case 'nosql':
+            return CIRCLE_PALETTES[0];
+
+        // Purple & Indigo (#a855f7) -> Backend Dev, JS Internals
+        case 'backend':
+        case 'backend-development':
+        case 'javascript':
+        case 'javascript-internals':
+        case 'js':
+            return CIRCLE_PALETTES[1];
+
+        // Primary Zenith Blue (#6A7CFF) -> Blockchain, OOPs
+        case 'blockchain':
+        case 'oops':
+        case 'oop':
+        case 'object-oriented-programming':
+        case 'lld':
+        case 'low-level-design':
+            return CIRCLE_PALETTES[2];
+
+        // Emerald & Mint (#10b981) -> Cloud DevOps, OS
+        case 'devops':
+        case 'cloud-devops':
+        case 'cloud':
+        case 'os':
+        case 'operating-system':
+        case 'operating-systems':
+            return CIRCLE_PALETTES[3];
+
+        // Zesty Orange & Coral (#f97316) -> Computer Networks, System Design
+        case 'cn':
+        case 'computer-networks':
+        case 'networking':
+        case 'system-design':
+        case 'hld':
+        case 'system':
+            return CIRCLE_PALETTES[4];
+
+        // Rose & Magenta (#f43f5e) -> DSA, Web Dev (Frontend)
+        case 'dsa':
+        case 'data-structures':
+        case 'data-structures-and-algorithms':
+        case 'frontend':
+        case 'webdev':
+        case 'web-dev':
+        case 'web-development':
+            return CIRCLE_PALETTES[5];
+
+        default:
+            return CIRCLE_PALETTES[fallbackIndex % CIRCLE_PALETTES.length];
+    }
+}
+
 export const ModuleCard: React.FC<ModuleCardProps> = ({ module, index = 0, onSolve, className }) => {
-    const palette = CIRCLE_PALETTES[index % CIRCLE_PALETTES.length];
+    const palette = getPaletteForModule(module?.slug, index);
     const [imageError, setImageError] = useState(false);
 
     const iconSlug = module.slug.startsWith('module-') ? module.slug : `module-${module.slug}`;
@@ -114,6 +184,11 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ module, index = 0, onSol
             variant={CardVariant.FLAT}
             effectConfig={{
                 borderEffect: CardBorderEffect.GRADIENT_HOVER,
+                borderEffectProps: {
+                    [CardBorderEffect.GRADIENT_HOVER]: {
+                        gradientColor: palette.hoverBorderColor,
+                    },
+                },
                 wrapperEffect: CardWrapperEffect.INTERACTIVE_3D,
                 wrapperEffectProps: {
                     [CardWrapperEffect.INTERACTIVE_3D]: {
@@ -123,7 +198,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ module, index = 0, onSol
                 },
             }}
             className={cn(
-                'relative rounded-3xl p-6 sm:p-8 overflow-hidden border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark h-80 w-full max-w-145 flex flex-col justify-between shadow-xs transition-[border-color,box-shadow,color,background-color] duration-300 group cursor-pointer select-none font-sans',
+                'relative rounded-2xl sm:rounded-3xl p-4.5 xs:p-5 sm:p-6 2xl:p-8 overflow-hidden border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark h-full w-full max-w-full flex flex-col justify-between shadow-xs transition-[border-color,box-shadow,color,background-color] duration-300 group cursor-pointer select-none font-sans',
                 palette.cardBg,
                 className
             )}
@@ -156,7 +231,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ module, index = 0, onSol
             />
 
             {/* Top Card Section */}
-            <div className="relative z-10 space-y-4 pr-6">
+            <div className="relative z-10 space-y-3 sm:space-y-4 pr-3 sm:pr-6">
                 {/* Header Module Icon & Problem Count */}
                 <div className="flex items-center justify-between">
                     {!imageError ? (
@@ -165,41 +240,41 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ module, index = 0, onSol
                             alt={module.title}
                             width={60}
                             height={60}
-                            className="size-xxl-1 object-contain rounded-md ml-2"
+                            className="size-9 xs:size-11 sm:size-13 2xl:size-15 object-contain rounded-md ml-1 sm:ml-2"
                             onError={() => setImageError(true)}
                         />
                     ) : (
-                        <Command className="size-xxl-1 text-primary" />
+                        <Command className="size-9 xs:size-11 sm:size-13 2xl:size-15 text-primary ml-1 sm:ml-2" />
                     )}
 
                     {module.problemCount !== undefined && module.problemCount > 0 && (
-                        <div className="flex items-center gap-1.5 text-xs font-medium text-muted-light dark:text-muted-dark bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 px-3 py-1 rounded-full border border-foreground-light-shade3/40 dark:border-foreground-dark-shade3/40">
-                            <BookOpen className="size-3.5 text-primary" />
+                        <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-muted-light dark:text-muted-dark bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full border border-foreground-light-shade3/40 dark:border-foreground-dark-shade3/40 shrink-0">
+                            <BookOpen className="size-3 sm:size-3.5 text-primary" />
                             <span>{module.problemCount} Problems</span>
                         </div>
                     )}
                 </div>
 
                 {/* Module Title & Description */}
-                <CardHeader className="p-0 space-y-2">
-                    <CardTitle className={cn("text-xl sm:text-2xl font-extrabold tracking-tight text-foreground-dark-shade3 dark:text-background-light-shade3 line-clamp-1 transition-colors", palette.titleHover)}>
+                <CardHeader className="p-0 space-y-1 sm:space-y-2">
+                    <CardTitle className={cn("text-base xs:text-lg sm:text-xl 2xl:text-2xl font-extrabold tracking-tight text-foreground-dark-shade3 dark:text-background-light-shade3 line-clamp-1 transition-colors", palette.titleHover)}>
                         {module.title}
                     </CardTitle>
-                    <CardDescription className="text-xs sm:text-sm text-muted-light dark:text-muted-dark font-normal leading-relaxed line-clamp-3 overflow-hidden text-ellipsis">
+                    <CardDescription className="text-xs sm:text-sm text-muted-light dark:text-muted-dark font-normal leading-relaxed line-clamp-2 sm:line-clamp-3 overflow-hidden text-ellipsis">
                         {module.description}
                     </CardDescription>
                 </CardHeader>
             </div>
 
             {/* Bottom Action Footer */}
-            <div className="relative z-10 pt-4 flex items-center justify-between border-t border-foreground-light-shade3/50 dark:border-foreground-dark-shade3/50">
+            <div className="relative z-10 pt-3 sm:pt-4 flex items-center justify-between border-t border-foreground-light-shade3/50 dark:border-foreground-dark-shade3/50">
                 <Button
                     variant={ButtonVariant.DEFAULT}
                     effect={ButtonEffect.SHIMMER}
                     background={palette.buttonBg}
                     shimmerColor={palette.shimmerColor}
                     className={cn(
-                        'ml-2 px-5 py-2.5 rounded-full border backdrop-blur-md text-xs font-semibold shadow-xs transition-all duration-300 cursor-pointer flex items-center justify-center gap-2',
+                        'ml-1 sm:ml-2 px-3.5 sm:px-5 py-1.5 sm:py-2.5 rounded-full border backdrop-blur-md text-[11px] sm:text-xs font-semibold shadow-xs transition-all duration-300 cursor-pointer flex items-center justify-center gap-2',
                         palette.buttonBorder
                     )}
                     onClick={(e) => {
@@ -208,7 +283,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ module, index = 0, onSol
                     }}
                 >
                     <span>Solve Module</span>
-                    <ArrowRight className="size-3.5" />
+                    <ArrowRight className="size-3 sm:size-3.5" />
                 </Button>
             </div>
         </Card>

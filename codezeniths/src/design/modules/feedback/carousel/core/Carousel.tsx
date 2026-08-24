@@ -94,7 +94,7 @@ export const CarouselContent = forwardRef<HTMLDivElement, CarouselContentProps>(
     return (
       <div 
         ref={emblaRef} 
-        className={cn(carouselContentVariants({ effect: activeEffect }), viewportClassName)}
+        className={cn(carouselContentVariants({ effect: activeEffect }), 'w-full min-w-0 max-w-full', viewportClassName)}
         data-slot="carousel-viewport"
       >
         <div

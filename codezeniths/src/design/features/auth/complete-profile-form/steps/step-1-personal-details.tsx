@@ -53,7 +53,7 @@ export const Step1PersonalDetails: React.FC<Step1Props> = ({
     const hasPhoneError = Boolean(errors.phone);
 
     return (
-        <div className="space-y-8 w-full p-6">
+        <div className="space-y-6 sm:space-y-8 w-full p-1 xs:p-2 sm:p-6">
             {/* Upload PFP Section at top */}
             <div className="w-full">
                 <UploadInput
@@ -79,7 +79,7 @@ export const Step1PersonalDetails: React.FC<Step1Props> = ({
             </div>
 
             {/* Row 1: First Name & Last Name Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-4 sm:gap-y-6 md:gap-y-8">
                 <div className="space-y-1">
                     <FloatingLabelInput
                         id="firstName"
@@ -108,7 +108,7 @@ export const Step1PersonalDetails: React.FC<Step1Props> = ({
             </div>
 
             {/* Row 2: Date of Birth & Gender Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-4 sm:gap-y-6 md:gap-y-8">
                 <div className="space-y-1">
                     <FloatingOutlineWrapper
                         label="Date of Birth"
@@ -188,9 +188,9 @@ export const Step1PersonalDetails: React.FC<Step1Props> = ({
 
             {/* Row 5: Phone Number (Optional) with Floating Styling & Live Availability Check */}
             {!hasExistingPhoneNumber && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-8 w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-4 sm:gap-x-8 gap-y-4 sm:gap-y-6 w-full">
                     {/* Country Code (1 col) */}
-                    <div className="md:col-span-1 space-y-1">
+                    <div className="sm:col-span-1 space-y-1">
                         <FloatingOutlineWrapper
                             label="Country"
                             hasValue={Boolean(currentCountryCode)}
@@ -214,7 +214,7 @@ export const Step1PersonalDetails: React.FC<Step1Props> = ({
                     </div>
 
                     {/* Phone Number Input with Floating Label (3 cols) */}
-                    <div className="md:col-span-3 space-y-1">
+                    <div className="sm:col-span-3 space-y-1">
                         <div className="relative group w-full">
                             <FloatingLabelInput
                                 id="phone"

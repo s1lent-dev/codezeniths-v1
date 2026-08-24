@@ -65,7 +65,7 @@ export const CompleteProfileForm: React.FC = () => {
 
     if (isLoadingSettings) {
         return (
-            <Card variant={CardVariant.FLAT} className="w-[95%] md:w-[80%] sm:w-[75%] max-w-6xl p-8 md:p-16 border border-secondary rounded-2xl bg-foreground-light dark:bg-foreground-dark mx-auto lg:mt-12 md:mt-8 sm:mt-4 shadow-none">
+            <Card variant={CardVariant.FLAT} className="w-full max-w-5xl p-4.5 xs:p-6 sm:p-10 md:p-14 border border-secondary rounded-xs bg-foreground-light dark:bg-foreground-dark mx-auto shadow-none">
                 <div className="flex flex-col items-center justify-center min-h-75 space-y-4">
                     <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="w-8 h-8 text-primary" />
                     <p className="text-sm text-body-light dark:text-body-dark">Loading onboarding profile...</p>
@@ -77,22 +77,22 @@ export const CompleteProfileForm: React.FC = () => {
     const maxAllowedStep = onboardingProfile?.onBoardingStep ?? 0;
 
     return (
-        <Card variant={CardVariant.FLAT} className="w-[95%] md:w-[80%] sm:w-[75%] max-w-6xl p-8 md:p-12 border border-secondary rounded-2xl bg-foreground-light dark:bg-foreground-dark mx-auto lg:mt-12 md:mt-8 sm:mt-4 shadow-none">
-            <CardHeader className="flex-col items-center justify-center mt-8 mb-8 p-0 border-none shrink-0 w-full space-y-2">
+        <Card variant={CardVariant.FLAT} className="w-full max-w-5xl p-4.5 xs:p-6 sm:p-10 md:p-12 border border-secondary rounded-xs bg-foreground-light dark:bg-foreground-dark mx-auto shadow-none">
+            <CardHeader className="flex-col items-center justify-center mt-2 xs:mt-4 sm:mt-8 mb-4 sm:mb-8 p-0 border-none shrink-0 w-full space-y-2">
                 <Typography
                     variant={TypographyVariant.H3}
-                    className="font-bold text-3xl sm:text-4xl lg:text-5xl text-body-light dark:text-body-dark text-center"
+                    className="font-bold text-2xl xs:text-3xl sm:text-4xl lg:text-5xl text-body-light dark:text-body-dark text-center"
                 >
                     Complete Your Profile
                 </Typography>
                 <Typography
                     variant={TypographyVariant.SPAN}
-                    className="block w-full max-w-sm text-center text-sm text-muted-light dark:text-muted-dark mx-auto"
+                    className="block w-full max-w-sm text-center text-xs xs:text-sm text-muted-light dark:text-muted-dark mx-auto"
                 >
                     Set up your developer identity, skills, and preferences to customize your experience.
                 </Typography>
             </CardHeader>
-            <CardContent className="p-0 w-full flex flex-col mt-12 gap-8">
+            <CardContent className="p-0 w-full flex flex-col mt-6 sm:mt-8 md:mt-10 gap-6 sm:gap-8">
                 <Stepper.Provider initialStep={STEP_DEFINITIONS[Math.min(maxAllowedStep, 3)].id}>
                     {({ methods }) => (
                         <div className="w-full flex flex-col gap-8">

@@ -282,12 +282,12 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
     const isAnnual = billingCycle === 'annual';
 
     return (
-        <Card className="w-full p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-7">
+        <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
             {/* Section Header with Cycle Switcher */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-sm bg-primary/10 text-primary shrink-0">
-                        <Layers className="size-6" />
+                    <div className="p-2.5 sm:p-3 rounded-sm bg-primary/10 text-primary shrink-0">
+                        <Layers className="size-5 sm:size-6" />
                     </div>
                     <div>
                         <Typography
@@ -341,7 +341,7 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
             </div>
 
             {/* Plans 3-Card Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4 mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 pt-2 sm:pt-4 mt-4 sm:mt-6">
                 {PLANS_CONFIG.map((plan) => (
                     <PlanCardItem
                         key={plan.id}

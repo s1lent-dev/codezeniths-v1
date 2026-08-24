@@ -11,7 +11,7 @@ export interface TagsOverviewSectionProps {
 
 export const TagsOverviewSection: React.FC<TagsOverviewSectionProps> = ({ className }) => {
     return (
-        <Container direction="col" size="none" padded={false} gap="6" className={`w-full pb-12 ${className || ''}`}>
+        <Container direction="col" size="none" padded={false} gap="6" className={`w-full max-w-full min-w-0 pb-12 ${className || ''}`}>
             {/* Header Section: Breadcrumb + Tag Info Card + Progress Card */}
             <TagsHeaderSection />
 

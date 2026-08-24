@@ -23,7 +23,7 @@ export const CategoryCardIcon: React.FC<CategoryCardIconProps> = ({
         return (
             <div
                 className={cn(
-                    'size-12 sm:size-14 rounded-xl bg-gradient-to-br from-amber-400/20 via-amber-500/15 to-yellow-500/25 border border-amber-400/35 text-amber-400 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(251,191,36,0.3)] group-hover:scale-105 transition-transform duration-300',
+                    'size-12 sm:size-14 rounded-xl bg-linear-to-br from-amber-400/20 via-amber-500/15 to-yellow-500/25 border border-amber-400/35 text-amber-400 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(251,191,36,0.3)] group-hover:scale-105 transition-transform duration-300',
                     className
                 )}
             >
@@ -87,7 +87,7 @@ export const CategoryCardIcon: React.FC<CategoryCardIconProps> = ({
     return (
         <div
             className={cn(
-                'size-8 sm:size-14 rounded-sm flex items-center justify-center shrink-0 overflow-hidden relative',
+                'size-14 sm:size-14 rounded-sm flex items-center justify-center shrink-0 overflow-hidden relative',
                 className
             )}
         >

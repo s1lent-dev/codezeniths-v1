@@ -134,30 +134,30 @@ export const SignupForm = () => {
         );
     };
 
-    const inputClassName = "border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-lg";
+    const inputClassName = "border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 xs:h-12 sm:h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm xs:text-base sm:text-lg";
 
     return (
-        <Card variant={CardVariant.FLAT} className="w-[95%] md:w-[80%] sm:w-[75%] max-w-6xl p-8 md:p-16 border border-secondary rounded-2xl bg-foreground-light dark:bg-foreground-dark mx-auto lg:mt-12 md:mt-8 sm:mt-4 shadow-none">
-            <CardHeader className="flex-col items-center justify-center mb-12 p-0 border-none shrink-0 w-full">
+        <Card variant={CardVariant.FLAT} className="w-full max-w-5xl p-4.5 xs:p-6 sm:p-10 md:p-14 lg:p-16 border border-secondary rounded-xs bg-foreground-light dark:bg-foreground-dark mx-auto shadow-none">
+            <CardHeader className="flex-col items-center justify-center mb-6 sm:mb-10 md:mb-12 p-0 border-none shrink-0 w-full">
                 <Typography
                     variant={TypographyVariant.H3}
-                    className="font-bold text-3xl sm:text-4xl lg:text-5xl text-body-light dark:text-body-dark mb-2 text-center"
+                    className="font-bold text-2xl xs:text-3xl sm:text-4xl lg:text-5xl text-body-light dark:text-body-dark mb-2 text-center"
                 >
                     Create An Account
                 </Typography>
             </CardHeader>
             <CardContent className="p-0 w-full flex flex-col gap-6">
-                <form onSubmit={form.handleSubmit(onSubmit, onError)} className="w-full flex flex-col gap-10">
-                    <Grid cols={2} gap="lg">
+                <form onSubmit={form.handleSubmit(onSubmit, onError)} className="w-full flex flex-col gap-6 sm:gap-8 md:gap-10">
+                    <Grid cols={1} className="sm:grid-cols-2" gap="md">
                         <GridItem colSpan={1}>
                             <Button
                                 type="button"
                                 variant={ButtonVariant.OUTLINE}
                                 size={ButtonSize.LG}
                                 onClick={handleGoogleOAuth}
-                                className="w-full h-14 text-lg gap-4 bg-primary/5 dark:bg-primary/5 hover:bg-primary/15 dark:hover:bg-primary/10 border-primary/20 hover:border-primary/40 text-body-light dark:text-body-dark transition-all duration-300 flex items-center justify-center shadow-sm hover:shadow-primary/10"
+                                className="w-full h-11 xs:h-12 sm:h-14 text-sm xs:text-base sm:text-lg gap-3 sm:gap-4 bg-primary/5 dark:bg-primary/5 hover:bg-primary/15 dark:hover:bg-primary/10 border-primary/20 hover:border-primary/40 text-body-light dark:text-body-dark transition-all duration-300 flex items-center justify-center shadow-sm hover:shadow-primary/10"
                             >
-                                <Image src={GoogleIcon} alt="Google" width={24} height={24} className="opacity-90" />
+                                <Image src={GoogleIcon} alt="Google" width={22} height={22} className="opacity-90" />
                                 Google
                             </Button>
                         </GridItem>
@@ -167,9 +167,9 @@ export const SignupForm = () => {
                                 variant={ButtonVariant.OUTLINE}
                                 size={ButtonSize.LG}
                                 onClick={handleGithubOAuth}
-                                className="w-full h-14 text-lg gap-4 bg-primary/5 dark:bg-primary/5 hover:bg-primary/15 dark:hover:bg-primary/10 border-primary/20 hover:border-primary/40 text-body-light dark:text-body-dark transition-all duration-300 flex items-center justify-center shadow-sm hover:shadow-primary/10"
+                                className="w-full h-11 xs:h-12 sm:h-14 text-sm xs:text-base sm:text-lg gap-3 sm:gap-4 bg-primary/5 dark:bg-primary/5 hover:bg-primary/15 dark:hover:bg-primary/10 border-primary/20 hover:border-primary/40 text-body-light dark:text-body-dark transition-all duration-300 flex items-center justify-center shadow-sm hover:shadow-primary/10"
                             >
-                                <Image src={GithubIcon} alt="Github" width={24} height={24} className="opacity-90 " />
+                                <Image src={GithubIcon} alt="Github" width={22} height={22} className="opacity-90 " />
                                 Github
                             </Button>
                         </GridItem>
@@ -180,13 +180,13 @@ export const SignupForm = () => {
                             <Separator className="w-full bg-secondary-shade2/25 dark:bg-secondary-shade2/25" />
                         </div>
                         <div className="relative flex justify-center">
-                            <Typography variant={TypographyVariant.SPAN} className="bg-foreground-light dark:bg-foreground-dark px-4 text-muted-light-shade3 dark:text-muted-dark-shade3 font-normal text-[0.75rem] tracking-wider">
+                            <Typography variant={TypographyVariant.SPAN} className="bg-foreground-light dark:bg-foreground-dark px-3 xs:px-4 text-muted-light-shade3 dark:text-muted-dark-shade3 font-normal text-[0.7rem] xs:text-xs tracking-wider text-center">
                                 Or, register with your email
                             </Typography>
                         </div>
                     </Container>
 
-                    <Grid cols={1} className="md:grid-cols-2" gap="xl">
+                    <Grid cols={1} className="md:grid-cols-2" gap="lg">
                         <GridItem colSpan={1}>
                             <Container direction="col" size="none" padded={false} centered={false} className="space-y-2">
                                 <Container direction="col" size="none" padded={false} centered={false} className="relative">
@@ -278,7 +278,7 @@ export const SignupForm = () => {
                         </GridItem>
                     </Grid>
 
-                    <div className="relative group w-full pt-2">
+                    <div className="relative group w-full pt-1">
                         <PhoneInput 
                             countryCode={watchedValues.countryCode}
                             onCountryCodeChange={(val) => form.setValue('countryCode', val, { shouldValidate: true })}
@@ -309,7 +309,7 @@ export const SignupForm = () => {
                         </div>
                     </div>
 
-                    <Grid cols={1} className="md:grid-cols-2" gap="xl">
+                    <Grid cols={1} className="md:grid-cols-2" gap="lg">
                         <GridItem colSpan={1}>
                             <Container direction="col" size="none" padded={false} centered={false} className="space-y-2">
                                 <Container direction="col" size="none" padded={false} centered={false} className="relative">
@@ -331,7 +331,7 @@ export const SignupForm = () => {
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark transition-colors cursor-pointer"
                                         >
-                                            {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                         </button>
                                     </div>
                                 </Container>
@@ -362,7 +362,7 @@ export const SignupForm = () => {
                                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                             className="text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark transition-colors cursor-pointer"
                                         >
-                                            {showConfirmPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                         </button>
                                     </div>
                                 </Container>
@@ -375,7 +375,7 @@ export const SignupForm = () => {
                         </GridItem>
                     </Grid>
 
-                    <div className="flex justify-center my-3">
+                    <div className="flex justify-center my-2 max-w-full overflow-hidden scale-[0.80] xs:scale-[0.88] sm:scale-100 origin-center">
                         <Turnstile
                             ref={turnstileRef}
                             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
@@ -386,23 +386,23 @@ export const SignupForm = () => {
                         />
                     </div>
 
-                    <div className="flex justify-center pt-6">
+                    <div className="flex justify-center pt-2 sm:pt-4">
                         <Button
                             type="submit"
                             variant={ButtonVariant.SECONDARY}
                             effect={ButtonEffect.SHIMMER}
                             isLoading={isSubmitting}
                             disabled={!turnstileToken}
-                            className="w-auto px-8 h-12 text-foreground-dark dark:text-foreground-light-shade3 shadow-md"
+                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 px-4 xs:px-6 sm:px-12 h-11 xs:h-12 sm:h-14 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md mx-auto"
                         >
                             {isSubmitting ? 'Creating...' : 'Create Account'}
                             {!isSubmitting && <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />}
                         </Button>
                     </div>
-                    <Separator className="w-full mt-6 bg-secondary-shade2/25 dark:bg-secondary/25" />
+                    <Separator className="w-full mt-4 sm:mt-6 bg-secondary-shade2/25 dark:bg-secondary/25" />
 
-                    <Container direction="row" align="center" justify="end" size="none" padded={false} centered={false} className="w-full mt-2">
-                        <Typography variant={TypographyVariant.P} className="text-sm text-muted-light dark:text-muted-dark text-right">
+                    <Container direction="row" align="center" justify="end" size="none" padded={false} centered={false} className="w-full mt-2 text-center sm:text-right">
+                        <Typography variant={TypographyVariant.P} className="text-xs xs:text-sm text-muted-light dark:text-muted-dark w-full sm:w-auto">
                             Already have an account?{' '}
                             <Link href="/sign-in" className="text-heading-light dark:text-heading-dark font-medium hover:underline">
                                 Login

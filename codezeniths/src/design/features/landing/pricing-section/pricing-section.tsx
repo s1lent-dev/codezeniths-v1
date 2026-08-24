@@ -5,6 +5,7 @@ import {
     Container,
     Typography,
     TypographyVariant,
+    TypographyAlign,
     Badge,
     Separator,
     Button,
@@ -122,8 +123,8 @@ const PricingCardItem = ({ plan }: { plan: any }) => {
         <Card
             variant={CardVariant.FLAT}
             className={cn(
-                "relative p-6 flex flex-col justify-start rounded-2xl border bg-foreground-light dark:bg-foreground-dark border-secondary h-full w-full",
-                plan.popular ? "md:-translate-y-4 shadow-2xl border-primary/50" : ""
+                "relative p-4 xs:p-6 flex flex-col justify-start rounded-xl sm:rounded-2xl border bg-foreground-light dark:bg-foreground-dark border-secondary h-full w-full",
+                plan.popular ? "lg:-translate-y-4 shadow-2xl border-primary/50" : ""
             )}
         >
             {plan.popular && (
@@ -149,21 +150,21 @@ const PricingCardItem = ({ plan }: { plan: any }) => {
             )}
 
             <CardHeader padded={false} className="flex flex-col items-start mb-4 p-0 w-full border-none shrink-0">
-                <div className="w-10 h-10 bg-primary/10 text-primary flex items-center justify-center rounded-sm mb-4">
+                <div className="w-10 h-10 bg-primary/10 text-primary flex items-center justify-center rounded-md sm:rounded-lg mb-4">
                     <plan.icon className="w-5 h-5" />
                 </div>
-                <CardTitle className="font-semibold text-lg text-body-light dark:text-body-dark mb-2">
+                <CardTitle className="font-semibold text-base sm:text-lg text-body-light dark:text-body-dark mb-2">
                     {plan.title}
                 </CardTitle>
                 <div className="flex items-baseline gap-1 mb-2">
-                    <Typography variant={TypographyVariant.H2} className="font-bold text-3xl text-body-light dark:text-body-dark">
+                    <Typography variant={TypographyVariant.H2} className="font-bold text-2xl xs:text-3xl text-body-light dark:text-body-dark">
                         {plan.price}
                     </Typography>
-                    <span className="text-sm text-muted-light dark:text-muted-dark">
+                    <span className="text-xs sm:text-sm text-muted-light dark:text-muted-dark">
                         {plan.period}
                     </span>
                 </div>
-                <CardDescription className="text-[0.85rem] text-muted-light dark:text-muted-dark leading-relaxed m-0 p-0">
+                <CardDescription className="text-xs sm:text-[0.85rem] text-muted-light dark:text-muted-dark leading-relaxed m-0 p-0">
                     {plan.description}
                 </CardDescription>
             </CardHeader>
@@ -171,7 +172,7 @@ const PricingCardItem = ({ plan }: { plan: any }) => {
             <Button 
                 variant={plan.buttonVariant} 
                 size={ButtonSize.DEFAULT} 
-                className="w-full mb-6 font-semibold shrink-0"
+                className="w-full mb-6 font-semibold shrink-0 text-xs sm:text-sm rounded-md sm:rounded-lg"
                 effect={plan.buttonEffect}
                 pulseColor={plan.buttonEffect === ButtonEffect.PULSATING ? plan.pulseColor : undefined}
                 pulseDuration={plan.buttonEffect === ButtonEffect.PULSATING ? plan.pulseDuration : undefined}
@@ -190,7 +191,7 @@ const PricingCardItem = ({ plan }: { plan: any }) => {
                     {plan.standoutFeatures.map((feature: string, fIndex: number) => (
                         <div key={fIndex} className="flex items-start gap-3">
                             <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                            <span className="text-[0.85rem] leading-snug text-body-light/80 dark:text-muted-dark/90">
+                            <span className="text-xs sm:text-[0.85rem] leading-snug text-body-light/80 dark:text-muted-dark/90">
                                 {feature}
                             </span>
                         </div>
@@ -200,7 +201,7 @@ const PricingCardItem = ({ plan }: { plan: any }) => {
                         <div className="mt-2">
                             <button 
                                 onClick={() => setIsExpanded(!isExpanded)}
-                                className="flex items-center gap-2 text-sm font-semibold text-muted-light dark:text-muted-dark hover:text-primary transition-colors py-2"
+                                className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-muted-light dark:text-muted-dark hover:text-primary transition-colors py-2 cursor-pointer"
                             >
                                 {isExpanded ? 'See less' : 'See more'}
                                 <ChevronDown className={cn("w-4 h-4 transition-transform", isExpanded ? "rotate-180" : "")} />
@@ -216,7 +217,7 @@ const PricingCardItem = ({ plan }: { plan: any }) => {
                                     {plan.moreFeatures.map((feature: string, fIndex: number) => (
                                         <div key={fIndex} className="flex items-start gap-3 opacity-80">
                                             <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                                            <span className="text-[0.85rem] leading-snug text-body-light/80 dark:text-muted-dark/90">
+                                            <span className="text-xs sm:text-[0.85rem] leading-snug text-body-light/80 dark:text-muted-dark/90">
                                                 {feature}
                                             </span>
                                         </div>
@@ -233,28 +234,30 @@ const PricingCardItem = ({ plan }: { plan: any }) => {
 
 export const PricingSection = () => {
     return (
-        <section className="py-16 relative bg-background-light dark:bg-background-dark overflow-hidden">
-            <Container size="5xl" className="mx-auto px-6 lg:px-8 relative z-10">
+        <section className="py-12 sm:py-16 lg:py-24 relative bg-background-light dark:bg-background-dark overflow-hidden">
+            <Container size="5xl" className="mx-auto px-4 xs:px-6 lg:px-8 relative z-10">
                 {/* Header */}
                 <motion.div 
                     initial={{ opacity: 0, y: -20, filter: "blur(5px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="flex flex-col items-center text-center max-w-2xl mx-auto mb-20 gap-4"
+                    className="flex flex-col items-center text-center max-w-2xl mx-auto mb-12 sm:mb-20 gap-4"
                 >
-                    <Badge variant="outline" className="rounded-full px-8 py-1.5 text-sm font-semibold bg-foreground-light dark:bg-foreground-dark text-body-light dark:text-body-dark border-secondary">
+                    <Badge variant="outline" className="mx-auto rounded-full px-6 sm:px-8 py-1.5 text-xs sm:text-sm font-semibold bg-foreground-light dark:bg-foreground-dark text-body-light dark:text-body-dark border-secondary">
                         Pricing Plans
                     </Badge>
                     <Typography
                         variant={TypographyVariant.H2}
-                        className="font-bold text-3xl sm:text-4xl text-foreground-dark-shade3 dark:text-foreground-light-shade3 mt-4"
+                        align={TypographyAlign.CENTER}
+                        className="font-bold text-2xl xs:text-3xl sm:text-4xl text-foreground-dark-shade3 dark:text-foreground-light-shade3 mt-4 text-center"
                     >
                         Choose your path to the Zenith
                     </Typography>
                     <Typography
                         variant={TypographyVariant.P}
-                        className="text-[0.900rem] leading-6 font-extrathin text-muted-light-shade1 dark:text-muted-dark-shade1 mt-2 items-center text-center max-w-xl mx-auto"
+                        align={TypographyAlign.CENTER}
+                        className="text-xs xs:text-sm sm:text-[0.900rem] leading-relaxed sm:leading-6 font-extrathin text-muted-light-shade1 dark:text-muted-dark-shade1 mt-2 text-center max-w-xl mx-auto"
                     >
                         Whether you're just starting your journey or aiming to architect highly scalable systems, we have a plan crafted specifically for you.
                     </Typography>
@@ -272,7 +275,7 @@ export const PricingSection = () => {
                             transition: { staggerChildren: 0.2 }
                         }
                     }}
-                    className="flex flex-col lg:flex-row items-stretch justify-center gap-8 w-full max-w-6xl mx-auto"
+                    className="flex flex-col lg:flex-row items-stretch justify-center gap-6 xs:gap-8 w-full max-w-6xl mx-auto"
                 >
                     {PRICING_PLANS.map((plan, index) => (
                         <motion.div 

@@ -14,19 +14,19 @@ export const ModuleSliderSkeleton: React.FC<ModuleSliderSkeletonProps> = ({ clas
     return (
         <div className={cn('relative w-full py-4 select-none font-sans overflow-hidden', className)}>
             {/* 3D Perspective Carousel Container */}
-            <div className="relative w-full h-95 flex items-center justify-center perspective-[1000px]">
+            <div className="relative w-full h-[300px] xs:h-[310px] sm:h-[330px] md:h-[340px] lg:h-[360px] 2xl:h-[380px] flex items-center justify-center perspective-[1000px]">
                 {/* 1. Left Side 3D Perspective Card (Angled & Scaled Down) */}
-                <div className="absolute left-0 sm:left-[15%] md:left-[25%] lg:left-[45%] w-120 sm:w-135 max-w-[85vw] h-77.5 z-10 scale-[0.82] opacity-40 blur-[0.5px] pointer-events-none transform-gpu -rotate-y-12 translate-z-[-80px] transition-all duration-500 hidden sm:block">
+                <div className="absolute left-[5%] sm:left-[10%] md:left-[15%] lg:left-[22%] w-[84vw] max-w-[320px] xs:w-[340px] xs:max-w-none sm:w-[380px] md:w-[410px] lg:w-[480px] xl:w-[530px] 2xl:w-[580px] h-[270px] xs:h-[280px] sm:h-[295px] md:h-[305px] lg:h-[320px] 2xl:h-[340px] z-10 scale-[0.82] opacity-40 blur-[0.5px] pointer-events-none transform-gpu -rotate-y-12 translate-z-[-80px] transition-all duration-500 hidden sm:block">
                     <ModuleCardSkeleton />
                 </div>
 
                 {/* 2. Center Front Card (Active Focus Slide) */}
-                <div className="relative w-145 max-w-[92vw] h-85 z-20 scale-100 shadow-2xl pointer-events-none transform-gpu transition-all duration-500">
+                <div className="relative w-[84vw] max-w-[320px] xs:w-[340px] xs:max-w-none sm:w-[380px] md:w-[410px] lg:w-[480px] xl:w-[530px] 2xl:w-[580px] h-[270px] xs:h-[280px] sm:h-[295px] md:h-[305px] lg:h-[320px] 2xl:h-[340px] z-20 scale-100 shadow-2xl pointer-events-none transform-gpu transition-all duration-500">
                     <ModuleCardSkeleton />
                 </div>
 
                 {/* 3. Right Side 3D Perspective Card (Angled & Scaled Down) */}
-                <div className="absolute right-0 sm:right-[15%] md:right-[25%] lg:right-[45%] w-120 sm:w-135 max-w-[85vw] h-77.5 z-10 scale-[0.82] opacity-40 blur-[0.5px] pointer-events-none transform-gpu rotate-y-12 translate-z-[-80px] transition-all duration-500 hidden sm:block">
+                <div className="absolute right-[5%] sm:right-[10%] md:right-[15%] lg:right-[22%] w-[84vw] max-w-[320px] xs:w-[340px] xs:max-w-none sm:w-[380px] md:w-[410px] lg:w-[480px] xl:w-[530px] 2xl:w-[580px] h-[270px] xs:h-[280px] sm:h-[295px] md:h-[305px] lg:h-[320px] 2xl:h-[340px] z-10 scale-[0.82] opacity-40 blur-[0.5px] pointer-events-none transform-gpu rotate-y-12 translate-z-[-80px] transition-all duration-500 hidden sm:block">
                     <ModuleCardSkeleton />
                 </div>
             </div>

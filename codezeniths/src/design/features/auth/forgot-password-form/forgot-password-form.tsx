@@ -42,7 +42,7 @@ export const ForgotPasswordForm = () => {
     const [showNewPassword, setShowNewPassword] = React.useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
-    const inputClassName = "border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-lg w-full";
+    const inputClassName = "border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 xs:h-12 sm:h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm xs:text-base sm:text-lg w-full";
 
     const rawIdentifier = requestForm.watch('identifier') || '';
     const currentCountryCode = rawIdentifier.startsWith('+') ? (rawIdentifier.split(' ')[0] || DEFAULT_COUNTRY_CODE) : DEFAULT_COUNTRY_CODE;
@@ -52,9 +52,9 @@ export const ForgotPasswordForm = () => {
         : Boolean(rawIdentifier && !requestForm.formState.errors.identifier);
 
     return (
-        <Card variant={CardVariant.FLAT} className="w-[95%] md:w-[80%] sm:w-[75%] max-w-2xl p-8 md:p-12 border border-secondary rounded-2xl bg-foreground-light dark:bg-foreground-dark mx-auto lg:mt-12 md:mt-8 sm:mt-4 shadow-none">
+        <Card variant={CardVariant.FLAT} className="w-full max-w-2xl p-4.5 xs:p-6 sm:p-10 md:p-14 border border-secondary rounded-xs bg-foreground-light dark:bg-foreground-dark mx-auto shadow-none">
             
-            <CardHeader className="flex flex-col items-center justify-center mb-6 p-0 border-none shrink-0 w-full relative">
+            <CardHeader className="flex flex-col items-center justify-center mb-4 sm:mb-6 p-0 border-none shrink-0 w-full relative">
                 
                 {step === 'verify' && (
                     <button 
@@ -62,22 +62,22 @@ export const ForgotPasswordForm = () => {
                         className="absolute left-0 top-0 p-2 text-muted-light dark:text-muted-dark hover:text-primary transition-colors cursor-pointer"
                         aria-label="Go back"
                     >
-                        <ChevronLeft size={24} />
+                        <ChevronLeft size={22} />
                     </button>
                 )}
 
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                    <KeyRound className="w-8 h-8 text-primary" />
+                <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <KeyRound className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 text-primary" />
                 </div>
                 
                 <Typography
                     variant={TypographyVariant.H3}
-                    className="font-bold text-2xl sm:text-3xl lg:text-4xl text-body-light dark:text-body-dark mb-2 text-center"
+                    className="font-bold text-xl xs:text-2xl sm:text-3xl lg:text-4xl text-body-light dark:text-body-dark mb-2 text-center"
                 >
                     {step === 'request' ? 'Forgot Password?' : 'Secure Your Account'}
                 </Typography>
                 
-                <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark max-w-sm">
+                <Typography variant={TypographyVariant.P} className="text-center text-muted-light dark:text-muted-dark max-w-sm text-xs xs:text-sm sm:text-base leading-relaxed">
                     {step === 'request' 
                         ? 'Enter your details below to reset it.'
                         : (authType === 'email' 
@@ -88,29 +88,29 @@ export const ForgotPasswordForm = () => {
                 </Typography>
             </CardHeader>
 
-            <CardContent className="p-0 w-full flex flex-col items-center gap-6">
+            <CardContent className="p-0 w-full flex flex-col items-center gap-5 sm:gap-6">
                 
                 {step === 'request' && (
-                    <div className="w-full flex flex-col items-center gap-6">
+                    <div className="w-full flex flex-col items-center gap-5 sm:gap-6">
                         {/* Custom sleek tabs/toggle */}
-                        <div className="flex bg-muted-light/10 dark:bg-muted-dark/10 p-1 rounded-lg w-full max-w-sm mb-2">
+                        <div className="flex bg-muted-light/10 dark:bg-muted-dark/10 p-1 rounded-lg w-full max-w-xs sm:max-w-sm mb-1 sm:mb-2">
                             <button
                                 type="button"
                                 onClick={() => handleTypeChange('email')}
-                                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium transition-all rounded-md cursor-pointer ${authType === 'email' ? 'bg-primary text-white shadow-sm' : 'text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark'}`}
+                                className={`flex-1 flex items-center justify-center gap-2 py-1.5 xs:py-2 text-xs xs:text-sm font-medium transition-all rounded-md cursor-pointer ${authType === 'email' ? 'bg-primary text-white shadow-sm' : 'text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark'}`}
                             >
-                                <Mail size={16} /> Email
+                                <Mail size={15} /> Email
                             </button>
                             <button
                                 type="button"
                                 onClick={() => handleTypeChange('phone')}
-                                className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium transition-all rounded-md cursor-pointer ${authType === 'phone' ? 'bg-primary text-white shadow-sm' : 'text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark'}`}
+                                className={`flex-1 flex items-center justify-center gap-2 py-1.5 xs:py-2 text-xs xs:text-sm font-medium transition-all rounded-md cursor-pointer ${authType === 'phone' ? 'bg-primary text-white shadow-sm' : 'text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark'}`}
                             >
-                                <Smartphone size={16} /> Phone
+                                <Smartphone size={15} /> Phone
                             </button>
                         </div>
 
-                        <form onSubmit={handleRequest} className="w-full sm:w-[80%] md:w-[70%] flex flex-col items-center gap-6">
+                        <form onSubmit={handleRequest} className="w-full sm:w-[90%] md:w-[80%] flex flex-col items-center gap-5 sm:gap-6">
                             
                             <Container direction="col" size="none" padded={false} centered={false} className="w-full space-y-2">
                                 <div className="relative w-full">
@@ -160,7 +160,7 @@ export const ForgotPasswordForm = () => {
                                 )}
                             </Container>
 
-                            <div className="flex justify-center my-1 w-full">
+                            <div className="flex justify-center my-1 w-full max-w-full overflow-hidden scale-[0.80] xs:scale-[0.88] sm:scale-100 origin-center">
                                 <Turnstile
                                     ref={turnstileRef}
                                     siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
@@ -179,7 +179,7 @@ export const ForgotPasswordForm = () => {
                                 pulseDuration={'1.5s'}
                                 isLoading={isSending}
                                 disabled={!isIdentifierValid || isSending || !!requestForm.formState.errors.identifier || !turnstileToken}
-                                className="w-full h-12 text-foreground-dark dark:text-foreground-light shadow-md mt-2 cursor-pointer disabled:cursor-not-allowed"
+                                className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light shadow-md mt-2 cursor-pointer disabled:cursor-not-allowed mx-auto"
                             >
                                 Send Reset Code
                                 {!isSending && <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />}
@@ -189,32 +189,32 @@ export const ForgotPasswordForm = () => {
                 )}
 
                 {step === 'verify' && (
-                    <form onSubmit={handleVerify} className="w-full sm:w-[90%] md:w-[85%] flex flex-col items-center gap-8">
+                    <form onSubmit={handleVerify} className="w-full sm:w-[90%] md:w-[85%] flex flex-col items-center gap-6 sm:gap-8">
                         
-                        <Container direction="col" align="center" size="none" padded={false} centered={false} className="w-full gap-2">
+                        <Container direction="col" align="center" size="none" padded={false} centered={false} className="w-full gap-2 overflow-x-auto py-1">
                             <InputOTP 
                                 maxLength={6} 
                                 value={verifyForm.watch('otp')} 
                                 onChange={(val) => verifyForm.setValue('otp', val, { shouldValidate: true })}
-                                containerClassName="gap-2 sm:gap-4 flex justify-center w-full"
+                                containerClassName="gap-1 xs:gap-1.5 sm:gap-3 flex justify-center w-full"
                             >
-                                <InputOTPGroup className="gap-2 sm:gap-4 flex justify-center w-full">
-                                    <InputOTPSlot index={0} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={1} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={2} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={3} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={4} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={5} className={`w-12 h-14 sm:w-14 sm:h-16 text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
+                                <InputOTPGroup className="gap-1 xs:gap-1.5 sm:gap-3 flex justify-center w-full">
+                                    <InputOTPSlot index={0} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
+                                    <InputOTPSlot index={1} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
+                                    <InputOTPSlot index={2} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
+                                    <InputOTPSlot index={3} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
+                                    <InputOTPSlot index={4} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
+                                    <InputOTPSlot index={5} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
                                 </InputOTPGroup>
                             </InputOTP>
                             {verifyForm.formState.errors.otp && (
-                                <Typography variant={TypographyVariant.CAPTION} className="text-red-500 dark:text-red-400 mt-2">
+                                <Typography variant={TypographyVariant.CAPTION} className="text-red-500 dark:text-red-400 mt-2 text-center">
                                     {verifyForm.formState.errors.otp.message}
                                 </Typography>
                             )}
                         </Container>
 
-                        <div className="w-full space-y-6 mt-2">
+                        <div className="w-full space-y-4 sm:space-y-6 mt-1 sm:mt-2">
                             <Container direction="col" size="none" padded={false} centered={false} className="w-full space-y-2 relative">
                                 <Input
                                     type={showNewPassword ? 'text' : 'password'}
@@ -225,7 +225,7 @@ export const ForgotPasswordForm = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowNewPassword(!showNewPassword)}
-                                    className="absolute right-3 top-4 text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark transition-colors cursor-pointer"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark transition-colors cursor-pointer"
                                 >
                                     {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
@@ -246,7 +246,7 @@ export const ForgotPasswordForm = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="absolute right-3 top-4 text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark transition-colors cursor-pointer"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark transition-colors cursor-pointer"
                                 >
                                     {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
@@ -264,14 +264,14 @@ export const ForgotPasswordForm = () => {
                             effect={ButtonEffect.SHIMMER}
                             isLoading={isVerifying}
                             disabled={!verifyForm.watch('otp') || verifyForm.watch('otp').length !== 6 || !verifyForm.watch('newPassword') || !verifyForm.watch('confirmPassword') || isVerifying}
-                            className="w-full h-12 text-foreground-dark dark:text-foreground-light-shade3 shadow-md mt-2 cursor-pointer disabled:cursor-not-allowed"
+                            className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md mt-2 cursor-pointer disabled:cursor-not-allowed mx-auto"
                         >
                             Reset Password
                             {!isVerifying && <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />}
                         </Button>
                         
                         <div className="flex flex-col items-center gap-2 mt-2 w-full">
-                            <Typography variant={TypographyVariant.P} className="text-sm text-center text-muted-light dark:text-muted-dark">
+                            <Typography variant={TypographyVariant.P} className="text-xs xs:text-sm text-center text-muted-light dark:text-muted-dark">
                                 Didn't receive a code?{' '}
                                 <button 
                                     type="button"
@@ -286,7 +286,7 @@ export const ForgotPasswordForm = () => {
                             <button 
                                 type="button"
                                 onClick={handleBack}
-                                className="text-sm font-medium text-muted-light dark:text-muted-dark hover:text-heading-light dark:hover:text-heading-dark hover:underline transition-colors mt-2 cursor-pointer"
+                                className="text-xs xs:text-sm font-medium text-muted-light dark:text-muted-dark hover:text-heading-light dark:hover:text-heading-dark hover:underline transition-colors mt-1 cursor-pointer"
                             >
                                 Use a different {authType}
                             </button>

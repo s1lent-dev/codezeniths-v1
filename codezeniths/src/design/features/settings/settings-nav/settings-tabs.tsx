@@ -80,4 +80,39 @@ export const SettingsNav: React.FC<SettingsNavProps> = ({ className }) => {
     );
 };
 
+export const MobileSettingsNav: React.FC<SettingsNavProps> = ({ className }) => {
+    const pathname = usePathname();
+
+    return (
+        <div className={cn('w-full overflow-x-auto no-scrollbar rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark p-1.5 shadow-xs', className)}>
+            <nav className="flex items-center gap-1 min-w-max">
+                {SETTINGS_TABS.map((tab) => {
+                    const isActive = pathname === tab.href || pathname.startsWith(tab.href + '/');
+                    const Icon = tab.icon;
+                    return (
+                        <Link
+                            key={tab.href}
+                            href={tab.href}
+                            className={cn(
+                                'flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium transition-all shrink-0 whitespace-nowrap',
+                                isActive
+                                    ? 'bg-primary/10 dark:bg-primary/15 text-primary font-semibold shadow-2xs'
+                                    : 'text-muted-light dark:text-muted-dark hover:bg-foreground-light-shade2/60 dark:hover:bg-foreground-dark-shade1/60 hover:text-body-light dark:hover:text-body-dark'
+                            )}
+                        >
+                            <Icon
+                                className={cn(
+                                    'size-3.5 shrink-0 transition-colors',
+                                    isActive ? 'text-primary' : 'text-muted-light/70 dark:text-muted-dark/70'
+                                )}
+                            />
+                            <span>{tab.label}</span>
+                        </Link>
+                    );
+                })}
+            </nav>
+        </div>
+    );
+};
+
 export { SettingsNav as SettingsTabs };

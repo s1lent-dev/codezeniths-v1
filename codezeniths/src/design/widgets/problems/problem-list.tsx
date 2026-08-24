@@ -269,13 +269,13 @@ export const ProblemList: React.FC<ProblemListProps> = ({
     return (
         <TooltipProvider delayDuration={100}>
             {/* Outer Container with Foreground Background Color */}
-            <div className={cn('w-full space-y-5 font-sans bg-foreground-light dark:bg-foreground-dark text-heading-light dark:text-heading-dark p-5 sm:p-6 rounded-lg shadow-sm', className)}>
+            <div className={cn('w-full space-y-4 sm:space-y-5 font-sans bg-foreground-light dark:bg-foreground-dark text-heading-light dark:text-heading-dark p-2.5 xs:p-3 sm:p-5 md:p-6 rounded-lg shadow-sm', className)}>
                 {/* Top Control Bar */}
-                <div className="flex items-center justify-between gap-4 pb-2">
+                <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3 sm:gap-4 pb-2">
                     {/* Left: Search input, Filter popover button, Sort popover button */}
-                    <div className="flex items-center gap-2.5 flex-1 max-w-md">
+                    <div className="flex items-center gap-2 xs:gap-2.5 flex-1 min-w-0 max-w-md">
                         {/* Search Input */}
-                        <form onSubmit={handleSearchSubmit} className="relative flex-1">
+                        <form onSubmit={handleSearchSubmit} className="relative flex-1 min-w-0">
                             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-light dark:text-muted-dark pointer-events-none" />
                             <input
                                 type="text"
@@ -599,8 +599,8 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                     </div>
 
                     {/* Right: Solved Counter Ratio + 3-dots Menu */}
-                    <div className="flex items-center gap-4">
-                        <span className="text-sm font-medium text-muted-light dark:text-muted-dark">
+                    <div className="flex items-center justify-between xs:justify-end gap-3 sm:gap-4 shrink-0 pt-2 xs:pt-0 border-t xs:border-t-0 border-foreground-light-shade3 dark:border-foreground-dark-shade3">
+                        <span className="text-xs sm:text-sm font-medium text-muted-light dark:text-muted-dark">
                             {solvedCount} / {total} solved
                         </span>
 

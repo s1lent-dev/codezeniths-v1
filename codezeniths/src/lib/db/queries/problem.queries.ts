@@ -35,7 +35,6 @@ import { Prisma } from '@prisma/client';
 import { recordProblemSolvedAndSyncStreak, revertProblemSolvedAndSyncStreak } from './utils/streak.utils';
 
 import { processScoreTransition } from './utils/leaderboard.utils';
-import { countBy } from 'lodash';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -73,7 +72,7 @@ async function attachUserProgress(
     const progresses = await prisma.problemProgress.findMany({
         where: {
             userId,
-            ...(problemIds.length <= 100 ? { problemId: { in: problemIds } } : {}),
+            problemId: { in: problemIds },
         },
         select: {
             problemId: true,
@@ -389,7 +388,11 @@ export class ProblemQueries implements IProblemQueries {
             const isTransitioningFromSolved =
                 previousStatus === 'solved' && status !== 'solved';
 
-            const solvedAt = status === 'solved' ? new Date() : null;
+            // If solving: assign new timestamp if transitioning to solved or missing timestamp, else preserve existing.
+            // If unsolving (not_solved, in_progress, etc.): explicitly reset solvedAt to null.
+            const solvedAt = status === 'solved'
+                ? (isTransitioningToSolved ? new Date() : (existingProgress?.solvedAt ?? new Date()))
+                : null;
 
             const progress = await prisma.problemProgress.upsert({
                 where: {
@@ -413,6 +416,7 @@ export class ProblemQueries implements IProblemQueries {
                     status: true,
                     revisit: true,
                     favourite: true,
+                    solvedAt: true,
                     problem: {
                         select: {
                             slug: true
@@ -810,6 +814,7 @@ export class ProblemQueries implements IProblemQueries {
 
             const userExists = await prisma.user.findUnique({
                 where: { id: userId },
+                select: { id: true },
             });
             if (!userExists) {
                 logger.warn('User not found while getting problem progress', { userId });
@@ -818,56 +823,69 @@ export class ProblemQueries implements IProblemQueries {
                     .build();
             }
 
-            // Fetch all problems
-            const allProblems = await prisma.problem.findMany({
-                select: {
-                    id: true,
-                    difficulty: true,
-                },
-            });
-
-            const problemsCount = allProblems.length;
-            const allProblemIds = allProblems.map((p) => p.id);
-
-            // Fetch user progress for these problems
-            const userProgress = await prisma.problemProgress.findMany({
-                where: {
-                    userId,
-                    ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
-                },
-                select: {
-                    status: true,
-                    revisit: true,
-                    problem: {
-                        select: {
-                            id: true,
-                            difficulty: true,
+            // High-performance parallel queries leveraging native database aggregation and indexes
+            const [difficultyGroupCounts, userSolvedProgress, problemsRevisitCount] = await Promise.all([
+                // 1. Total problem counts grouped by difficulty directly in PostgreSQL
+                prisma.problem.groupBy({
+                    by: ['difficulty'],
+                    _count: { _all: true },
+                }),
+                // 2. User's solved problems (indexed on [userId, status])
+                prisma.problemProgress.findMany({
+                    where: {
+                        userId,
+                        status: 'solved',
+                    },
+                    select: {
+                        problem: {
+                            select: {
+                                difficulty: true,
+                            },
                         },
                     },
-                },
-            });
+                }),
+                // 3. User's revisit count (indexed on [userId, revisit])
+                prisma.problemProgress.count({
+                    where: {
+                        userId,
+                        revisit: true,
+                    },
+                }),
+            ]);
 
-            const problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-            const problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
+            const problemsCountByDifficulty = {
+                easy: 0,
+                medium: 0,
+                hard: 0,
+            };
+
+            for (const item of difficultyGroupCounts) {
+                if (item.difficulty === 'easy') problemsCountByDifficulty.easy = item._count._all;
+                else if (item.difficulty === 'medium') problemsCountByDifficulty.medium = item._count._all;
+                else if (item.difficulty === 'hard') problemsCountByDifficulty.hard = item._count._all;
+            }
+
+            const problemsCount =
+                problemsCountByDifficulty.easy +
+                problemsCountByDifficulty.medium +
+                problemsCountByDifficulty.hard;
+
+            const problemsSolvedCountByDifficulty = {
+                easy: 0,
+                medium: 0,
+                hard: 0,
+            };
+
+            for (const p of userSolvedProgress) {
+                if (p.problem?.difficulty === 'easy') problemsSolvedCountByDifficulty.easy++;
+                else if (p.problem?.difficulty === 'medium') problemsSolvedCountByDifficulty.medium++;
+                else if (p.problem?.difficulty === 'hard') problemsSolvedCountByDifficulty.hard++;
+            }
+
+            const problemsSolvedCount = userSolvedProgress.length;
             const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
             const problemsSolvedPercentage =
                 problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
-
-            const solvedProgress = userProgress.filter((p) => p.status === 'solved' && p.problem);
-
-            const problemsCountByDifficultyRaw = countBy(allProblems, (p) => p.difficulty);
-            const problemsCountByDifficulty = {
-                easy: problemsCountByDifficultyRaw.easy || 0,
-                medium: problemsCountByDifficultyRaw.medium || 0,
-                hard: problemsCountByDifficultyRaw.hard || 0,
-            };
-
-            const problemsSolvedCountByDifficultyRaw = countBy(solvedProgress, (p) => p.problem!.difficulty);
-            const problemsSolvedCountByDifficulty = {
-                easy: problemsSolvedCountByDifficultyRaw.easy || 0,
-                medium: problemsSolvedCountByDifficultyRaw.medium || 0,
-                hard: problemsSolvedCountByDifficultyRaw.hard || 0,
-            };
 
             return {
                 problemsCount,
@@ -891,10 +909,12 @@ export class ProblemQueries implements IProblemQueries {
                 where: {
                     userId,
                     status: 'solved',
+                    solvedAt: { not: null },
                 },
-                orderBy: { updatedAt: 'desc' },
+                orderBy: { solvedAt: 'desc' },
                 take: limit,
-                include: {
+                select: {
+                    solvedAt: true,
                     problem: {
                         select: {
                             id: true,
@@ -906,12 +926,12 @@ export class ProblemQueries implements IProblemQueries {
             });
 
             return solvedProgress
-                .filter((p) => p.problem !== null)
+                .filter((p) => p.problem !== null && p.solvedAt !== null)
                 .map((p) => ({
-                    id: p.problem!.id,
-                    title: p.problem!.title,
-                    slug: p.problem!.slug,
-                    solvedAt: p.updatedAt,
+                    id: p.problem.id,
+                    title: p.problem.title,
+                    slug: p.problem.slug,
+                    solvedAt: p.solvedAt,
                 }));
         })
         .build();

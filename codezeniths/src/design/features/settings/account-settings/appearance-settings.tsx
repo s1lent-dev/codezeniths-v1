@@ -35,11 +35,11 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({
     onSelectTheme,
 }) => {
     return (
-        <Card className="w-full p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-7">
+        <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
             {/* Section Header */}
             <div className="flex items-center gap-3">
-                <div className="p-3 rounded-sm bg-primary/10 text-primary shrink-0">
-                    <Palette className="size-6" />
+                <div className="p-2.5 sm:p-3 rounded-sm bg-primary/10 text-primary shrink-0">
+                    <Palette className="size-5 sm:size-6" />
                 </div>
                 <div>
                     <Typography
@@ -61,7 +61,7 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({
             </div>
 
             {/* Theme Option Cards with Gradient Hover */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 pt-4 sm:pt-6">
                 {THEME_OPTIONS.map((opt) => {
                     const isSelected = selectedTheme === opt.value;
                     const IconComponent = opt.icon;

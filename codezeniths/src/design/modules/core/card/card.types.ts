@@ -192,6 +192,7 @@ interface GradientHoverEffectProps {
     gradientColor?: string | undefined;
     gradientSize?: number | undefined;
     gradientOpacity?: number | undefined;
+    borderWidth?: number | undefined;
 }
 
 // ─────────────────────────────────────────────────────────────
