@@ -12,6 +12,9 @@ import { mailService } from '@/service/mail/mail.service';
 import { SmsTemplate, smsService } from '@/service/sms';
 import { prisma } from '@/lib/db/prisma.client';
 import { logger } from '@/service/logging';
+import { searchClient } from '@/service/search';
+import { storageService } from '@/service/storage';
+import { redisService, RedisStore } from '@/lib/redis';
 
 async function getUserEmailContext(userId: string): Promise<{ name?: string; theme?: 'dark' | 'light' }> {
     try {
@@ -479,6 +482,63 @@ export const authAccountLockedSmsConsumer = createConsumer(
     { queue: MqQueue.AUTH_SMS_ACCOUNT_LOCKED }
 );
 
+export const authAccountDeletedConsumer = createConsumer(
+    'auth.account.deleted',
+    async (payload: PayloadOf<'auth.account.deleted'>, context: MessageContext) => {
+        const { userId, image, resume } = payload;
+        try {
+            logger.info('[auth:account_deleted] Processing background cleanup for deleted user', { userId });
+
+            // 1. Remove user from Redis search collection AND remove all orphaned autocomplete prefixes from Trie
+            await searchClient.collection('users' as any).removeDocument(userId).catch((err) => {
+                logger.warn('[auth:account_deleted] Failed to remove user from search collection', { userId, err });
+            });
+
+            // 2. Remove user from Global Leaderboard ZSET (zset:leaderboard:global)
+            await redisService.sortedList.remove(RedisStore.leaderboards.global(), userId).catch(() => {});
+
+            // 3. Remove user from ALL Module Leaderboards (zset:leaderboard:module:<moduleId>)
+            const allModules = await prisma.module.findMany({ select: { id: true } }).catch(() => []);
+            if (allModules.length > 0) {
+                await Promise.all(
+                    allModules.map((m) =>
+                        redisService.sortedList.remove(RedisStore.leaderboards.module(m.id), userId).catch(() => {})
+                    )
+                );
+            }
+
+            // 4. Remove user notifications list (list:user:<userId>:notifications)
+            await redisService.client.del(RedisStore.notifications.userListRawKey(userId)).catch(() => {});
+
+            // 5. Remove user cache keys
+            await redisService.client.del(
+                RedisStore.user.profile(userId),
+                RedisStore.user.details(userId)
+            ).catch(() => {});
+
+            // 6. Delete uploaded files from Cloudflare R2 / S3 storage
+            if (image && !image.startsWith('http://') && !image.startsWith('https://')) {
+                await storageService.delete(image).catch((err) => {
+                    logger.warn('[auth:account_deleted] Failed to delete user avatar from storage', { image, err });
+                });
+            }
+
+            if (resume) {
+                await storageService.delete(resume).catch((err) => {
+                    logger.warn('[auth:account_deleted] Failed to delete user resume from storage', { resume, err });
+                });
+            }
+
+            logger.info('[auth:account_deleted] Successfully completed background cleanup for user', { userId });
+            context.ack();
+        } catch (error) {
+            logger.error('[auth:account_deleted] Error during deleted user background cleanup', error);
+            context.ack();
+        }
+    },
+    { queue: MqQueue.AUTH_ACCOUNT_DELETED }
+);
+
 /**
  * Starts all Auth domain consumers.
  */
@@ -501,6 +561,7 @@ export async function startAuthConsumers(): Promise<void> {
         authPasswordlessCredentialsSmsConsumer.start(),
         authNewDeviceSmsConsumer.start(),
         authAccountLockedSmsConsumer.start(),
+        authAccountDeletedConsumer.start(),
     ]);
-    logger.info('[auth:consumers] All 17 Auth consumers initialized successfully.');
+    logger.info('[auth:consumers] All 18 Auth consumers initialized successfully.');
 }

@@ -7,7 +7,7 @@ import { createConsumer } from '../core/mq.consumer';
 import { MqQueue } from '../shared/mq.types';
 import type { MessageContext } from '../shared/mq.types';
 import type { PayloadOf } from '../shared/mq.registry';
-import { redisService } from '@/lib/redis';
+import { redisService, RedisStore } from '@/lib/redis';
 import { prisma } from '@/lib/db/prisma.client';
 import { logger } from '@/service/logging';
 
@@ -32,7 +32,7 @@ async function sendInAppNotification(userId: string, type: string, title: string
             read: dbNotification.read,
         };
 
-        const listKey = `user:${userId}:notifications`;
+        const listKey = RedisStore.notifications.userList(userId);
         await redisService.list.push(listKey, JSON.stringify(notification));
 
         const len = await redisService.list.len(listKey);
@@ -40,7 +40,7 @@ async function sendInAppNotification(userId: string, type: string, title: string
             await redisService.list.pop(listKey);
         }
 
-        const channel = `user:${userId}:notifications`;
+        const channel = RedisStore.channels.userNotifications(userId);
         await redisService.pubsub.publish(channel, notification);
     } catch (error) {
         logger.error('[social:inapp] Failed to deliver social in-app notification', { error, userId });

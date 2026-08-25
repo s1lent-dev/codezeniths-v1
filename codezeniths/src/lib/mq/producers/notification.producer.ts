@@ -33,6 +33,11 @@ export class NotificationProducer {
         routingKey: MqRoutingKey.NOTIFICATION_NEW_DEVICE,
     });
 
+    private readonly contactReceivedProducer = createProducer('notification.contact.received', {
+        exchange: MqExchange.NOTIFICATION,
+        routingKey: MqRoutingKey.NOTIFICATION_CONTACT_RECEIVED,
+    });
+
     /**
      * Publishes a direct or global in-app notification.
      */
@@ -66,6 +71,13 @@ export class NotificationProducer {
      */
     async notifyNewDevice(payload: PayloadOf<'notification.new_device'>): Promise<void> {
         await this.newDeviceProducer.publish(payload);
+    }
+
+    /**
+     * Publishes a contact form inquiry received from landing page.
+     */
+    async sendContactMessage(payload: PayloadOf<'notification.contact.received'>): Promise<void> {
+        await this.contactReceivedProducer.publish(payload);
     }
 }
 

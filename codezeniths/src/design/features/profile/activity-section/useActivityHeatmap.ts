@@ -25,18 +25,13 @@ export function useActivityHeatmap(
     userId?: string,
     userCreatedAt?: string | Date | null
 ) {
-    const currentYear = useMemo(() => new Date().getFullYear(), []);
-    const todayStr = useMemo(() => {
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, '0');
-        const d = String(now.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    }, []);
+    const currentYear = useMemo(() => new Date().getUTCFullYear(), []);
+    const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
 
     const creationYear = useMemo(() => {
         if (!userCreatedAt) return currentYear;
-        const y = new Date(userCreatedAt).getFullYear();
+        const d = new Date(userCreatedAt);
+        const y = d.getUTCFullYear();
         return isNaN(y) ? currentYear : Math.min(y, currentYear);
     }, [userCreatedAt, currentYear]);
 
@@ -44,9 +39,9 @@ export function useActivityHeatmap(
         if (!userCreatedAt) return null;
         try {
             const d = new Date(userCreatedAt);
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
+            const y = d.getUTCFullYear();
+            const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(d.getUTCDate()).padStart(2, '0');
             return `${y}-${m}-${day}`;
         } catch {
             return null;
@@ -83,15 +78,15 @@ export function useActivityHeatmap(
         return map;
     }, [activityData]);
 
-    // Build the 12 Month Segments with Sunday-to-Saturday columns
+    // Build the 12 Month Segments with Sunday-to-Saturday columns in UTC
     const months = useMemo(() => {
         const monthsData: MonthSegment[] = [];
 
         for (let m = 0; m < 12; m++) {
-            const firstOfMonth = new Date(selectedYear, m, 1);
-            const monthName = firstOfMonth.toLocaleString('en-US', { month: 'short' });
-            const totalDaysInMonth = new Date(selectedYear, m + 1, 0).getDate();
-            const startDayOfWeek = firstOfMonth.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+            const firstOfMonth = new Date(Date.UTC(selectedYear, m, 1));
+            const monthName = firstOfMonth.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+            const totalDaysInMonth = new Date(Date.UTC(selectedYear, m + 1, 0)).getUTCDate();
+            const startDayOfWeek = firstOfMonth.getUTCDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
 
             const monthWeeks: (DayCell | null)[][] = [];
             let currentWeekCol: (DayCell | null)[] = [];

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TRPCReactProvider } from '@codezeniths/lib/trpc/trpc/trpc.client';
-import { Loader } from '@codezeniths/components';
+import { Loader, NavigationProgressBar } from '@codezeniths/components';
 import { Toaster } from '@codezeniths/modules';
 import { Suspense } from 'react';
 import { ClientSideServiceWorker } from "@codezeniths/lib/firebase";
@@ -50,6 +50,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background-light dark:bg-background-dark">
+          <Suspense fallback={null}>
+              <NavigationProgressBar />
+          </Suspense>
           <TRPCReactProvider>
               <ClientSideServiceWorker />
               <FcmListenerProvider />

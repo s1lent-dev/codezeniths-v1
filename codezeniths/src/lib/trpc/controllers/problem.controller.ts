@@ -15,6 +15,8 @@ import {
 import { TRPCError } from '@trpc/server';
 import { logger } from '@/service/logging';
 import { z } from 'zod';
+import { problemCatalogueService } from '../utils/problem-catalogue.service';
+
 export class ProblemController implements IProblemController {
     async getProblems({
         ctx,
@@ -26,8 +28,15 @@ export class ProblemController implements IProblemController {
         logger.info('Executing getProblems controller', { mode: input.mode });
         
         const userId = ctx.user?.id;
+        const isDynamic = problemCatalogueService.hasDynamicProblemFilters(input.filters, input.sorting);
 
         try {
+            // Fast-path: Static Master Catalogue (L1 in-memory + L2 Redis)
+            if (!isDynamic) {
+                return await problemCatalogueService.getProblems({ ctx, input });
+            }
+
+            // Fallback: Database Queries for User Dynamic Filters (status, playlist, revisit, etc.)
             switch (input.mode) {
                 case 'paginated': {
                     const result = await ctx.queries.problem.getProblemsPaginated({

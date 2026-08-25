@@ -182,8 +182,10 @@ export function createMailService() {
       
       return executeSend({ 
         to, 
-        subject: entry.defaultSubject, 
-        html: RenderedEmail 
+        subject: options?.subject || entry.defaultSubject, 
+        html: RenderedEmail,
+        from: options?.from,
+        replyTo: options?.replyTo,
       }, options);
     }
   };

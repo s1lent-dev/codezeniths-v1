@@ -15,15 +15,16 @@ export const SearchProblemIndexSchema = z.object({
     order: z.number().int().default(0),
     articleUrl: z.string().url().nullable().optional(),
     problemUrl: z.string().url().nullable().optional(),
-    favouriteCount: z.number().int().default(0),
     topicId: z.string().nullable().optional(),
     topicSlug: z.string().nullable().optional(),
     topic: z.string().nullable().optional(),
+    topicLevel: z.string().nullable().optional(),
     moduleId: z.string().nullable().optional(),
     moduleSlug: z.string().nullable().optional(),
     module: z.string().nullable().optional(),
     tags: z.array(SearchProblemTagSchema),
     phoneticTitle: z.string().optional(),
+    createdAt: z.coerce.date().or(z.string()).optional(),
 });
 
 export const SearchTopicIndexSchema = z.object({

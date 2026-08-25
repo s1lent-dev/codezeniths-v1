@@ -9,7 +9,7 @@ import type { MessageContext } from '../shared/mq.types';
 import type { PayloadOf } from '../shared/mq.registry';
 import { MailTemplate } from '@/service/mail/mail.types';
 import { mailService } from '@/service/mail/mail.service';
-import { redisService } from '@/lib/redis';
+import { redisService, RedisStore } from '@/lib/redis';
 import { prisma } from '@/lib/db/prisma.client';
 import { deviceTokenService } from '@/lib/firebase/devicetoken.service';
 import { FcmTemplate } from '@/lib/firebase/types';
@@ -38,7 +38,7 @@ async function sendInAppNotification(userId: string, type: string, title: string
         };
 
         // 2. Save to user's notification list in Redis (cache)
-        const listKey = `user:${userId}:notifications`;
+        const listKey = RedisStore.notifications.userList(userId);
         await redisService.list.push(listKey, JSON.stringify(notification));
 
         // Limit list size to latest 50 items
@@ -48,7 +48,7 @@ async function sendInAppNotification(userId: string, type: string, title: string
         }
 
         // 3. Publish to user's real-time WebSocket channel in Redis
-        const channel = `user:${userId}:notifications`;
+        const channel = RedisStore.channels.userNotifications(userId);
         await redisService.pubsub.publish(channel, notification);
     } catch (error) {
         logger.error('[progress:inapp] Failed to deliver in-app notification', { error, userId });
@@ -96,24 +96,24 @@ export const progressProblemSolvedConsumer = createConsumer(
                 `You successfully solved "${payload.problemTitle}" in ${payload.module}.`
             );
 
-            // Optional Push Notification
-            const user = await prisma.user.findUnique({
-                where: { id: payload.userId },
-                include: { preferences: true },
-            });
+            // // Optional Push Notification
+            // const user = await prisma.user.findUnique({
+            //     where: { id: payload.userId },
+            //     include: { preferences: true },
+            // });
 
-            logger.info("User in Problem Solved: ", { user });
+            // logger.info("User in Problem Solved: ", { user });
 
-            if (user?.preferences?.pushNotifications) {
-                logger.info('[progress:problem_solved] Sending push notification');
-                await deviceTokenService.sendTemplatedToUser(
-                    payload.userId,
-                    FcmTemplate.PROBLEM_SOLVED,
-                    {
-                        problemName: payload.problemTitle,
-                    }
-                );
-            }
+            // if (user?.preferences?.pushNotifications) {
+            //     logger.info('[progress:problem_solved] Sending push notification');
+            //     await deviceTokenService.sendTemplatedToUser(
+            //         payload.userId,
+            //         FcmTemplate.PROBLEM_SOLVED,
+            //         {
+            //             problemName: payload.problemTitle,
+            //         }
+            //     );
+            // }
 
             context.ack();
         } catch (error) {

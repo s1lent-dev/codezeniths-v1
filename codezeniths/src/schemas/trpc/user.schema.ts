@@ -577,6 +577,8 @@ export const GetUserProfileDetailsTRPCOutputSchema = z.object({
     followingCount: z.number().int(),
     isFollowing: z.boolean(),
     isOwnProfile: z.boolean(),
+    isPrivate: z.boolean().default(false).optional(),
+    profileVisibility: z.enum(['public', 'private']).default('public').optional(),
     globalRank: z.number().int().nullable().optional(),
     rankProgress: UserRankProgressSchema.optional(),
 });

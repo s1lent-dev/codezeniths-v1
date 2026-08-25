@@ -13,17 +13,32 @@ import {
     ButtonVariant,
     ButtonSize,
     Background,
-    BackgroundVariant
+    BackgroundVariant,
+    Spinner,
+    SpinnerVariant,
 } from '@codezeniths/components';
 import {
     Card,
     CardVariant
 } from '@codezeniths/modules';
 import { cn } from '@codezeniths/design/cn';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Mail, MapPin, Phone, CheckCircle2, Send } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useContactForm } from './useContactForm';
 
 export const ContactSection = () => {
+    const {
+        register,
+        handleSubmit,
+        onSubmit,
+        setValue,
+        watch,
+        errors,
+        isSubmitting,
+    } = useContactForm();
+
+    const termsChecked = watch('terms');
+
     return (
         <section className="py-12 sm:py-16 lg:py-24 relative bg-background-light dark:bg-background-dark overflow-visible">
             <Container size="3xl" className="mx-auto px-4 xs:px-6 lg:px-8 relative">
@@ -59,8 +74,8 @@ export const ContactSection = () => {
                             visible: { 
                                 opacity: 1, 
                                 scale: 1, 
-                                y: 0,
-                                transition: { duration: 2.0, ease: [0.16, 1, 0.3, 1] }
+                                y: 0, 
+                                transition: { duration: 2.0, ease: [0.16, 1, 0.3, 1] } 
                             },
                         }}
                         suppressHydrationWarning
@@ -86,65 +101,132 @@ export const ContactSection = () => {
                     >
                         <Card
                             variant={CardVariant.FLAT}
-                            className="p-5 xs:p-8 md:p-12 border border-secondary rounded-xl sm:rounded-2xl bg-foreground-light dark:bg-foreground-dark"
+                            className="p-5 xs:p-8 md:p-12 border border-secondary rounded-xl sm:rounded-2xl bg-foreground-light dark:bg-foreground-dark shadow-sm"
                         >
-                            <Typography
-                                variant={TypographyVariant.H3}
-                                align={TypographyAlign.CENTER}
-                                className="font-bold text-xl xs:text-2xl sm:text-3xl text-body-light dark:text-body-dark mb-6 sm:mb-10 text-center sm:text-left"
-                            >
-                                Send a message
-                            </Typography>
+                            <div className="mb-6 sm:mb-10 text-center sm:text-left">
+                                <Typography
+                                    variant={TypographyVariant.H3}
+                                    align={TypographyAlign.CENTER}
+                                    className="font-bold text-xl xs:text-2xl sm:text-3xl text-body-light dark:text-body-dark text-center sm:text-left"
+                                >
+                                    Send a message
+                                </Typography>
+                                <Typography
+                                    variant={TypographyVariant.MUTED}
+                                    className="text-xs sm:text-sm text-muted-light dark:text-muted-dark mt-1"
+                                >
+                                    Have a question or looking to collaborate? Drop us a line below.
+                                </Typography>
+                            </div>
 
-                            <form className="flex flex-col gap-6 md:gap-8">
+                            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 md:gap-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                                    <Input
-                                        placeholder="Full name"
-                                        className="border-0 border-b border-muted-light/40 dark:border-muted-dark/40 rounded-none px-0! bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 sm:h-12 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm sm:text-base"
-                                    />
-                                    <Input
-                                        placeholder="Email address"
-                                        type="email"
-                                        className="border-0 border-b border-muted-light/40 dark:border-muted-dark/40 rounded-none px-0! bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 sm:h-12 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm sm:text-base"
-                                    />
+                                    <div className="flex flex-col gap-1">
+                                        <Input
+                                            placeholder="Full name *"
+                                            {...register('name')}
+                                            aria-invalid={Boolean(errors.name)}
+                                            className={cn(
+                                                'border-0 border-b border-muted-light/40 dark:border-muted-dark/40 rounded-none px-0! bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 sm:h-12 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm sm:text-base',
+                                                errors.name && 'border-destructive dark:border-destructive'
+                                            )}
+                                        />
+                                        {errors.name && (
+                                            <span className="text-[11px] text-destructive mt-0.5">{errors.name.message}</span>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <Input
+                                            placeholder="Email address *"
+                                            type="email"
+                                            {...register('email')}
+                                            aria-invalid={Boolean(errors.email)}
+                                            className={cn(
+                                                'border-0 border-b border-muted-light/40 dark:border-muted-dark/40 rounded-none px-0! bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 sm:h-12 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm sm:text-base',
+                                                errors.email && 'border-destructive dark:border-destructive'
+                                            )}
+                                        />
+                                        {errors.email && (
+                                            <span className="text-[11px] text-destructive mt-0.5">{errors.email.message}</span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                                    <Input
-                                        placeholder="Subject"
-                                        className="border-0 border-b border-muted-light/40 dark:border-muted-dark/40 rounded-none px-0! bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 sm:h-12 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm sm:text-base"
-                                    />
-                                    <Input
-                                        placeholder="Phone number"
-                                        type="tel"
-                                        className="border-0 border-b border-muted-light/40 dark:border-muted-dark/40 rounded-none px-0! bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 sm:h-12 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm sm:text-base"
-                                    />
+                                    <div className="flex flex-col gap-1">
+                                        <Input
+                                            placeholder="Subject *"
+                                            {...register('subject')}
+                                            aria-invalid={Boolean(errors.subject)}
+                                            className={cn(
+                                                'border-0 border-b border-muted-light/40 dark:border-muted-dark/40 rounded-none px-0! bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 sm:h-12 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm sm:text-base',
+                                                errors.subject && 'border-destructive dark:border-destructive'
+                                            )}
+                                        />
+                                        {errors.subject && (
+                                            <span className="text-[11px] text-destructive mt-0.5">{errors.subject.message}</span>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <Input
+                                            placeholder="Phone number (optional)"
+                                            type="tel"
+                                            {...register('phone')}
+                                            className="border-0 border-b border-muted-light/40 dark:border-muted-dark/40 rounded-none px-0! bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 sm:h-12 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm sm:text-base"
+                                        />
+                                    </div>
                                 </div>
 
-                                <div>
+                                <div className="flex flex-col gap-1">
                                     <Textarea
-                                        placeholder="Message"
-                                        className="border-0 border-b border-muted-light/40 dark:border-muted-dark/40 rounded-none px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 min-h-25 sm:min-h-30 resize-none placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm sm:text-base"
+                                        placeholder="Your message *"
+                                        {...register('message')}
+                                        aria-invalid={Boolean(errors.message)}
+                                        className={cn(
+                                            'border-0 border-b border-muted-light/40 dark:border-muted-dark/40 rounded-none px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 min-h-25 sm:min-h-30 resize-none placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm sm:text-base',
+                                            errors.message && 'border-destructive dark:border-destructive'
+                                        )}
                                     />
+                                    {errors.message && (
+                                        <span className="text-[11px] text-destructive mt-0.5">{errors.message.message}</span>
+                                    )}
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mt-2">
-                                    <div className="flex items-start space-x-3">
-                                        <Checkbox id="terms" className="mt-1 rounded-xs" />
-                                        <label
-                                            htmlFor="terms"
-                                            className="text-xs sm:text-sm text-muted-light dark:text-muted-dark leading-relaxed max-w-sm cursor-pointer"
-                                        >
-                                            By clicking Checkbox, you agree to use our "Form" terms And consent cookie usage in browser.
-                                        </label>
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 mt-2">
+                                    <div className="flex flex-col gap-1">
+                                        <div className="flex items-start space-x-3">
+                                            <Checkbox
+                                                id="terms"
+                                                checked={Boolean(termsChecked)}
+                                                onCheckedChange={(checked) => setValue('terms', Boolean(checked), { shouldValidate: true })}
+                                                className="mt-1 rounded-xs"
+                                            />
+                                            <label
+                                                htmlFor="terms"
+                                                className="text-xs sm:text-sm text-muted-light dark:text-muted-dark leading-relaxed max-w-sm cursor-pointer select-none"
+                                            >
+                                                By clicking Checkbox, you agree to use our &quot;Form&quot; terms and consent cookie usage in browser.
+                                            </label>
+                                        </div>
+                                        {errors.terms && (
+                                            <span className="text-[11px] text-destructive ml-7">{errors.terms.message}</span>
+                                        )}
                                     </div>
                                     <Button
                                         variant={ButtonVariant.SECONDARY}
                                         size={ButtonSize.LG}
-                                        className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 text-xs sm:text-sm rounded-md sm:rounded-lg"
-                                        type="button"
+                                        className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 text-xs sm:text-sm rounded-md sm:rounded-lg cursor-pointer"
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        isLoading={isSubmitting}
                                     >
-                                        Send Message <ArrowRight className="w-4 h-4" />
+                                        {isSubmitting ? (
+                                            'Sending...'
+                                        ) : (
+                                            <>
+                                                Send Message <ArrowRight className="w-4 h-4" />
+                                            </>
+                                        )}
                                     </Button>
                                 </div>
                             </form>
@@ -169,13 +251,16 @@ export const ContactSection = () => {
 
                         <div className="flex flex-col items-center lg:items-start gap-6 sm:gap-10 w-full">
                             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-                                <Typography
-                                    variant={TypographyVariant.H6}
-                                    align={TypographyAlign.CENTER}
-                                    className="font-semibold text-base sm:text-lg text-body-light dark:text-body-dark mb-2 sm:mb-3 text-center lg:text-left"
-                                >
-                                    Our Location
-                                </Typography>
+                                <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                    <MapPin className="size-4 text-primary" />
+                                    <Typography
+                                        variant={TypographyVariant.H6}
+                                        align={TypographyAlign.CENTER}
+                                        className="font-semibold text-base sm:text-lg text-body-light dark:text-body-dark text-center lg:text-left"
+                                    >
+                                        Our Location
+                                    </Typography>
+                                </div>
                                 <Typography
                                     variant={TypographyVariant.P}
                                     align={TypographyAlign.CENTER}
@@ -187,30 +272,36 @@ export const ContactSection = () => {
                             </div>
 
                             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-                                <Typography
-                                    variant={TypographyVariant.H6}
-                                    align={TypographyAlign.CENTER}
-                                    className="font-semibold text-base sm:text-lg text-body-light dark:text-body-dark mb-2 sm:mb-3 text-center lg:text-left"
-                                >
-                                    Email Address
-                                </Typography>
+                                <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                    <Mail className="size-4 text-primary" />
+                                    <Typography
+                                        variant={TypographyVariant.H6}
+                                        align={TypographyAlign.CENTER}
+                                        className="font-semibold text-base sm:text-lg text-body-light dark:text-body-dark text-center lg:text-left"
+                                    >
+                                        Email Address
+                                    </Typography>
+                                </div>
                                 <Typography
                                     variant={TypographyVariant.P}
                                     align={TypographyAlign.CENTER}
                                     className="text-xs sm:text-[0.900rem] text-muted-light dark:text-muted-dark leading-relaxed text-center lg:text-left"
                                 >
-                                    codezeniths@gmail.com
+                                    support@codezeniths.in
                                 </Typography>
                             </div>
 
                             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-                                <Typography
-                                    variant={TypographyVariant.H6}
-                                    align={TypographyAlign.CENTER}
-                                    className="font-semibold text-base sm:text-lg text-body-light dark:text-body-dark mb-2 sm:mb-3 text-center lg:text-left"
-                                >
-                                    Phone Number
-                                </Typography>
+                                <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                    <Phone className="size-4 text-primary" />
+                                    <Typography
+                                        variant={TypographyVariant.H6}
+                                        align={TypographyAlign.CENTER}
+                                        className="font-semibold text-base sm:text-lg text-body-light dark:text-body-dark text-center lg:text-left"
+                                    >
+                                        Phone Number
+                                    </Typography>
+                                </div>
                                 <Typography
                                     variant={TypographyVariant.P}
                                     align={TypographyAlign.CENTER}

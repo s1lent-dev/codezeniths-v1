@@ -69,6 +69,7 @@ export async function assertTopology(channel: amqp.Channel): Promise<void> {
         [MqQueue.AUTH_SMS_PASSWORDLESS_CREDENTIALS, MqRoutingKey.AUTH_SMS_PASSWORDLESS_CREDENTIALS],
         [MqQueue.AUTH_SMS_NEW_DEVICE,              MqRoutingKey.AUTH_SMS_NEW_DEVICE],
         [MqQueue.AUTH_SMS_ACCOUNT_LOCKED,          MqRoutingKey.AUTH_SMS_ACCOUNT_LOCKED],
+        [MqQueue.AUTH_ACCOUNT_DELETED,             MqRoutingKey.AUTH_ACCOUNT_DELETED],
     ];
     for (const [q, rk] of authQueues) {
         await channel.assertQueue(q, DURABLE);
@@ -127,6 +128,7 @@ export async function assertTopology(channel: amqp.Channel): Promise<void> {
         MqQueue.NOTIFICATION_ADMIN_BROADCAST,
         MqQueue.NOTIFICATION_USER_LOGIN,
         MqQueue.NOTIFICATION_NEW_DEVICE,
+        MqQueue.NOTIFICATION_CONTACT_RECEIVED,
     ];
     for (const q of notificationQueues) {
         await channel.assertQueue(q, DURABLE);

@@ -79,7 +79,7 @@ export const PlaylistInfoCard: React.FC<PlaylistInfoCardProps> = ({
         >
             {/* Ambient Background Glow */}
             <div
-                className="absolute -right-16 -top-16 size-48 rounded-full pointer-events-none blur-3xl opacity-15"
+                className="absolute -right-16 -top-16 size-52 rounded-full pointer-events-none blur-3xl opacity-20 transition-all duration-500"
                 style={{ background: 'var(--color-primary)' }}
             />
 

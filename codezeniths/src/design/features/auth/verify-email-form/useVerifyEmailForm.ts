@@ -21,6 +21,7 @@ export const useVerifyEmailForm = () => {
     const isLinkRedirect = searchParams.get('verified') === 'true';
     const queryToken = searchParams.get('token');
     const queryEmail = searchParams.get('email');
+    const queryError = searchParams.get('error');
 
     const [channel, setChannel] = useState<'otp' | 'link'>('otp');
     const [isSending, setIsSending] = useState(false);
@@ -30,6 +31,21 @@ export const useVerifyEmailForm = () => {
     const [linkSent, setLinkSent] = useState(false);
     const [cooldown, setCooldown] = useState(0);
     const hasHandledVerificationRef = useRef(false);
+
+    // Show informative error toast when redirected due to account_not_linked
+    useEffect(() => {
+        if (queryError === 'account_not_linked') {
+            toast.error(
+                'Account Email Not Verified',
+                'Your account email is not verified yet. Please verify your email first before linking Google or GitHub.'
+            );
+            if (typeof window !== 'undefined') {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('error');
+                window.history.replaceState({}, '', url.toString());
+            }
+        }
+    }, [queryError, toast]);
 
     const form = useForm<VerifyEmailFormValues>({
         resolver: zodResolver(verifyEmailSchema),
@@ -44,12 +60,12 @@ export const useVerifyEmailForm = () => {
 
     // If user is already verified and URL has params, clean URL immediately
     useEffect(() => {
-        if (user?.emailVerified && (isLinkRedirect || queryToken || queryEmail)) {
+        if (user?.emailVerified && (isLinkRedirect || queryToken || queryEmail || queryError)) {
             if (typeof window !== 'undefined') {
                 window.history.replaceState({}, '', window.location.pathname);
             }
         }
-    }, [user?.emailVerified, isLinkRedirect, queryToken, queryEmail]);
+    }, [user?.emailVerified, isLinkRedirect, queryToken, queryEmail, queryError]);
 
     // Automatically set email from session once available
     useEffect(() => {

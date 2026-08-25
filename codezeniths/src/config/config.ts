@@ -56,7 +56,7 @@ export const ENV_CONFIG: EnvConfig = EnvConfigSchema.parse({
 
     // Resend / Email Configuration
     RESEND_API_KEY: process.env.RESEND_API_KEY || 're_placeholder_key_for_dev_purposes',
-    RESEND_DEFAULT_FROM_EMAIL: process.env.RESEND_DEFAULT_FROM_EMAIL || 'noreply@codezeniths.com',
+    RESEND_DEFAULT_FROM_EMAIL: process.env.RESEND_DEFAULT_FROM_EMAIL || 'support@codezeniths.in',
     RESEND_DEFAULT_FROM_NAME: process.env.RESEND_DEFAULT_FROM_NAME || 'CodeZeniths',
     MAIL_DRY_RUN: process.env.MAIL_DRY_RUN || 'true',
 

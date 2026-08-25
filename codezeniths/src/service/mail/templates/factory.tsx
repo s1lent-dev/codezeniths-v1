@@ -212,6 +212,31 @@ export class EmailComponentFactory {
           />
         );
 
+      case MailTemplate.CONTACT_INQUIRY:
+        return (
+          <templates.ContactInquiryEmail
+            name={props.name}
+            email={props.email}
+            subject={props.subject}
+            phone={props.phone}
+            message={props.message}
+            submittedAt={props.submittedAt}
+            isRegisteredUser={props.isRegisteredUser}
+            theme={props.theme}
+          />
+        );
+
+      case MailTemplate.CONTACT_CONFIRMATION:
+        return (
+          <templates.ContactConfirmationEmail
+            name={props.name}
+            subject={props.subject}
+            message={props.message}
+            submittedAt={props.submittedAt}
+            theme={props.theme}
+          />
+        );
+
       default:
         throw new Error(`Unsupported email template: ${template}`);
     }

@@ -66,26 +66,18 @@ export const NavbarDesktopButtons = () => {
     let buttonLabel = 'Sign In';
     let buttonRoute = '/sign-in';
 
-    if (pathname === '/sign-in') {
-        buttonLabel = 'Sign Up';
-        buttonRoute = '/sign-up';
-    } else if (pathname === '/complete-profile') {
-        buttonLabel = 'Home';
-        buttonRoute = '/problemset';
-    } else if (
-        pathname === '/verify-email' ||
-        pathname === '/verify-phone' ||
-        pathname === '/forgot-password' ||
-        pathname === '/reset-password'
-    ) {
-        if (isAuthenticated && user) {
-            if (user.isOnboardingComplete) {
-                buttonLabel = 'Home';
-                buttonRoute = '/problemset';
-            } else {
-                buttonLabel = 'Complete Profile';
-                buttonRoute = '/complete-profile';
-            }
+    if (isAuthenticated && user) {
+        if (user.isOnboardingComplete) {
+            buttonLabel = 'Home';
+            buttonRoute = '/problemset';
+        } else {
+            buttonLabel = 'Complete Profile';
+            buttonRoute = '/complete-profile';
+        }
+    } else {
+        if (pathname === '/sign-in') {
+            buttonLabel = 'Sign Up';
+            buttonRoute = '/sign-up';
         } else {
             buttonLabel = 'Sign In';
             buttonRoute = '/sign-in';

@@ -112,4 +112,19 @@ export const EMAIL_PREVIEW_MOCK_DATA: Record<MailTemplate, Record<string, any>> 
     actionUrl: 'https://codezeniths.com/roadmaps',
     actionText: 'Explore System Design Track',
   },
+  [MailTemplate.CONTACT_INQUIRY]: {
+    name: 'Alex Rivera',
+    email: 'alex.rivera@example.com',
+    subject: 'Inquiry regarding Enterprise ZenLab Workspaces',
+    phone: '+1 555-0199',
+    message: 'Hello CodeZeniths team, I am interested in team licensing.',
+    submittedAt: 'Aug 25, 2026, 12:00 PM',
+    isRegisteredUser: true,
+  },
+  [MailTemplate.CONTACT_CONFIRMATION]: {
+    name: 'Alex Rivera',
+    subject: 'Inquiry regarding Enterprise ZenLab Workspaces',
+    message: 'Hello CodeZeniths team, I am interested in team licensing.',
+    submittedAt: 'Aug 25, 2026, 12:00 PM',
+  },
 };

@@ -15,6 +15,7 @@ import { PrivacyHeroCard } from './privacy-hero-card';
 import { SubmissionPrivacyCard } from './submission-privacy-card';
 import { SearchDiscoveryPrivacyCard } from './search-discovery-privacy-card';
 import { TelemetryAnalyticsCard } from './telemetry-analytics-card';
+import { ConnectedAccountsCard } from './connected-accounts-card';
 import { DataGovernanceCard } from './data-governance-card';
 import { ExportDataModal } from './modals/export-data-modal';
 import { DeleteAccountModal } from './modals/delete-account-modal';
@@ -48,25 +49,28 @@ export const PrivacySettingsSection: React.FC<PrivacySettingsSectionProps> = ({
                 onExportClick={() => setIsExportModalOpen(true)}
             />
 
-            {/* 2. Code & Activity Privacy: Submissions, Heatmap, Leaderboard, Presence */}
+            {/* 2. Connected Social Accounts: Link Google & GitHub */}
+            <ConnectedAccountsCard />
+
+            {/* 3. Code & Activity Privacy: Submissions, Heatmap, Leaderboard, Presence */}
             <SubmissionPrivacyCard
                 preferences={preferences}
                 onToggle={handleToggle}
             />
 
-            {/* 3. Search & Discovery Indexing: SEO, Peer Matching, Recruiter Outreach */}
+            {/* 4. Search & Discovery Indexing: SEO, Peer Matching, Recruiter Outreach */}
             <SearchDiscoveryPrivacyCard
                 preferences={preferences}
                 onToggle={handleToggle}
             />
 
-            {/* 4. Telemetry & Analytics: AI Recommendations, Diagnostics, VCS Sync */}
+            {/* 5. Telemetry & Analytics: AI Recommendations, Diagnostics, VCS Sync */}
             <TelemetryAnalyticsCard
                 preferences={preferences}
                 onToggle={handleToggle}
             />
 
-            {/* 5. Data Governance & Management: Export Archive, Purge Logs, Delete Account */}
+            {/* 6. Data Governance & Management: Export Archive, Purge Logs, Delete Account */}
             <DataGovernanceCard
                 onExportClick={() => setIsExportModalOpen(true)}
                 onPurgeClick={handlePurgeTelemetry}

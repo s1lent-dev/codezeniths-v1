@@ -130,20 +130,55 @@ const Footer = () => {
                             Learn, visualize, and connect with coders — all the way to your peak.
                         </Typography>
                         <div className="flex items-center gap-3 mt-2">
-                            <a href="#" className="w-9 h-9 rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 flex items-center justify-center text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary hover:text-white transition-colors shadow-sm">
-                                <FacebookIcon size={16} className="border-none" />
-                            </a>
-                            <a href="#" className="w-9 h-9 rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 flex items-center justify-center text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary hover:text-white transition-colors shadow-sm">
+                            <a
+                                href="https://x.com/codezeniths"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="CodeZeniths on X (Twitter)"
+                                title="X (Twitter)"
+                                className="w-9 h-9 rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 flex items-center justify-center text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary hover:text-white transition-colors shadow-sm"
+                            >
                                 <TwitterIcon size={16} className="border-none" />
                             </a>
-                            <a href="#" className="w-9 h-9 rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 flex items-center justify-center text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary hover:text-white transition-colors shadow-sm">
-                                <InstagramIcon size={16} />
+                            <a
+                                href="https://github.com/codezeniths"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="CodeZeniths on GitHub"
+                                title="GitHub"
+                                className="w-9 h-9 rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 flex items-center justify-center text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary hover:text-white transition-colors shadow-sm"
+                            >
+                                <GithubIcon size={16} />
                             </a>
-                            <a href="#" className="w-9 h-9 rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 flex items-center justify-center text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary hover:text-white transition-colors shadow-sm">
+                            <a
+                                href="https://www.linkedin.com/in/codezeniths/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="CodeZeniths on LinkedIn"
+                                title="LinkedIn"
+                                className="w-9 h-9 rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 flex items-center justify-center text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary hover:text-white transition-colors shadow-sm"
+                            >
                                 <LinkedinIcon size={16} className="border-none" />
                             </a>
-                            <a href="#" className="w-9 h-9 rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 flex items-center justify-center text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary hover:text-white transition-colors shadow-sm">
-                                <GithubIcon size={16} />
+                            <a
+                                href="https://www.instagram.com/codezeniths/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="CodeZeniths on Instagram"
+                                title="Instagram"
+                                className="w-9 h-9 rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 flex items-center justify-center text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary hover:text-white transition-colors shadow-sm"
+                            >
+                                <InstagramIcon size={16} />
+                            </a>
+                            <a
+                                href="https://www.facebook.com/codezeniths/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="CodeZeniths on Facebook"
+                                title="Facebook"
+                                className="w-9 h-9 rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 flex items-center justify-center text-foreground-dark-shade3 dark:text-foreground-light-shade3 hover:bg-primary hover:text-white transition-colors shadow-sm"
+                            >
+                                <FacebookIcon size={16} className="border-none" />
                             </a>
                         </div>
                     </div>
@@ -188,7 +223,7 @@ const Footer = () => {
                             </div>
                             <div className="flex items-center gap-3 text-sm font-medium text-muted-light-shade1 dark:text-muted-dark-shade1 hover:text-primary transition-colors cursor-pointer">
                                 <Mail size={18} className="text-primary shrink-0" />
-                                <span>codezeniths@gmail.com</span>
+                                <span>support@codezeniths.in</span>
                             </div>
                         </div>
                     </div>

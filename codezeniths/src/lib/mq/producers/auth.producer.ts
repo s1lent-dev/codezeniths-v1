@@ -88,6 +88,11 @@ export class AuthProducer {
         routingKey: MqRoutingKey.AUTH_SMS_PASSWORDLESS_CREDENTIALS,
     });
 
+    private readonly accountDeletedProducer = createProducer('auth.account.deleted', {
+        exchange: MqExchange.AUTH,
+        routingKey: MqRoutingKey.AUTH_ACCOUNT_DELETED,
+    });
+
 
     /** JSDoc: Triggered when a new user signs up. Targets exchange auth.direct via routing key auth.email.welcome. */
     async sendWelcomeEmail(payload: PayloadOf<'auth.email.welcome'>): Promise<void> {
@@ -187,6 +192,11 @@ export class AuthProducer {
     /** JSDoc: Triggered to send passwordless credentials via SMS. Targets exchange auth.direct via routing key auth.sms.passwordless_credentials. */
     async sendPasswordlessCredentialsSms(payload: PayloadOf<'auth.sms.passwordless_credentials'>): Promise<void> {
         await this.passwordlessCredentialsSmsProducer.publish(payload);
+    }
+
+    /** JSDoc: Triggered when a user account is deleted to asynchronously purge cache, search indices, and media files. */
+    async sendAccountDeleted(payload: PayloadOf<'auth.account.deleted'>): Promise<void> {
+        await this.accountDeletedProducer.publish(payload);
     }
 }
 

@@ -57,24 +57,27 @@ export interface DetailInfoCardProps {
     className?: string;
 }
 
-const levelConfig: Record<string, { label: string; color: string; bg: string; border: string }> = {
+const levelConfig: Record<string, { label: string; color: string; bg: string; border: string; glow: string }> = {
     fundamental: {
         label: 'Fundamental',
         color: 'var(--color-teal)',
         bg: 'rgba(115, 218, 202, 0.08)',
         border: 'rgba(115, 218, 202, 0.2)',
+        glow: 'var(--color-teal)',
     },
     intermediate: {
         label: 'Intermediate',
         color: 'var(--color-warning)',
         bg: 'rgba(224, 175, 104, 0.08)',
         border: 'rgba(224, 175, 104, 0.2)',
+        glow: 'var(--color-warning)',
     },
     advanced: {
         label: 'Advanced',
         color: 'var(--color-destructive)',
         bg: 'rgba(255, 70, 85, 0.08)',
         border: 'rgba(255, 70, 85, 0.2)',
+        glow: 'var(--color-destructive)',
     },
 };
 
@@ -91,6 +94,28 @@ export const DetailInfoCard: React.FC<DetailInfoCardProps> = ({
     const rawLevel = data.level?.toString().toLowerCase() || 'fundamental';
     const lvl = levelConfig[rawLevel] || levelConfig.fundamental;
     const isFavourite = data.type === 'favourite' || data.slug === 'favourites';
+
+    const ambientGlowColor = React.useMemo(() => {
+        // 1. Favourites: Radiant Gold aura (matching star icon)
+        if (data.type === 'favourite' || data.slug === 'favourites') {
+            return 'rgba(251, 191, 36, 0.35)';
+        }
+
+        // 2. Playlists: Primary Brand Indigo aura
+        if (data.type === 'playlist') {
+            return 'var(--color-primary)';
+        }
+
+        // 3. Topics & Tags: Dynamic Level Hint (Fundamental: Teal, Intermediate: Warning, Advanced: Destructive)
+        if (data.level) {
+            const raw = data.level.toLowerCase();
+            if (levelConfig[raw]) {
+                return levelConfig[raw].glow;
+            }
+        }
+
+        return 'var(--color-primary)';
+    }, [data.type, data.slug, data.level]);
 
     const handlePractice = () => {
         if (onPracticeClick) {
@@ -118,8 +143,8 @@ export const DetailInfoCard: React.FC<DetailInfoCardProps> = ({
         >
             {/* Ambient Background Glow */}
             <div
-                className="absolute -right-16 -top-16 size-48 rounded-full pointer-events-none blur-3xl opacity-15"
-                style={{ background: 'var(--color-primary)' }}
+                className="absolute -right-16 -top-16 size-52 rounded-full pointer-events-none blur-3xl opacity-20 transition-all duration-500"
+                style={{ background: ambientGlowColor }}
             />
 
             <div className="space-y-4 relative z-10">

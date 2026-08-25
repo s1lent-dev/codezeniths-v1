@@ -23,11 +23,12 @@ export const HeatmapTooltip: React.FC<HeatmapTooltipProps> = ({
 }) => {
     if (!visible || !position) return null;
 
-    const formattedDate = new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
+    const formattedDate = new Date(dateStr + 'T00:00:00Z').toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
         year: 'numeric',
+        timeZone: 'UTC',
     });
 
     return (

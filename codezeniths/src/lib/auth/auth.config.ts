@@ -163,55 +163,72 @@ export function createAuth(config: AuthConfig) {
                 }
               }
 
-              // 2. Generate a unique username with collision retry loop
-              const rawBase = (
-                modifiedData.name ||
-                modifiedData.email?.split("@")[0] ||
-                "user"
-              )
-                .toLowerCase()
-                .replace(/[^a-z0-9]/g, "-")
-                .replace(/-+/g, "-")
-                .replace(/^-|-$/g, "");
-              const baseSlug =
-                rawBase.length >= 3 ? rawBase : `${rawBase || "user"}-dev`;
+              // 2. Handle username:
+              // - For manual credential signup: preserve the user's chosen username as-is (do not append random numbers).
+              // - For OAuth (Google, GitHub) or passwordless signups: generate a unique username from name/email + random numbers.
+              const manualUsername = (
+                modifiedData.username ||
+                body?.username ||
+                (data as any).username ||
+                ""
+              ).trim();
 
-              let generatedUsername = "";
-              for (let attempt = 0; attempt < 10; attempt++) {
-                const randomSuffix = Math.floor(
-                  1000 + Math.random() * 9000,
-                ).toString();
-                const candidate = `${baseSlug}-${randomSuffix}`;
+              if (manualUsername.length > 0) {
+                modifiedData.username = manualUsername;
+                modifiedData.displayUsername = manualUsername;
+                await redisService.bloom
+                  .add("usernames", manualUsername)
+                  .catch(() => {});
+              } else {
+                const rawBase = (
+                  modifiedData.name ||
+                  modifiedData.email?.split("@")[0] ||
+                  "user"
+                )
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]/g, "-")
+                  .replace(/-+/g, "-")
+                  .replace(/^-|-$/g, "");
+                const baseSlug =
+                  rawBase.length >= 3 ? rawBase : `${rawBase || "user"}-dev`;
 
-                // Check Bloom Filter
-                const isTakenInBloom = await redisService.bloom
-                  .exists("usernames", candidate)
-                  .catch(() => false);
-                if (isTakenInBloom) continue;
+                let generatedUsername = "";
+                for (let attempt = 0; attempt < 10; attempt++) {
+                  const randomSuffix = Math.floor(
+                    1000 + Math.random() * 9000,
+                  ).toString();
+                  const candidate = `${baseSlug}-${randomSuffix}`;
 
-                // Check Database
-                const existingUser = await prisma.user
-                  .findUnique({
-                    where: { username: candidate },
-                    select: { id: true },
-                  })
-                  .catch(() => null);
+                  // Check Bloom Filter
+                  const isTakenInBloom = await redisService.bloom
+                    .exists("usernames", candidate)
+                    .catch(() => false);
+                  if (isTakenInBloom) continue;
 
-                if (!existingUser) {
-                  generatedUsername = candidate;
-                  await redisService.bloom
-                    .add("usernames", candidate)
-                    .catch(() => {});
-                  break;
+                  // Check Database
+                  const existingUser = await prisma.user
+                    .findUnique({
+                      where: { username: candidate },
+                      select: { id: true },
+                    })
+                    .catch(() => null);
+
+                  if (!existingUser) {
+                    generatedUsername = candidate;
+                    await redisService.bloom
+                      .add("usernames", candidate)
+                      .catch(() => {});
+                    break;
+                  }
                 }
-              }
 
-              if (!generatedUsername) {
-                generatedUsername = `${baseSlug}-${Date.now().toString().slice(-6)}`;
-              }
+                if (!generatedUsername) {
+                  generatedUsername = `${baseSlug}-${Date.now().toString().slice(-6)}`;
+                }
 
-              modifiedData.username = generatedUsername;
-              modifiedData.displayUsername = generatedUsername;
+                modifiedData.username = generatedUsername;
+                modifiedData.displayUsername = generatedUsername;
+              }
 
               return { data: modifiedData };
             } catch (err) {

@@ -34,6 +34,8 @@ export enum MailTemplate {
   PAYMENT_REFUND = 'payment_refund',
   ADMIN_BROADCAST = 'admin_broadcast',
   PASSWORDLESS_CREDENTIALS = 'passwordless_credentials',
+  CONTACT_INQUIRY = 'contact_inquiry',
+  CONTACT_CONFIRMATION = 'contact_confirmation',
 }
 
 // ==========================================
@@ -66,6 +68,9 @@ export interface EmailPayload {
 
 export interface SendOptions {
   dedupeKey?: string;
+  from?: { email: string; name?: string };
+  replyTo?: string;
+  subject?: string;
 }
 
 export type MailResult =
@@ -280,6 +285,29 @@ export const mailTemplateRegistry = {
       theme: themeSchema,
     }),
     defaultSubject: 'Your CodeZeniths Account Credentials',
+  },
+  [MailTemplate.CONTACT_INQUIRY]: {
+    schema: z.object({
+      name: z.string(),
+      email: z.string(),
+      subject: z.string(),
+      phone: z.string().optional(),
+      message: z.string(),
+      submittedAt: z.string(),
+      isRegisteredUser: z.boolean().optional(),
+      theme: themeSchema,
+    }),
+    defaultSubject: 'New Contact Form Inquiry — CodeZeniths',
+  },
+  [MailTemplate.CONTACT_CONFIRMATION]: {
+    schema: z.object({
+      name: z.string(),
+      subject: z.string(),
+      message: z.string(),
+      submittedAt: z.string(),
+      theme: themeSchema,
+    }),
+    defaultSubject: "We've Received Your Message — CodeZeniths",
   },
 } satisfies Record<
   MailTemplate,

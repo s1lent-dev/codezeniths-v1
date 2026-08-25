@@ -14,21 +14,21 @@ export const CalendarActivitySection: React.FC<CalendarActivitySectionProps> = (
     isLoading = false,
     className,
 }) => {
-    // 1. Compute exact calendar week data for current month (handles 4, 5, or 6 week months)
+    // 1. Compute exact calendar week data for current month (handles 4, 5, or 6 week months) in UTC
     const { activeWeekIndex, totalWeeks, endOfWeek, monthName } = useMemo(() => {
         const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        const date = now.getDate();
+        const year = now.getUTCFullYear();
+        const month = now.getUTCMonth();
+        const date = now.getUTCDate();
 
         // Find 1st day of month & calculate offset (Monday = 0, Tuesday = 1, ..., Sunday = 6)
-        const firstOfMonth = new Date(year, month, 1);
-        const firstDayOfWeek = firstOfMonth.getDay();
+        const firstOfMonth = new Date(Date.UTC(year, month, 1));
+        const firstDayOfWeek = firstOfMonth.getUTCDay();
         const firstDayOffset = (firstDayOfWeek + 6) % 7;
 
         // Total days in current month
-        const lastOfMonth = new Date(year, month + 1, 0);
-        const totalDaysInMonth = lastOfMonth.getDate();
+        const lastOfMonth = new Date(Date.UTC(year, month + 1, 0));
+        const totalDaysInMonth = lastOfMonth.getUTCDate();
 
         // Calculate total calendar weeks in month (can be 4, 5, or 6)
         const calculatedTotalWeeks = Math.ceil((firstDayOffset + totalDaysInMonth) / 7);
@@ -37,19 +37,17 @@ export const CalendarActivitySection: React.FC<CalendarActivitySectionProps> = (
         const calculatedActiveWeek = Math.ceil((date + firstDayOffset) / 7);
         const currentWeekIdx = Math.min(Math.max(calculatedActiveWeek, 1), calculatedTotalWeeks);
 
-        // End of current calendar week (Sunday 23:59:59)
-        const endOfWeekDate = new Date(now);
-        const dayOfWeek = now.getDay();
+        // End of current calendar week (Sunday 23:59:59.999 UTC)
+        const dayOfWeek = now.getUTCDay();
         const daysSinceMonday = (dayOfWeek + 6) % 7;
         const daysUntilSunday = 6 - daysSinceMonday;
-        endOfWeekDate.setDate(now.getDate() + daysUntilSunday);
-        endOfWeekDate.setHours(23, 59, 59, 999);
+        const endOfWeekDate = new Date(Date.UTC(year, month, date + daysUntilSunday, 23, 59, 59, 999));
 
         return {
             activeWeekIndex: currentWeekIdx,
             totalWeeks: calculatedTotalWeeks,
             endOfWeek: endOfWeekDate,
-            monthName: now.toLocaleString('default', { month: 'short' }),
+            monthName: now.toLocaleString('default', { month: 'short', timeZone: 'UTC' }),
         };
     }, []);
 
@@ -100,7 +98,7 @@ export const CalendarActivitySection: React.FC<CalendarActivitySectionProps> = (
             <ActivityCalendar isLoading={isLoading} />
 
             {/* Weekly Premium Banner with Dual Light/Dark Mode Styling */}
-            <div className="rounded-xl p-4.5 bg-gradient-to-br from-primary/10 via-amber-500/10 to-primary/5 dark:from-primary/25 dark:via-purple-950/50 dark:to-slate-900/90 border border-primary/20 dark:border-primary/30 text-heading-light dark:text-heading-dark space-y-3.5 shadow-sm relative overflow-hidden">
+            <div className="rounded-xl p-4.5 bg-linear-to-br from-primary/10 via-amber-500/10 to-primary/5 dark:from-primary/25 dark:via-purple-950/50 dark:to-slate-900/90 border border-primary/20 dark:border-primary/30 text-heading-light dark:text-heading-dark space-y-3.5 shadow-sm relative overflow-hidden">
                 {/* Top Header Row */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">

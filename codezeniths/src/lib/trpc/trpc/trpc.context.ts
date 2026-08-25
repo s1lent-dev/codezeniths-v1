@@ -15,6 +15,7 @@ import { SearchController } from '../controllers/search.controller';
 import { FavouriteController } from '../controllers/favourite.controller';
 import { LeaderboardController } from '../controllers/leaderboard.controller';
 import { PlaylistController } from '../controllers/playlist.controller';
+import { ContactController } from '../controllers/contact.controller';
 import {
     IModuleController,
     ITopicController,
@@ -26,6 +27,7 @@ import {
     ISkillController,
     IFavouriteController,
     IPlaylistController,
+    IContactController,
 } from '../controllers/interfaces';
 import { ILeaderboardController } from '../controllers/interfaces/leaderboard.controller.interface';
 
@@ -138,6 +140,7 @@ export interface ControllersContext {
         favourite: IFavouriteController;
         leaderboard: ILeaderboardController;
         playlist: IPlaylistController;
+        contact: IContactController;
     };
 }
 
@@ -152,6 +155,7 @@ const skillController = new SkillController();
 const favouriteController = new FavouriteController();
 const leaderboardController = new LeaderboardController();
 const playlistController = new PlaylistController();
+const contactController = new ContactController();
 import { searchClient } from '@codezeniths/service/search';
 const searchController = new SearchController(searchClient);
 
@@ -170,6 +174,7 @@ export function createControllersContext(): ControllersContext {
             favourite: favouriteController,
             leaderboard: leaderboardController,
             playlist: playlistController,
+            contact: contactController,
         },
     };
 }

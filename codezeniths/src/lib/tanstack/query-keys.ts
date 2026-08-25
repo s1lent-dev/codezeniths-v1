@@ -21,7 +21,9 @@ export const queryKeys = {
         profileViewersInfinite: (userId?: string, limit?: number) =>
             ['user', 'profileViewers', 'infinite', userId ?? 'me', limit ?? 6] as const,
         yearlyActivity: (userId?: string, year?: number) =>
-            ['user', 'yearlyActivity', userId ?? 'me', year ?? new Date().getFullYear()] as const,
+            ['user', 'yearlyActivity', userId ?? 'me', year ?? new Date().getUTCFullYear()] as const,
+        monthlyActivity: (year?: number, month?: number) =>
+            ['user', 'monthlyActivity', year ?? new Date().getUTCFullYear(), month ?? (new Date().getUTCMonth() + 1)] as const,
         profileDetails: (usernameOrId?: string) => ['user', 'profileDetails', usernameOrId ?? 'me'] as const,
     },
     module: {

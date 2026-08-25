@@ -12,7 +12,7 @@ import {
     Progress,
 } from '@codezeniths/components';
 import { Card } from '@codezeniths/modules';
-import { Zap, Bot, Cpu, Users, Infinity as InfinityIcon, Compass, Code2, Crown } from 'lucide-react';
+import { Zap, Bot, Cpu, Users, Infinity as InfinityIcon, Compass, Code2, Crown, CheckCircle2 } from 'lucide-react';
 import { PlanTier } from './useBillingSettings';
 
 interface CurrentPlanOverviewCardProps {
@@ -87,9 +87,10 @@ export const CurrentPlanOverviewCard: React.FC<CurrentPlanOverviewCardProps> = (
                         <span className="text-sm sm:text-base font-bold text-heading-light dark:text-heading-dark">
                             {details.name}
                         </span>
-                        <Badge variant="success" className="px-2 py-0.5 text-[10px] h-5 rounded-xs font-semibold">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
+                            <CheckCircle2 className="size-2.5" />
                             Active
-                        </Badge>
+                        </span>
                     </div>
                     <p className="text-xs text-muted-light dark:text-muted-dark">
                         {details.priceDescription}

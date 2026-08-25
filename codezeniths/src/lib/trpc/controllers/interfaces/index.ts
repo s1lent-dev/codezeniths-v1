@@ -11,4 +11,5 @@ export * from './skill.controller.interface';
 export * from './search.controller.interface';
 export * from './favourite.controller.interface';
 export * from './playlist.controller.interface';
+export * from './contact.controller.interface';
 

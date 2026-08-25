@@ -34,6 +34,8 @@ export interface ProfileSidebarProps {
         followingCount?: number;
         isFollowing?: boolean;
         isOwnProfile?: boolean;
+        isPrivate?: boolean;
+        profileVisibility?: string;
         socials?: {
             github?: string | null;
             linkedin?: string | null;
@@ -109,6 +111,8 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
     onClickPlaylists,
     className,
 }) => {
+    const isRestrictedPrivate = Boolean(user?.isPrivate && !user?.isOwnProfile);
+
     return (
         <aside
             className={cn(
@@ -124,6 +128,8 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
                     username={user?.username}
                     image={user?.image}
                     globalRank={user?.globalRank}
+                    isPrivate={user?.isPrivate}
+                    isOwnProfile={user?.isOwnProfile}
                     isLoading={isLoading}
                 />
 
@@ -140,8 +146,8 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
                     isPendingAction={isPendingFollowAction}
                     onFollow={onFollow}
                     onUnfollow={onUnfollow}
-                    onClickFollowers={onClickFollowers}
-                    onClickFollowing={onClickFollowing}
+                    onClickFollowers={isRestrictedPrivate ? undefined : onClickFollowers}
+                    onClickFollowing={isRestrictedPrivate ? undefined : onClickFollowing}
                 />
 
                 <Separator className="bg-secondary/15" />
@@ -158,33 +164,37 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
                 />
             </div>
 
-            {/* Community Stats Card */}
-            <div className="rounded-md bg-foreground-light dark:bg-foreground-dark p-5 shadow-xs">
-                <CommunityStatsCard
-                    totalViews={communityStats?.totalViews}
-                    pastWeekViews={communityStats?.pastWeekViews}
-                    playlistCount={communityStats?.playlistCount}
-                    totalPlaylistBookmarks={communityStats?.totalPlaylistBookmarks}
-                    globalPercentile={communityStats?.globalPercentile}
-                    bestModule={communityStats?.bestModule}
-                    onClickViews={onClickViews}
-                    onClickPlaylists={onClickPlaylists}
-                    isLoading={isLoading}
-                />
-            </div>
+            {/* Community Stats Card - Only visible if public or own profile */}
+            {!isRestrictedPrivate && (
+                <div className="rounded-md bg-foreground-light dark:bg-foreground-dark p-5 shadow-xs">
+                    <CommunityStatsCard
+                        totalViews={communityStats?.totalViews}
+                        pastWeekViews={communityStats?.pastWeekViews}
+                        playlistCount={communityStats?.playlistCount}
+                        totalPlaylistBookmarks={communityStats?.totalPlaylistBookmarks}
+                        globalPercentile={communityStats?.globalPercentile}
+                        bestModule={communityStats?.bestModule}
+                        onClickViews={onClickViews}
+                        onClickPlaylists={onClickPlaylists}
+                        isLoading={isLoading}
+                    />
+                </div>
+            )}
 
-            {/* Skills Breakdown by Level Card */}
-            <div className="rounded-md bg-foreground-light dark:bg-foreground-dark p-5 shadow-xs">
-                <SkillsBreakdown
-                    fundamentalTags={tagsByLevel?.fundamental}
-                    intermediateTags={tagsByLevel?.intermediate}
-                    advancedTags={tagsByLevel?.advanced}
-                    modules={modules}
-                    selectedModule={selectedModule}
-                    onModuleChange={onModuleChange}
-                    isLoading={isLoading}
-                />
-            </div>
+            {/* Skills Breakdown by Level Card - Only visible if public or own profile */}
+            {!isRestrictedPrivate && (
+                <div className="rounded-md bg-foreground-light dark:bg-foreground-dark p-5 shadow-xs">
+                    <SkillsBreakdown
+                        fundamentalTags={tagsByLevel?.fundamental}
+                        intermediateTags={tagsByLevel?.intermediate}
+                        advancedTags={tagsByLevel?.advanced}
+                        modules={modules}
+                        selectedModule={selectedModule}
+                        onModuleChange={onModuleChange}
+                        isLoading={isLoading}
+                    />
+                </div>
+            )}
         </aside>
     );
 };

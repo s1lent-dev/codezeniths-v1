@@ -41,6 +41,34 @@ export class Collection<TDoc> {
     return this.similarityStrategy.findSimilar(id, documents, opts?.limit ?? 5);
   }
 
+  private extractDocumentPrefixes(doc: TDoc): string[] {
+    if (!this.definition.autocompleteFields || this.definition.autocompleteFields.length === 0) {
+      return [];
+    }
+    const prefixSet = new Set<string>();
+    for (const field of this.definition.autocompleteFields) {
+      const val = (doc as Record<string, unknown>)[field];
+      if (typeof val === 'string' && val.trim().length > 0) {
+        const clean = val.toLowerCase().trim();
+        prefixSet.add(`${clean}*`);
+        const words = clean.split(/[\s\-_/]+/);
+        for (const word of words) {
+          if (word.length >= 2) {
+            prefixSet.add(`${word}*`);
+            for (let i = 1; i <= word.length; i++) {
+              prefixSet.add(word.substring(0, i));
+            }
+          }
+        }
+        const maxLen = Math.min(clean.length, 30);
+        for (let i = 1; i <= maxLen; i++) {
+          prefixSet.add(clean.substring(0, i));
+        }
+      }
+    }
+    return Array.from(prefixSet);
+  }
+
   async addDocument(rawDoc: unknown): Promise<Result<void, SearchError>> {
     const collectionName = this.definition.name;
     const liveNamespace = `search:${collectionName}`;
@@ -66,33 +94,11 @@ export class Collection<TDoc> {
       }
 
       if (this.definition.autocompleteFields && this.definition.autocompleteFields.length > 0) {
-        const prefixSet = new Set<string>();
-        for (const field of this.definition.autocompleteFields) {
-          const val = (doc as Record<string, unknown>)[field];
-          if (typeof val === 'string' && val.trim().length > 0) {
-            const clean = val.toLowerCase().trim();
-            prefixSet.add(`${clean}*`);
-            const words = clean.split(/[\s\-_/]+/);
-            for (const word of words) {
-              if (word.length >= 2) {
-                prefixSet.add(`${word}*`);
-                for (let i = 1; i <= word.length; i++) {
-                  prefixSet.add(word.substring(0, i));
-                }
-              }
-            }
-            const maxLen = Math.min(clean.length, 30);
-            for (let i = 1; i <= maxLen; i++) {
-              prefixSet.add(clean.substring(0, i));
-            }
-          }
-        }
-        const prefixes = Array.from(prefixSet);
+        const prefixes = this.extractDocumentPrefixes(doc);
         if (prefixes.length > 0) {
           await redisService.trie.addPrefixes(liveTrieKey, prefixes);
         }
       }
-
 
       const documentsRaw = await redisService.client.get(`${liveNamespace}:all`);
       let documents: TDoc[] = documentsRaw ? JSON.parse(documentsRaw) : [];
@@ -118,13 +124,36 @@ export class Collection<TDoc> {
   async removeDocument(id: string): Promise<Result<void, SearchError>> {
     const collectionName = this.definition.name;
     const liveNamespace = `search:${collectionName}`;
+    const liveTrieKey = `search:autocomplete:${collectionName}`;
     try {
       const documentsRaw = await redisService.client.get(`${liveNamespace}:all`);
       let documents: TDoc[] = documentsRaw ? JSON.parse(documentsRaw) : [];
       const idField = this.definition.idField as keyof TDoc;
 
-      documents = documents.filter(d => (d as Record<string, unknown>)[idField as string] !== id);
-      await redisService.client.set(`${liveNamespace}:all`, JSON.stringify(documents));
+      const docToRemove = documents.find(d => (d as Record<string, unknown>)[idField as string] === id);
+      if (!docToRemove) {
+        return ok(undefined);
+      }
+
+      const remainingDocs = documents.filter(d => (d as Record<string, unknown>)[idField as string] !== id);
+      await redisService.client.set(`${liveNamespace}:all`, JSON.stringify(remainingDocs));
+
+      // Clean up orphaned autocomplete prefixes
+      if (this.definition.autocompleteFields && this.definition.autocompleteFields.length > 0) {
+        const targetPrefixes = this.extractDocumentPrefixes(docToRemove);
+        const remainingPrefixes = new Set<string>();
+        for (const doc of remainingDocs) {
+          for (const p of this.extractDocumentPrefixes(doc)) {
+            remainingPrefixes.add(p);
+          }
+        }
+
+        const prefixesToRemove = targetPrefixes.filter(p => !remainingPrefixes.has(p));
+        if (prefixesToRemove.length > 0) {
+          await redisService.trie.removePrefixes(liveTrieKey, prefixesToRemove);
+        }
+      }
+
       return ok(undefined);
     } catch (error) {
       return err(new IndexingError(

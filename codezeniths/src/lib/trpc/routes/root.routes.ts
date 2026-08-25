@@ -11,6 +11,7 @@ import { searchRouter } from './search.routes';
 import { favouriteRouter } from './favourite.routes';
 import { leaderboardRouter } from './leaderboard.routes';
 import { playlistRouter } from './playlist.routes';
+import { contactRouter } from './contact.routes';
 
 export const appRouter = createTRPCRouter({
     module: moduleRouter,
@@ -25,6 +26,7 @@ export const appRouter = createTRPCRouter({
     favourite: favouriteRouter,
     leaderboard: leaderboardRouter,
     playlist: playlistRouter,
+    contact: contactRouter,
 });
 
 

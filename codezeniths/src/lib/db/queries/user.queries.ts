@@ -1190,7 +1190,7 @@ export class UserQueries implements IUserQueries {
         .output(GetUserYearlyActivityOutputSchema)
         .handler(async ({ userId, year }) => {
             logger.info('Executing getUserYearlyActivity query', { userId, year });
-            const targetYear = year ?? new Date().getFullYear();
+            const targetYear = year ?? new Date().getUTCFullYear();
             const startDate = new Date(Date.UTC(targetYear, 0, 1, 0, 0, 0, 0));
             const endDate = new Date(Date.UTC(targetYear, 11, 31, 23, 59, 59, 999));
 
@@ -1272,12 +1272,11 @@ export class UserQueries implements IUserQueries {
 
             const user = await prisma.user.findFirst({
                 where: {
-                    OR: [
-                        username ? { username } : {},
-                        userId ? { id: userId } : {},
-                    ].filter((item) => Object.keys(item).length > 0),
+                    ...(username ? { username: { equals: username, mode: 'insensitive' as const } } : {}),
+                    ...(userId ? { id: userId } : {}),
                 },
                 include: {
+                    preferences: true,
                     socialLinks: true,
                     userSkills: {
                         include: {
@@ -1296,6 +1295,7 @@ export class UserQueries implements IUserQueries {
 
             const targetUserId = user.id;
             const isOwnProfile = Boolean(viewerId && viewerId === targetUserId);
+            const isPrivate = Boolean(user.preferences?.profileVisibility === 'private');
 
             const [followerCount, followingCount, followRecord, globalStats] = await Promise.all([
                 prisma.userFollow.count({ where: { followingId: targetUserId } }),
@@ -1310,11 +1310,54 @@ export class UserQueries implements IUserQueries {
                           },
                       })
                     : null,
-                prisma.userGlobalStats.findUnique({
-                    where: { userId: targetUserId },
-                    select: { score: true },
-                }),
+                !isPrivate || isOwnProfile
+                    ? prisma.userGlobalStats.findUnique({
+                          where: { userId: targetUserId },
+                          select: { score: true },
+                      })
+                    : null,
             ]);
+
+            // If private and viewer is not the owner, return safe restricted profile
+            if (isPrivate && !isOwnProfile) {
+                return {
+                    id: user.id,
+                    name: user.name,
+                    firstName: user.firstName ?? null,
+                    lastName: user.lastName ?? null,
+                    username: user.username,
+                    email: null,
+                    emailVerified: false,
+                    phoneNumber: null,
+                    phoneNumberVerified: false,
+                    image: user.image,
+                    resume: null,
+                    dob: null,
+                    about: user.about,
+                    location: user.location,
+                    gender: user.gender,
+                    userType: user.userType,
+                    experienceLevel: user.experienceLevel,
+                    createdAt: user.createdAt,
+                    socials: user.socialLinks
+                        ? {
+                              github: user.socialLinks.github,
+                              linkedin: user.socialLinks.linkedin,
+                              twitter: user.socialLinks.twitter,
+                              website: user.socialLinks.website,
+                          }
+                        : null,
+                    topSkills: [],
+                    followerCount,
+                    followingCount,
+                    isFollowing: Boolean(followRecord),
+                    isOwnProfile: false,
+                    isPrivate: true,
+                    profileVisibility: 'private',
+                    globalRank: null,
+                    rankProgress: undefined,
+                };
+            }
 
             // Calculate global rank if user has stats and minimum score (score >= 10 for Guardian I)
             let globalRank: number | null = null;
@@ -1374,6 +1417,8 @@ export class UserQueries implements IUserQueries {
                 followingCount,
                 isFollowing: Boolean(followRecord),
                 isOwnProfile,
+                isPrivate,
+                profileVisibility: user.preferences?.profileVisibility || 'public',
                 globalRank,
                 rankProgress,
             };
@@ -1509,6 +1554,72 @@ export class UserQueries implements IUserQueries {
                 }
             });
             return updated;
+        })
+        .build();
+
+    deleteUserAccount = qRPC()
+        .input(z.object({
+            userId: z.string().uuid(),
+        }))
+        .output(z.object({
+            success: z.boolean(),
+            deletedUser: z.object({
+                id: z.string(),
+                username: z.string().nullable().optional(),
+                email: z.string(),
+                phoneNumber: z.string().nullable().optional(),
+                image: z.string().nullable().optional(),
+                resume: z.string().nullable().optional(),
+            }),
+        }))
+        .handler(async (payload) => {
+            logger.info('Executing deleteUserAccount mutation', { userId: payload.userId });
+            const { userId } = payload;
+
+            const existingUser = await prisma.user.findUnique({
+                where: { id: userId },
+                select: {
+                    id: true,
+                    username: true,
+                    email: true,
+                    phoneNumber: true,
+                    image: true,
+                    resume: true,
+                },
+            });
+
+            if (!existingUser) {
+                logger.warn('User not found for deletion', { userId });
+                throw new AppErrorBuilder('User not found')
+                    .setCode(ErrorCode.NOT_FOUND)
+                    .build();
+            }
+
+            // 1. Clean up non-FK Verification records for email and phoneNumber
+            const identifiersToClean: string[] = [existingUser.email];
+            if (existingUser.phoneNumber) {
+                identifiersToClean.push(existingUser.phoneNumber);
+            }
+
+            await prisma.verification.deleteMany({
+                where: {
+                    identifier: { in: identifiersToClean },
+                },
+            }).catch((err) => {
+                logger.warn('Failed to clean up verification records for deleted user', { userId, error: err });
+            });
+
+            // 2. Execute user deletion (PostgreSQL foreign keys cascade all 17 relation tables)
+            await prisma.user.delete({
+                where: { id: userId },
+            });
+
+            logger.info('Successfully deleted user account from database', { userId });
+
+            return {
+                success: true,
+                deletedUser: existingUser,
+            };
         })
         .build();
 }

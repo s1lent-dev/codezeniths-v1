@@ -38,10 +38,10 @@ async function main() {
                 order: p.order ?? 0,
                 articleUrl: p.articleUrl || null,
                 problemUrl: p.problemUrl || null,
-                favouriteCount: p.favouriteCount ?? 0,
                 topicId: p.topicId || p.topic?.id || null,
                 topicSlug: p.topic?.slug || null,
                 topic: p.topic?.title || null,
+                topicLevel: p.topic?.level || null,
                 moduleId: p.topic?.module?.id || null,
                 moduleSlug: p.topic?.module?.slug || null,
                 module: p.topic?.module?.title || null,
@@ -51,6 +51,7 @@ async function main() {
                     slug: t.tag.slug,
                 })),
                 phoneticTitle: p.title,
+                createdAt: p.createdAt,
             }));
         };
 

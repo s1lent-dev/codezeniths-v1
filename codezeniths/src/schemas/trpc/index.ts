@@ -15,4 +15,5 @@ export * from './search.schema';
 export * from './favourite.schema';
 export * from './leaderboard.schema';
 export * from './playlist.schema';
+export * from './contact.schema';
 

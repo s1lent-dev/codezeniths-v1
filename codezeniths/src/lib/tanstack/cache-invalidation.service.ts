@@ -12,6 +12,8 @@ export class CacheInvalidationService {
             queryClient.invalidateQueries({ queryKey: queryKeys.problem.progress() }),
             queryClient.invalidateQueries({ queryKey: queryKeys.user.activeStreak() }),
             queryClient.invalidateQueries({ queryKey: ['user', 'streak'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'monthlyActivity'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'yearlyActivity'] }),
         ]);
     }
 

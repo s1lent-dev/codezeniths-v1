@@ -131,7 +131,7 @@ export const ProfileVisibilitySettings: React.FC<ProfileVisibilitySettingsProps>
 
             {/* Inline Confirm Action when Modified */}
             {isVisibilityDirty && (
-                <div className="p-4 rounded-md bg-primary/10 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200">
+                <div className="p-4 rounded-md bg-primary/10 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200 mt-6">
                     <div className="space-y-0.5">
                         <Typography
                             as="p"

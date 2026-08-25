@@ -53,7 +53,7 @@ export const SigninForm = () => {
     const hasIdentifierError = errors.identifier && ((watchedValues.identifier?.length ?? 0) > 0 || isSubmitted);
     const hasPasswordError = errors.password && ((watchedValues.password?.length ?? 0) > 0 || isSubmitted);
 
-    const inputClassName = "border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 xs:h-12 sm:h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm xs:text-base sm:text-lg";
+    const inputClassName = "border-0 border-b border-muted-light/25 dark:border-muted-dark/25 focus:border-primary dark:focus:border-primary transition-colors rounded-none !px-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 h-11 xs:h-12 sm:h-14 placeholder:text-muted-light dark:placeholder:text-muted-dark text-sm xs:text-base";
 
     return (
         <Card variant={CardVariant.FLAT} className="relative w-full max-w-5xl p-4.5 xs:p-6 sm:p-10 md:p-14 lg:p-16 border border-secondary rounded-xs bg-foreground-light dark:bg-foreground-dark mx-auto shadow-none">

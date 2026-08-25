@@ -308,6 +308,9 @@ export const userRouter = createTRPCRouter({
         .input(UpdateUserPreferencesInputSchema)
         .output(UpdateUserPreferencesOutputSchema)
         .mutation(({ ctx, input }) => ctx.controllers.user.updateUserPreferences({ ctx, input })),
+
+    deleteAccount: protectedProcedure
+        .mutation(({ ctx }) => ctx.controllers.user.deleteAccount({ ctx })),
 });
 
 

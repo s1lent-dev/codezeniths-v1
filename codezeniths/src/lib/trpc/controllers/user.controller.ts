@@ -88,6 +88,7 @@ import { ENV_CONFIG } from '@/config/config';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '@codezeniths/lib/db/prisma.client';
 import { logger } from '@/service/logging';
+import { authProducer } from '@/lib/mq/producers/auth.producer';
 import { extractTextFromPdf, extractSkillsWithAI, matchSkillsWithDatabase } from '@codezeniths/service/resume-extractor';
 import { z } from 'zod';
 import { formatUserProfile, formatUserProfiles } from '@/utils/user.formatter';
@@ -1454,12 +1455,12 @@ export class UserController implements IUserController {
 
         const userId = ctx.user?.id;
         const now = new Date();
-        const year = input.year ?? now.getFullYear();
-        const month = input.month ?? (now.getMonth() + 1);
+        const year = input.year ?? now.getUTCFullYear();
+        const month = input.month ?? (now.getUTCMonth() + 1);
 
         const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
         const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
-        const daysInMonth = new Date(year, month, 0).getDate();
+        const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
 
         const activityMap: Record<string, number> = {};
 
@@ -2049,6 +2050,50 @@ export class UserController implements IUserController {
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: error?.message || 'Failed to update user preferences.',
+            });
+        }
+    }
+
+    async deleteAccount({
+        ctx,
+    }: {
+        ctx: TRPCContext;
+    }): Promise<{ success: boolean; message: string }> {
+        logger.info('Executing deleteAccount controller', { userId: ctx.user?.id });
+        const userId = ctx.user?.id;
+        if (!userId) {
+            throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User authentication required.' });
+        }
+
+        try {
+            // 1. Delete user from database (cascades all 17 relations + cleans verification rows)
+            const result = await ctx.queries.user.deleteUserAccount({
+                userId,
+            });
+
+            // 2. Dispatch RabbitMQ event for background Redis, search index, leaderboard & storage file purge
+            await authProducer.sendAccountDeleted({
+                userId,
+                username: result.deletedUser.username || undefined,
+                email: result.deletedUser.email,
+                phoneNumber: result.deletedUser.phoneNumber || undefined,
+                image: result.deletedUser.image || undefined,
+                resume: result.deletedUser.resume || undefined,
+            }).catch((err) => {
+                logger.error('Failed to publish auth.account.deleted event', { error: err, userId });
+            });
+
+            logger.info('Successfully executed deleteAccount controller', { userId });
+            return {
+                success: true,
+                message: 'Account deleted successfully.',
+            };
+        } catch (error: any) {
+            logger.error('Error in deleteAccount controller', { error: error?.message, userId });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to delete user account.',
             });
         }
     }

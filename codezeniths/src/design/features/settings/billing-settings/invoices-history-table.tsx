@@ -66,9 +66,10 @@ export const InvoicesHistoryTable: React.FC<InvoicesHistoryTableProps> = ({
                                     <span className="text-sm font-semibold text-heading-light dark:text-heading-dark truncate">
                                         {inv.invoiceNumber}
                                     </span>
-                                    <Badge variant="success" className="px-2 py-0.2 text-[10px] h-4.5 rounded-xs font-semibold">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
+                                        <CheckCircle2 className="size-2.5" />
                                         Paid
-                                    </Badge>
+                                    </span>
                                 </div>
                                 <span className="text-xs text-muted-light dark:text-muted-dark mt-0.5">
                                     {inv.description} • {inv.date}

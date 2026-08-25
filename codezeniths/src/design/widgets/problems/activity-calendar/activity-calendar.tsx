@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { cn } from '@codezeniths/design/cn';
-import { trpc } from '@/lib/trpc/trpc/trpc.client';
+import { userQueryService } from '@/lib/tanstack/services/user.query-service';
 import { Spinner, SpinnerVariant } from '@codezeniths/components';
 import { ActivityCalendarSkeleton } from './activity-calendar-skeleton';
 
@@ -27,25 +27,24 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
     onMonthChange,
 }) => {
     const today = new Date();
-    const currentDayNumber = today.getDate();
-    const currentMonthShort = today.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+    const currentDayNumber = today.getUTCDate();
+    const currentMonthNumber = today.getUTCMonth() + 1;
+    const currentYearNumber = today.getUTCFullYear();
+    const currentMonthShort = today.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase();
 
     const [currentDate, setCurrentDate] = useState(() => {
-        const year = initialYear ?? today.getFullYear();
-        const month = initialMonth ? initialMonth - 1 : today.getMonth();
-        return new Date(year, month, 1);
+        const year = initialYear ?? currentYearNumber;
+        const month = initialMonth ? initialMonth - 1 : today.getUTCMonth();
+        return new Date(Date.UTC(year, month, 1));
     });
 
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1; // 1-indexed (1-12)
+    const year = currentDate.getUTCFullYear();
+    const month = currentDate.getUTCMonth() + 1; // 1-indexed (1-12)
 
-    // Query user monthly activity via tRPC
-    const { data: activityData, isLoading: isQueryLoading } = trpc.user.getUserMonthlyActivity.useQuery(
+    // Query user monthly activity via TanStack Query Service
+    const { data: activityData, isLoading: isQueryLoading } = userQueryService.getUserMonthlyActivity(
         { year, month },
-        {
-            staleTime: 1000 * 60 * 5, // 5 minutes cache
-            refetchOnWindowFocus: false,
-        }
+        { enabled: true }
     );
 
     const isLoading = isPropsLoading || isQueryLoading;
@@ -64,36 +63,36 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
         });
     }
 
-    // Handle Month Navigation with Boundaries
+    // Handle Month Navigation with Boundaries in UTC
     const userCreatedAtDate = activityData?.userCreatedAt ? new Date(activityData.userCreatedAt) : null;
 
     const canGoPrevMonth = !userCreatedAtDate || (
-        year > userCreatedAtDate.getFullYear() ||
-        (year === userCreatedAtDate.getFullYear() && month > (userCreatedAtDate.getMonth() + 1))
+        year > userCreatedAtDate.getUTCFullYear() ||
+        (year === userCreatedAtDate.getUTCFullYear() && month > (userCreatedAtDate.getUTCMonth() + 1))
     );
 
     const canGoNextMonth = (
-        year < today.getFullYear() ||
-        (year === today.getFullYear() && month < (today.getMonth() + 1))
+        year < currentYearNumber ||
+        (year === currentYearNumber && month < currentMonthNumber)
     );
 
     const handlePrevMonth = () => {
         if (!canGoPrevMonth) return;
-        const nextDate = new Date(year, currentDate.getMonth() - 1, 1);
+        const nextDate = new Date(Date.UTC(year, currentDate.getUTCMonth() - 1, 1));
         setCurrentDate(nextDate);
-        onMonthChange?.(nextDate.getFullYear(), nextDate.getMonth() + 1);
+        onMonthChange?.(nextDate.getUTCFullYear(), nextDate.getUTCMonth() + 1);
     };
 
     const handleNextMonth = () => {
         if (!canGoNextMonth) return;
-        const nextDate = new Date(year, currentDate.getMonth() + 1, 1);
+        const nextDate = new Date(Date.UTC(year, currentDate.getUTCMonth() + 1, 1));
         setCurrentDate(nextDate);
-        onMonthChange?.(nextDate.getFullYear(), nextDate.getMonth() + 1);
+        onMonthChange?.(nextDate.getUTCFullYear(), nextDate.getUTCMonth() + 1);
     };
 
-    // Calculate grid layout
-    const firstDayOfWeek = new Date(year, currentDate.getMonth(), 1).getDay(); // 0=Sunday
-    const totalDaysInMonth = new Date(year, currentDate.getMonth() + 1, 0).getDate();
+    // Calculate grid layout in UTC
+    const firstDayOfWeek = new Date(Date.UTC(year, currentDate.getUTCMonth(), 1)).getUTCDay(); // 0=Sunday
+    const totalDaysInMonth = new Date(Date.UTC(year, currentDate.getUTCMonth() + 1, 0)).getUTCDate();
 
     const calendarWeeks: (number | null)[][] = [];
     let currentWeek: (number | null)[] = Array(firstDayOfWeek).fill(null);
@@ -112,13 +111,13 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
         calendarWeeks.push(currentWeek);
     }
 
-    const todayDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const todayDateStr = `${currentYearNumber}-${String(currentMonthNumber).padStart(2, '0')}-${String(currentDayNumber).padStart(2, '0')}`;
 
-    // Account creation date at midnight for accurate active day comparison
+    // Account creation date in UTC midnight for accurate active day comparison
     const creationDayStart = userCreatedAtDate
-        ? new Date(userCreatedAtDate.getFullYear(), userCreatedAtDate.getMonth(), userCreatedAtDate.getDate(), 0, 0, 0)
+        ? new Date(Date.UTC(userCreatedAtDate.getUTCFullYear(), userCreatedAtDate.getUTCMonth(), userCreatedAtDate.getUTCDate(), 0, 0, 0, 0))
         : null;
-    const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    const todayEnd = new Date(Date.UTC(currentYearNumber, currentMonthNumber - 1, currentDayNumber, 23, 59, 59, 999));
 
     return (
         <div className={cn('w-full space-y-3 font-sans text-heading-light dark:text-heading-dark', className)}>
@@ -196,8 +195,8 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
                             const formattedMonth = month < 10 ? `0${month}` : `${month}`;
                             const dateStr = `${year}-${formattedMonth}-${formattedDay}`;
 
-                            const cellDateStart = new Date(year, month - 1, day, 0, 0, 0);
-                            const cellDateEnd = new Date(year, month - 1, day, 23, 59, 59);
+                            const cellDateStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+                            const cellDateEnd = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
 
                             const isSolved = solvedDates.has(dateStr);
                             const isToday = dateStr === todayDateStr;
@@ -212,12 +211,12 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
                                     className="h-7 flex items-center justify-center relative cursor-pointer group"
                                     title={isSolved ? `${dateStr}: Problem Solved!` : dateStr}
                                 >
-                                    {isToday ? (
+                                    {isSolved ? (
+                                        <CheckCircle2 className="w-5 h-5 text-indigo-500 dark:text-indigo-400 mx-auto transition-transform group-hover:scale-110" />
+                                    ) : isToday ? (
                                         <div className="w-6 h-6 rounded-full bg-primary text-foreground-light-shade3 font-bold flex items-center justify-center text-xs shadow-sm">
                                             {day}
                                         </div>
-                                    ) : isSolved ? (
-                                        <CheckCircle2 className="w-5 h-5 text-indigo-500 dark:text-indigo-400 mx-auto transition-transform group-hover:scale-110" />
                                     ) : (
                                         <div className="relative flex flex-col items-center justify-center">
                                             <span className="text-body-light dark:text-body-dark font-medium hover:text-primary transition-colors">

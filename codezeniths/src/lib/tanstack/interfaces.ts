@@ -59,7 +59,7 @@ export interface IUserQueryService {
     extractResumeSkills(): any;
     getExtractionProgress(variables: any, options?: any): any;
     getActiveStreak(): any;
-    getUserStreak(input?: { userId?: string }): any;
+    getUserStreak(input?: { userId?: string }, options?: { enabled?: boolean }): any;
     recordDailyCheckIn(): any;
 
     getFollowStats(input: { userId: string }, options?: { enabled?: boolean }): any;
@@ -72,11 +72,13 @@ export interface IUserQueryService {
     getProfileViewers(input?: { userId?: string; page?: number; limit?: number }, options?: { enabled?: boolean }): any;
     getProfileViewersInfinite(input?: { userId?: string; limit?: number }, options?: { enabled?: boolean }): any;
     getUserYearlyActivity(input?: { userId?: string; year?: number }, options?: { enabled?: boolean }): any;
+    getUserMonthlyActivity(input?: { year?: number; month?: number }, options?: { enabled?: boolean; staleTime?: number }): any;
     getUserProfileDetails(input?: { username?: string; userId?: string }, options?: { enabled?: boolean }): any;
     updateUsername(): any;
     updateEmail(): any;
     updatePhoneNumber(): any;
     updateUserPreferences(): any;
+    deleteAccount(): any;
 }
 
 // ─── Module Query Service Interface ─────────────────────────────────────────────

@@ -127,6 +127,7 @@ export const useSignupForm = () => {
             await authClient.signIn.social({
                 provider: 'google',
                 callbackURL: '/problemset',
+                errorCallbackURL: '/verify-email',
             });
         } catch (err: any) {
             toast.error('Google OAuth Failed: ' + err.message);
@@ -138,6 +139,7 @@ export const useSignupForm = () => {
             await authClient.signIn.social({
                 provider: 'github',
                 callbackURL: '/problemset',
+                errorCallbackURL: '/verify-email',
             });
         } catch (err: any) {
             toast.error('Github OAuth Failed: ' + err.message);

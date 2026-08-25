@@ -1,5 +1,5 @@
 import { prisma } from '@codezeniths/lib/db/prisma.client';
-import { redisService } from '@codezeniths/lib/redis';
+import { redisService, RedisStore } from '@codezeniths/lib/redis';
 import { logger } from '@codezeniths/service/logging';
 import { Difficulty, ProgressStatus } from '@prisma/client';
 import { getRankFromScore } from '@/utils/rank.utils';
@@ -172,16 +172,16 @@ export async function processScoreTransition({
         void (async () => {
             try {
                 if (txResult.newGlobalScore < 10) {
-                    await redisService.sortedList.remove('leaderboard:global', userId);
+                    await redisService.sortedList.remove(RedisStore.leaderboards.global(), userId);
                 } else {
-                    await redisService.sortedList.add('leaderboard:global', txResult.newGlobalScore, userId);
+                    await redisService.sortedList.add(RedisStore.leaderboards.global(), txResult.newGlobalScore, userId);
                 }
 
                 if (moduleId && txResult.newModScore !== undefined) {
                     if (txResult.newModScore < 10) {
-                        await redisService.sortedList.remove(`leaderboard:module:${moduleId}`, userId);
+                        await redisService.sortedList.remove(RedisStore.leaderboards.module(moduleId), userId);
                     } else {
-                        await redisService.sortedList.add(`leaderboard:module:${moduleId}`, txResult.newModScore, userId);
+                        await redisService.sortedList.add(RedisStore.leaderboards.module(moduleId), txResult.newModScore, userId);
                     }
                 }
 

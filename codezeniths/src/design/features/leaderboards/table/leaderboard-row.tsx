@@ -49,8 +49,8 @@ export const LeaderboardRow = forwardRef<HTMLTableRowElement, LeaderboardRowProp
                 className={cn(
                     'group transition-all duration-150 border-0 rounded-md select-none',
                     isOdd
-                        ? 'bg-foreground-light-shade1/70 dark:bg-foreground-dark-shade1/70 hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1'
-                        : 'bg-transparent hover:bg-foreground-light-shade1/40 dark:hover:bg-foreground-dark-shade1/40',
+                        ? 'bg-transparent hover:bg-foreground-light-shade1/40 dark:hover:bg-foreground-dark-shade1/40'
+                        : 'bg-foreground-light-shade1/70 dark:bg-foreground-dark-shade1/70 hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1',
                     isCurrentViewer && 'ring-1 ring-primary/40 bg-primary/5 hover:bg-primary/10',
                     className
                 )}

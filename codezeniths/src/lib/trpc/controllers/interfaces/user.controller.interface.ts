@@ -283,5 +283,9 @@ export interface IUserController {
         ctx: TRPCContext;
         input: z.infer<typeof UpdateUserPreferencesInputSchema>;
     }): Promise<z.infer<typeof UpdateUserPreferencesOutputSchema>>;
+
+    deleteAccount(args: {
+        ctx: TRPCContext;
+    }): Promise<{ success: boolean; message: string }>;
 }
 

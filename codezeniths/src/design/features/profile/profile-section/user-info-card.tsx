@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Trophy } from 'lucide-react';
+import { Trophy, Lock } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@codezeniths/components';
 import { Typography } from '@codezeniths/components';
 import { cn } from '@codezeniths/design/cn';
@@ -11,6 +11,8 @@ export interface UserInfoCardProps {
     username?: string | null;
     image?: string | null;
     globalRank?: number | null;
+    isPrivate?: boolean;
+    isOwnProfile?: boolean;
     isLoading?: boolean;
     className?: string;
 }
@@ -20,6 +22,8 @@ export const UserInfoCard: React.FC<UserInfoCardProps> = ({
     username,
     image,
     globalRank,
+    isPrivate = false,
+    isOwnProfile = false,
     isLoading = false,
     className,
 }) => {
@@ -57,7 +61,7 @@ export const UserInfoCard: React.FC<UserInfoCardProps> = ({
                 </Avatar>
             </div>
 
-            {/* Right: Name, @username, Rank */}
+            {/* Right: Name, @username, Rank / Private Status */}
             <div className="flex flex-col min-w-0 flex-1">
                 <Typography className="text-base sm:text-lg font-bold text-heading-light dark:text-heading-dark truncate leading-tight">
                     {displayName}
@@ -66,9 +70,14 @@ export const UserInfoCard: React.FC<UserInfoCardProps> = ({
                     {displayUsername}
                 </span>
 
-                {/* Global Rank Badge */}
-                <div className="mt-2 flex items-center">
-                    {globalRank ? (
+                {/* Status Badge */}
+                <div className="mt-2 flex items-center gap-2">
+                    {isPrivate && !isOwnProfile ? (
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 text-[10px] font-medium">
+                            <Lock className="size-2.5" />
+                            <span>Private Account</span>
+                        </div>
+                    ) : globalRank ? (
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 border border-secondary/20 text-xs font-semibold text-body-light dark:text-body-dark">
                             <Trophy className="size-3.5 text-warning" />
                             <span>Rank #{globalRank.toLocaleString()}</span>

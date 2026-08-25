@@ -206,7 +206,7 @@ export const UploadInput: React.FC<UploadInputProps> = ({
                 <div
                     onClick={() => !disabled && !isUploading && fileInputRef.current?.click()}
                     className={cn(
-                        "relative group shrink-0 cursor-pointer overflow-hidden shadow-md transition-transform active:scale-95",
+                        "relative group shrink-0 cursor-pointer overflow-hidden shadow-xs transition-all duration-300 ring-2 ring-primary/20 hover:ring-primary/60 hover:shadow-[0_0_24px_rgba(var(--primary-rgb),0.35)] active:scale-95",
                         avatarSizeClass,
                         shapeClass,
                         styleToClassName(avatarStyle)
@@ -215,27 +215,36 @@ export const UploadInput: React.FC<UploadInputProps> = ({
                 >
                     <Avatar className={cn("w-full h-full", shapeClass)}>
                         {previewUrl && <AvatarImage src={previewUrl} alt={title} className="object-cover" />}
-                        <AvatarFallback className="bg-primary/10 border border-primary/20 text-primary font-bold flex items-center justify-center">
+                        <AvatarFallback className="bg-gradient-to-br from-primary/15 via-primary/8 to-transparent border border-primary/25 text-primary font-bold flex items-center justify-center transition-all duration-300 group-hover:from-primary/25 group-hover:to-primary/10">
                             {fallbackInitials ? (
                                 fallbackInitials.toUpperCase()
                             ) : (
-                                <FallbackIcon className="w-1/2 h-1/2 text-primary dark:text-primary" />
+                                <FallbackIcon className="w-1/2 h-1/2 text-primary dark:text-primary transition-transform duration-300 group-hover:scale-105" />
                             )}
                         </AvatarFallback>
                     </Avatar>
 
-                    {/* Hover Camera Overlay */}
+                    {/* Hover Ambient Luminescent Glass Overlay */}
                     {!disabled && (
                         <div className={cn(
-                            "absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white gap-1",
-                            isUploading && "opacity-100 bg-black/70"
+                            "absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out flex flex-col items-center justify-center gap-1.5 z-10",
+                            "bg-gradient-to-t from-primary/45 via-background-light/40 dark:via-background-dark/40 to-primary/25 backdrop-blur-[4px]",
+                            "border border-primary/30",
+                            isUploading && "opacity-100 bg-primary/30 backdrop-blur-md"
                         )}>
+                            {/* Ambient Radial Luminous Glow */}
+                            <div className="absolute inset-0 bg-radial from-primary/35 via-transparent to-transparent opacity-90 pointer-events-none" />
+
                             {isUploading ? (
-                                <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="w-5 h-5 text-white" />
+                                <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="w-5 h-5 text-primary drop-shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]" />
                             ) : (
                                 <>
-                                    <Camera className="w-5 h-5" />
-                                    <span className="text-[10px] font-semibold uppercase tracking-wider">Change</span>
+                                    <div className="size-7 rounded-full bg-primary/25 border border-primary/50 flex items-center justify-center shadow-[0_0_14px_rgba(var(--primary-rgb),0.5)] backdrop-blur-xs transition-transform duration-200 group-hover:scale-110">
+                                        <Camera className="w-3.5 h-3.5 text-heading-light dark:text-heading-dark drop-shadow-[0_0_6px_rgba(255,255,255,0.6)]" />
+                                    </div>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-heading-light dark:text-heading-dark drop-shadow-xs">
+                                        {previewUrl ? 'Change' : 'Upload'}
+                                    </span>
                                 </>
                             )}
                         </div>

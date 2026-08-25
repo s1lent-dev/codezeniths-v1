@@ -152,7 +152,7 @@ const PlanCardItem: React.FC<{
             {/* Ribbon: Yearly Discount for Zenith */}
             {isAnnual && plan.discountBanner && (
                 <div className="absolute -top-3 right-4 z-10">
-                    <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-emerald-500 text-white shadow-xs">
+                    <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30 shadow-xs backdrop-blur-xs">
                         {plan.discountBanner}
                     </span>
                 </div>
@@ -173,9 +173,10 @@ const PlanCardItem: React.FC<{
                     </div>
 
                     {isCurrentPlan && (
-                        <Badge variant="success" className="text-[10px] uppercase font-bold px-2 py-0.5">
+                        <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
+                            <Check className="size-3" />
                             Current Plan
-                        </Badge>
+                        </span>
                     )}
                 </div>
 

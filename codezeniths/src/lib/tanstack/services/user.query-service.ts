@@ -73,6 +73,8 @@ import {
     GetProfileViewersTRPCOutputSchema,
     GetUserYearlyActivityTRPCInputSchema,
     GetUserYearlyActivityTRPCOutputSchema,
+    GetUserMonthlyActivityInputSchema,
+    GetUserMonthlyActivityOutputSchema,
     GetUserProfileDetailsTRPCInputSchema,
     GetUserProfileDetailsTRPCOutputSchema,
     UpdateUsernameInputSchema,
@@ -393,7 +395,7 @@ export class UserQueryService implements IUserQueryService {
         });
     }
 
-    getUserStreak(input?: { userId?: string }) {
+    getUserStreak(input?: { userId?: string }, options?: { enabled?: boolean }) {
         return useQuery({
             queryKey: queryKeys.user.streak(input?.userId),
             queryFn: async () => {
@@ -401,6 +403,7 @@ export class UserQueryService implements IUserQueryService {
                 const raw = await trpcClient.user.getUserStreak.query(validatedInput);
                 return GetUserStreakTRPCOutputSchema.parse(raw);
             },
+            enabled: options?.enabled ?? true,
             ...CACHE_TIERS.USER_PROGRESS,
         });
     }
@@ -574,6 +577,23 @@ export class UserQueryService implements IUserQueryService {
         });
     }
 
+    getUserMonthlyActivity(
+        input?: { year?: number; month?: number },
+        options?: { enabled?: boolean; staleTime?: number }
+    ) {
+        return useQuery({
+            queryKey: queryKeys.user.monthlyActivity(input?.year, input?.month),
+            queryFn: async () => {
+                const validatedInput = GetUserMonthlyActivityInputSchema.parse(input ?? {});
+                const raw = await trpcClient.user.getUserMonthlyActivity.query(validatedInput);
+                return GetUserMonthlyActivityOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.USER_PROGRESS,
+            ...(options?.staleTime !== undefined ? { staleTime: options.staleTime } : {}),
+        });
+    }
+
     getUserProfileDetails(
         input?: { username?: string; userId?: string },
         options?: { enabled?: boolean }
@@ -643,6 +663,19 @@ export class UserQueryService implements IUserQueryService {
             },
             onSuccess: async () => {
                 await CacheInvalidationService.invalidateOnPreferencesChange(queryClient);
+            },
+        });
+    }
+
+    deleteAccount() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async () => {
+                const raw = await trpcClient.user.deleteAccount.mutate();
+                return raw;
+            },
+            onSuccess: async () => {
+                queryClient.clear();
             },
         });
     }

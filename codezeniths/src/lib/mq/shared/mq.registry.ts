@@ -116,6 +116,15 @@ export const messageRegistry = {
         phoneNumber: z.string(),
         reason: z.string().optional(),
     }),
+    'auth.account.deleted': z.object({
+        correlationId,
+        userId: z.string(),
+        username: z.string().nullable().optional(),
+        email: z.string().optional(),
+        phoneNumber: z.string().nullable().optional(),
+        image: z.string().nullable().optional(),
+        resume: z.string().nullable().optional(),
+    }),
 
     // ── Payment Messages ────────────────────────────────────────────
     'payment.webhook.ingested': z.object({
@@ -284,6 +293,17 @@ export const messageRegistry = {
         userId: z.string(),
         deviceName: z.string(),
         timestamp: z.string(),
+    }),
+    'notification.contact.received': z.object({
+        correlationId,
+        name: z.string(),
+        email: z.string().email(),
+        subject: z.string(),
+        phone: z.string().optional(),
+        message: z.string(),
+        userId: z.string().optional(),
+        theme: z.enum(['dark', 'light']).default('dark'),
+        submittedAt: z.string(),
     }),
 
     // ── Search Messages ─────────────────────────────────────────────

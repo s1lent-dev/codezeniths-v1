@@ -26,7 +26,7 @@ export * from './payment/payment-failed-email';
 export * from './payment/payment-refund-email';
 
 // Notification Templates
-export * from './notification/admin-broadcast-email';
+export * from './notification';
 
 // Factory
 export * from './factory';

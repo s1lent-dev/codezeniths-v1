@@ -9,7 +9,7 @@
 
 import 'dotenv/config';
 import { prisma } from '../lib/db/prisma.client';
-import { redisService } from '../lib/redis';
+import { redisService, RedisStore } from '../lib/redis';
 import { logger } from '@codezeniths/service/logging';
 
 async function cleanUsers() {
@@ -47,7 +47,7 @@ async function cleanUsers() {
         // 2. Clear Redis leaderboards, user caches, and reindex
         console.log('🧹 Clearing Redis leaderboards and cache...');
         try {
-            await redisService.client.del('leaderboard:global');
+            await redisService.client.del(RedisStore.leaderboards.globalRawKey());
             console.log('✅ Cleared Redis leaderboard:global');
         } catch (e) {
             console.warn('⚠️ Note on Redis cleanup:', e);

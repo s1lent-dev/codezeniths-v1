@@ -9,7 +9,7 @@ import type { MessageContext } from '../shared/mq.types';
 import type { PayloadOf } from '../shared/mq.registry';
 import { MailTemplate } from '@/service/mail/mail.types';
 import { mailService } from '@/service/mail/mail.service';
-import { redisService } from '@/lib/redis';
+import { redisService, RedisStore } from '@/lib/redis';
 import { prisma } from '@/lib/db/prisma.client';
 import { deviceTokenService } from '@/lib/firebase/devicetoken.service';
 import { FcmTemplate } from '@/lib/firebase/types';
@@ -37,12 +37,12 @@ async function sendInAppNotification(userId: string | null | undefined, type: st
         };
 
         if (userId) {
-            const listKey = `user:${userId}:notifications`;
+            const listKey = RedisStore.notifications.userList(userId);
             await redisService.list.push(listKey, JSON.stringify(notification));
             const len = await redisService.list.len(listKey);
             if (len > 50) await redisService.list.pop(listKey);
 
-            const channel = `user:${userId}:notifications`;
+            const channel = RedisStore.channels.userNotifications(userId);
             await redisService.pubsub.publish(channel, notification);
         } else {
             const listKey = `global:notifications`;
@@ -174,6 +174,61 @@ export const notificationNewDeviceConsumer = createConsumer(
     { queue: MqQueue.NOTIFICATION_NEW_DEVICE }
 );
 
+export const notificationContactReceivedConsumer = createConsumer(
+    'notification.contact.received',
+    async (payload: PayloadOf<'notification.contact.received'>, context: MessageContext) => {
+        try {
+            const { name, email, subject, phone, message, userId, theme, submittedAt } = payload;
+            const isRegisteredUser = Boolean(userId);
+
+            // 1. Send Inbound Inquiry Email to CodeZeniths support inbox (replyTo set directly to sender's email)
+            await mailService.sendTemplatedEmail(
+                MailTemplate.CONTACT_INQUIRY,
+                'support@codezeniths.in',
+                {
+                    name,
+                    email,
+                    subject,
+                    phone,
+                    message,
+                    submittedAt,
+                    isRegisteredUser,
+                    theme: theme || 'dark',
+                },
+                {
+                    from: { email: 'support@codezeniths.in', name: 'CodeZeniths Inbound Contact' },
+                    replyTo: email,
+                    subject: `[Contact Form] ${subject} from ${name}`,
+                }
+            );
+
+            // 2. Send Outbound Auto-Confirmation Email back to the user
+            await mailService.sendTemplatedEmail(
+                MailTemplate.CONTACT_CONFIRMATION,
+                email,
+                {
+                    name,
+                    subject,
+                    message,
+                    submittedAt,
+                    theme: theme || 'dark',
+                },
+                {
+                    from: { email: 'support@codezeniths.in', name: 'CodeZeniths Support' },
+                    subject: `We've Received Your Message — CodeZeniths`,
+                }
+            );
+
+            logger.info('[notification:contact_received] Successfully delivered contact inquiry and confirmation emails', { email, subject });
+            context.ack();
+        } catch (error) {
+            logger.error('[notification:contact_received] Failed to deliver contact notification emails', error);
+            context.nack(false);
+        }
+    },
+    { queue: MqQueue.NOTIFICATION_CONTACT_RECEIVED }
+);
+
 /**
  * Starts all Notification domain consumers.
  */
@@ -184,6 +239,7 @@ export async function startNotificationConsumers(): Promise<void> {
         notificationAdminBroadcastConsumer.start(),
         notificationUserLoginConsumer.start(),
         notificationNewDeviceConsumer.start(),
+        notificationContactReceivedConsumer.start(),
     ]);
-    logger.info('[notification:consumers] All 5 Notification consumers initialized successfully.');
+    logger.info('[notification:consumers] All 6 Notification consumers initialized successfully.');
 }

@@ -28,6 +28,7 @@ export function useProfile({ username }: UseProfileOptions = {}) {
 
     const targetUserId = profileUser?.id;
     const isOwnProfile = profileUser?.isOwnProfile ?? false;
+    const isRestrictedPrivate = Boolean(profileUser?.isPrivate && !isOwnProfile);
 
     // Fetch logged-in user profile details if viewing someone else's profile to accurately know the viewer's ID
     const { data: viewerProfile } = userQueryService.getUserProfileDetails(
@@ -47,26 +48,28 @@ export function useProfile({ username }: UseProfileOptions = {}) {
         }
     }, [targetUserId, isOwnProfile, recordView]);
 
-    // 3. User Streak Stats
+    // 3. User Streak Stats (Disabled if private & not own profile)
     const { data: streakData, isLoading: isLoadingStreak } = userQueryService.getUserStreak(
         { userId: targetUserId },
+        { enabled: Boolean(targetUserId) && !isRestrictedPrivate }
     );
 
     // 4. Leaderboard Stats (Global rank, percentile, personal bests, best module)
     const { data: rankData, isLoading: isLoadingRank } = leaderboardQueryService.getUserRankAndPercentile(
         { userId: targetUserId },
+        { enabled: Boolean(targetUserId) && !isRestrictedPrivate }
     );
 
     // 5. Problem Solving Progress (Total, Easy, Medium, Hard)
     const { data: problemProgress, isLoading: isLoadingProgress } = problemQueryService.getProblemProgress(
         { userId: targetUserId },
-        { enabled: Boolean(targetUserId) }
+        { enabled: Boolean(targetUserId) && !isRestrictedPrivate }
     );
 
     // 6. Profile Views & Past Week Delta
     const { data: viewStats, isLoading: isLoadingViews } = userQueryService.getProfileViewStats(
         { userId: targetUserId },
-        { enabled: Boolean(targetUserId) }
+        { enabled: Boolean(targetUserId) && !isRestrictedPrivate }
     );
 
     // 7. Platform Modules List
@@ -78,13 +81,13 @@ export function useProfile({ username }: UseProfileOptions = {}) {
             userId: targetUserId,
             moduleSlug: selectedModuleSlug !== 'all' ? selectedModuleSlug : undefined,
         },
-        { enabled: Boolean(targetUserId) }
+        { enabled: Boolean(targetUserId) && !isRestrictedPrivate }
     );
 
     // 9. Recently Solved 10 Problems
     const { data: recentProblems, isLoading: isLoadingRecents } = problemQueryService.getRecentlySolvedProblems(
         { userId: targetUserId, limit: 10 },
-        { enabled: Boolean(targetUserId) }
+        { enabled: Boolean(targetUserId) && !isRestrictedPrivate }
     );
 
     // Follow / Unfollow Mutations
@@ -129,6 +132,7 @@ export function useProfile({ username }: UseProfileOptions = {}) {
         // User Profile
         profileUser,
         isOwnProfile,
+        isRestrictedPrivate,
         isLoadingUser,
         isUserError,
         userError,

@@ -193,4 +193,18 @@ export interface IUserQueries {
             autosave?: boolean;
         }
     ) => Promise<z.infer<typeof GetUserPreferencesOutputSchema>>;
+
+    deleteUserAccount: (
+        payload: { userId: string }
+    ) => Promise<{
+        success: boolean;
+        deletedUser: {
+            id: string;
+            username?: string | null;
+            email: string;
+            phoneNumber?: string | null;
+            image?: string | null;
+            resume?: string | null;
+        };
+    }>;
 }

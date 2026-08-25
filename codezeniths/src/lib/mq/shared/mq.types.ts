@@ -100,6 +100,7 @@ export const MqQueue = {
     AUTH_SMS_PASSWORDLESS_CREDENTIALS: 'q.auth.sms.passwordless_credentials',
     AUTH_SMS_NEW_DEVICE:            'q.auth.sms.new_device',
     AUTH_SMS_ACCOUNT_LOCKED:        'q.auth.sms.account_locked',
+    AUTH_ACCOUNT_DELETED:           'q.auth.account.deleted',
 
     // ── Payment Queues ────────────────────────────────────────────
     PAYMENT_WEBHOOK_PROCESSOR:      'q.payment.webhook.processor',
@@ -132,6 +133,7 @@ export const MqQueue = {
     NOTIFICATION_ADMIN_BROADCAST:   'q.notification.admin_broadcast',
     NOTIFICATION_USER_LOGIN:        'q.notification.user_login',
     NOTIFICATION_NEW_DEVICE:        'q.notification.new_device',
+    NOTIFICATION_CONTACT_RECEIVED:  'q.notification.contact_received',
 
     // ── Search Queues ─────────────────────────────────────────────
     SEARCH_USER_INDEX:              'q.search.user_index',
@@ -166,6 +168,7 @@ export const MqRoutingKey = {
     AUTH_SMS_PASSWORDLESS_CREDENTIALS: 'auth.sms.passwordless_credentials',
     AUTH_SMS_NEW_DEVICE:            'auth.sms.new_device',
     AUTH_SMS_ACCOUNT_LOCKED:        'auth.sms.account_locked',
+    AUTH_ACCOUNT_DELETED:           'auth.account.deleted',
 
     // ── Payment Routing Keys ──────────────────────────────────────
     PAYMENT_WEBHOOK_INGESTED:       'payment.webhook.ingested',
@@ -198,6 +201,7 @@ export const MqRoutingKey = {
     NOTIFICATION_ADMIN_BROADCAST:   'notification.admin_broadcast',
     NOTIFICATION_USER_LOGIN:        'notification.user_login',
     NOTIFICATION_NEW_DEVICE:        'notification.new_device',
+    NOTIFICATION_CONTACT_RECEIVED:  'notification.contact_received',
 
     // ── Search Routing Keys ───────────────────────────────────────
     SEARCH_USER_INDEX:              'search.user.index',
