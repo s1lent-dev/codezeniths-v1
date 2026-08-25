@@ -82,9 +82,128 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
     if (isLoading) {
         return (
             <div className="space-y-6 sm:space-y-7 animate-pulse">
-                <div className="h-48 rounded-md bg-secondary/10" />
-                <div className="h-72 rounded-md bg-secondary/10" />
-                <div className="h-44 rounded-md bg-secondary/10" />
+                {/* 1. Personal Details Card Skeleton */}
+                <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
+                    <div className="flex items-center gap-3">
+                        <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                        <div className="space-y-2 flex-1">
+                            <div className="h-4.5 w-36 rounded bg-secondary/20" />
+                            <div className="h-3 w-56 xs:w-72 rounded bg-secondary/15" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 gap-y-5 xs:gap-y-6 sm:gap-y-7 gap-x-6 sm:gap-x-8 pt-4 sm:pt-6">
+                        {[
+                            'First Name',
+                            'Last Name',
+                            'Date of Birth',
+                            'Gender',
+                            'Phone Number',
+                            'Location',
+                        ].map((label, idx) => (
+                            <div key={idx} className="flex flex-col gap-2">
+                                <div className="h-3 w-20 rounded bg-secondary/15" />
+                                <div className="h-4 w-28 xs:w-36 rounded bg-secondary/20" />
+                            </div>
+                        ))}
+                    </div>
+                </Card>
+
+                {/* 2. Professional Background Card Skeleton */}
+                <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-8 sm:space-y-10">
+                    <div className="w-full flex flex-col gap-3">
+                        <div className="flex items-center gap-3">
+                            <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                            <div className="space-y-2 flex-1">
+                                <div className="h-4.5 w-44 rounded bg-secondary/20" />
+                                <div className="h-3 w-64 xs:w-80 rounded bg-secondary/15" />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 xs:grid-cols-2 gap-y-5 xs:gap-y-6 sm:gap-y-7 gap-x-6 sm:gap-x-8 pt-4 sm:pt-6">
+                            <div className="flex flex-col gap-2">
+                                <div className="h-3 w-20 rounded bg-secondary/15" />
+                                <div className="h-4 w-32 rounded bg-secondary/20" />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <div className="h-3 w-28 rounded bg-secondary/15" />
+                                <div className="h-4 w-36 rounded bg-secondary/20" />
+                            </div>
+                        </div>
+
+                        <Separator className="bg-foreground-light-shade2/80 dark:bg-foreground-dark-shade1/60 my-2" />
+
+                        {/* About / Bio Skeleton */}
+                        <div className="space-y-3">
+                            <div className="h-3 w-24 rounded bg-secondary/15" />
+                            <div className="p-5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 space-y-2.5">
+                                <div className="h-3.5 w-full rounded bg-secondary/20" />
+                                <div className="h-3.5 w-5/6 rounded bg-secondary/15" />
+                                <div className="h-3.5 w-3/4 rounded bg-secondary/15" />
+                            </div>
+                        </div>
+
+                        <Separator className="bg-foreground-light-shade2/80 dark:bg-foreground-dark-shade1/60 my-2" />
+
+                        {/* Skills Skeleton */}
+                        <div className="space-y-3.5">
+                            <div className="flex items-center justify-between">
+                                <div className="h-3 w-36 rounded bg-secondary/15" />
+                                <div className="h-5 w-16 rounded-full bg-primary/10" />
+                            </div>
+                            <div className="flex flex-wrap gap-2.5 pt-1">
+                                <div className="h-7 w-20 rounded-md bg-primary/10" />
+                                <div className="h-7 w-24 rounded-md bg-primary/10" />
+                                <div className="h-7 w-28 rounded-md bg-primary/10" />
+                                <div className="h-7 w-20 rounded-md bg-primary/10" />
+                                <div className="h-7 w-32 rounded-md bg-primary/10" />
+                            </div>
+                        </div>
+
+                        <Separator className="bg-foreground-light-shade2/80 dark:bg-foreground-dark-shade1/60 my-2" />
+
+                        {/* Resume Document Skeleton */}
+                        <div className="space-y-3">
+                            <div className="h-3 w-32 rounded bg-secondary/15" />
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4.5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40">
+                                <div className="flex items-center gap-3.5 min-w-0">
+                                    <div className="size-9 rounded-md bg-primary/15 shrink-0" />
+                                    <div className="space-y-1.5 min-w-0">
+                                        <div className="h-4 w-44 rounded bg-secondary/20" />
+                                        <div className="h-3 w-28 rounded bg-secondary/15" />
+                                    </div>
+                                </div>
+                                <div className="h-8 w-28 rounded-sm bg-primary/15 shrink-0" />
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* 3. Social Profiles Card Skeleton */}
+                <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
+                    <div className="flex items-center gap-3">
+                        <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                        <div className="space-y-2 flex-1">
+                            <div className="h-4.5 w-32 rounded bg-secondary/20" />
+                            <div className="h-3 w-64 xs:w-72 rounded bg-secondary/15" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 pt-4 sm:pt-6">
+                        {[1, 2, 3, 4].map((idx) => (
+                            <div
+                                key={idx}
+                                className="p-4 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 flex items-center justify-between gap-3"
+                            >
+                                <div className="flex items-center gap-2.5">
+                                    <div className="size-4.5 rounded bg-secondary/20 shrink-0" />
+                                    <div className="h-3.5 w-16 rounded bg-secondary/15" />
+                                </div>
+                                <div className="h-3.5 w-24 rounded bg-secondary/20" />
+                            </div>
+                        ))}
+                    </div>
+                </Card>
             </div>
         );
     }

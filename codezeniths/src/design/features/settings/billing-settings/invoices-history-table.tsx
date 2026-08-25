@@ -17,12 +17,53 @@ import { InvoiceItem } from './useBillingSettings';
 interface InvoicesHistoryTableProps {
     invoices: InvoiceItem[];
     onDownloadInvoice: (invoiceNumber: string) => void;
+    isLoading?: boolean;
 }
 
 export const InvoicesHistoryTable: React.FC<InvoicesHistoryTableProps> = ({
     invoices,
     onDownloadInvoice,
+    isLoading = false,
 }) => {
+    if (isLoading) {
+        return (
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 animate-pulse">
+                {/* Section Header Skeleton */}
+                <div className="flex items-center gap-3">
+                    <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                    <div className="space-y-2 flex-1">
+                        <div className="h-4.5 w-48 rounded bg-secondary/20" />
+                        <div className="h-3 w-64 xs:w-80 rounded bg-secondary/15" />
+                    </div>
+                </div>
+
+                {/* Invoices List Skeleton */}
+                <div className="space-y-3 pt-6">
+                    {[1, 2, 3].map((idx) => (
+                        <div
+                            key={idx}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4.5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 border border-foreground-light-shade3 dark:border-foreground-dark-shade1"
+                        >
+                            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                <div className="size-10 rounded-sm bg-secondary/20 shrink-0" />
+                                <div className="space-y-1.5 min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-4 w-32 rounded bg-secondary/20" />
+                                        <div className="h-4 w-14 rounded-full bg-secondary/15" />
+                                    </div>
+                                    <div className="h-3 w-56 xs:w-72 rounded bg-secondary/15" />
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 shrink-0">
+                                <div className="h-4 w-20 rounded bg-secondary/20" />
+                                <div className="h-8 w-28 rounded-sm bg-primary/15" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </Card>
+        );
+    }
     return (
         <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
             {/* Section Header */}

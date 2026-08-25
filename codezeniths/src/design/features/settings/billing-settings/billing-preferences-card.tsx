@@ -33,6 +33,7 @@ interface BillingPreferencesCardProps {
     spendCapEnabled: boolean;
     onToggleSpendCap: (enabled: boolean) => void;
     spendCapAmount: number;
+    isLoading?: boolean;
 }
 
 interface AutomationSwitchItemProps {
@@ -121,7 +122,62 @@ export const BillingPreferencesCard: React.FC<BillingPreferencesCardProps> = ({
     spendCapEnabled,
     onToggleSpendCap,
     spendCapAmount,
+    isLoading = false,
 }) => {
+    if (isLoading) {
+        return (
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 animate-pulse">
+                {/* Section Header Skeleton */}
+                <div className="flex items-center gap-3">
+                    <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                    <div className="space-y-2 flex-1">
+                        <div className="h-4.5 w-64 rounded bg-secondary/20" />
+                        <div className="h-3 w-80 xs:w-96 rounded bg-secondary/15" />
+                    </div>
+                </div>
+
+                {/* Section 1: Billing Timing Model Skeleton */}
+                <div className="space-y-3 pt-2">
+                    <div className="h-3 w-48 rounded bg-secondary/15" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[1, 2].map((idx) => (
+                            <div
+                                key={idx}
+                                className="border border-foreground-light-shade3 dark:border-foreground-dark-shade1 p-5 rounded-sm bg-primary/3 flex items-center justify-between gap-4"
+                            >
+                                <div className="size-11 rounded-sm bg-secondary/20 shrink-0" />
+                                <div className="space-y-2 min-w-0 flex-1">
+                                    <div className="h-4 w-32 rounded bg-secondary/20" />
+                                    <div className="h-3 w-full rounded bg-secondary/15" />
+                                </div>
+                                <div className="size-5 rounded-xs bg-secondary/20 shrink-0" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Section 2: Automation Switches Skeleton */}
+                <div className="space-y-3 pt-2">
+                    <div className="h-3 w-48 rounded bg-secondary/15" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[1, 2, 3, 4].map((idx) => (
+                            <div
+                                key={idx}
+                                className="border border-foreground-light-shade3 dark:border-foreground-dark-shade1 p-4.5 rounded-sm bg-primary/3 flex items-center justify-between gap-4"
+                            >
+                                <div className="size-11 rounded-sm bg-secondary/20 shrink-0" />
+                                <div className="space-y-2 min-w-0 flex-1">
+                                    <div className="h-4 w-36 rounded bg-secondary/20" />
+                                    <div className="h-3 w-full rounded bg-secondary/15" />
+                                </div>
+                                <div className="w-9 h-5 rounded-full bg-secondary/20 shrink-0" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </Card>
+        );
+    }
     return (
         <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
             <div className="space-y-6 sm:space-y-7 flex flex-col w-full">

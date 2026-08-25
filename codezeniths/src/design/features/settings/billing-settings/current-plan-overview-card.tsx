@@ -18,12 +18,63 @@ import { PlanTier } from './useBillingSettings';
 interface CurrentPlanOverviewCardProps {
     currentPlan: PlanTier;
     onChangePlanClick: () => void;
+    isLoading?: boolean;
 }
 
 export const CurrentPlanOverviewCard: React.FC<CurrentPlanOverviewCardProps> = ({
     currentPlan,
     onChangePlanClick,
+    isLoading = false,
 }) => {
+    if (isLoading) {
+        return (
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 animate-pulse">
+                {/* Section Header Skeleton */}
+                <div className="flex items-center gap-3">
+                    <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                    <div className="space-y-2 flex-1">
+                        <div className="h-4.5 w-56 rounded bg-secondary/20" />
+                        <div className="h-3 w-72 xs:w-96 rounded bg-secondary/15" />
+                    </div>
+                </div>
+
+                {/* Active Plan Detail Box Skeleton */}
+                <div className="p-4 sm:p-5 rounded-md bg-primary/5 border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-1 sm:mt-2">
+                    <div className="space-y-2 min-w-0 flex-1">
+                        <div className="h-5 w-48 rounded bg-secondary/20" />
+                        <div className="h-3.5 w-64 xs:w-80 rounded bg-secondary/15" />
+                    </div>
+                    <div className="h-9 w-36 rounded-sm bg-primary/15 shrink-0" />
+                </div>
+
+                {/* Quota Meters Skeleton */}
+                <div className="space-y-4 pt-2">
+                    <div className="h-3 w-48 rounded bg-secondary/15" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {[1, 2, 3, 4].map((idx) => (
+                            <div
+                                key={idx}
+                                className="p-4.5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 border border-foreground-light-shade3 dark:border-foreground-dark-shade1 space-y-3"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="size-7 rounded-xs bg-secondary/20 shrink-0" />
+                                        <div className="h-3.5 w-32 rounded bg-secondary/20" />
+                                    </div>
+                                    <div className="h-3.5 w-16 rounded bg-secondary/15" />
+                                </div>
+                                <div className="h-1.5 w-full rounded bg-secondary/20" />
+                                <div className="flex justify-between">
+                                    <div className="h-2.5 w-16 rounded bg-secondary/15" />
+                                    <div className="h-2.5 w-20 rounded bg-secondary/15" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </Card>
+        );
+    }
     const planDetails: Record<PlanTier, { name: string; priceDescription: string; computeLimit: string; computeUsed: number; computeMax: number; computePercent: number }> = {
         explorer: {
             name: 'CodeZeniths Explorer',

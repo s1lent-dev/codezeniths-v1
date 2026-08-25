@@ -124,9 +124,23 @@ export const ConnectedAccountsCard: React.FC = () => {
             {/* Integration Cards List */}
             <div className="space-y-3.5 sm:space-y-4 pt-4 sm:pt-6">
                 {isLoading ? (
-                    <div className="py-8 flex items-center justify-center gap-2 text-xs text-muted-light dark:text-muted-dark">
-                        <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="size-4 text-primary" />
-                        <span>Loading connected accounts...</span>
+                    <div className="space-y-3.5 sm:space-y-4 animate-pulse">
+                        {[1, 2].map((idx) => (
+                            <div
+                                key={idx}
+                                className="border border-foreground-light-shade3 dark:border-foreground-dark-shade1 p-4 sm:p-4.5 rounded-sm bg-primary/3 flex items-center justify-between gap-3 sm:gap-4"
+                            >
+                                <div className="size-10 rounded-sm bg-secondary/20 shrink-0" />
+                                <div className="space-y-2 min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-4 w-32 rounded bg-secondary/20" />
+                                        <div className="h-4 w-20 rounded-full bg-secondary/15" />
+                                    </div>
+                                    <div className="h-3 w-56 xs:w-72 rounded bg-secondary/15" />
+                                </div>
+                                <div className="h-8 w-24 sm:w-28 rounded-sm bg-secondary/20 shrink-0" />
+                            </div>
+                        ))}
                     </div>
                 ) : (
                     <>

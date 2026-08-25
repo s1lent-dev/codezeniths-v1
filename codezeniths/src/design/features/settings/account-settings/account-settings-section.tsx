@@ -80,6 +80,7 @@ export const AccountSettingsSection: React.FC<AccountSettingsSectionProps> = ({
                 isEditPhoneOpen={isEditPhoneOpen}
                 setIsEditPhoneOpen={setIsEditPhoneOpen}
                 onRefresh={handleRefreshAll}
+                isLoading={isLoading}
             />
 
             {/* 3. Profile Visibility Card: Public / Private Preferences */}
@@ -89,12 +90,14 @@ export const AccountSettingsSection: React.FC<AccountSettingsSectionProps> = ({
                 isUpdatingVisibility={isUpdatingVisibility}
                 onSelectVisibility={handleSelectVisibility}
                 onConfirmVisibility={handleConfirmVisibility}
+                isLoading={isLoading}
             />
 
             {/* 4. System Appearance Card: Dark / Light Mode Preferences */}
             <AppearanceSettings
                 selectedTheme={selectedTheme}
                 onSelectTheme={handleSelectTheme}
+                isLoading={isLoading}
             />
 
             {/* 5. Notification Preferences Card: Email, SMS, Push & DND Switches */}
@@ -107,6 +110,7 @@ export const AccountSettingsSection: React.FC<AccountSettingsSectionProps> = ({
                 onToggleSmsNotifications={handleToggleSmsNotifications}
                 onTogglePushNotifications={handleTogglePushNotifications}
                 onToggleDoNotDisturb={handleToggleDoNotDisturb}
+                isLoading={isLoading}
             />
         </div>
     );

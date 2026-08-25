@@ -38,6 +38,7 @@ interface AccountCredentialsCardProps {
     isEditPhoneOpen: boolean;
     setIsEditPhoneOpen: (open: boolean) => void;
     onRefresh?: () => void;
+    isLoading?: boolean;
 }
 
 interface CredentialRowItemProps {
@@ -152,7 +153,41 @@ export const AccountCredentialsCard: React.FC<AccountCredentialsCardProps> = ({
     isEditPhoneOpen,
     setIsEditPhoneOpen,
     onRefresh,
+    isLoading = false,
 }) => {
+    if (isLoading) {
+        return (
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 animate-pulse">
+                {/* Section Header Skeleton */}
+                <div className="flex items-center gap-3">
+                    <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                    <div className="space-y-2 flex-1">
+                        <div className="h-4.5 w-48 rounded bg-secondary/20" />
+                        <div className="h-3 w-64 xs:w-80 rounded bg-secondary/15" />
+                    </div>
+                </div>
+
+                {/* Credentials List Skeleton */}
+                <div className="space-y-3.5 sm:space-y-4 pt-4 sm:pt-6">
+                    {[1, 2, 3].map((idx) => (
+                        <div
+                            key={idx}
+                            className="flex flex-col gap-3 p-3.5 sm:p-4 rounded-md bg-primary/4 dark:bg-primary/4 sm:flex-row sm:items-center sm:justify-between sm:gap-3.5"
+                        >
+                            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                <div className="size-9 rounded-sm bg-secondary/20 shrink-0" />
+                                <div className="space-y-1.5 min-w-0 flex-1">
+                                    <div className="h-3 w-24 rounded bg-secondary/15" />
+                                    <div className="h-4 w-40 xs:w-48 rounded bg-secondary/20" />
+                                </div>
+                            </div>
+                            <div className="size-8 rounded-full bg-secondary/20 shrink-0 self-end sm:self-center" />
+                        </div>
+                    ))}
+                </div>
+            </Card>
+        );
+    }
     return (
         <>
             <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">

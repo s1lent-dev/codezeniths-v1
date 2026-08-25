@@ -7,6 +7,7 @@ import {
     TypographyWeight,
 } from '@codezeniths/components';
 import { Card } from '@codezeniths/modules';
+import { cn } from '@codezeniths/design/cn';
 import {
     History,
     Sparkles,
@@ -30,16 +31,35 @@ export const SearchHistoryHeroCard: React.FC<SearchHistoryHeroCardProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <Card className="w-full p-4.5 xs:p-5 sm:p-7 rounded-md border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs animate-pulse">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6">
-                    <div className="flex items-center gap-4 xs:gap-5">
-                        <div className="size-14 xs:size-16 rounded-md bg-secondary/20 shrink-0" />
-                        <div className="space-y-3 min-w-0 flex-1">
-                            <div className="h-6 w-36 xs:w-48 rounded bg-secondary/20" />
-                            <div className="h-4 w-48 xs:w-64 rounded bg-secondary/15" />
+            <Card className="w-full p-4.5 xs:p-5 sm:p-7 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs animate-pulse">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
+                    {/* Left Emblem & Header Skeleton */}
+                    <div className="flex items-center gap-4 xs:gap-5 sm:gap-6 min-w-0">
+                        <div className="size-14 xs:size-16 sm:size-18 rounded-md bg-primary/15 shrink-0" />
+                        <div className="space-y-2.5 min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                                <div className="h-6 w-36 xs:w-48 rounded bg-secondary/25" />
+                                <div className="h-5 w-28 rounded-full bg-primary/15 hidden sm:block" />
+                            </div>
+                            <div className="h-4 w-64 xs:w-80 rounded bg-secondary/15" />
                         </div>
                     </div>
-                    <div className="h-10 w-full sm:w-48 rounded-sm bg-secondary/20 shrink-0" />
+
+                    {/* Right 3-Stat Metric Boxes Skeleton */}
+                    <div className="grid grid-cols-2 xs:grid-cols-3 gap-2.5 sm:gap-4 shrink-0 w-full lg:w-auto">
+                        {[1, 2, 3].map((idx) => (
+                            <div
+                                key={idx}
+                                className={cn(
+                                    'px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-md bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 border border-foreground-light-shade3 dark:border-foreground-dark-shade1 space-y-1.5 min-w-24',
+                                    idx === 3 && 'col-span-2 xs:col-span-1'
+                                )}
+                            >
+                                <div className="h-3 w-16 rounded bg-secondary/15" />
+                                <div className="h-5 w-12 rounded bg-secondary/20" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </Card>
         );

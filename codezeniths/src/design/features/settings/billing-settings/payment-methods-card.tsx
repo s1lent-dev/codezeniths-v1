@@ -19,6 +19,7 @@ interface PaymentMethodsCardProps {
     onSetDefault: (id: string) => void;
     onRemove: (id: string) => void;
     onAddClick: () => void;
+    isLoading?: boolean;
 }
 
 export const PaymentMethodsCard: React.FC<PaymentMethodsCardProps> = ({
@@ -26,7 +27,47 @@ export const PaymentMethodsCard: React.FC<PaymentMethodsCardProps> = ({
     onSetDefault,
     onRemove,
     onAddClick,
+    isLoading = false,
 }) => {
+    if (isLoading) {
+        return (
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 animate-pulse">
+                {/* Section Header Skeleton */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                        <div className="space-y-2 flex-1">
+                            <div className="h-4.5 w-44 rounded bg-secondary/20" />
+                            <div className="h-3 w-64 xs:w-80 rounded bg-secondary/15" />
+                        </div>
+                    </div>
+                    <div className="h-8 w-36 rounded-sm bg-primary/15 shrink-0" />
+                </div>
+
+                {/* Saved Payment Methods Skeleton */}
+                <div className="space-y-3.5 pt-6">
+                    {[1, 2].map((idx) => (
+                        <div
+                            key={idx}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4.5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 border border-foreground-light-shade3 dark:border-foreground-dark-shade1"
+                        >
+                            <div className="flex items-center gap-4 min-w-0 flex-1">
+                                <div className="size-11 rounded-sm bg-secondary/20 shrink-0" />
+                                <div className="space-y-1.5 min-w-0 flex-1">
+                                    <div className="h-4 w-36 rounded bg-secondary/20" />
+                                    <div className="h-3 w-48 rounded bg-secondary/15" />
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                                <div className="h-8 w-24 rounded-sm bg-secondary/20" />
+                                <div className="h-8 w-20 rounded-sm bg-secondary/15" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </Card>
+        );
+    }
     return (
         <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
             {/* Section Header with Add Card Action */}

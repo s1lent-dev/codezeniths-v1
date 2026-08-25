@@ -15,11 +15,12 @@ import { Globe, Lock, Check, Eye } from 'lucide-react';
 import { ProfileVisibility } from '@codezeniths/schemas/db';
 
 interface ProfileVisibilitySettingsProps {
-    selectedVisibility: ProfileVisibility;
-    isVisibilityDirty: boolean;
-    isUpdatingVisibility: boolean;
-    onSelectVisibility: (visibility: ProfileVisibility) => void;
-    onConfirmVisibility: () => void;
+    selectedVisibility?: ProfileVisibility;
+    isVisibilityDirty?: boolean;
+    isUpdatingVisibility?: boolean;
+    onSelectVisibility?: (visibility: ProfileVisibility) => void;
+    onConfirmVisibility?: () => void;
+    isLoading?: boolean;
 }
 
 const VISIBILITY_OPTIONS = [
@@ -38,12 +39,44 @@ const VISIBILITY_OPTIONS = [
 ];
 
 export const ProfileVisibilitySettings: React.FC<ProfileVisibilitySettingsProps> = ({
-    selectedVisibility,
-    isVisibilityDirty,
-    isUpdatingVisibility,
-    onSelectVisibility,
-    onConfirmVisibility,
+    selectedVisibility = 'public',
+    isVisibilityDirty = false,
+    isUpdatingVisibility = false,
+    onSelectVisibility = () => {},
+    onConfirmVisibility = () => {},
+    isLoading = false,
 }) => {
+    if (isLoading) {
+        return (
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 animate-pulse">
+                {/* Section Header Skeleton */}
+                <div className="flex items-center gap-3">
+                    <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                    <div className="space-y-2 flex-1">
+                        <div className="h-4.5 w-36 rounded bg-secondary/20" />
+                        <div className="h-3 w-64 xs:w-80 rounded bg-secondary/15" />
+                    </div>
+                </div>
+
+                {/* Option Cards Skeleton */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 pt-4 sm:pt-6">
+                    {[1, 2].map((idx) => (
+                        <div
+                            key={idx}
+                            className="border border-foreground-light-shade3 dark:border-foreground-dark-shade1 p-5 rounded-sm bg-primary/3 flex items-center justify-between gap-4"
+                        >
+                            <div className="size-11 rounded-sm bg-secondary/20 shrink-0" />
+                            <div className="space-y-2 min-w-0 flex-1">
+                                <div className="h-4 w-28 rounded bg-secondary/20" />
+                                <div className="h-3 w-full rounded bg-secondary/15" />
+                            </div>
+                            <div className="size-5 rounded-xs bg-secondary/20 shrink-0" />
+                        </div>
+                    ))}
+                </div>
+            </Card>
+        );
+    }
     return (
         <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
             {/* Section Header */}
