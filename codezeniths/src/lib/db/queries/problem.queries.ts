@@ -7,8 +7,6 @@ import { AppErrorBuilder } from '@codezeniths/service/error/error';
 import { ErrorCode } from '@codezeniths/service/error/error.types';
 import { progressProducer, notificationProducer } from '@/lib/mq';
 import {
-    GetProblemsInputSchema,
-    GetProblemsOutputSchema,
     GetProblemsPaginatedInputSchema,
     GetProblemsPaginatedOutputSchema,
     GetProblemsInfiniteInputSchema,
@@ -143,44 +141,6 @@ function mapProblem(problem: any) {
 // ─── ProblemQueries ───────────────────────────────────────────────────────────
 
 export class ProblemQueries implements IProblemQueries {
-    getProblems = qRPC()
-        .input(GetProblemsInputSchema)
-        .output(GetProblemsOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing getProblems query', { payload });
-            const { userId, filters, sorting } = payload;
-
-            const where = buildProblemWhere(filters || {}, userId);
-            const orderBy = buildProblemOrderBy(sorting);
-
-            const [total, solvedCount, problems] = await Promise.all([
-                prisma.problem.count({ where }),
-                userId
-                    ? prisma.problemProgress.count({
-                          where: {
-                              userId,
-                              status: 'solved',
-                              problem: where,
-                          },
-                      })
-                    : Promise.resolve(0),
-                prisma.problem.findMany({
-                    where,
-                    orderBy,
-                    select: getProblemSelect(userId),
-                }),
-            ]);
-
-            const mappedProblems = problems.map(mapProblem);
-
-            return {
-                problems: mappedProblems,
-                total,
-                solvedCount,
-            };
-        })
-        .build();
-
     getProblemsPaginated = qRPC()
         .input(GetProblemsPaginatedInputSchema)
         .output(GetProblemsPaginatedOutputSchema)
@@ -843,27 +803,27 @@ export class ProblemQueries implements IProblemQueries {
                 void difficultyTotalsCache.set(totalsCacheKey, difficultyGroupCounts);
             }
 
-            // 2. Parallel user queries (Both indexed)
-            const [userSolvedProgress, problemsRevisitCount] = await Promise.all([
-                prisma.problemProgress.findMany({
-                    where: {
-                        userId,
-                        status: 'solved',
-                    },
-                    select: {
-                        problem: {
-                            select: {
-                                difficulty: true,
-                            },
-                        },
-                    },
-                }),
-                prisma.problemProgress.count({
-                    where: {
-                        userId,
-                        revisit: true,
-                    },
-                }),
+            // 2. Parallel user queries: O(1) Primary Key lookup on UserGlobalStats + Indexed Revisit Count
+            const [globalStats, problemsRevisitCount] = await Promise.all([
+                userId
+                    ? prisma.userGlobalStats.findUnique({
+                          where: { userId },
+                          select: {
+                              totalSolvedCount: true,
+                              easySolved: true,
+                              mediumSolved: true,
+                              hardSolved: true,
+                          },
+                      })
+                    : null,
+                userId
+                    ? prisma.problemProgress.count({
+                          where: {
+                              userId,
+                              revisit: true,
+                          },
+                      })
+                    : 0,
             ]);
 
             const problemsCountByDifficulty = {
@@ -883,19 +843,14 @@ export class ProblemQueries implements IProblemQueries {
                 problemsCountByDifficulty.medium +
                 problemsCountByDifficulty.hard;
 
+            // Direct O(1) assignment from pre-aggregated UserGlobalStats
             const problemsSolvedCountByDifficulty = {
-                easy: 0,
-                medium: 0,
-                hard: 0,
+                easy: globalStats?.easySolved ?? 0,
+                medium: globalStats?.mediumSolved ?? 0,
+                hard: globalStats?.hardSolved ?? 0,
             };
 
-            for (const p of userSolvedProgress) {
-                if (p.problem?.difficulty === 'easy') problemsSolvedCountByDifficulty.easy++;
-                else if (p.problem?.difficulty === 'medium') problemsSolvedCountByDifficulty.medium++;
-                else if (p.problem?.difficulty === 'hard') problemsSolvedCountByDifficulty.hard++;
-            }
-
-            const problemsSolvedCount = userSolvedProgress.length;
+            const problemsSolvedCount = globalStats?.totalSolvedCount ?? 0;
             const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
             const problemsSolvedPercentage =
                 problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;

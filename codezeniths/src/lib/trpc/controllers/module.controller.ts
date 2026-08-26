@@ -79,17 +79,8 @@ export class ModuleController implements IModuleController {
         logger.info('Executing getSingleModuleProgress controller', { input });
 
         const userId = ctx.user?.id;
-        if (!userId) {
-            logger.warn('Unauthorized attempt to fetch single module progress');
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
-        }
 
         try {
-            // TODO: [Redis] Check cache for single module progress statistics
-
             const result = await ctx.queries.module.getSingleModuleProgress({
                 moduleId: input.moduleId,
                 moduleSlug: input.moduleSlug,

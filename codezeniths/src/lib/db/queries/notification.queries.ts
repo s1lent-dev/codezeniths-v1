@@ -3,8 +3,6 @@ import { qRPC } from './utils/qrpc.utils';
 import { prisma } from '@/lib/db/prisma.client';
 import { logger } from '@/service/logging';
 import {
-    CreateNotificationInputSchema,
-    CreateGlobalNotificationInputSchema,
     GetNotificationsInputSchema,
     GetNotificationsOutputSchema,
     NotificationDBOutputSchema,
@@ -14,64 +12,6 @@ import {
 import { INotificationQueries } from './interfaces/notification.queries.interface';
 
 export class NotificationQueries implements INotificationQueries {
-    createNotification = qRPC()
-        .input(CreateNotificationInputSchema)
-        .output(NotificationDBOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing createNotification query', { payload });
-            const { userId, type, title, message } = payload;
-            
-            const notification = await prisma.notification.create({
-                data: {
-                    userId,
-                    type,
-                    title,
-                    message,
-                    read: false,
-                },
-            });
-            
-            return {
-                id: notification.id,
-                userId: notification.userId,
-                type: notification.type,
-                title: notification.title,
-                message: notification.message,
-                read: notification.read,
-                createdAt: notification.createdAt,
-            };
-        })
-        .build();
-
-    createGlobalNotification = qRPC()
-        .input(CreateGlobalNotificationInputSchema)
-        .output(NotificationDBOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing createGlobalNotification query', { payload });
-            const { type, title, message } = payload;
-
-            const notification = await prisma.notification.create({
-                data: {
-                    userId: null,
-                    type,
-                    title,
-                    message,
-                    read: false,
-                },
-            });
-
-            return {
-                id: notification.id,
-                userId: notification.userId,
-                type: notification.type,
-                title: notification.title,
-                message: notification.message,
-                read: notification.read,
-                createdAt: notification.createdAt,
-            };
-        })
-        .build();
-
     getNotifications = qRPC()
         .input(GetNotificationsInputSchema)
         .output(GetNotificationsOutputSchema)

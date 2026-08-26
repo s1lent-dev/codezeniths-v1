@@ -7,9 +7,28 @@ export function useModuleDetails() {
     const params = useParams();
     const moduleSlug = (params?.module as string) || '';
 
-    const { data: moduleDetails, isLoading, isError, error } = moduleQueryService.getSingleModule({
-        slug: moduleSlug,
-    });
+    const {
+        data: moduleDetails,
+        isLoading: isModuleQueryLoading,
+        isPending: isModulePending,
+        isError,
+        error,
+    } = moduleQueryService.getSingleModule(
+        { slug: moduleSlug },
+        { enabled: !!moduleSlug }
+    );
+
+    const {
+        data: moduleProgress,
+        isLoading: isProgressQueryLoading,
+        isPending: isProgressPending,
+    } = moduleQueryService.getSingleModuleProgress(
+        { moduleSlug },
+        { enabled: !!moduleSlug }
+    );
+
+    const isLoading = !moduleSlug || isModuleQueryLoading || (isModulePending && !moduleDetails);
+    const isLoadingProgress = !moduleSlug || isProgressQueryLoading || (isProgressPending && !moduleProgress);
 
     const toggleModuleBookmarkMutation = moduleQueryService.toggleModuleBookmark();
 
@@ -24,7 +43,9 @@ export function useModuleDetails() {
     return {
         moduleSlug,
         moduleDetails,
+        moduleProgress,
         isLoading,
+        isLoadingProgress,
         isError,
         error,
         handleToggleModuleBookmark,

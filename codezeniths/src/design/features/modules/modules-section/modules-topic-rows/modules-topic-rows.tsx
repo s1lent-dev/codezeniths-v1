@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { motion } from 'motion/react';
 import { ChevronRight, ChevronLeft, Layers } from 'lucide-react';
 import {
     Typography,
@@ -201,10 +202,36 @@ export const ModulesTopicRows: React.FC<ModulesTopicRowsProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <div className="w-full space-y-10">
+            <div className="w-full space-y-16 pt-4 font-sans select-none">
                 {[1, 2, 3].map((row) => (
                     <div key={row} className="space-y-4">
-                        <div className="h-7 w-48 bg-primary/10 rounded-md animate-pulse" />
+                        {/* Topic Row Header Skeleton */}
+                        <div className="flex items-center justify-between gap-3 mb-2 sm:mb-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: row * 0.1 }}
+                                    className="size-7 sm:size-8 rounded-md bg-primary/10"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: row * 0.1 + 0.05 }}
+                                    className="h-6 w-40 sm:w-56 rounded-md bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: row * 0.1 + 0.1 }}
+                                    className="hidden sm:inline-flex h-5 w-16 rounded-full bg-secondary/15"
+                                />
+                            </div>
+                            <div className="hidden sm:flex items-center gap-3">
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: row * 0.1 + 0.15 }}
+                                    className="h-4 w-20 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
+                            </div>
+                        </div>
                         <CategoryCardGridSkeleton count={3} />
                     </div>
                 ))}

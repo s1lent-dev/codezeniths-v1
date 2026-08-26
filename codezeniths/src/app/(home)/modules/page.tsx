@@ -1,14 +1,13 @@
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { ModuleSliderSkeleton } from '@/design/features/problems/module-section/module-slider-skeleton';
+import { Loader } from '@codezeniths/components';
 
 const ModulesSection = dynamic(
     () => import('@/design/features/modules').then((mod) => mod.ModulesSection),
     {
         loading: () => (
-            <div className="w-full space-y-6 pb-16 font-sans">
-                <div className="h-10 w-48 rounded-md bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 animate-pulse" />
-                <ModuleSliderSkeleton />
+            <div className="flex items-center justify-center min-h-[60vh] w-full">
+                <Loader />
             </div>
         ),
     }
@@ -19,9 +18,8 @@ export default function Page() {
         <div className="w-full">
             <Suspense
                 fallback={
-                    <div className="w-full space-y-6 pb-16 font-sans">
-                        <div className="h-10 w-48 rounded-md bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 animate-pulse" />
-                        <ModuleSliderSkeleton />
+                    <div className="flex items-center justify-center min-h-[60vh] w-full">
+                        <Loader />
                     </div>
                 }
             >
@@ -30,3 +28,4 @@ export default function Page() {
         </div>
     );
 }
+

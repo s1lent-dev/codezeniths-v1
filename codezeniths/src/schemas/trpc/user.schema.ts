@@ -14,12 +14,6 @@ import {
 } from '@codezeniths/schemas/db';
 
 
-// ─── getProfileById ────────────────────────────────────────────────────────────
-
-export const GetProfileByIdInputSchema = z.object({
-    userId: z.uuidv7().optional(), // optional because it defaults to logged-in user ID
-});
-
 export const ProfileDataSchema = z.object({
     id: z.uuidv7(),
     username: z.string().nullable(),
@@ -36,33 +30,6 @@ export const ProfileDataSchema = z.object({
     onBoardingStep: z.number().default(0),
     createdAt: z.coerce.date(),
 });
-
-export const GetProfileByIdOutputSchema = z.object({
-    profile: ProfileDataSchema,
-    activity: z.array(UserDailyActivitySchema),
-    skills: z.array(UserSkillSchema).optional(),
-    socials: UserSocialLinksSchema.nullable(),
-});
-
-// ─── getProfileByUsername ──────────────────────────────────────────────────────
-
-export const GetProfileByUsernameInputSchema = z.object({
-    username: z.string().min(3).max(30),
-});
-
-export const GetProfileByUsernameOutputSchema = z.discriminatedUnion('status', [
-    z.object({
-        status: z.literal('visible'),
-        profile: ProfileDataSchema,
-        activity: z.array(UserDailyActivitySchema),
-        skills: z.array(UserSkillSchema).optional(),
-        socials: UserSocialLinksSchema.nullable(),
-    }),
-    z.object({
-        status: z.literal('private'),
-        message: z.string(),
-    }),
-]);
 
 // ─── getSettings ───────────────────────────────────────────────────────────────
 
@@ -185,15 +152,6 @@ export const GetExtractionProgressOutputSchema = z.object({
     step: z.string().nullable(),
 });
 
-// ─── getAvatar ─────────────────────────────────────────────────────────────────
-
-export const GetAvatarInputSchema = z.object({
-    userId: z.uuidv7().optional(),
-});
-
-export const GetAvatarOutputSchema = z.object({
-    image: z.string().nullable(),
-});
 export const CheckUserNameAvailabilityInputSchema = z.object({ 
     username: z.string().min(3).max(30),
     suggestions: z.array(z.string()).optional() 
@@ -206,18 +164,6 @@ export const CheckEmailAvailabilityInputSchema = z.object({ email: z.email() });
 export const CheckEmailAvailabilityOutputSchema = z.object({ available: z.boolean(), isVerified: z.boolean().optional() });
 export const CheckPhoneAvailabilityInputSchema = z.object({ phone: z.string().min(5) });
 export const CheckPhoneAvailabilityOutputSchema = z.object({ available: z.boolean(), isVerified: z.boolean().optional() });
-
-// ─── getAvatarUploadUrl ────────────────────────────────────────────────────────
-
-export const GetAvatarUploadUrlInputSchema = z.object({
-    contentType: z.string().regex(/^image\/(png|jpeg|jpg|webp|gif)$/),
-});
-
-export const GetAvatarUploadUrlOutputSchema = z.object({
-    uploadUrl: z.string().url(),
-    key: z.string(),
-    publicUrl: z.string().url(),
-});
 
 // ─── onboarding schemas ────────────────────────────────────────────────────────
 
@@ -295,10 +241,6 @@ export const UpdateOnboardingStep3InputSchema = z.object({
 
 export const UpdateOnboardingStep3OutputSchema = ProfileDataSchema;
 
-
-export const GetResumeDownloadUrlInputSchema = z.object({ userId: z.string().optional() });
-export const GetResumeDownloadUrlOutputSchema = z.object({ url: z.string().nullable() });
-
 // ─── getUserMonthlyActivity ───────────────────────────────────────────────────
 
 export const GetUserMonthlyActivityInputSchema = z.object({
@@ -320,20 +262,7 @@ export const GetUserMonthlyActivityOutputSchema = z.object({
     activities: z.array(UserMonthlyActivityItemSchema),
 });
 
-// ─── getActiveStreak / getUserStreak ──────────────────────────────────────────
-
-export const GetActiveStreakTRPCOutputSchema = z.object({
-    currentStreak: z.number().int(),
-    longestStreak: z.number().int(),
-    lastProblemSolvedDate: z.coerce.date().nullable().optional(),
-    totalActiveDays: z.number().int(),
-    currentCheckInStreak: z.number().int(),
-    longestCheckInStreak: z.number().int(),
-    lastActiveDate: z.coerce.date().nullable().optional(),
-    // Backward-compat aliases
-    bestStreak: z.number().int().optional(),
-    activeDaysCount: z.number().int().optional(),
-});
+// ─── getUserStreak ────────────────────────────────────────────────────────────
 
 export const GetUserStreakTRPCInputSchema = z.object({
     userId: z.uuidv7().optional(),
@@ -369,6 +298,7 @@ export const RecordDailyCheckInTRPCInputSchema = z.object({
 
 export const RecordDailyCheckInTRPCOutputSchema = z.object({
     checkedIn: z.boolean(),
+    isNewCheckIn: z.boolean().default(true),
     totalActiveDays: z.number().int(),
     currentCheckInStreak: z.number().int(),
     longestCheckInStreak: z.number().int(),
@@ -398,18 +328,6 @@ export const UnfollowUserTRPCOutputSchema = z.object({
     isFollowing: z.boolean(),
     followerCount: z.number().int(),
     followingCount: z.number().int(),
-});
-
-// ─── getFollowStats ───────────────────────────────────────────────────────────
-
-export const GetFollowStatsTRPCInputSchema = z.object({
-    userId: z.uuidv7(),
-});
-
-export const GetFollowStatsTRPCOutputSchema = z.object({
-    followerCount: z.number().int(),
-    followingCount: z.number().int(),
-    isFollowing: z.boolean(),
 });
 
 // ─── getFollowers / getFollowing ──────────────────────────────────────────────

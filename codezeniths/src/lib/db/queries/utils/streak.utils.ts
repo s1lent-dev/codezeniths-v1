@@ -22,6 +22,7 @@ export interface EvaluatedStreakState {
     updatedAt?: Date;
     isSolvedToday: boolean;
     isCheckedInToday: boolean;
+    isNewCheckIn?: boolean;
     isDirty?: boolean;
 
     // Backward compatibility aliases
@@ -192,6 +193,7 @@ export async function recordDailyCheckInAndSyncStreak({
                 ...streak,
                 isSolvedToday: false,
                 isCheckedInToday: true,
+                isNewCheckIn: true,
                 isDirty: false,
                 bestStreak: streak.longestStreak,
                 activeDaysCount: streak.totalActiveDays,
@@ -238,12 +240,14 @@ export async function recordDailyCheckInAndSyncStreak({
             userId,
             currentCheckInStreak: updatedStreak.currentCheckInStreak,
             totalActiveDays: updatedStreak.totalActiveDays,
+            isNewCheckIn: isNewActiveDay,
         });
 
         return {
             ...updatedStreak,
             isSolvedToday: evaluated.isSolvedToday,
             isCheckedInToday: true,
+            isNewCheckIn: isNewActiveDay,
             isDirty: false,
             bestStreak: updatedStreak.longestStreak,
             activeDaysCount: updatedStreak.totalActiveDays,

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { cn } from '@codezeniths/design/cn';
 import {
     Search,
@@ -204,12 +205,50 @@ export const ModuleProblemSection: React.FC<ModuleProblemSectionProps> = ({
 
                 {/* 2] Topic Accordions List inside card */}
                 {isLoading ? (
-                    <div className="w-full space-y-3">
-                        {[1, 2, 3].map((n) => (
+                    <div className="w-full space-y-3 select-none">
+                        {[1, 2, 3, 4].map((n) => (
                             <div
                                 key={n}
-                                className="w-full h-16 rounded-xl animate-pulse bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3/60"
-                            />
+                                className="w-full p-3 sm:p-4 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade3/60 bg-background-light/50 dark:bg-background-dark/50 flex items-center justify-between gap-4 select-none"
+                            >
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: n * 0.05 }}
+                                        className="size-5 rounded-md bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
+                                    />
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: n * 0.05 + 0.05 }}
+                                        className={cn(
+                                            'h-4 rounded-md bg-foreground-light-shade3 dark:bg-foreground-dark-shade3',
+                                            n % 2 === 0 ? 'w-48 sm:w-64' : 'w-36 sm:w-52'
+                                        )}
+                                    />
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: n * 0.05 + 0.1 }}
+                                        className="hidden md:inline-flex h-4 w-20 rounded-full bg-secondary/15"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0">
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: n * 0.05 + 0.15 }}
+                                        className="h-3.5 w-16 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                    />
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: n * 0.05 + 0.2 }}
+                                        className="hidden lg:block lg:w-28 xl:w-44 h-2 rounded-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                    />
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: n * 0.05 + 0.25 }}
+                                        className="size-7 rounded-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                    />
+                                </div>
+                            </div>
                         ))}
                     </div>
                 ) : processedTopics.length > 0 ? (

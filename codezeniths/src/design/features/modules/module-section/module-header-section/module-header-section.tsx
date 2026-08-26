@@ -15,29 +15,37 @@ export interface ModuleHeaderSectionProps {
         isBookmarked?: boolean;
         tagCount?: number;
         topicCount?: number;
-        progress: {
-            problemsCount: number;
-            problemsSolvedCount: number;
-            problemsRevisitCount: number;
-            problemNotSolvedCount: number;
-            problemsSolvedPercentage: number;
-            problemsCountByDifficulty: {
-                easy: number;
-                medium: number;
-                hard: number;
-            };
-            problemsSolvedCountByDifficulty: {
-                easy: number;
-                medium: number;
-                hard: number;
-            };
+        problemsCount?: number;
+    };
+    moduleProgress?: {
+        problemsCount: number;
+        problemsSolvedCount: number;
+        problemsRevisitCount: number;
+        problemNotSolvedCount: number;
+        problemsSolvedPercentage: number;
+        problemsCountByDifficulty: {
+            easy: number;
+            medium: number;
+            hard: number;
+        };
+        problemsSolvedCountByDifficulty: {
+            easy: number;
+            medium: number;
+            hard: number;
         };
     };
     isLoading?: boolean;
+    isLoadingProgress?: boolean;
     onToggleBookmark?: () => void;
 }
 
-export const ModuleHeaderSection: React.FC<ModuleHeaderSectionProps> = ({ moduleDetails, isLoading = false, onToggleBookmark }) => {
+export const ModuleHeaderSection: React.FC<ModuleHeaderSectionProps> = ({
+    moduleDetails,
+    moduleProgress,
+    isLoading = false,
+    isLoadingProgress = false,
+    onToggleBookmark,
+}) => {
     return (
         <Grid cols={12} gap="lg" className="items-stretch">
             {/* Left Card: Header Info Card */}
@@ -52,7 +60,7 @@ export const ModuleHeaderSection: React.FC<ModuleHeaderSectionProps> = ({ module
                         stats={[
                             { label: `${moduleDetails.topicCount ?? 0} Topics`, dotColor: 'bg-primary' },
                             { label: `${moduleDetails.tagCount ?? 0} Tags`, dotColor: 'bg-teal' },
-                            { label: `${moduleDetails.progress.problemsCount} Problems`, dotColor: 'bg-warning' },
+                            { label: `${moduleDetails.problemsCount ?? 0} Problems`, dotColor: 'bg-warning' },
                         ]}
                         description={
                             moduleDetails.description ||
@@ -61,14 +69,14 @@ export const ModuleHeaderSection: React.FC<ModuleHeaderSectionProps> = ({ module
                         isBookmarked={moduleDetails.isBookmarked}
                         onBookmarkClick={onToggleBookmark}
                         actionHref={`/modules/${moduleDetails.slug}`}
-                        actionLabel={moduleDetails.progress.problemsSolvedCount > 0 ? 'Resume Module' : 'Start Module'}
+                        actionLabel={(moduleProgress?.problemsSolvedCount ?? 0) > 0 ? 'Resume Module' : 'Start Module'}
                     />
                 )}
             </GridItem>
 
             {/* Right Card: Module Progress Card */}
             <GridItem colSpan={4} className="col-span-12 lg:col-span-4">
-                <ModuleProgressCard progress={moduleDetails?.progress} isLoading={isLoading} />
+                <ModuleProgressCard progress={moduleProgress} isLoading={isLoadingProgress} />
             </GridItem>
         </Grid>
     );

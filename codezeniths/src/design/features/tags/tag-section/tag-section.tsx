@@ -13,7 +13,11 @@ export const TagSection: React.FC = () => {
     const {
         tagSlug,
         tagDetails,
+        tagProgress,
+        tagSuggestions,
         isLoading,
+        isLoadingProgress,
+        isLoadingSuggestions,
         isError,
         error,
         isBookmarkBusy,
@@ -56,7 +60,11 @@ export const TagSection: React.FC = () => {
                 <div className="w-full lg:w-82.5 xl:w-90 shrink-0">
                     <TagInfoSection
                         tagDetails={tagDetails}
+                        tagProgress={tagProgress}
+                        tagSuggestions={tagSuggestions}
                         isLoading={isLoading}
+                        isLoadingProgress={isLoadingProgress}
+                        isLoadingSuggestions={isLoadingSuggestions}
                         onToggleBookmark={handleToggleBookmark}
                         isBookmarkBusy={isBookmarkBusy}
                     />

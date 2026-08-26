@@ -8,7 +8,7 @@ export interface TagFilterInput {
 }
 
 export interface TagSortingInput {
-    sortBy?: 'name' | 'level' | 'createdAt';
+    sortBy?: 'name' | 'level' | 'createdAt' | 'problemsCount';
     order?: 'asc' | 'desc';
 }
 
@@ -55,6 +55,8 @@ export function buildTagsOrderBy(
             return [{ level: order }, { id: 'asc' }];
         case 'createdAt':
             return [{ createdAt: order }, { id: 'asc' }];
+        case 'problemsCount':
+            return [{ problems: { _count: order } }, { id: 'asc' }];
         default:
             return [{ name: 'asc' }, { id: 'asc' }];
     }

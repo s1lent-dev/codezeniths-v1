@@ -32,7 +32,7 @@ import { useAuth, authClient } from '@/lib/auth/auth';
 import { useNavigationStore } from '../store/navigation.store';
 
 export const ProfilePopover = () => {
-    const { user } = useAuth();
+    const { user, isLoading } = useAuth();
     const router = useRouter();
     const { isDark, toggleTheme } = useTheme();
     const appearanceButtonRef = React.useRef<HTMLButtonElement>(null);
@@ -80,11 +80,14 @@ export const ProfilePopover = () => {
                     type="button"
                     variant={ButtonVariant.GHOST}
                     size={ButtonSize.NONE}
+                    disabled={isLoading}
                     className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-primary/40 transition-all cursor-pointer focus:outline-none"
                     aria-label="User profile"
                 >
                     <div className="w-8 h-8 rounded-full bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-md overflow-hidden ring-2 ring-primary/20">
-                        {user?.image ? (
+                        {isLoading ? (
+                            <span className="w-full h-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 animate-pulse" />
+                        ) : user?.image ? (
                             <img src={user.image} alt={displayName} className="w-full h-full object-cover" />
                         ) : (
                             <span>{displayName.substring(0, 2).toUpperCase()}</span>
@@ -205,7 +208,7 @@ export const ProfilePopover = () => {
                     </Link>
 
                     <Link
-                        href="/settings"
+                        href="/settings/profile-details"
                         onClick={() => setProfilePopoverOpen(false)}
                         className="flex items-center gap-3 px-3 py-2 text-xs font-medium text-body-light dark:text-body-dark hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 rounded-sm transition-colors"
                     >

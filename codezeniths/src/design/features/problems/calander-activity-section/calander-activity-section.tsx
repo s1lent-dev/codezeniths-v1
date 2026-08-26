@@ -6,12 +6,10 @@ import { cn } from '@codezeniths/design/cn';
 import { ActivityCalendar } from '@codezeniths/widgets';
 
 export interface CalendarActivitySectionProps {
-    isLoading?: boolean;
     className?: string;
 }
 
 export const CalendarActivitySection: React.FC<CalendarActivitySectionProps> = ({
-    isLoading = false,
     className,
 }) => {
     // 1. Compute exact calendar week data for current month (handles 4, 5, or 6 week months) in UTC
@@ -95,7 +93,7 @@ export const CalendarActivitySection: React.FC<CalendarActivitySectionProps> = (
     return (
         <div className={cn('w-full rounded-lg bg-foreground-light dark:bg-foreground-dark p-6 space-y-5 text-heading-light dark:text-heading-dark shadow-md font-sans', className)}>
             {/* Custom Activity Calendar with Header Emblem Badge & tRPC Integration */}
-            <ActivityCalendar isLoading={isLoading} />
+            <ActivityCalendar />
 
             {/* Weekly Premium Banner with Dual Light/Dark Mode Styling */}
             <div className="rounded-xl p-4.5 bg-linear-to-br from-primary/10 via-amber-500/10 to-primary/5 dark:from-primary/25 dark:via-purple-950/50 dark:to-slate-900/90 border border-primary/20 dark:border-primary/30 text-heading-light dark:text-heading-dark space-y-3.5 shadow-sm relative overflow-hidden">

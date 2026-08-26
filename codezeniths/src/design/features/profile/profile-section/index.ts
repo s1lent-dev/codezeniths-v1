@@ -6,3 +6,4 @@ export * from './community-stats-card';
 export * from './skills-breakdown';
 export * from './profile-completion-card';
 export * from './profile-sidebar';
+export * from './profile-right-section-skeleton';

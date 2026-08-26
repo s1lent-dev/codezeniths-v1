@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/auth';
-import { useLocalStorage, createStorageKey } from '@/hooks/performance-hooks/useStorage';
 import { userQueryService } from '@/lib/tanstack/services/user.query-service';
 import { toast } from '@/design/modules/feedback/toast';
 
@@ -13,20 +12,22 @@ export interface DailyCheckInStorageData {
     dateStr: string;      // UTC date "YYYY-MM-DD"
     checkInTime: number;  // Timestamp in ms when check-in occurred
     expiresAt: number;    // UTC midnight timestamp in ms of the next day
-    ttlMs: number;        // Total duration (expiresAt - checkInTime)
+    hoursLeft: number;    // Number of hours remaining in the current UTC day
+    ttlMs: number;        // Total duration in ms (expiresAt - checkInTime)
 }
 
 /**
- * Calculates the next UTC midnight timestamp and remaining TTL duration from current time.
+ * Calculates the next UTC midnight timestamp, remaining TTL duration, and hours left from current time.
  */
 export function calculateNextUtcMidnight(now: Date = new Date()): {
     checkInTime: number;
     expiresAt: number;
     ttlMs: number;
+    hoursLeft: number;
     dateStr: string;
 } {
     const checkInTime = now.getTime();
-    const dateStr = now.toISOString().split('T')[0];
+    const dateStr = now.toISOString().split('T')[0]; // "YYYY-MM-DD" (UTC)
 
     // Compute start of next UTC day (00:00:00.000 UTC)
     const nextUtcMidnight = new Date(Date.UTC(
@@ -37,11 +38,13 @@ export function calculateNextUtcMidnight(now: Date = new Date()): {
     ));
     const expiresAt = nextUtcMidnight.getTime();
     const ttlMs = Math.max(0, expiresAt - checkInTime);
+    const hoursLeft = Math.max(1, Math.ceil(ttlMs / (1000 * 60 * 60)));
 
     return {
         checkInTime,
         expiresAt,
         ttlMs,
+        hoursLeft,
         dateStr,
     };
 }
@@ -53,12 +56,20 @@ export function calculateNextUtcMidnight(now: Date = new Date()): {
 export function isCheckInEligibleRoute(pathname: string | null): boolean {
     if (!pathname) return false;
 
-    // Disallowed: Landing page and API routes
-    if (pathname === '/' || pathname.startsWith('/api')) {
+    // Disallowed: Landing page, API, and static marketing routes
+    if (
+        pathname === '/' ||
+        pathname.startsWith('/api') ||
+        pathname.startsWith('/about') ||
+        pathname.startsWith('/contact') ||
+        pathname.startsWith('/pricing') ||
+        pathname.startsWith('/terms') ||
+        pathname.startsWith('/privacy')
+    ) {
         return false;
     }
 
-    // Disallowed: Auth routes
+    // Disallowed: Auth & onboarding routes
     const disallowedPrefixes = [
         '/sign-in',
         '/sign-up',
@@ -73,16 +84,18 @@ export function isCheckInEligibleRoute(pathname: string | null): boolean {
         return false;
     }
 
-    // Eligible routes: Home platform pages and profile pages
+    // Eligible routes: All home platform pages and profile pages
     const eligiblePrefixes = [
         '/problemset',
         '/modules',
-        '/contests',
-        '/roadmaps',
-        '/playground',
-        '/favourites',
-        '/settings',
         '/tags',
+        '/playlists',
+        '/favourites',
+        '/leaderboards',
+        '/roadmaps',
+        '/contests',
+        '/playground',
+        '/settings',
         '/profile',
     ];
 
@@ -90,17 +103,37 @@ export function isCheckInEligibleRoute(pathname: string | null): boolean {
 }
 
 /**
+ * Generates the deterministic localStorage key for a user's daily check-in.
+ */
+export function getDailyCheckInStorageKey(userId: string): string {
+    return `cz_daily_checkin_${userId}`;
+}
+
+/**
  * Synchronously retrieves stored daily check-in data from localStorage.
  */
-export function getStoredDailyCheckIn(key: string): DailyCheckInStorageData | null {
-    if (typeof window === 'undefined') return null;
+export function getStoredDailyCheckIn(userId: string): DailyCheckInStorageData | null {
+    if (typeof window === 'undefined' || !userId) return null;
     try {
+        const key = getDailyCheckInStorageKey(userId);
         const item = window.localStorage.getItem(key);
         if (!item) return null;
         return JSON.parse(item) as DailyCheckInStorageData;
-    } catch (error) {
-        console.warn('Failed to parse daily check-in storage:', error);
+    } catch {
         return null;
+    }
+}
+
+/**
+ * Synchronously writes daily check-in data to localStorage.
+ */
+export function setStoredDailyCheckIn(userId: string, data: DailyCheckInStorageData): void {
+    if (typeof window === 'undefined' || !userId) return;
+    try {
+        const key = getDailyCheckInStorageKey(userId);
+        window.localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+        console.error('Failed to write daily check-in to localStorage:', e);
     }
 }
 
@@ -115,24 +148,15 @@ export function getStoredDailyCheckIn(key: string): DailyCheckInStorageData | nu
  */
 export function useDailyCheckIn() {
     const pathname = usePathname();
-    const { user, session, isAuthenticated, isLoading } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
     const isExecutingRef = useRef(false);
-
-    const storageKey = user?.id
-        ? createStorageKey('user', user.id, 'daily-check-in')
-        : 'app:user:anonymous:daily-check-in';
-
-    const [checkInRecord, setCheckInRecord] = useLocalStorage<DailyCheckInStorageData | null>(
-        storageKey,
-        null
-    );
 
     // TanStack Query Mutation Hook from userQueryService
     const recordDailyCheckInMutation = userQueryService.recordDailyCheckIn();
 
     useEffect(() => {
-        // 1. Verify user has an active session
-        if (isLoading || !isAuthenticated || !user?.id || !session) {
+        // 1. Wait until session check is complete and user is authenticated
+        if (isLoading || !isAuthenticated || !user?.id) {
             return;
         }
 
@@ -141,20 +165,23 @@ export function useDailyCheckIn() {
             return;
         }
 
-        // 3. Verify if already checked in today using valid TTL (from state or synchronous localStorage)
-        const currentRecord = checkInRecord || getStoredDailyCheckIn(storageKey);
+        // 3. Verify if already checked in today using valid UTC date & TTL from localStorage
         const now = Date.now();
+        const { dateStr: todayUtc } = calculateNextUtcMidnight();
+        const stored = getStoredDailyCheckIn(user.id);
+
         const isAlreadyCheckedIn =
-            currentRecord &&
-            currentRecord.userId === user.id &&
-            currentRecord.checkedIn === true &&
-            now < currentRecord.expiresAt;
+            stored &&
+            stored.userId === user.id &&
+            stored.checkedIn === true &&
+            stored.dateStr === todayUtc &&
+            now < stored.expiresAt;
 
         if (isAlreadyCheckedIn) {
             return;
         }
 
-        // 4. Prevent duplicate execution on rapid re-renders
+        // 4. Prevent duplicate execution on rapid re-renders or concurrent transitions
         if (isExecutingRef.current) {
             return;
         }
@@ -165,37 +192,31 @@ export function useDailyCheckIn() {
             {},
             {
                 onSuccess: (data) => {
-                    const { checkInTime, expiresAt, ttlMs, dateStr } = calculateNextUtcMidnight();
+                    const { checkInTime, expiresAt, ttlMs, hoursLeft, dateStr } = calculateNextUtcMidnight();
                     const newRecord: DailyCheckInStorageData = {
                         userId: user.id,
                         checkedIn: true,
                         dateStr,
                         checkInTime,
                         expiresAt,
+                        hoursLeft,
                         ttlMs,
                     };
 
-                    // Synchronously write to localStorage immediately to eliminate state lag across navigation
-                    if (typeof window !== 'undefined') {
-                        try {
-                            window.localStorage.setItem(storageKey, JSON.stringify(newRecord));
-                        } catch (e) {
-                            console.error('Failed to write daily check-in to localStorage:', e);
-                        }
+                    // Synchronously cache check-in record in localStorage
+                    setStoredDailyCheckIn(user.id, newRecord);
+
+                    // Only show celebration toast if this was genuinely a new check-in for today
+                    if (data?.isNewCheckIn) {
+                        const streakCount = data?.currentCheckInStreak ?? 1;
+                        toast.success(
+                            'Daily Check-in Complete! 🔥',
+                            streakCount > 1
+                                ? `You're on a ${streakCount}-day visit streak! Keep it up!`
+                                : 'First daily check-in recorded. Welcome to Codezeniths today!',
+                            { duration: 4500 }
+                        );
                     }
-
-                    // Store check-in state with TTL in hook state
-                    setCheckInRecord(newRecord);
-
-                    // Trigger success toast feedback
-                    const streakCount = data?.currentCheckInStreak ?? 1;
-                    toast.success(
-                        'Daily Check-in Complete! 🔥',
-                        streakCount > 1
-                            ? `You're on a ${streakCount}-day visit streak! Keep it up!`
-                            : 'First daily check-in recorded. Welcome to Codezeniths today!',
-                        { duration: 4500 }
-                    );
                 },
                 onError: (error: any) => {
                     console.error('Failed to record daily check-in:', error);
@@ -210,8 +231,14 @@ export function useDailyCheckIn() {
         isAuthenticated,
         isLoading,
         user?.id,
-        session,
-        checkInRecord,
-        setCheckInRecord,
     ]);
 }
+
+/**
+ * Top-level listener component for daily check-in.
+ * Mounted once at the application root or layout level to avoid duplicate hook runs.
+ */
+export const DailyCheckInListener: React.FC = () => {
+    useDailyCheckIn();
+    return null;
+};

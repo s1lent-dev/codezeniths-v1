@@ -381,7 +381,14 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
                         )}
                     >
                         <span>Annual</span>
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500 text-white">
+                        <span
+                            className={cn(
+                                'text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none transition-all duration-200 border',
+                                isAnnual
+                                    ? 'bg-white/20 dark:bg-white/25 text-white dark:text-foreground-light-shade3 border-white/30 backdrop-blur-xs shadow-2xs'
+                                    : 'bg-primary/10 dark:bg-primary/15 text-primary dark:text-primary-shade1 border-primary/20 hover:border-primary/30'
+                            )}
+                        >
                             -20%
                         </span>
                     </button>

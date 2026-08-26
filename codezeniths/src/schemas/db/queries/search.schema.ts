@@ -67,8 +67,12 @@ export const GetSearchTagsOutputSchema = z.array(
         description: z.string().nullable().optional(),
         level: z.string().nullable().optional(),
         module: z.string().nullable().optional(),
+        moduleSlug: z.string().nullable().optional(),
+        moduleId: z.string().nullable().optional(),
+        problemIds: z.array(z.string()).optional(),
         problemsCount: z.number().optional(),
         phoneticName: z.string().optional(),
+        createdAt: z.coerce.date().or(z.string()).optional(),
     })
 );
 
@@ -101,19 +105,6 @@ export const GetSearchUsersOutputSchema = z.array(
 // ─── Search History Schemas ───────────────────────────────────────────────────
 
 import { SearchCollectionSchema, UserSearchHistorySchema } from '../db.schema';
-
-export const RecordSearchSelectionInputSchema = z.object({
-    userId: z.uuidv7(),
-    collection: SearchCollectionSchema,
-    resultId: z.string(),
-    title: z.string(),
-    slug: z.string().nullable().optional(),
-    document: z.record(z.string(), z.any()),
-});
-
-export const RecordSearchSelectionOutputSchema = z.object({
-    success: z.boolean(),
-});
 
 export const GetRecentSearchHistoryInputSchema = z.object({
     userId: z.uuidv7(),

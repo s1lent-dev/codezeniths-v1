@@ -38,9 +38,3 @@ export const MarkAllAsReadTRPCOutputSchema = z.boolean();
 export const UpsertDeviceTokenTRPCInputSchema = deviceTokenUpsertSchema;
 
 export const UpsertDeviceTokenTRPCOutputSchema = z.boolean();
-
-export const RemoveDeviceTokenTRPCInputSchema = z.object({
-    fid: z.string().min(1),
-});
-
-export const RemoveDeviceTokenTRPCOutputSchema = z.boolean();

@@ -2,8 +2,6 @@ import { TRPCContext } from '../trpc/trpc.context';
 import {
     GetSkillsInputSchema,
     GetSkillsOutputSchema,
-    GetSingleSkillInputSchema,
-    GetSingleSkillOutputSchema,
     CreateSkillInputSchema,
     CreateSkillOutputSchema,
 } from '@codezeniths/schemas/db';
@@ -20,17 +18,6 @@ export class SkillController implements ISkillController {
         } catch (error: any) {
             logger.error('Error in getSkills controller', { error });
             throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message || 'Error fetching skills' });
-        }
-    }
-
-    async getSingleSkill({ ctx, input }: { ctx: TRPCContext; input: z.infer<typeof GetSingleSkillInputSchema> }): Promise<z.infer<typeof GetSingleSkillOutputSchema>> {
-        logger.info('Executing getSingleSkill controller', { input });
-        try {
-            return await ctx.queries.skill.getSingleSkill(input);
-        } catch (error: any) {
-            logger.error('Error in getSingleSkill controller', { error, slug: input.slug });
-            if (error?.code === 'NOT_FOUND') throw new TRPCError({ code: 'NOT_FOUND', message: error.message });
-            throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message || 'Error fetching skill' });
         }
     }
 

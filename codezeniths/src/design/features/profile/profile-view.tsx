@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useProfile } from './useProfile';
-import { ProfileSidebar } from './profile-section';
+import { ProfileSidebar, ProfileRightSectionSkeleton } from './profile-section';
 import { ProfileSummaryCards } from './proress-section';
 import { ActivityHeatmap } from './activity-section';
 import { RecentlySolvedList } from './recents-section';
@@ -105,7 +105,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
                 {/* 2. Right Section: Dynamic Views or Private Screen */}
                 <main className="flex-1 min-w-0 w-full flex flex-col gap-6">
-                    {isRestrictedPrivate ? (
+                    {isLoadingUser ? (
+                        <ProfileRightSectionSkeleton />
+                    ) : isRestrictedPrivate ? (
                         <Card
                             variant={CardVariant.FLAT}
                             className="w-full rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark px-6 py-12 sm:px-12 sm:py-16 md:py-20 flex flex-col items-center justify-center text-center shadow-xs"

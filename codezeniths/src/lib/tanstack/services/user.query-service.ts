@@ -5,12 +5,8 @@ import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
 import { queryKeys } from '../query-keys';
 import { CACHE_TIERS } from '../cache-config';
 import { CacheInvalidationService } from '../cache-invalidation.service';
-import type { IUserQueryService } from '../interfaces';
+import { z } from 'zod';
 import {
-    GetProfileByIdInputSchema,
-    GetProfileByIdOutputSchema,
-    GetProfileByUsernameInputSchema,
-    GetProfileByUsernameOutputSchema,
     GetSettingsInputSchema,
     GetSettingsOutputSchema,
     UpdateProfileInputSchema,
@@ -25,8 +21,6 @@ import {
     UploadResumeOutputSchema,
     RemoveResumeInputSchema,
     RemoveResumeOutputSchema,
-    GetAvatarInputSchema,
-    GetAvatarOutputSchema,
     GetExtractionProgressInputSchema,
     GetExtractionProgressOutputSchema,
     CheckUserNameAvailabilityInputSchema,
@@ -35,8 +29,6 @@ import {
     CheckEmailAvailabilityOutputSchema,
     CheckPhoneAvailabilityInputSchema,
     CheckPhoneAvailabilityOutputSchema,
-    GetAvatarUploadUrlInputSchema,
-    GetAvatarUploadUrlOutputSchema,
     GetOnboardingProfileInputSchema,
     GetOnboardingProfileOutputSchema,
     UpdateOnboardingStep0InputSchema,
@@ -49,18 +41,14 @@ import {
     UpdateOnboardingStep3OutputSchema,
     ExtractResumeSkillsInputSchema,
     ExtractResumeSkillsOutputSchema,
-    GetActiveStreakTRPCOutputSchema,
     GetUserStreakTRPCInputSchema,
     GetUserStreakTRPCOutputSchema,
     RecordDailyCheckInTRPCInputSchema,
     RecordDailyCheckInTRPCOutputSchema,
     FollowUserTRPCInputSchema,
-
     FollowUserTRPCOutputSchema,
     UnfollowUserTRPCInputSchema,
     UnfollowUserTRPCOutputSchema,
-    GetFollowStatsTRPCInputSchema,
-    GetFollowStatsTRPCOutputSchema,
     GetFollowersTRPCInputSchema,
     GetFollowersTRPCOutputSchema,
     GetFollowingTRPCInputSchema,
@@ -86,34 +74,9 @@ import {
     UpdateUserPreferencesInputSchema,
     UpdateUserPreferencesOutputSchema,
 } from '@/schemas/trpc';
-import { UserSocialLinksSchema } from '@codezeniths/schemas/db';
-import { z } from 'zod';
+import type { IUserQueryService } from '../interfaces';
 
 export class UserQueryService implements IUserQueryService {
-    getProfileById(input: z.infer<typeof GetProfileByIdInputSchema>) {
-        const validatedInput = GetProfileByIdInputSchema.parse(input);
-        return useQuery({
-            queryKey: queryKeys.user.profileById(validatedInput.userId),
-            queryFn: async () => {
-                const raw = await trpcClient.user.getProfileById.query(validatedInput);
-                return GetProfileByIdOutputSchema.parse(raw);
-            },
-            ...CACHE_TIERS.USER_PROGRESS,
-        });
-    }
-
-    getProfileByUsername(input: z.infer<typeof GetProfileByUsernameInputSchema>) {
-        const validatedInput = GetProfileByUsernameInputSchema.parse(input);
-        return useQuery({
-            queryKey: queryKeys.user.profileByUsername(validatedInput.username),
-            queryFn: async () => {
-                const raw = await trpcClient.user.getProfileByUsername.query(validatedInput);
-                return GetProfileByUsernameOutputSchema.parse(raw);
-            },
-            ...CACHE_TIERS.USER_PROGRESS,
-        });
-    }
-
     getSettings(input: z.infer<typeof GetSettingsInputSchema>, options?: { enabled?: boolean }) {
         const validatedInput = GetSettingsInputSchema.parse(input);
         return useQuery({
@@ -138,17 +101,6 @@ export class UserQueryService implements IUserQueryService {
             onSuccess: async () => {
                 await CacheInvalidationService.invalidateOnProfileChange(queryClient);
             },
-        });
-    }
-
-    getSocialLinks() {
-        return useQuery({
-            queryKey: queryKeys.user.socials(),
-            queryFn: async () => {
-                const raw = await trpcClient.user.getSocialLinks.query();
-                return UserSocialLinksSchema.nullable().parse(raw);
-            },
-            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
@@ -222,28 +174,6 @@ export class UserQueryService implements IUserQueryService {
         });
     }
 
-    getAvatar(input: z.infer<typeof GetAvatarInputSchema>) {
-        const validatedInput = GetAvatarInputSchema.parse(input);
-        return useQuery({
-            queryKey: queryKeys.user.avatar(validatedInput.userId),
-            queryFn: async () => {
-                const raw = await trpcClient.user.getAvatar.query(validatedInput);
-                return GetAvatarOutputSchema.parse(raw);
-            },
-            ...CACHE_TIERS.USER_PROGRESS,
-        });
-    }
-
-    getAvatarUploadUrl() {
-        return useMutation({
-            mutationFn: async (variables: z.infer<typeof GetAvatarUploadUrlInputSchema>) => {
-                const validatedInput = GetAvatarUploadUrlInputSchema.parse(variables);
-                const raw = await trpcClient.user.getAvatarUploadUrl.mutate(validatedInput);
-                return GetAvatarUploadUrlOutputSchema.parse(raw);
-            },
-        });
-    }
-
     checkUserNameAvailability(input: Partial<z.infer<typeof CheckUserNameAvailabilityInputSchema>>) {
         const validation = CheckUserNameAvailabilityInputSchema.safeParse(input);
         return useQuery({
@@ -295,7 +225,7 @@ export class UserQueryService implements IUserQueryService {
     getOnboardingProfile(input?: z.infer<typeof GetOnboardingProfileInputSchema>) {
         const validatedInput = GetOnboardingProfileInputSchema.parse(input || {});
         return useQuery({
-            queryKey: ['user', 'onboardingProfile', validatedInput.userId],
+            queryKey: queryKeys.user.onboardingProfile(validatedInput.userId),
             queryFn: async () => {
                 const raw = await trpcClient.user.getOnboardingProfile.query(validatedInput);
                 return GetOnboardingProfileOutputSchema.parse(raw);
@@ -384,17 +314,6 @@ export class UserQueryService implements IUserQueryService {
         });
     }
 
-    getActiveStreak() {
-        return useQuery({
-            queryKey: queryKeys.user.activeStreak(),
-            queryFn: async () => {
-                const raw = await trpcClient.user.getActiveStreak.query();
-                return GetActiveStreakTRPCOutputSchema.parse(raw);
-            },
-            ...CACHE_TIERS.USER_PROGRESS,
-        });
-    }
-
     getUserStreak(input?: { userId?: string }, options?: { enabled?: boolean }) {
         return useQuery({
             queryKey: queryKeys.user.streak(input?.userId),
@@ -419,20 +338,6 @@ export class UserQueryService implements IUserQueryService {
             onSuccess: async () => {
                 await CacheInvalidationService.invalidateStreak(queryClient);
             },
-        });
-    }
-
-
-    getFollowStats(input: { userId: string }, options?: { enabled?: boolean }) {
-        return useQuery({
-            queryKey: queryKeys.user.followStats(input.userId),
-            queryFn: async () => {
-                const validatedInput = GetFollowStatsTRPCInputSchema.parse(input);
-                const raw = await trpcClient.user.getFollowStats.query(validatedInput);
-                return GetFollowStatsTRPCOutputSchema.parse(raw);
-            },
-            enabled: options?.enabled ?? Boolean(input.userId),
-            ...CACHE_TIERS.DYNAMIC,
         });
     }
 

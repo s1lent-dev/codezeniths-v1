@@ -5,6 +5,8 @@ import {
     GetSingleTopicTRPCOutputSchema,
     GetSingleTopicProgressTRPCInputSchema,
     GetSingleTopicProgressTRPCOutputSchema,
+    GetTopicSuggestionsTRPCInputSchema,
+    GetTopicSuggestionsTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { TRPCError } from '@trpc/server';
 import { logger } from '@/service/logging';
@@ -50,17 +52,8 @@ export class TopicController implements ITopicController {
         logger.info('Executing getSingleTopicProgress controller', { input });
 
         const userId = ctx.user?.id;
-        if (!userId) {
-            logger.warn('Unauthorized attempt to fetch single topic progress');
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
-        }
 
         try {
-            // TODO: [Redis] Check cache for single topic progress statistics
-
             const result = await ctx.queries.topic.getSingleTopicProgress({
                 topicId: input.topicId,
                 topicSlug: input.topicSlug,
@@ -74,6 +67,33 @@ export class TopicController implements ITopicController {
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: error.message || 'Something went wrong while fetching topic progress statistics.',
+                cause: error,
+            });
+        }
+    }
+
+    async getTopicSuggestions({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetTopicSuggestionsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetTopicSuggestionsTRPCOutputSchema>> {
+        logger.info('Executing getTopicSuggestions controller', { input });
+
+        try {
+            const result = await ctx.queries.topic.getTopicSuggestions({
+                topicId: input.topicId,
+                topicSlug: input.topicSlug,
+            });
+
+            return result;
+        } catch (error: any) {
+            logger.error('Error in getTopicSuggestions controller', { error });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error.message || 'Something went wrong while fetching topic suggestions.',
                 cause: error,
             });
         }

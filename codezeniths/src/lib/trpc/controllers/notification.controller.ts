@@ -8,8 +8,6 @@ import {
     MarkAllAsReadTRPCOutputSchema,
     UpsertDeviceTokenTRPCInputSchema,
     UpsertDeviceTokenTRPCOutputSchema,
-    RemoveDeviceTokenTRPCInputSchema,
-    RemoveDeviceTokenTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { TRPCError } from '@trpc/server';
 import { logger } from '@/service/logging';
@@ -154,37 +152,4 @@ export class NotificationController implements INotificationController {
             });
         }
     }
-
-    async removeDeviceToken({
-        ctx,
-        input,
-    }: {
-        ctx: TRPCContext;
-        input: z.infer<typeof RemoveDeviceTokenTRPCInputSchema>;
-    }): Promise<z.infer<typeof RemoveDeviceTokenTRPCOutputSchema>> {
-        logger.info('Executing removeDeviceToken controller', { input });
-
-        const userId = ctx.user?.id;
-        if (!userId) {
-            logger.warn('Unauthorized attempt to remove device token');
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
-        }
-
-        try {
-            await deviceTokenService.remove(input.fid);
-            return true;
-        } catch (error: any) {
-            logger.error('Error in removeDeviceToken controller', { error, userId, fid: input.fid });
-            if (error instanceof TRPCError) throw error;
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: error.message || 'Something went wrong while removing device token.',
-                cause: error,
-            });
-        }
-    }
 }
-

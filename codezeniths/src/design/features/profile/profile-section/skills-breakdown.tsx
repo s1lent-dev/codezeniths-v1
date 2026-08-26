@@ -13,6 +13,7 @@ import {
     SelectItem,
 } from '@codezeniths/components';
 import { cn } from '@codezeniths/design/cn';
+import { motion } from 'motion/react';
 
 export interface TagProgressItem {
     id: string;
@@ -169,15 +170,28 @@ export const SkillsBreakdown: React.FC<SkillsBreakdownProps> = ({
 
     if (isLoading) {
         return (
-            <div className={cn('space-y-4 w-full animate-pulse', className)}>
+            <div className={cn('space-y-4 w-full select-none', className)}>
                 <div className="flex items-center justify-between">
-                    <div className="h-4 w-24 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                    <div className="h-7 w-28 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.8, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                        className="h-4 w-24 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
+                    />
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                        className="h-7 w-28 bg-foreground-light-shade2 dark:bg-foreground-dark-shade1 rounded-md"
+                    />
                 </div>
                 <div className="space-y-3">
-                    <div className="h-12 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                    <div className="h-12 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                    <div className="h-12 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
+                    {[0, 1, 2].map((idx) => (
+                        <motion.div
+                            key={idx}
+                            animate={{ opacity: [0.35, 0.8, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 }}
+                            className="h-12 bg-foreground-light-shade2 dark:bg-foreground-dark-shade1 rounded-md"
+                        />
+                    ))}
                 </div>
             </div>
         );

@@ -1,17 +1,27 @@
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { DetailPageSkeleton } from '@codezeniths/design/widgets/shared/detail-info-card/detail-page-skeleton';
+import { Loader } from '@codezeniths/components';
 
 const TagSection = dynamic(
     () => import('@codezeniths/features').then((mod) => mod.TagSection),
     {
-        loading: () => <DetailPageSkeleton showSuggestions={true} />,
+        loading: () => (
+            <div className="flex h-full min-h-[60vh] w-full items-center justify-center">
+                <Loader />
+            </div>
+        ),
     }
 );
 
 export default function SingleTagPage() {
     return (
-        <Suspense fallback={<DetailPageSkeleton showSuggestions={true} />}>
+        <Suspense
+            fallback={
+                <div className="flex h-full min-h-[60vh] w-full items-center justify-center">
+                    <Loader />
+                </div>
+            }
+        >
             <TagSection />
         </Suspense>
     );

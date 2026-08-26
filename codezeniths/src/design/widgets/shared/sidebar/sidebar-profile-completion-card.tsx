@@ -93,7 +93,7 @@ export const SidebarProfileCompletionCard: React.FC<SidebarProfileCompletionCard
 
     return (
         <Link
-            href="/settings"
+            href="/settings/profile-details"
             onClick={onNavigate}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}

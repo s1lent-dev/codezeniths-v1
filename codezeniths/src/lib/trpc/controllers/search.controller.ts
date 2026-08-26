@@ -10,10 +10,6 @@ import { TRPCContext } from '../trpc/trpc.context';
 import { ISearchController } from './interfaces';
 
 import {
-  AutocompleteTRPCInputSchema,
-  AutocompleteTRPCOutputSchema,
-  MoreLikeThisTRPCInputSchema,
-  MoreLikeThisTRPCOutputSchema,
   SearchTRPCInputSchema,
   SearchTRPCOutputSchema,
   RecordSearchSelectionTRPCInputSchema,
@@ -33,111 +29,6 @@ import { searchProducer } from '@/lib/mq';
 
 export class SearchController implements ISearchController {
   constructor(private readonly searchClient: SearchClient<Record<string, any>>) {}
-
-  public async reindexAll({
-    ctx,
-  }: {
-    ctx: TRPCContext;
-  }): Promise<{ success: boolean; message: string; summaries: unknown[] }> {
-    logger.info('Executing reindexAll controller for static collections');
-    const staticLoaders = {
-      problems: async () => ctx.queries.search.getSearchProblems({}),
-      topics: async () => ctx.queries.search.getSearchTopics({}),
-      modules: async () => ctx.queries.search.getSearchModules({}),
-      tags: async () => ctx.queries.search.getSearchTags({}),
-      products: async () => ctx.queries.search.getSearchProducts({}),
-    };
-
-    try {
-      const results = await Promise.all(
-        Object.entries(staticLoaders).map(async ([name, loader]) => {
-          try {
-            const collection = this.searchClient.collection(name as never);
-            return await collection.reindex(loader as () => Promise<never[]>);
-          } catch (error) {
-            return { ok: false as const, error };
-          }
-        })
-      );
-      
-      const failures = results.filter(r => !r.ok);
-      if (failures.length > 0) {
-        logger.warn('Reindex completed with some failures', { failures });
-        return { success: false, message: `Reindex failed for ${failures.length} static collection(s).`, summaries: results };
-      }
-      return { success: true, message: 'Successfully reindexed all static collections.', summaries: results };
-    } catch (error: any) {
-      logger.error('Error in reindexAll controller', { error });
-      if (error instanceof TRPCError) throw error;
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: error.message || 'Something went wrong while reindexing static collections.',
-        cause: error,
-      });
-    }
-  }
-
-  public async autocomplete({
-    ctx,
-    input,
-  }: {
-    ctx: TRPCContext;
-    input: z.infer<typeof AutocompleteTRPCInputSchema>;
-  }): Promise<z.infer<typeof AutocompleteTRPCOutputSchema>> {
-    logger.info('Executing autocomplete controller', { collection: input.collection, prefix: input.prefix });
-    
-    try {
-      const validated = AutocompleteTRPCInputSchema.parse(input);
-      const targetCollections = validated.collection === 'all'
-        ? this.searchClient.getAllCollectionNames()
-        : [validated.collection];
-
-      const resultsPerCollection = await Promise.all(
-        targetCollections.map(async (collName) => {
-          try {
-            return await this.searchClient.collection(collName as never).autocomplete(validated.prefix, { limit: validated.limit });
-          } catch {
-            return [];
-          }
-        })
-      );
-
-      const mergedSuggestions = Array.from(new Set(resultsPerCollection.flat())).slice(0, validated.limit);
-      return AutocompleteTRPCOutputSchema.parse(mergedSuggestions);
-    } catch (error: any) {
-      logger.error('Error in autocomplete controller', { error, input });
-      if (error instanceof TRPCError) throw error;
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: error.message || 'Something went wrong during autocomplete.',
-        cause: error,
-      });
-    }
-  }
-
-  public async getRecommendations({
-    ctx,
-    input,
-  }: {
-    ctx: TRPCContext;
-    input: z.infer<typeof MoreLikeThisTRPCInputSchema>;
-  }): Promise<z.infer<typeof MoreLikeThisTRPCOutputSchema>> {
-    logger.info('Executing getRecommendations controller', { collection: input.collection, id: input.id });
-    
-    try {
-      const validated = MoreLikeThisTRPCInputSchema.parse(input);
-      const results = await this.searchClient.collection(validated.collection as never).moreLikeThis(validated.id, { limit: validated.limit });
-      return MoreLikeThisTRPCOutputSchema.parse(results);
-    } catch (error: any) {
-      logger.error('Error in getRecommendations controller', { error, input });
-      if (error instanceof TRPCError) throw error;
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: error.message || 'Something went wrong fetching recommendations.',
-        cause: error,
-      });
-    }
-  }
 
   public async searchQuery({
     ctx,

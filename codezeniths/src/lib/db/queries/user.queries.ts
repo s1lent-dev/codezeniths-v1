@@ -13,20 +13,14 @@ import {
     GetUserProfileOutputSchema,
     GetUserSocialsInputSchema,
     GetUserSocialsOutputSchema,
-    GetUserProgressInputSchema,
-    GetUserProgressOutputSchema,
     GetUserPreferencesInputSchema,
     GetUserPreferencesOutputSchema,
     GetUserDailyActivityInputSchema,
     GetUserDailyActivityOutputSchema,
-    GetUserActivityInputSchema,
-    GetUserActivityOutputSchema,
     RecordDailyCheckInInputSchema,
     RecordDailyCheckInOutputSchema,
     UpdateUserProfileInputSchema,
     UpdateUserProfileOutputSchema,
-    UpdateUserRoleInputSchema,
-    UpdateUserRoleOutputSchema,
     UpsertUserSocialsInputSchema,
     UpsertUserSocialsOutputSchema,
     UpdateUserImageInputSchema,
@@ -39,16 +33,12 @@ import {
     CheckEmailAvailabilityOutputSchema,
     CheckPhoneAvailabilityInputSchema,
     CheckPhoneAvailabilityOutputSchema,
-    GetActiveStreakInputSchema,
-    GetActiveStreakOutputSchema,
     GetUserStreakInputSchema,
     GetUserStreakOutputSchema,
     FollowUserInputSchema,
     FollowUserOutputSchema,
     UnfollowUserInputSchema,
     UnfollowUserOutputSchema,
-    GetFollowStatsInputSchema,
-    GetFollowStatsOutputSchema,
     GetFollowersInputSchema,
     GetFollowersOutputSchema,
     GetFollowingInputSchema,
@@ -124,147 +114,6 @@ export class UserQueries implements IUserQueries {
         })
         .build();
 
-    getUserProgress = qRPC()
-        .input(GetUserProgressInputSchema)
-        .output(GetUserProgressOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing getUserProgress query', { payload });
-            const { userId } = payload;
-
-            // Verify user exists first to throw appropriate NOT_FOUND
-            const userExists = await prisma.user.findUnique({
-                where: { id: userId },
-            });
-
-            if (!userExists) {
-                logger.warn('User not found while getting progress', { userId });
-                throw new AppErrorBuilder('User not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
-            }
-
-            // Fetch all problems with relationships (optimized selection)
-            const allProblems = await prisma.problem.findMany({
-                select: {
-                    id: true,
-                    difficulty: true,
-                    topic: {
-                        select: {
-                            module: {
-                                select: {
-                                    title: true,
-                                },
-                            },
-                        },
-                    },
-                    tags: {
-                        select: {
-                            tag: {
-                                select: {
-                                    name: true,
-                                },
-                            },
-                        },
-                    },
-                },
-            });
-
-            const userProgress = await prisma.problemProgress.findMany({
-                where: { userId },
-                select: {
-                    status: true,
-                    revisit: true,
-                    problem: {
-                        select: {
-                            difficulty: true,
-                            topic: {
-                                select: {
-                                    module: {
-                                        select: {
-                                            title: true,
-                                        },
-                                    },
-                                },
-                            },
-                            tags: {
-                                select: {
-                                    tag: {
-                                        select: {
-                                            name: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            });
-
-            const problemsCount = allProblems.length;
-            const problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-            const problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
-            const problemsAttemptedCount = userProgress.length;
-            const problemsSolvedPercentage = problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
-
-            // Filter solved problems
-            const solvedProblems = userProgress.filter((p) => p.status === 'solved' && p.problem);
-
-            // Group overall problems by difficulty using countBy
-            const problemsCountByDifficultyRaw = countBy(allProblems, (p) => p.difficulty);
-            const problemsCountByDifficulty = {
-                easy: problemsCountByDifficultyRaw.easy || 0,
-                medium: problemsCountByDifficultyRaw.medium || 0,
-                hard: problemsCountByDifficultyRaw.hard || 0,
-            };
-
-            // Group solved problems by difficulty using countBy
-            const problemsSolvedCountByDifficultyRaw = countBy(solvedProblems, (p) => p.problem!.difficulty);
-            const problemsSolvedCountByDifficulty = {
-                easy: problemsSolvedCountByDifficultyRaw.easy || 0,
-                medium: problemsSolvedCountByDifficultyRaw.medium || 0,
-                hard: problemsSolvedCountByDifficultyRaw.hard || 0,
-            };
-
-            // Group overall problems by module using countBy
-            const problemsCountByModule = countBy(allProblems, (p) => p.topic?.module?.title || 'Unknown');
-
-            // Group solved problems by module (seeded to match all modules from problemsCountByModule)
-            const problemsSolvedCountByModuleRaw = countBy(solvedProblems, (p) => p.problem!.topic?.module?.title || 'Unknown');
-            const problemsSolvedCountByModule: Record<string, number> = {};
-            Object.keys(problemsCountByModule).forEach((moduleTitle) => {
-                problemsSolvedCountByModule[moduleTitle] = problemsSolvedCountByModuleRaw[moduleTitle] || 0;
-            });
-
-            // Group overall problems by tags using countBy
-            const problemsCountByTags = countBy(allProblems, (p) => {
-                return p.tags.map((t) => t.tag?.name).filter(Boolean) as string[];
-            });
-
-            // Group solved problems by tags (seeded to match all tags from problemsCountByTags)
-            const problemsSolvedCountByTagsRaw = countBy(solvedProblems, (p) => {
-                return p.problem!.tags.map((t) => t.tag?.name).filter(Boolean) as string[];
-            });
-            const problemsSolvedCountByTags: Record<string, number> = {};
-            Object.keys(problemsCountByTags).forEach((tagName) => {
-                problemsSolvedCountByTags[tagName] = problemsSolvedCountByTagsRaw[tagName] || 0;
-            });
-
-            return {
-                problemsCount,
-                problemsSolvedCount,
-                problemsRevisitCount,
-                problemsAttemptedCount,
-                problemsSolvedPercentage,
-                problemsCountByDifficulty,
-                problemsSolvedCountByDifficulty,
-                problemsCountByModule,
-                problemsSolvedCountByModule,
-                problemsCountByTags,
-                problemsSolvedCountByTags,
-            };
-        })
-        .build();
-
     getUserPreferences = qRPC()
         .input(GetUserPreferencesInputSchema)
         .output(GetUserPreferencesOutputSchema)
@@ -329,9 +178,6 @@ export class UserQueries implements IUserQueries {
         })
         .build();
 
-    // Legacy alias
-    getUserActivity = this.getUserDailyActivity;
-
     recordDailyCheckIn = qRPC()
         .input(RecordDailyCheckInInputSchema)
         .output(RecordDailyCheckInOutputSchema)
@@ -340,6 +186,7 @@ export class UserQueries implements IUserQueries {
             const result = await recordDailyCheckInAndSyncStreak(payload);
             return {
                 checkedIn: true,
+                isNewCheckIn: result.isNewCheckIn ?? true,
                 totalActiveDays: result.totalActiveDays,
                 currentCheckInStreak: result.currentCheckInStreak,
                 longestCheckInStreak: result.longestCheckInStreak,
@@ -521,35 +368,6 @@ export class UserQueries implements IUserQueries {
         })
         .build();
 
-    updateUserRole = qRPC()
-        .input(UpdateUserRoleInputSchema)
-        .output(UpdateUserRoleOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing updateUserRole mutation', { payload });
-            const { userId, role } = payload;
-
-            // Ensure user exists
-            const user = await prisma.user.findUnique({
-                where: { id: userId },
-            });
-
-            if (!user) {
-                logger.warn('User not found for role update', { userId });
-                throw new AppErrorBuilder('User not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
-            }
-
-            const updatedUser = await prisma.user.update({
-                where: { id: userId },
-                data: { role },
-            });
-
-            logger.info('Successfully updated user role', { userId, role });
-            return updatedUser;
-        })
-        .build();
-
     upsertUserSocials = qRPC()
         .input(UpsertUserSocialsInputSchema)
         .output(UpsertUserSocialsOutputSchema)
@@ -706,27 +524,6 @@ export class UserQueries implements IUserQueries {
         })
         .build();
 
-    getActiveStreak = qRPC()
-        .input(GetActiveStreakInputSchema)
-        .output(GetActiveStreakOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing getActiveStreak query', { payload });
-            const streak = await this.getUserStreak(payload);
-            return {
-                currentStreak: streak.currentStreak,
-                longestStreak: streak.longestStreak,
-                lastProblemSolvedDate: streak.lastProblemSolvedDate,
-                totalActiveDays: streak.totalActiveDays,
-                currentCheckInStreak: streak.currentCheckInStreak,
-                longestCheckInStreak: streak.longestCheckInStreak,
-                lastActiveDate: streak.lastActiveDate,
-                bestStreak: streak.longestStreak,
-                activeDaysCount: streak.totalActiveDays,
-            };
-        })
-        .build();
-
-
     followUser = qRPC()
         .input(FollowUserInputSchema)
         .output(FollowUserOutputSchema)
@@ -810,35 +607,6 @@ export class UserQueries implements IUserQueries {
                 isFollowing: false,
                 followerCount,
                 followingCount,
-            };
-        })
-        .build();
-
-    getFollowStats = qRPC()
-        .input(GetFollowStatsInputSchema)
-        .output(GetFollowStatsOutputSchema)
-        .handler(async ({ userId, viewerId }) => {
-            logger.info('Executing getFollowStats query', { userId, viewerId });
-
-            const [followerCount, followingCount, isFollowingRecord] = await Promise.all([
-                prisma.userFollow.count({ where: { followingId: userId } }),
-                prisma.userFollow.count({ where: { followerId: userId } }),
-                viewerId
-                    ? prisma.userFollow.findUnique({
-                          where: {
-                              followerId_followingId: {
-                                  followerId: viewerId,
-                                  followingId: userId,
-                              },
-                          },
-                      })
-                    : null,
-            ]);
-
-            return {
-                followerCount,
-                followingCount,
-                isFollowing: Boolean(isFollowingRecord),
             };
         })
         .build();

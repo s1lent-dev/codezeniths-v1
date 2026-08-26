@@ -7,9 +7,7 @@ import { CACHE_TIERS } from '../cache-config';
 import type { IProductQueryService } from '../interfaces';
 import {
     GetProductsOutputSchema,
-    GetSingleProductOutputSchema,
     GetProductsInputSchema,
-    GetSingleProductInputSchema,
 } from '@codezeniths/schemas/db';
 import { z } from 'zod';
 
@@ -20,19 +18,6 @@ export class ProductQueryService implements IProductQueryService {
             queryFn: async () => {
                 const raw = await trpcClient.product.getProducts.query(input);
                 return GetProductsOutputSchema.parse(raw);
-            },
-            ...CACHE_TIERS.STATIC_CATALOG,
-        });
-    }
-
-    getSingleProduct(input: z.infer<typeof GetSingleProductInputSchema>) {
-        const validatedInput = GetSingleProductInputSchema.parse(input);
-        const cacheKey = validatedInput.slug || 'unknown';
-        return useQuery({
-            queryKey: queryKeys.product.single(cacheKey),
-            queryFn: async () => {
-                const raw = await trpcClient.product.getSingleProduct.query(validatedInput);
-                return GetSingleProductOutputSchema.parse(raw);
             },
             ...CACHE_TIERS.STATIC_CATALOG,
         });

@@ -1,7 +1,5 @@
 import { z } from 'zod';
 import {
-    GetProblemsInputSchema,
-    GetProblemsOutputSchema,
     GetProblemsPaginatedInputSchema,
     GetProblemsPaginatedOutputSchema,
     GetProblemsInfiniteInputSchema,
@@ -28,10 +26,6 @@ export interface IProblemQueries {
     getProblemTablePrimitives: (
         payload: z.infer<typeof GetProblemTablePrimitivesInputSchema>,
     ) => Promise<z.infer<typeof GetProblemTablePrimitivesOutputSchema>>;
-
-    getProblems: (
-        payload: z.infer<typeof GetProblemsInputSchema>,
-    ) => Promise<z.infer<typeof GetProblemsOutputSchema>>;
 
     getProblemsPaginated: (
         payload: z.infer<typeof GetProblemsPaginatedInputSchema>,

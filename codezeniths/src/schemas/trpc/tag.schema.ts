@@ -1,85 +1,110 @@
 import { z } from 'zod';
 import {
     GetTagsOutputSchema,
-    GetTagsFilteredOutputSchema,
+    GetTagsCatalogueInputSchema,
+    GetTagsCatalogueOutputSchema,
     TagFilterSchema,
     TagSortingSchema,
-    GetSingleTagProblemsOutputSchema,
-    GetSingleTagProblemProgressOutputSchema,
+    GetSingleTagProgressOutputSchema,
     GetSingleTagOutputSchema,
+    GetTagSuggestionsOutputSchema,
 } from '@codezeniths/schemas/db';
 
-// ─── getTags ───────────────────────────────────────────────────────────────────
+// ─── getTags (Lightweight Navbar / Chips Catalog) ──────────────────────────────
 
 export const GetTagsTRPCOutputSchema = GetTagsOutputSchema;
 
-// ─── getTagsFiltered ───────────────────────────────────────────────────────────
+// ─── getTagsCatalogue (Rich Paginated, Infinite & Filtered) ────────────────────
 
-export const GetTagsFilteredTRPCInputSchema = z.object({
-    filters: TagFilterSchema.optional(),
-    sorting: TagSortingSchema.optional(),
-});
+export const GetTagsCatalogueTRPCInputSchema = z.discriminatedUnion('mode', [
+    z.object({
+        mode: z.literal('paginated'),
+        page: z.number().int().min(1).default(1),
+        limit: z.number().int().min(1).max(100).default(6),
+        filters: TagFilterSchema.optional(),
+        sorting: TagSortingSchema.optional(),
+    }),
+    z.object({
+        mode: z.literal('infinite'),
+        cursor: z.string().optional(),
+        limit: z.number().int().min(1).max(100).default(6),
+        filters: TagFilterSchema.optional(),
+        sorting: TagSortingSchema.optional(),
+    }),
+    z.object({
+        mode: z.literal('filtered'),
+        filters: TagFilterSchema.optional(),
+        sorting: TagSortingSchema.optional(),
+    }),
+]);
 
-export const GetTagsFilteredTRPCOutputSchema = GetTagsFilteredOutputSchema;
+export const GetTagsCatalogueTRPCOutputSchema = GetTagsCatalogueOutputSchema;
 
+// ─── getSingleTagProgress ──────────────────────────────────────────────────────
 
-// ─── getSingleTagProblems ──────────────────────────────────────────────────────
+export const GetSingleTagProgressTRPCInputSchema = z
+    .object({
+        tagId: z.string().optional(),
+        tagSlug: z.string().optional(),
+    })
+    .refine((d) => d.tagSlug || d.tagId, {
+        message: 'At least one of tagSlug or tagId must be provided',
+    });
 
-export const GetSingleTagProblemsTRPCInputSchema = z.object({
-    id: z.uuidv7().optional(),
-    slug: z.string().optional(),
-}).refine((d) => d.slug || d.id, {
-    message: 'At least one of slug or id must be provided',
-});
-
-export const GetSingleTagProblemsTRPCOutputSchema = GetSingleTagProblemsOutputSchema;
-
-// ─── getSingleTagProblemProgress ────────────────────────────────────────────────
-
-export const GetSingleTagProblemProgressTRPCInputSchema = z.object({
-    tagId: z.uuidv7().optional(),
-    tagSlug: z.string().optional(),
-}).refine((d) => d.tagSlug || d.tagId, {
-    message: 'At least one of tagSlug or tagId must be provided',
-});
-
-export const GetSingleTagProblemProgressTRPCOutputSchema = GetSingleTagProblemProgressOutputSchema;
+export const GetSingleTagProgressTRPCOutputSchema = GetSingleTagProgressOutputSchema;
 
 // ─── getSingleTag ─────────────────────────────────────────────────────────────
 
-export const GetSingleTagTRPCInputSchema = z.object({
-    id: z.uuidv7().optional(),
-    slug: z.string().optional(),
-}).refine((d) => d.slug || d.id, {
-    message: 'At least one of slug or id must be provided',
-});
+export const GetSingleTagTRPCInputSchema = z
+    .object({
+        id: z.string().optional(),
+        slug: z.string().optional(),
+    })
+    .refine((d) => d.slug || d.id, {
+        message: 'At least one of slug or id must be provided',
+    });
 
 export const GetSingleTagTRPCOutputSchema = GetSingleTagOutputSchema;
 
+// ─── getTagSuggestions ────────────────────────────────────────────────────────
+
+export const GetTagSuggestionsTRPCInputSchema = z
+    .object({
+        tagId: z.string().optional(),
+        tagSlug: z.string().optional(),
+    })
+    .refine((d) => d.tagSlug || d.tagId, {
+        message: 'At least one of tagSlug or tagId must be provided',
+    });
+
+export const GetTagSuggestionsTRPCOutputSchema = GetTagSuggestionsOutputSchema;
+
 // ─── toggleTagBookmark ─────────────────────────────────────────────────────────
 
-export const ToggleTagBookmarkTRPCInputSchema = z.object({
-    tagId: z.uuidv7().optional(),
-    tagSlug: z.string().optional(),
-}).refine((d) => d.tagId || d.tagSlug, {
-    message: 'At least one of tagId or tagSlug must be provided',
-});
+export const ToggleTagBookmarkTRPCInputSchema = z
+    .object({
+        tagId: z.string().optional(),
+        tagSlug: z.string().optional(),
+    })
+    .refine((d) => d.tagId || d.tagSlug, {
+        message: 'At least one of tagId or tagSlug must be provided',
+    });
 
 export const ToggleTagBookmarkTRPCOutputSchema = z.object({
     isBookmarked: z.boolean(),
-    tagId: z.uuidv7(),
+    tagId: z.string(),
 });
 
 // ─── getUserTagProgressByLevel ───────────────────────────────────────────────
 
 export const GetUserTagProgressByLevelTRPCInputSchema = z.object({
-    userId: z.string().uuid().optional(),
+    userId: z.string().optional(),
     moduleSlug: z.string().optional(),
-    moduleId: z.string().uuid().optional(),
+    moduleId: z.string().optional(),
 });
 
 export const TagProgressItemTRPCSchema = z.object({
-    id: z.string().uuid(),
+    id: z.string(),
     name: z.string(),
     slug: z.string(),
     level: z.enum(['fundamental', 'intermediate', 'advanced']).nullable().optional(),
@@ -92,4 +117,3 @@ export const GetUserTagProgressByLevelTRPCOutputSchema = z.object({
     intermediate: z.array(TagProgressItemTRPCSchema),
     advanced: z.array(TagProgressItemTRPCSchema),
 });
-

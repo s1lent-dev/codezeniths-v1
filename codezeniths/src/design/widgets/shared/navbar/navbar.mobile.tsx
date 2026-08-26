@@ -25,26 +25,28 @@ export const NavbarMobileToggle = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
 
-    let buttonLabel = 'Sign In';
+    let buttonLabel = '';
     let buttonRoute = '/sign-in';
 
-    if (isAuthenticated && user) {
-        if (user.isOnboardingComplete) {
-            buttonLabel = 'Home';
-            buttonRoute = '/problemset';
+    if (!isLoading) {
+        if (isAuthenticated && user) {
+            if (user.isOnboardingComplete) {
+                buttonLabel = 'Home';
+                buttonRoute = '/problemset';
+            } else {
+                buttonLabel = 'Complete Profile';
+                buttonRoute = '/complete-profile';
+            }
         } else {
-            buttonLabel = 'Complete Profile';
-            buttonRoute = '/complete-profile';
-        }
-    } else {
-        if (pathname === '/sign-in') {
-            buttonLabel = 'Sign Up';
-            buttonRoute = '/sign-up';
-        } else {
-            buttonLabel = 'Sign In';
-            buttonRoute = '/sign-in';
+            if (pathname === '/sign-in') {
+                buttonLabel = 'Sign Up';
+                buttonRoute = '/sign-up';
+            } else {
+                buttonLabel = 'Sign In';
+                buttonRoute = '/sign-in';
+            }
         }
     }
 
@@ -107,11 +109,14 @@ export const NavbarMobileToggle = () => {
                             <ThemeToggler />
                             <Button 
                                 variant={ButtonVariant.DEFAULT} 
+                                isLoading={isLoading}
+                                disabled={isLoading}
                                 onClick={() => {
+                                    if (isLoading) return;
                                     setIsMobileMenuOpen(false);
                                     router.push(buttonRoute);
                                 }}
-                                className="px-4 py-1.5 typography-p h-8 capitalize"
+                                className="px-4 py-1.5 typography-p min-w-20 h-8.5 capitalize justify-center"
                             >
                                 {buttonLabel}
                             </Button>

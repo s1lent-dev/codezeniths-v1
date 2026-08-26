@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { DetailPageSkeleton } from '@codezeniths/design/widgets/shared/detail-info-card/detail-page-skeleton';
+import { Loader } from '@codezeniths/components';
 
 export const metadata = {
     title: 'Playlist Details | Codezeniths',
@@ -10,13 +10,23 @@ export const metadata = {
 const PlaylistDetailPageSection = dynamic(
     () => import('@codezeniths/features').then((mod) => mod.PlaylistDetailPageSection),
     {
-        loading: () => <DetailPageSkeleton showSuggestions={false} />,
+        loading: () => (
+            <div className="flex h-full min-h-[60vh] w-full items-center justify-center">
+                <Loader />
+            </div>
+        ),
     }
 );
 
 export default function SinglePlaylistPage() {
     return (
-        <Suspense fallback={<DetailPageSkeleton showSuggestions={false} />}>
+        <Suspense
+            fallback={
+                <div className="flex h-full min-h-[60vh] w-full items-center justify-center">
+                    <Loader />
+                </div>
+            }
+        >
             <PlaylistDetailPageSection />
         </Suspense>
     );

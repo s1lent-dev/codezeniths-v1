@@ -11,9 +11,38 @@ export function useTopicDetails() {
     const moduleSlug = (params?.module as string) || '';
     const topicSlug = (params?.topic as string) || '';
 
-    const { data: topicDetails, isLoading, isError, error } = topicQueryService.getSingleTopic({
-        slug: topicSlug,
-    });
+    const {
+        data: topicDetails,
+        isLoading: isTopicQueryLoading,
+        isPending: isTopicPending,
+        isError,
+        error,
+    } = topicQueryService.getSingleTopic(
+        { slug: topicSlug },
+        { enabled: !!topicSlug }
+    );
+
+    const {
+        data: topicProgress,
+        isLoading: isProgressQueryLoading,
+        isPending: isProgressPending,
+    } = topicQueryService.getSingleTopicProgress(
+        { topicSlug },
+        { enabled: !!topicSlug }
+    );
+
+    const {
+        data: topicSuggestions,
+        isLoading: isSuggestionsQueryLoading,
+        isPending: isSuggestionsPending,
+    } = topicQueryService.getTopicSuggestions(
+        { topicSlug },
+        { enabled: !!topicSlug }
+    );
+
+    const isLoading = !topicSlug || isTopicQueryLoading || (isTopicPending && !topicDetails);
+    const isLoadingProgress = !topicSlug || isProgressQueryLoading || (isProgressPending && !topicProgress);
+    const isLoadingSuggestions = !topicSlug || isSuggestionsQueryLoading || (isSuggestionsPending && !topicSuggestions);
 
     const toggleTopicBookmarkMutation = moduleQueryService.toggleTopicBookmark();
     const [isBookmarkBusy, setIsBookmarkBusy] = useState(false);
@@ -53,7 +82,11 @@ export function useTopicDetails() {
         moduleSlug,
         topicSlug,
         topicDetails,
+        topicProgress,
+        topicSuggestions,
         isLoading,
+        isLoadingProgress,
+        isLoadingSuggestions,
         isError,
         error,
         isBookmarkBusy,

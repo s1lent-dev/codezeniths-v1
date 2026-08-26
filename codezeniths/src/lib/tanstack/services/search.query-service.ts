@@ -7,10 +7,6 @@ import { z } from 'zod';
 import {
     SearchTRPCInputSchema,
     SearchTRPCOutputSchema,
-    AutocompleteTRPCInputSchema,
-    AutocompleteTRPCOutputSchema,
-    MoreLikeThisTRPCInputSchema,
-    MoreLikeThisTRPCOutputSchema,
     RecordSearchSelectionTRPCInputSchema,
     RecordSearchSelectionTRPCOutputSchema,
     GetRecentSearchHistoryTRPCInputSchema,
@@ -25,8 +21,6 @@ import {
 } from '@/schemas/trpc';
 
 type SearchInput = Omit<z.infer<typeof SearchTRPCInputSchema>, 'collection'>;
-type AutocompleteInput = Omit<z.infer<typeof AutocompleteTRPCInputSchema>, 'collection'>;
-type RecommendationsInput = Omit<z.infer<typeof MoreLikeThisTRPCInputSchema>, 'collection'>;
 
 export class SearchQueryService implements ISearchQueryService {
     search(collectionName: string, input: SearchInput, enabled: boolean = true) {
@@ -42,38 +36,6 @@ export class SearchQueryService implements ISearchQueryService {
             },
             enabled,
             staleTime: 1000 * 60 * 5, // 5 minutes cache
-        });
-    }
-
-    autocomplete(collectionName: string, input: AutocompleteInput, enabled: boolean = true) {
-        const fullInput = { ...input, collection: collectionName };
-        const validatedInput = AutocompleteTRPCInputSchema.parse(fullInput);
-        
-        return useQuery({
-            queryKey: queryKeys.search.autocomplete(collectionName, validatedInput),
-            queryFn: async () => {
-                if (!validatedInput.prefix) return [];
-                const raw = await trpcClient.search.autocomplete.query(validatedInput);
-                return AutocompleteTRPCOutputSchema.parse(raw);
-            },
-            enabled,
-            staleTime: 1000 * 60 * 5,
-        });
-    }
-
-    getRecommendations(collectionName: string, input: RecommendationsInput, enabled: boolean = true) {
-        const fullInput = { ...input, collection: collectionName };
-        const validatedInput = MoreLikeThisTRPCInputSchema.parse(fullInput);
-        
-        return useQuery({
-            queryKey: queryKeys.search.recommendations(collectionName, validatedInput),
-            queryFn: async () => {
-                if (!validatedInput.id) return [];
-                const raw = await trpcClient.search.recommendations.query(validatedInput);
-                return MoreLikeThisTRPCOutputSchema.parse(raw);
-            },
-            enabled,
-            staleTime: 1000 * 60 * 5,
         });
     }
 
@@ -169,4 +131,3 @@ export class SearchQueryService implements ISearchQueryService {
 }
 
 export const searchQueryService = new SearchQueryService();
-

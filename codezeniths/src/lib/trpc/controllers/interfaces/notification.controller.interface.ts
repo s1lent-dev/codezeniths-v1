@@ -7,8 +7,6 @@ import {
     MarkAllAsReadTRPCOutputSchema,
     UpsertDeviceTokenTRPCInputSchema,
     UpsertDeviceTokenTRPCOutputSchema,
-    RemoveDeviceTokenTRPCInputSchema,
-    RemoveDeviceTokenTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { z } from 'zod';
 
@@ -31,10 +29,4 @@ export interface INotificationController {
         ctx: TRPCContext;
         input: z.infer<typeof UpsertDeviceTokenTRPCInputSchema>;
     }): Promise<z.infer<typeof UpsertDeviceTokenTRPCOutputSchema>>;
-
-    removeDeviceToken(args: {
-        ctx: TRPCContext;
-        input: z.infer<typeof RemoveDeviceTokenTRPCInputSchema>;
-    }): Promise<z.infer<typeof RemoveDeviceTokenTRPCOutputSchema>>;
 }
-

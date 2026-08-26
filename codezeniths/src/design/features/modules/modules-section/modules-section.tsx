@@ -16,6 +16,9 @@ export const ModulesSection: React.FC = () => {
         problemProgress,
         modulesWithTopics,
         isLoading,
+        isLoadingStreak,
+        isLoadingRecent,
+        isLoadingFeatured,
         isLoadingProgress,
         isLoadingWithTopics,
         handleSolveModule,
@@ -45,7 +48,9 @@ export const ModulesSection: React.FC = () => {
                     recentModuleData={recentModuleData}
                     featuredModuleData={featuredModuleData}
                     problemProgress={problemProgress}
-                    isLoading={isLoadingProgress}
+                    isLoadingStreak={isLoadingStreak}
+                    isLoadingRecent={isLoadingRecent || isLoadingFeatured}
+                    isLoadingProgress={isLoadingProgress}
                 />
             </div>
 

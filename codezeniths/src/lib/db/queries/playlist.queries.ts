@@ -27,6 +27,16 @@ import {
 } from '@codezeniths/schemas/db';
 import { IPlaylistQueries } from './interfaces/playlist.queries.interface';
 import type { Prisma } from '@prisma/client';
+import { createCache } from '@/hooks/performance-hooks/cache/cache';
+
+// Multi-tier cache for creator's public other playlists
+const creatorOtherPlaylistsL1Cache = createCache<
+    Array<{ id: string; title: string; slug: string; problemsCount: number }>
+>({
+    strategy: 'adaptive',
+    maxSize: 100,
+    ttl: 1000 * 60 * 5, // 5 minutes in RAM
+});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -262,6 +272,7 @@ export class PlaylistQueries implements IPlaylistQueries {
             logger.info('Executing getPlaylistInfo query', { payload });
             const { slug, id, userId } = payload;
 
+            // 1. Direct indexed lookup for Playlist
             const playlist = await prisma.playlist.findFirst({
                 where: {
                     OR: [id ? { id } : {}, slug ? { slug } : {}].filter((obj) => Object.keys(obj).length > 0),
@@ -319,70 +330,110 @@ export class PlaylistQueries implements IPlaylistQueries {
                     .build();
             }
 
-            const problems = playlist.items.map((i) => i.problem);
-            const problemIds = problems.map((p) => p.id);
-            const problemsCount = problems.length;
+            const problemIds: string[] = [];
+            for (const item of playlist.items) {
+                if (item.problem?.id) {
+                    problemIds.push(item.problem.id);
+                }
+            }
+            const problemsCount = problemIds.length;
 
-            const easyTotal = problems.filter((p) => p.difficulty === 'easy').length;
-            const mediumTotal = problems.filter((p) => p.difficulty === 'medium').length;
-            const hardTotal = problems.filter((p) => p.difficulty === 'hard').length;
+            // 2. Parallelized Execution of User Progress and Creator's Other Playlists
+            const userProgressPromise =
+                userId && problemIds.length > 0
+                    ? prisma.problemProgress.findMany({
+                          where: {
+                              userId,
+                              problemId: { in: problemIds },
+                          },
+                          select: {
+                              problemId: true,
+                              status: true,
+                              revisit: true,
+                          },
+                      })
+                    : Promise.resolve([]);
 
-            let problemsSolvedCount = 0;
-            let problemsRevisitCount = 0;
+            const otherPlaylistsPromise = (async () => {
+                const cacheKey = `${playlist.creatorId}:${playlist.id}`;
+                const cached = creatorOtherPlaylistsL1Cache.get(cacheKey);
+                if (cached) return cached;
+
+                const otherList = await prisma.playlist.findMany({
+                    where: {
+                        creatorId: playlist.creatorId,
+                        id: { not: playlist.id },
+                        isPublic: true,
+                    },
+                    take: 4,
+                    orderBy: { bookmarkCount: 'desc' },
+                    select: {
+                        id: true,
+                        title: true,
+                        slug: true,
+                        _count: {
+                            select: { items: true },
+                        },
+                    },
+                });
+
+                const mapped = otherList.map((p) => ({
+                    id: p.id,
+                    title: p.title,
+                    slug: p.slug,
+                    problemsCount: p._count.items,
+                }));
+
+                creatorOtherPlaylistsL1Cache.set(cacheKey, mapped);
+                return mapped;
+            })();
+
+            const [userProgresses, otherPlaylists] = await Promise.all([
+                userProgressPromise,
+                otherPlaylistsPromise,
+            ]);
+
+            // 3. Single-Pass O(P) Progress Accumulation
+            const progressMap = new Map<string, { status: string; revisit: boolean }>();
+            for (const up of userProgresses) {
+                progressMap.set(up.problemId, up);
+            }
+
+            let easyTotal = 0;
+            let mediumTotal = 0;
+            let hardTotal = 0;
             let easySolved = 0;
             let mediumSolved = 0;
             let hardSolved = 0;
+            let problemsSolvedCount = 0;
+            let problemsRevisitCount = 0;
 
-            if (userId && problemIds.length > 0) {
-                const userProgresses = await prisma.problemProgress.findMany({
-                    where: {
-                        userId,
-                        ...(problemIds.length <= 100 ? { problemId: { in: problemIds } } : {}),
-                    },
-                    select: {
-                        problemId: true,
-                        status: true,
-                        revisit: true,
-                    },
-                });
+            for (const item of playlist.items) {
+                const p = item.problem;
+                if (!p) continue;
 
-                const solvedProblemIds = new Set(
-                    userProgresses.filter((p) => p.status === 'solved').map((p) => p.problemId)
-                );
-                problemsSolvedCount = solvedProblemIds.size;
-                problemsRevisitCount = userProgresses.filter((p) => p.revisit).length;
+                const diff = p.difficulty as 'easy' | 'medium' | 'hard';
+                if (diff === 'easy') easyTotal++;
+                else if (diff === 'medium') mediumTotal++;
+                else if (diff === 'hard') hardTotal++;
 
-                problems.forEach((p) => {
-                    if (solvedProblemIds.has(p.id)) {
-                        if (p.difficulty === 'easy') easySolved++;
-                        else if (p.difficulty === 'medium') mediumSolved++;
-                        else if (p.difficulty === 'hard') hardSolved++;
+                const prog = progressMap.get(p.id);
+                if (prog) {
+                    if (prog.status === 'solved') {
+                        problemsSolvedCount++;
+                        if (diff === 'easy') easySolved++;
+                        else if (diff === 'medium') mediumSolved++;
+                        else if (diff === 'hard') hardSolved++;
                     }
-                });
+                    if (prog.revisit) {
+                        problemsRevisitCount++;
+                    }
+                }
             }
 
             const problemsSolvedPercentage =
                 problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
             const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
-
-            // Fetch other public playlists by this creator
-            const otherPlaylists = await prisma.playlist.findMany({
-                where: {
-                    creatorId: playlist.creatorId,
-                    id: { not: playlist.id },
-                    isPublic: true,
-                },
-                take: 4,
-                orderBy: { bookmarkCount: 'desc' },
-                select: {
-                    id: true,
-                    title: true,
-                    slug: true,
-                    _count: {
-                        select: { items: true },
-                    },
-                },
-            });
 
             return {
                 id: playlist.id,
@@ -420,12 +471,7 @@ export class PlaylistQueries implements IPlaylistQueries {
                         hard: hardSolved,
                     },
                 },
-                otherPlaylists: otherPlaylists.map((p) => ({
-                    id: p.id,
-                    title: p.title,
-                    slug: p.slug,
-                    problemsCount: p._count.items,
-                })),
+                otherPlaylists,
             };
         })
         .build();

@@ -7,6 +7,7 @@ import { Toaster } from '@codezeniths/modules';
 import { Suspense } from 'react';
 import { ClientSideServiceWorker } from "@codezeniths/lib/firebase";
 import FcmListenerProvider from "@codezeniths/lib/firebase/fcm.provider";
+import { DailyCheckInListener } from '@codezeniths/features';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,6 +57,7 @@ export default function RootLayout({
           <TRPCReactProvider>
               <ClientSideServiceWorker />
               <FcmListenerProvider />
+              <DailyCheckInListener />
               <Suspense fallback={<div className="fixed inset-0 z-999 flex items-center justify-center bg-background-light dark:bg-background-dark"><Loader /></div>}>
                   {children}
               </Suspense>

@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import {
     GetTagsOutputSchema,
-    GetTagsFilteredInputSchema,
-    GetTagsFilteredOutputSchema,
-    GetSingleTagProblemsInputSchema,
-    GetSingleTagProblemsOutputSchema,
-    GetSingleTagProblemProgressInputSchema,
-    GetSingleTagProblemProgressOutputSchema,
+    GetSingleTagProgressInputSchema,
+    GetSingleTagProgressOutputSchema,
+    GetSingleTagInputSchema,
+    GetSingleTagOutputSchema,
+    GetTagSuggestionsInputSchema,
+    GetTagSuggestionsOutputSchema,
     ToggleTagBookmarkInputSchema,
     ToggleTagBookmarkOutputSchema,
     GetUserTagProgressByLevelInputSchema,
@@ -16,21 +16,17 @@ import {
 export interface ITagQueries {
     getTags: (payload: void) => Promise<z.infer<typeof GetTagsOutputSchema>>;
 
-    getTagsFiltered: (
-        payload: z.infer<typeof GetTagsFilteredInputSchema>,
-    ) => Promise<z.infer<typeof GetTagsFilteredOutputSchema>>;
-
-    getSingleTagProblems: (
-        payload: z.infer<typeof GetSingleTagProblemsInputSchema>,
-    ) => Promise<z.infer<typeof GetSingleTagProblemsOutputSchema>>;
-
-    getSingleTagProblemProgress: (
-        payload: z.infer<typeof GetSingleTagProblemProgressInputSchema>,
-    ) => Promise<z.infer<typeof GetSingleTagProblemProgressOutputSchema>>;
+    getSingleTagProgress: (
+        payload: z.infer<typeof GetSingleTagProgressInputSchema>,
+    ) => Promise<z.infer<typeof GetSingleTagProgressOutputSchema>>;
 
     getSingleTag: (
-        payload: z.infer<typeof import('@codezeniths/schemas/db').GetSingleTagInputSchema>,
-    ) => Promise<z.infer<typeof import('@codezeniths/schemas/db').GetSingleTagOutputSchema>>;
+        payload: z.infer<typeof GetSingleTagInputSchema>,
+    ) => Promise<z.infer<typeof GetSingleTagOutputSchema>>;
+
+    getTagSuggestions: (
+        payload: z.infer<typeof GetTagSuggestionsInputSchema>,
+    ) => Promise<z.infer<typeof GetTagSuggestionsOutputSchema>>;
 
     toggleTagBookmark: (
         payload: z.infer<typeof ToggleTagBookmarkInputSchema>,
@@ -40,4 +36,3 @@ export interface ITagQueries {
         payload: z.infer<typeof GetUserTagProgressByLevelInputSchema>,
     ) => Promise<z.infer<typeof GetUserTagProgressByLevelOutputSchema>>;
 }
-

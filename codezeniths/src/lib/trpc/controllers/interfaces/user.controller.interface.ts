@@ -1,9 +1,5 @@
 import { TRPCContext } from '../../trpc/trpc.context';
 import {
-    GetProfileByIdInputSchema,
-    GetProfileByIdOutputSchema,
-    GetProfileByUsernameInputSchema,
-    GetProfileByUsernameOutputSchema,
     GetSettingsInputSchema,
     GetSettingsOutputSchema,
     UpdateProfileInputSchema,
@@ -20,16 +16,12 @@ import {
     RemoveResumeOutputSchema,
     GetExtractionProgressInputSchema,
     GetExtractionProgressOutputSchema,
-    GetAvatarInputSchema,
-    GetAvatarOutputSchema,
     CheckUserNameAvailabilityInputSchema,
     CheckUserNameAvailabilityOutputSchema,
     CheckEmailAvailabilityInputSchema,
     CheckEmailAvailabilityOutputSchema,
     CheckPhoneAvailabilityInputSchema,
     CheckPhoneAvailabilityOutputSchema,
-    GetAvatarUploadUrlInputSchema,
-    GetAvatarUploadUrlOutputSchema,
     GetOnboardingProfileInputSchema,
     GetOnboardingProfileOutputSchema,
     UpdateOnboardingStep0InputSchema,
@@ -42,22 +34,16 @@ import {
     UpdateOnboardingStep3OutputSchema,
     ExtractResumeSkillsInputSchema,
     ExtractResumeSkillsOutputSchema,
-    GetResumeDownloadUrlInputSchema,
-    GetResumeDownloadUrlOutputSchema,
     GetUserMonthlyActivityInputSchema,
     GetUserMonthlyActivityOutputSchema,
-    GetActiveStreakTRPCOutputSchema,
     GetUserStreakTRPCInputSchema,
     GetUserStreakTRPCOutputSchema,
     RecordDailyCheckInTRPCInputSchema,
     RecordDailyCheckInTRPCOutputSchema,
-
     FollowUserTRPCInputSchema,
     FollowUserTRPCOutputSchema,
     UnfollowUserTRPCInputSchema,
     UnfollowUserTRPCOutputSchema,
-    GetFollowStatsTRPCInputSchema,
-    GetFollowStatsTRPCOutputSchema,
     GetFollowersTRPCInputSchema,
     GetFollowersTRPCOutputSchema,
     GetFollowingTRPCInputSchema,
@@ -84,16 +70,6 @@ import {
 import { z } from 'zod';
 
 export interface IUserController {
-    getProfileById(args: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetProfileByIdInputSchema>;
-    }): Promise<z.infer<typeof GetProfileByIdOutputSchema>>;
-
-    getProfileByUsername(args: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetProfileByUsernameInputSchema>;
-    }): Promise<z.infer<typeof GetProfileByUsernameOutputSchema>>;
-
     getSettings(args: {
         ctx: TRPCContext;
         input: z.infer<typeof GetSettingsInputSchema>;
@@ -128,16 +104,6 @@ export interface IUserController {
         ctx: TRPCContext;
         input: z.infer<typeof RemoveResumeInputSchema>;
     }): Promise<z.infer<typeof RemoveResumeOutputSchema>>;
-
-    getAvatar(args: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetAvatarInputSchema>;
-    }): Promise<z.infer<typeof GetAvatarOutputSchema>>;
-
-    getAvatarUploadUrl(args: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetAvatarUploadUrlInputSchema>;
-    }): Promise<z.infer<typeof GetAvatarUploadUrlOutputSchema>>;
 
     checkUserNameAvailability(args: {
         ctx: TRPCContext;
@@ -189,19 +155,10 @@ export interface IUserController {
         input: z.infer<typeof GetExtractionProgressInputSchema>;
     }): Promise<z.infer<typeof GetExtractionProgressOutputSchema>>;
 
-    getResumeDownloadUrl(args: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetResumeDownloadUrlInputSchema>;
-    }): Promise<z.infer<typeof GetResumeDownloadUrlOutputSchema>>;
-
     getUserMonthlyActivity(args: {
         ctx: TRPCContext;
         input: z.infer<typeof GetUserMonthlyActivityInputSchema>;
     }): Promise<z.infer<typeof GetUserMonthlyActivityOutputSchema>>;
-
-    getActiveStreak(args: {
-        ctx: TRPCContext;
-    }): Promise<z.infer<typeof GetActiveStreakTRPCOutputSchema>>;
 
     getUserStreak(args: {
         ctx: TRPCContext;
@@ -213,7 +170,6 @@ export interface IUserController {
         input?: z.infer<typeof RecordDailyCheckInTRPCInputSchema>;
     }): Promise<z.infer<typeof RecordDailyCheckInTRPCOutputSchema>>;
 
-
     followUser(args: {
         ctx: TRPCContext;
         input: z.infer<typeof FollowUserTRPCInputSchema>;
@@ -223,11 +179,6 @@ export interface IUserController {
         ctx: TRPCContext;
         input: z.infer<typeof UnfollowUserTRPCInputSchema>;
     }): Promise<z.infer<typeof UnfollowUserTRPCOutputSchema>>;
-
-    getFollowStats(args: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetFollowStatsTRPCInputSchema>;
-    }): Promise<z.infer<typeof GetFollowStatsTRPCOutputSchema>>;
 
     getFollowers(args: {
         ctx: TRPCContext;
@@ -288,4 +239,3 @@ export interface IUserController {
         ctx: TRPCContext;
     }): Promise<{ success: boolean; message: string }>;
 }
-

@@ -1,18 +1,5 @@
 import { z } from 'zod';
 
-export const CreateNotificationInputSchema = z.object({
-    userId: z.string().uuid(),
-    type: z.string(),
-    title: z.string(),
-    message: z.string(),
-});
-
-export const CreateGlobalNotificationInputSchema = z.object({
-    type: z.string(),
-    title: z.string(),
-    message: z.string(),
-});
-
 export const NotificationStatusSchema = z.enum(['all', 'unread', 'read']);
 export type NotificationStatus = z.infer<typeof NotificationStatusSchema>;
 

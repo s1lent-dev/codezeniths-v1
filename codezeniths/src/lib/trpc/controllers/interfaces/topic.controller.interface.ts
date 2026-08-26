@@ -4,6 +4,8 @@ import {
     GetSingleTopicTRPCOutputSchema,
     GetSingleTopicProgressTRPCInputSchema,
     GetSingleTopicProgressTRPCOutputSchema,
+    GetTopicSuggestionsTRPCInputSchema,
+    GetTopicSuggestionsTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { z } from 'zod';
 
@@ -17,4 +19,10 @@ export interface ITopicController {
         ctx: TRPCContext;
         input: z.infer<typeof GetSingleTopicProgressTRPCInputSchema>;
     }): Promise<z.infer<typeof GetSingleTopicProgressTRPCOutputSchema>>;
+
+    getTopicSuggestions(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetTopicSuggestionsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetTopicSuggestionsTRPCOutputSchema>>;
 }
+

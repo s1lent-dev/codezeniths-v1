@@ -30,6 +30,9 @@ async function main() {
                 if (name === 'problems') {
                     await redisService.client.set('search:problems:version', Date.now().toString()).catch(() => {});
                 }
+                if (name === 'tags') {
+                    await redisService.client.set('search:tags:version', Date.now().toString()).catch(() => {});
+                }
                 console.log(`✅ OK (${data.documentsIndexed} docs, ${data.autocompleteEntries} prefixes, ${data.tookMs}ms)`);
                 summary[name] = {
                     ok: true,

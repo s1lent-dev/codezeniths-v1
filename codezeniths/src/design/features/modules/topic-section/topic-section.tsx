@@ -14,14 +14,18 @@ export const TopicSection: React.FC = () => {
         moduleSlug,
         topicSlug,
         topicDetails,
+        topicProgress,
+        topicSuggestions,
         isLoading,
+        isLoadingProgress,
+        isLoadingSuggestions,
         isError,
         error,
         isBookmarkBusy,
         handleToggleBookmark,
     } = useTopicDetails();
 
-    if (isError || (!isLoading && !topicDetails)) {
+    if (!isLoading && (isError || !topicDetails)) {
         return (
             <Card className="rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark p-12 text-center my-8">
                 <Typography variant={TypographyVariant.H3} className="text-xl font-bold text-destructive mb-2">
@@ -61,7 +65,11 @@ export const TopicSection: React.FC = () => {
                 <div className="w-full lg:w-82.5 xl:w-90 shrink-0">
                     <TopicInfoSection
                         topicDetails={topicDetails}
+                        topicProgress={topicProgress}
+                        topicSuggestions={topicSuggestions}
                         isLoading={isLoading}
+                        isLoadingProgress={isLoadingProgress}
+                        isLoadingSuggestions={isLoadingSuggestions}
                         onToggleBookmark={handleToggleBookmark}
                         isBookmarkBusy={isBookmarkBusy}
                     />

@@ -41,33 +41,6 @@ export const GetUserSocialsInputSchema = z.object({
 
 export const GetUserSocialsOutputSchema = UserSocialLinksSchema.nullable();
 
-// ─── getUserProgress ──────────────────────────────────────────────────────────
-export const GetUserProgressInputSchema = z.object({
-    userId: z.uuidv7(),
-});
-
-export const GetUserProgressOutputSchema = z.object({
-    problemsCount: z.number(),
-    problemsSolvedCount: z.number(),
-    problemsRevisitCount: z.number(),
-    problemsAttemptedCount: z.number(),
-    problemsSolvedPercentage: z.number(),
-    problemsCountByDifficulty: z.object({
-        easy: z.number(),
-        medium: z.number(),
-        hard: z.number(),
-    }),
-    problemsSolvedCountByDifficulty: z.object({
-        easy: z.number(),
-        medium: z.number(),
-        hard: z.number(),
-    }),
-    problemsCountByModule: z.record(z.string(), z.number()),
-    problemsSolvedCountByModule: z.record(z.string(), z.number()),
-    problemsCountByTags: z.record(z.string(), z.number()),
-    problemsSolvedCountByTags: z.record(z.string(), z.number()),
-});
-
 // ─── getUserPreferences ────────────────────────────────────────────────────────
 export const GetUserPreferencesInputSchema = z.object({
     userId: z.uuidv7(),
@@ -83,11 +56,6 @@ export const GetUserDailyActivityInputSchema = z.object({
 });
 
 export const GetUserDailyActivityOutputSchema = z.array(UserDailyActivitySchema);
-
-// Legacy alias for compatibility
-export const GetUserActivityInputSchema = GetUserDailyActivityInputSchema;
-export const GetUserActivityOutputSchema = GetUserDailyActivityOutputSchema;
-
 
 // ─── updateUserProfile ────────────────────────────────────────────────────────
 export const UpdateUserProfileInputSchema = z.object({
@@ -128,14 +96,6 @@ export const UpdateUserResumeInputSchema = z.object({
 
 export const UpdateUserResumeOutputSchema = UserSchema;
 
-// ─── updateUserRole ───────────────────────────────────────────────────────────
-export const UpdateUserRoleInputSchema = z.object({
-    userId: z.uuidv7(),
-    role: UserRoleSchema,
-});
-
-export const UpdateUserRoleOutputSchema = UserSchema;
-
 // ─── upsertUserSocials ─────────────────────────────────────────────────────────
 export const UpsertUserSocialsInputSchema = z.object({
     userId: z.uuidv7(),
@@ -166,24 +126,7 @@ export const CheckPhoneAvailabilityOutputSchema = z.object({
     isVerified: z.boolean().optional()
 });
 
-// ─── getActiveStreak / getUserStreak ──────────────────────────────────────────
-export const GetActiveStreakInputSchema = z.object({
-    userId: z.uuidv7(),
-});
-
-export const GetActiveStreakOutputSchema = z.object({
-    currentStreak: z.number().int(),
-    longestStreak: z.number().int(),
-    lastProblemSolvedDate: z.coerce.date().nullable().optional(),
-    totalActiveDays: z.number().int(),
-    currentCheckInStreak: z.number().int(),
-    longestCheckInStreak: z.number().int(),
-    lastActiveDate: z.coerce.date().nullable().optional(),
-    // Backward-compat aliases
-    bestStreak: z.number().int().optional(),
-    activeDaysCount: z.number().int().optional(),
-});
-
+// ─── getUserStreak ────────────────────────────────────────────────────────────
 export const GetUserStreakInputSchema = z.object({
     userId: z.uuidv7(),
 });
@@ -217,6 +160,7 @@ export const RecordDailyCheckInInputSchema = z.object({
 
 export const RecordDailyCheckInOutputSchema = z.object({
     checkedIn: z.boolean(),
+    isNewCheckIn: z.boolean().default(true),
     totalActiveDays: z.number().int(),
     currentCheckInStreak: z.number().int(),
     longestCheckInStreak: z.number().int(),
@@ -247,18 +191,6 @@ export const UnfollowUserOutputSchema = z.object({
     isFollowing: z.boolean(),
     followerCount: z.number().int(),
     followingCount: z.number().int(),
-});
-
-// ─── getFollowStats ───────────────────────────────────────────────────────────
-export const GetFollowStatsInputSchema = z.object({
-    userId: z.uuidv7(),
-    viewerId: z.uuidv7().optional(),
-});
-
-export const GetFollowStatsOutputSchema = z.object({
-    followerCount: z.number().int(),
-    followingCount: z.number().int(),
-    isFollowing: z.boolean(),
 });
 
 // ─── getFollowers / getFollowing ──────────────────────────────────────────────

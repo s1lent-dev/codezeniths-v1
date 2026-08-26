@@ -6,7 +6,7 @@ import { moduleQueryService } from '@/lib/tanstack/services/module.query-service
 
 export function useProgress() {
     const { data: progress, isLoading: isProgressLoading } = problemQueryService.getProblemProgress();
-    const { data: tags, isLoading: isTagsLoading } = tagQueryService.getTagsFiltered({});
+    const { data: tags, isLoading: isTagsLoading } = tagQueryService.getTags();
     const { data: modules, isLoading: isModulesLoading } = moduleQueryService.getModules();
 
     return {

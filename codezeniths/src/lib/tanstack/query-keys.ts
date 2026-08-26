@@ -3,17 +3,11 @@ export const queryKeys = {
         session: () => ['auth', 'session'] as const,
     },
     user: {
-        profileById: (id?: string) => ['user', 'profile', 'id', id ?? 'me'] as const,
-        profileByUsername: (username: string) => ['user', 'profile', 'username', username] as const,
         settings: (userId?: string) => ['user', 'settings', userId ?? 'me'] as const,
-        socials: () => ['user', 'socials'] as const,
-        avatar: (userId?: string) => ['user', 'avatar', userId ?? 'me'] as const,
         usernameAvailability: (username: string) => ['user', 'availability', 'username', username] as const,
         emailAvailability: (email: string) => ['user', 'availability', 'email', email] as const,
         phoneAvailability: (phone: string) => ['user', 'availability', 'phone', phone] as const,
-        activeStreak: () => ['user', 'activeStreak'] as const,
         streak: (userId?: string) => ['user', 'streak', userId ?? 'me'] as const,
-        followStats: (userId: string) => ['user', 'followStats', userId] as const,
         followers: (userId: string, page?: number) => ['user', 'followers', userId, page ?? 1] as const,
         following: (userId: string, page?: number) => ['user', 'following', userId, page ?? 1] as const,
         profileViews: (userId?: string) => ['user', 'profileViews', userId ?? 'me'] as const,
@@ -25,6 +19,7 @@ export const queryKeys = {
         monthlyActivity: (year?: number, month?: number) =>
             ['user', 'monthlyActivity', year ?? new Date().getUTCFullYear(), month ?? (new Date().getUTCMonth() + 1)] as const,
         profileDetails: (usernameOrId?: string) => ['user', 'profileDetails', usernameOrId ?? 'me'] as const,
+        onboardingProfile: (userId?: string) => ['user', 'onboardingProfile', userId ?? 'me'] as const,
     },
     module: {
         list: () => ['module', 'list'] as const,
@@ -36,13 +31,16 @@ export const queryKeys = {
     topic: {
         single: (idOrSlug: string) => ['topic', 'single', idOrSlug] as const,
         progress: (idOrSlug: string) => ['topic', 'progress', idOrSlug] as const,
+        suggestions: (idOrSlug: string) => ['topic', 'suggestions', idOrSlug] as const,
     },
     tag: {
         list: (filters?: any) => ['tag', 'list', filters] as const,
+        catalogue: (input?: any) => ['tag', 'catalogue', input ?? {}] as const,
+        catalogueInfinite: (input?: any) => ['tag', 'catalogue', 'infinite', input ?? {}] as const,
         overallProgress: () => ['tag', 'overallProgress'] as const,
-        singleProblems: (idOrSlug: string) => ['tag', 'singleProblems', idOrSlug] as const,
         progress: (idOrSlug: string) => ['tag', 'progress', idOrSlug] as const,
         single: (idOrSlug: string) => ['tag', 'single', idOrSlug] as const,
+        suggestions: (idOrSlug: string) => ['tag', 'suggestions', idOrSlug] as const,
         progressByLevel: (userId?: string, moduleSlug?: string) => ['tag', 'progressByLevel', userId ?? 'me', moduleSlug ?? 'all'] as const,
     },
     problem: {
@@ -54,15 +52,15 @@ export const queryKeys = {
     },
     search: {
         query: (collection: string, config: unknown) => ['search', 'query', collection, config] as const,
-        autocomplete: (collection: string, config: unknown) => ['search', 'autocomplete', collection, config] as const,
-        recommendations: (collection: string, config: unknown) => ['search', 'recommendations', collection, config] as const,
         history: (userId?: string) => ['search', 'history', userId ?? 'me'] as const,
         historyInfinite: (filters?: any, limit?: number) => ['search', 'history', 'infinite', filters ?? {}, limit ?? 6] as const,
         historyStats: () => ['search', 'history', 'stats'] as const,
     },
     product: {
         list: (input?: unknown) => ['product', 'list', input ?? {}] as const,
-        single: (idOrSlug: string) => ['product', 'single', idOrSlug] as const,
+    },
+    skill: {
+        list: (filters?: any) => ['skill', 'list', filters ?? {}] as const,
     },
     favourite: {
         info: () => ['favourite', 'info'] as const,
@@ -82,8 +80,8 @@ export const queryKeys = {
     playlist: {
         myList: () => ['playlist', 'my'] as const,
         communityList: (filters?: unknown) => ['playlist', 'community', filters ?? {}] as const,
-        communityInfinite: (filters?: unknown) => ['playlist', 'community', 'infinite', filters ?? {}] as const,
         info: (idOrSlug: string) => ['playlist', 'info', idOrSlug] as const,
+        forProblem: (problemId: string) => ['playlist', 'forProblem', problemId] as const,
     },
     notification: {
         list: (params?: unknown) => ['notifications', params ?? {}] as const,

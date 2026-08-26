@@ -8,8 +8,6 @@ import {
     MarkAllAsReadTRPCOutputSchema,
     UpsertDeviceTokenTRPCInputSchema,
     UpsertDeviceTokenTRPCOutputSchema,
-    RemoveDeviceTokenTRPCInputSchema,
-    RemoveDeviceTokenTRPCOutputSchema,
 } from '@/schemas/trpc';
 
 export const notificationRouter = createTRPCRouter({
@@ -31,10 +29,4 @@ export const notificationRouter = createTRPCRouter({
         .input(UpsertDeviceTokenTRPCInputSchema)
         .output(UpsertDeviceTokenTRPCOutputSchema)
         .mutation(({ ctx, input }) => ctx.controllers.notification.upsertDeviceToken({ ctx, input })),
-
-    removeDeviceToken: protectedProcedure
-        .input(RemoveDeviceTokenTRPCInputSchema)
-        .output(RemoveDeviceTokenTRPCOutputSchema)
-        .mutation(({ ctx, input }) => ctx.controllers.notification.removeDeviceToken({ ctx, input })),
 });
-

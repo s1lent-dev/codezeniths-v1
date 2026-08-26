@@ -145,7 +145,7 @@ export const MobileSidebarSheet = () => {
                                 ACCOUNT
                             </Typography>
                             <div className="space-y-1 flex flex-col gap-[2px]">
-                                <Link href="/settings" onClick={() => setMobileSidebarOpen(false)}>
+                                <Link href="/settings/profile-details" onClick={() => setMobileSidebarOpen(false)}>
                                     <div
                                         className={cn(
                                             'flex items-center gap-4 px-4 py-2.5 rounded-md transition-all duration-200 group',

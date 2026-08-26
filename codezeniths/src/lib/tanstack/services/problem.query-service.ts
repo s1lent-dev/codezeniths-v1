@@ -148,9 +148,10 @@ export function applyOptimisticProblemUpdate(
         status?: 'solved' | 'not_solved';
         favourite?: boolean;
         revisit?: boolean;
+        difficulty?: 'easy' | 'medium' | 'hard';
     }
 ) {
-    const { problemId, status, favourite, revisit } = variables;
+    const { problemId, status, favourite, revisit, difficulty } = variables;
 
     queryClient.setQueriesData({ queryKey: ['problem'] }, (oldData: any) => {
         if (!oldData) return oldData;
@@ -178,12 +179,24 @@ export function applyOptimisticProblemUpdate(
 
             const nextSolved = Math.max(0, oldData.problemsSolvedCount + deltaSolved);
             const nextTotal = oldData.problemsCount || 1;
+
+            const updatedSolvedByDiff = {
+                ...(oldData.problemsSolvedCountByDifficulty || { easy: 0, medium: 0, hard: 0 }),
+            };
+            if (difficulty && deltaSolved !== 0) {
+                updatedSolvedByDiff[difficulty] = Math.max(
+                    0,
+                    (updatedSolvedByDiff[difficulty] || 0) + deltaSolved
+                );
+            }
+
             return {
                 ...oldData,
                 problemsSolvedCount: nextSolved,
                 problemsRevisitCount: Math.max(0, (oldData.problemsRevisitCount || 0) + deltaRevisit),
                 problemNotSolvedCount: Math.max(0, oldData.problemNotSolvedCount - deltaSolved),
                 problemsSolvedPercentage: (nextSolved / nextTotal) * 100,
+                problemsSolvedCountByDifficulty: updatedSolvedByDiff,
             };
         }
 

@@ -18,6 +18,8 @@
     "email:export": "email export --dir src/service/mail/templates",
     "db:seed": "pnpx tsx src/lib/db/seed/seed.ts",
     "search:reindex": "pnpx tsx src/scripts/run-reindex.ts",
+    "search:reindex-problems": "pnpx tsx src/scripts/reindex-problems.ts",
+    "search:reindex-tags": "pnpx tsx src/scripts/reindex-tags.ts",
     "search:reindex-users": "pnpx tsx src/scripts/reindex-users.ts",
     "mq:reset": "pnpx tsx src/scripts/mq-reset.ts",
     "redis:flush": "pnpx tsx src/scripts/flush-redis.ts",

@@ -1,10 +1,6 @@
 import { TRPCContext } from '../trpc/trpc.context';
 import { IUserController } from './interfaces';
 import {
-    GetProfileByIdInputSchema,
-    GetProfileByIdOutputSchema,
-    GetProfileByUsernameInputSchema,
-    GetProfileByUsernameOutputSchema,
     GetSettingsInputSchema,
     GetSettingsOutputSchema,
     UpdateProfileInputSchema,
@@ -19,16 +15,12 @@ import {
     UploadResumeOutputSchema,
     RemoveResumeInputSchema,
     RemoveResumeOutputSchema,
-    GetAvatarInputSchema,
-    GetAvatarOutputSchema,
     CheckUserNameAvailabilityInputSchema,
     CheckUserNameAvailabilityOutputSchema,
     CheckEmailAvailabilityInputSchema,
     CheckEmailAvailabilityOutputSchema,
     CheckPhoneAvailabilityInputSchema,
     CheckPhoneAvailabilityOutputSchema,
-    GetAvatarUploadUrlInputSchema,
-    GetAvatarUploadUrlOutputSchema,
     GetOnboardingProfileInputSchema,
     GetOnboardingProfileOutputSchema,
     UpdateOnboardingStep0InputSchema,
@@ -43,22 +35,16 @@ import {
     ExtractResumeSkillsOutputSchema,
     GetExtractionProgressInputSchema,
     GetExtractionProgressOutputSchema,
-    GetResumeDownloadUrlInputSchema,
-    GetResumeDownloadUrlOutputSchema,
     GetUserMonthlyActivityInputSchema,
     GetUserMonthlyActivityOutputSchema,
-    GetActiveStreakTRPCOutputSchema,
     GetUserStreakTRPCInputSchema,
     GetUserStreakTRPCOutputSchema,
     RecordDailyCheckInTRPCInputSchema,
     RecordDailyCheckInTRPCOutputSchema,
-
     FollowUserTRPCInputSchema,
     FollowUserTRPCOutputSchema,
     UnfollowUserTRPCInputSchema,
     UnfollowUserTRPCOutputSchema,
-    GetFollowStatsTRPCInputSchema,
-    GetFollowStatsTRPCOutputSchema,
     GetFollowersTRPCInputSchema,
     GetFollowersTRPCOutputSchema,
     GetFollowingTRPCInputSchema,
@@ -95,154 +81,6 @@ import { formatUserProfile, formatUserProfiles } from '@/utils/user.formatter';
 import { searchProducer } from '@/lib/mq';
 
 export class UserController implements IUserController {
-
-    async getProfileById({
-        ctx,
-        input,
-    }: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetProfileByIdInputSchema>;
-    }): Promise<z.infer<typeof GetProfileByIdOutputSchema>> {
-        logger.info('Executing getProfileById controller', { input });
-        
-        const targetUserId = input.userId || ctx.user?.id;
-        if (!targetUserId) {
-            logger.warn('Unauthorized attempt to get profile by id');
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
-        }
-
-        try {
-            const user = await formatUserProfile(await ctx.queries.user.getUserProfile({ id: targetUserId }));
-            
-            const currentYear = new Date().getFullYear();
-            const startDate = new Date(Date.UTC(currentYear, 0, 1));
-            const endDate = new Date();
-
-            const activity = await ctx.queries.user.getUserActivity({
-                userId: targetUserId,
-                startDate,
-                endDate,
-            });
-
-            const socials = await ctx.queries.user.getUserSocials({ userId: targetUserId });
-
-            // TODO: [Redis] Cache the aggregated profile data to Redis
-
-            // Asynchronous non-blocking profile view recording
-            if (ctx.user?.id && ctx.user.id !== targetUserId) {
-                void ctx.queries.user.recordProfileView({
-                    viewedUserId: targetUserId,
-                    viewerId: ctx.user.id,
-                }).catch((err) => logger.error('Failed async profile view recording', { err, targetUserId }));
-            }
-
-            return {
-                profile: {
-                    id: user.id,
-                    username: user.username ?? null,
-                    firstName: user.firstName ?? null,
-                    lastName: user.lastName ?? null,
-                    name: user.name,
-                    email: user.email,
-                    image: user.image ?? null,
-                    resume: user.resume ?? null,
-                    about: user.about ?? null,
-                    location: user.location ?? null,
-                    gender: user.gender ?? null,
-                    isOnboardingComplete: user.isOnboardingComplete,
-                    onBoardingStep: user.onBoardingStep ?? 0,
-                    createdAt: user.createdAt,
-                },
-                activity,
-                socials,
-                skills: user.userSkills ?? [],
-            };
-        } catch (error: any) {
-            logger.error('Error in getProfileById controller', { error, userId: targetUserId });
-            if (error instanceof TRPCError) throw error;
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: error.message || 'Something went wrong while retrieving profile.',
-                cause: error,
-            });
-        }
-    }
-
-    async getProfileByUsername({
-        ctx,
-        input,
-    }: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetProfileByUsernameInputSchema>;
-    }): Promise<z.infer<typeof GetProfileByUsernameOutputSchema>> {
-        logger.info('Executing getProfileByUsername controller', { input });
-        const { username } = input;
-
-        try {
-            const user = await formatUserProfile(await ctx.queries.user.getUserProfile({ username }));
-
-            const preferences = await ctx.queries.user.getUserPreferences({ userId: user.id });
-
-            const isPrivate = preferences.profileVisibility === 'private';
-            const isSelf = ctx.user?.id === user.id;
-
-            if (isPrivate && !isSelf) {
-                logger.info('Blocked private profile view request', { username, viewerId: ctx.user?.id });
-                return {
-                    status: 'private',
-                    message: 'User account is private',
-                };
-            }
-
-            const currentYear = new Date().getFullYear();
-            const startDate = new Date(Date.UTC(currentYear, 0, 1));
-            const endDate = new Date();
-
-            const activity = await ctx.queries.user.getUserActivity({
-                userId: user.id,
-                startDate,
-                endDate,
-            });
-
-            const socials = await ctx.queries.user.getUserSocials({ userId: user.id });
-
-            // TODO: [Redis] Cache visible profile structure
-
-            return {
-                status: 'visible',
-                profile: {
-                    id: user.id,
-                    username: user.username ?? null,
-                    firstName: user.firstName ?? null,
-                    lastName: user.lastName ?? null,
-                    name: user.name,
-                    email: user.email,
-                    image: user.image ?? null,
-                    resume: user.resume ?? null,
-                    about: user.about ?? null,
-                    location: user.location ?? null,
-                    gender: user.gender ?? null,
-                    isOnboardingComplete: user.isOnboardingComplete,
-                    onBoardingStep: user.onBoardingStep ?? 0,
-                    createdAt: user.createdAt,
-                },
-                activity,
-                socials,
-                skills: user.userSkills ?? [],
-            };
-        } catch (error: any) {
-            logger.error('Error in getProfileByUsername controller', { error, username });
-            if (error instanceof TRPCError) throw error;
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: error.message || 'Something went wrong while retrieving profile by username.',
-                cause: error,
-            });
-        }
-    }
 
     async getSettings({
         ctx,
@@ -794,41 +632,6 @@ export class UserController implements IUserController {
         }
     }
 
-    async getAvatar({
-        ctx,
-        input,
-    }: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetAvatarInputSchema>;
-    }): Promise<z.infer<typeof GetAvatarOutputSchema>> {
-        logger.info('Executing getAvatar controller', { input });
-        
-        const targetUserId = input.userId || ctx.user?.id;
-        if (!targetUserId) {
-            logger.warn('Unauthorized attempt to get avatar');
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
-        }
-
-        try {
-            const user = await formatUserProfile(await ctx.queries.user.getUserProfile({ id: targetUserId }));
-
-            return {
-                image: user.image ?? null,
-            };
-        } catch (error: any) {
-            logger.error('Error in getAvatar controller', { error, userId: targetUserId });
-            if (error instanceof TRPCError) throw error;
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: error.message || 'Something went wrong while retrieving avatar.',
-                cause: error,
-            });
-        }
-    }
-
     async checkUserNameAvailability({
         ctx,
         input,
@@ -908,47 +711,6 @@ export class UserController implements IUserController {
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: 'Error checking phone availability',
-                cause: error,
-            });
-        }
-    }
-
-    async getAvatarUploadUrl({
-        ctx,
-        input,
-    }: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetAvatarUploadUrlInputSchema>;
-    }): Promise<z.infer<typeof GetAvatarUploadUrlOutputSchema>> {
-        logger.info('Executing getAvatarUploadUrl controller', { input });
-
-        const userId = ctx.user?.id;
-        if (!userId) {
-            logger.warn('Unauthorized attempt to get avatar upload url');
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
-        }
-
-        try {
-            const extension = input.contentType.split('/')[1] || 'png';
-            const key = `avatars/${userId}/${Date.now()}.${extension}`;
-
-            const uploadUrl = await storageService.getPresignedUploadUrl(key, 900, input.contentType);
-            const publicUrl = `${ENV_CONFIG.R2_ENDPOINT}/${ENV_CONFIG.R2_BUCKET_NAME}/${key}`;
-
-            return {
-                uploadUrl,
-                key,
-                publicUrl,
-            };
-        } catch (error: any) {
-            logger.error('Error in getAvatarUploadUrl controller', { error, userId });
-            if (error instanceof TRPCError) throw error;
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: 'Failed to generate avatar upload URL',
                 cause: error,
             });
         }
@@ -1417,33 +1179,6 @@ export class UserController implements IUserController {
         }
     }
 
-    async getResumeDownloadUrl({
-        ctx,
-        input,
-    }: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetResumeDownloadUrlInputSchema>;
-    }): Promise<z.infer<typeof GetResumeDownloadUrlOutputSchema>> {
-        const userId = input.userId || ctx.user?.id;
-        if (!userId) {
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
-        }
-        try {
-            const user = await ctx.queries.user.getUserProfile({ id: userId });
-            if (!user?.resume) {
-                return { url: null };
-            }
-            const downloadUrl = await storageService.getPresignedDownloadUrl(user.resume);
-            return { url: downloadUrl };
-        } catch (error: any) {
-            logger.error('Error in getResumeDownloadUrl controller', { error: error?.message, userId });
-            return { url: null };
-        }
-    }
-
     async getUserMonthlyActivity({
         ctx,
         input,
@@ -1513,45 +1248,6 @@ export class UserController implements IUserController {
             userCreatedAt: userCreatedAtIso,
             activities: resultActivities,
         };
-    }
-
-    async getActiveStreak({
-        ctx,
-    }: {
-        ctx: TRPCContext;
-    }): Promise<z.infer<typeof GetActiveStreakTRPCOutputSchema>> {
-        logger.info('Executing getActiveStreak controller', { userId: ctx.user?.id });
-        const userId = ctx.user?.id;
-        if (!userId) {
-            return {
-                currentStreak: 0,
-                longestStreak: 0,
-                lastProblemSolvedDate: null,
-                totalActiveDays: 0,
-                currentCheckInStreak: 0,
-                longestCheckInStreak: 0,
-                lastActiveDate: null,
-                bestStreak: 0,
-                activeDaysCount: 0,
-            };
-        }
-
-        try {
-            return await ctx.queries.user.getActiveStreak({ userId });
-        } catch (error: any) {
-            logger.error('Error in getActiveStreak controller', { error, userId });
-            return {
-                currentStreak: 0,
-                longestStreak: 0,
-                lastProblemSolvedDate: null,
-                totalActiveDays: 0,
-                currentCheckInStreak: 0,
-                longestCheckInStreak: 0,
-                lastActiveDate: null,
-                bestStreak: 0,
-                activeDaysCount: 0,
-            };
-        }
     }
 
     async getUserStreak({
@@ -1673,24 +1369,6 @@ export class UserController implements IUserController {
                 code: 'INTERNAL_SERVER_ERROR',
                 message: error?.message || 'Failed to unfollow user.',
             });
-        }
-    }
-
-    async getFollowStats({
-        ctx,
-        input,
-    }: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetFollowStatsTRPCInputSchema>;
-    }): Promise<z.infer<typeof GetFollowStatsTRPCOutputSchema>> {
-        try {
-            return await ctx.queries.user.getFollowStats({
-                userId: input.userId,
-                viewerId: ctx.user?.id,
-            });
-        } catch (error: any) {
-            logger.error('Error in getFollowStats controller', { error: error?.message, userId: input.userId });
-            return { followerCount: 0, followingCount: 0, isFollowing: false };
         }
     }
 

@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
+import { queryKeys } from '../query-keys';
 import { CacheInvalidationService } from '../cache-invalidation.service';
 import type { ISkillQueryService } from '../interfaces';
 import {
@@ -16,7 +17,7 @@ export class SkillQueryService implements ISkillQueryService {
     getSkills(input?: z.infer<typeof GetSkillsInputSchema>) {
         const validatedInput = input ? GetSkillsInputSchema.parse(input) : undefined;
         return useQuery({
-            queryKey: ['skill', 'list', validatedInput],
+            queryKey: queryKeys.skill.list(validatedInput),
             queryFn: async () => {
                 const raw = await trpcClient.skill.getSkills.query(validatedInput || {});
                 return GetSkillsOutputSchema.parse(raw);

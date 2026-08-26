@@ -56,8 +56,12 @@ export const SearchTagIndexSchema = z.object({
     description: z.string().nullable().optional(),
     level: z.string().nullable().optional(),
     module: z.string().nullable().optional(),
+    moduleSlug: z.string().nullable().optional(),
+    moduleId: z.string().nullable().optional(),
+    problemIds: z.array(z.string()).optional(),
     problemsCount: z.number().optional(),
     phoneticName: z.string().optional(),
+    createdAt: z.coerce.date().or(z.string()).optional(),
 });
 
 

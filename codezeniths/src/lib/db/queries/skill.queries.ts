@@ -6,8 +6,6 @@ import { ErrorCode } from '@codezeniths/service/error/error.types';
 import {
     GetSkillsInputSchema,
     GetSkillsOutputSchema,
-    GetSingleSkillInputSchema,
-    GetSingleSkillOutputSchema,
     CreateSkillInputSchema,
     CreateSkillOutputSchema,
 } from '@codezeniths/schemas/db';
@@ -20,23 +18,6 @@ export class SkillQueries implements ISkillQueries {
         .handler(async () => {
             logger.info('Executing getSkills query');
             return await prisma.skill.findMany();
-        })
-        .build();
-
-    getSingleSkill = qRPC()
-        .input(GetSingleSkillInputSchema)
-        .output(GetSingleSkillOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing getSingleSkill query', { payload });
-            const skill = await prisma.skill.findUnique({
-                where: { slug: payload.slug },
-            });
-            if (!skill) {
-                throw new AppErrorBuilder('Skill not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
-            }
-            return skill;
         })
         .build();
 

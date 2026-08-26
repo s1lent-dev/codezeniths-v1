@@ -178,7 +178,7 @@ export function Sidebar({ className }: { className?: string }) {
 
                             <div className="space-y-1.5 flex flex-col gap-[4px]">
                                 {/* Settings */}
-                                <Link href="/settings">
+                                <Link href="/settings/profile-details">
                                     {isDesktopSidebarCollapsed ? (
                                         <Tooltip>
                                             <TooltipTrigger asChild>

@@ -17,6 +17,8 @@ import { Card } from '@codezeniths/modules';
 import { UserProfileDetails } from './profile-edit-form.utils';
 import { Edit3 } from 'lucide-react';
 
+import { motion } from 'motion/react';
+
 export interface ProfileHeroCardProps {
     profile?: UserProfileDetails | null;
     isLoading?: boolean;
@@ -30,19 +32,51 @@ export const ProfileHeroCard: React.FC<ProfileHeroCardProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <Card className="w-full p-4.5 xs:p-5 sm:p-7 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs animate-pulse">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6">
+            <Card className="w-full p-4.5 xs:p-5 sm:p-7 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs relative overflow-hidden select-none font-sans group">
+                {/* Sweeping Shimmer Beam */}
+                <motion.div
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{
+                        duration: 1.8,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        repeatDelay: 0.2,
+                    }}
+                    className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                />
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6 relative z-10">
                     <div className="flex items-center gap-4 xs:gap-5 sm:gap-6 min-w-0">
-                        <div className="size-16 xs:size-18 sm:size-20 rounded-full bg-secondary/20 shrink-0" />
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.8, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                            className="size-16 xs:size-18 sm:size-20 rounded-full bg-primary/15 dark:bg-primary/25 shrink-0"
+                        />
                         <div className="space-y-2.5 min-w-0 flex-1">
-                            <div className="h-6 w-36 xs:w-48 rounded bg-secondary/25" />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                                className="h-6 w-36 xs:w-48 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                            />
                             <div className="flex items-center gap-2">
-                                <div className="h-4 w-24 rounded-full bg-primary/15" />
-                                <div className="h-4 w-36 rounded-full bg-secondary/15" />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                                    className="h-4 w-24 rounded-full bg-primary/15 dark:bg-primary/25"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 }}
+                                    className="h-4 w-36 rounded-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
                             </div>
                         </div>
                     </div>
-                    <div className="h-10 w-full sm:w-32 rounded-sm bg-primary/15 shrink-0" />
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.8, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                        className="h-10 w-full sm:w-32 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                    />
                 </div>
             </Card>
         );

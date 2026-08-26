@@ -1,17 +1,33 @@
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { Code2 } from 'lucide-react';
+import { Loader } from '@codezeniths/components';
+
+export const metadata = {
+    title: 'Playground | Codezeniths',
+    description: 'Instant multi-language code execution sandbox, multi-file workspaces, and shareable snippets.',
+};
 
 const UnderConstructionSection = dynamic(
     () => import('@codezeniths/features').then((mod) => mod.UnderConstructionSection),
     {
-        loading: () => <div className="w-full h-96 rounded-lg bg-foreground-light dark:bg-foreground-dark animate-pulse" />,
+        loading: () => (
+            <div className="flex h-full min-h-[60vh] w-full items-center justify-center">
+                <Loader />
+            </div>
+        ),
     }
 );
 
 export default function PlaygroundPage() {
     return (
-        <Suspense fallback={<div className="w-full h-96 rounded-lg bg-foreground-light dark:bg-foreground-dark animate-pulse" />}>
+        <Suspense
+            fallback={
+                <div className="flex h-full min-h-[60vh] w-full items-center justify-center">
+                    <Loader />
+                </div>
+            }
+        >
             <UnderConstructionSection
                 badgeIcon={<Code2 className="size-3.5 text-primary" />}
                 badgeText="Multi-Language Sandbox Coming Soon"

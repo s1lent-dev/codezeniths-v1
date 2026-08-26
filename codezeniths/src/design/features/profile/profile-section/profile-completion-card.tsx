@@ -81,7 +81,7 @@ export const ProfileCompletionCard: React.FC<ProfileCompletionCardProps> = ({
         completion;
 
     return (
-        <Link href="/settings" className="block group font-sans">
+        <Link href="/settings/profile-details" className="block group font-sans">
             <div
                 className={cn(
                     'rounded-md bg-foreground-light dark:bg-foreground-dark p-5 shadow-xs border border-secondary/15 hover:border-secondary/35 transition-all duration-300 relative overflow-hidden cursor-pointer hover:bg-linear-to-r hover:from-primary/5 hover:to-transparent flex flex-col gap-3.5',

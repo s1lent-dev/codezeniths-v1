@@ -1,20 +1,5 @@
 import { z } from 'zod';
-
-export const AutocompleteTRPCInputSchema = z.object({
-  collection: z.string().default('all'),
-  prefix: z.string().min(1),
-  limit: z.number().int().min(1).max(50).default(10),
-});
-
-export const AutocompleteTRPCOutputSchema = z.array(z.string());
-
-export const MoreLikeThisTRPCInputSchema = z.object({
-  collection: z.string(),
-  id: z.string(),
-  limit: z.number().int().min(1).max(20).default(5),
-});
-
-export const MoreLikeThisTRPCOutputSchema = z.array(z.any());
+import { SearchCollectionSchema, UserSearchHistorySchema } from '@codezeniths/schemas/db';
 
 export const SearchTRPCInputSchema = z.object({
   collection: z.string().default('all'),
@@ -47,8 +32,6 @@ export const SearchTRPCOutputSchema = z.object({
 });
 
 // ─── Search History TRPC Schemas ──────────────────────────────────────────────
-
-import { SearchCollectionSchema, UserSearchHistorySchema } from '@codezeniths/schemas/db';
 
 export const RecordSearchSelectionTRPCInputSchema = z.object({
   collection: SearchCollectionSchema,

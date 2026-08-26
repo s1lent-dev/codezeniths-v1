@@ -5,6 +5,8 @@ import { Eye, ListMusic, TrendingUp, Award } from 'lucide-react';
 import { Typography } from '@codezeniths/components';
 import { cn } from '@codezeniths/design/cn';
 
+import { motion } from 'motion/react';
+
 export interface CommunityStatsProps {
     totalViews?: number;
     pastWeekViews?: number;
@@ -38,13 +40,21 @@ export const CommunityStatsCard: React.FC<CommunityStatsProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <div className={cn('space-y-3 w-full animate-pulse', className)}>
-                <div className="h-4 w-32 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
+            <div className={cn('space-y-3 w-full select-none', className)}>
+                <motion.div
+                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                    className="h-4 w-32 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
+                />
                 <div className="grid grid-cols-2 gap-2.5">
-                    <div className="h-16 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                    <div className="h-16 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                    <div className="h-16 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                    <div className="h-16 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
+                    {[0, 1, 2, 3].map((idx) => (
+                        <motion.div
+                            key={idx}
+                            animate={{ opacity: [0.35, 0.8, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.05 }}
+                            className="h-16 bg-foreground-light-shade2 dark:bg-foreground-dark-shade1 rounded-md"
+                        />
+                    ))}
                 </div>
             </div>
         );

@@ -7,6 +7,8 @@ import { Button, ButtonVariant, ButtonSize } from '@codezeniths/components';
 import { Typography } from '@codezeniths/components';
 import { cn } from '@codezeniths/design/cn';
 
+import { motion } from 'motion/react';
+
 export interface FollowStatsCTAProps {
     followerCount?: number;
     followingCount?: number;
@@ -38,9 +40,17 @@ export const FollowStatsCTA: React.FC<FollowStatsCTAProps> = ({
 
     if (isLoading) {
         return (
-            <div className={cn('space-y-3 w-full animate-pulse', className)}>
-                <div className="h-4 w-40 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                <div className="h-9 w-full bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
+            <div className={cn('space-y-3 w-full select-none', className)}>
+                <motion.div
+                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                    className="h-4 w-40 bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60 rounded-md"
+                />
+                <motion.div
+                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                    className="h-9 w-full bg-primary/10 dark:bg-primary/20 rounded-md"
+                />
             </div>
         );
     }
@@ -79,7 +89,7 @@ export const FollowStatsCTA: React.FC<FollowStatsCTAProps> = ({
             {/* Action CTA Button */}
             <div className="w-full">
                 {isOwnProfile ? (
-                    <Link href="/settings" className="block w-full">
+                    <Link href="/settings/profile-details" className="block w-full">
                         <Button
                             variant={ButtonVariant.OUTLINE}
                             className="w-full rounded-sm justify-center gap-2 border-none bg-primary/10 dark:bg-primary/10 hover:bg-primary/15 dark:hover:bg-primary/15 text-heading-light dark:text-heading-dark font-medium transition-colors"

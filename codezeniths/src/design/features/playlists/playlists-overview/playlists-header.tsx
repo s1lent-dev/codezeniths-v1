@@ -70,50 +70,59 @@ export const PlaylistsHeader: React.FC<PlaylistsHeaderProps> = ({
 
                 {/* Right Quota Tracker Badge & Create Button */}
                 <div className="flex items-center gap-3 shrink-0 z-10">
-                    {/* Quota Badge */}
-                    <Badge
-                        variant="default"
-                        className={cn(
-                            'px-3 py-1.5 rounded-full text-xs font-semibold border-none flex items-center gap-1.5',
-                            isLimitReached
-                                ? 'bg-destructive/10 text-destructive'
-                                : 'bg-primary/10 text-primary'
-                        )}
-                    >
-                        <span className="size-1.5 rounded-full bg-current" />
-                        <span>
-                            {myPlaylistsCount} / {maxLimit} Created
-                        </span>
-                    </Badge>
-
-                    {/* Create Button with Tooltip when at max limit */}
-                    {isLimitReached ? (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <div>
-                                    <Button
-                                        variant={ButtonVariant.DEFAULT}
-                                        disabled
-                                        className="rounded-md font-semibold gap-1.5 opacity-60 cursor-not-allowed"
-                                    >
-                                        <Plus className="size-4" />
-                                        <span>Create Playlist</span>
-                                    </Button>
-                                </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                Maximum limit of {maxLimit} playlists reached for this account.
-                            </TooltipContent>
-                        </Tooltip>
+                    {isLoading ? (
+                        <>
+                            <div className="h-7 w-28 rounded-full bg-primary/10 animate-pulse" />
+                            <div className="h-9 w-32 rounded-md bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 animate-pulse" />
+                        </>
                     ) : (
-                        <Button
-                            variant={ButtonVariant.DEFAULT}
-                            onClick={onCreateClick}
-                            className="rounded-md bg-primary hover:bg-primary-shade2 text-white font-semibold gap-1.5 shadow-xs transition-colors cursor-pointer"
-                        >
-                            <Plus className="size-4" />
-                            <span>Create Playlist</span>
-                        </Button>
+                        <>
+                            {/* Quota Badge */}
+                            <Badge
+                                variant="default"
+                                className={cn(
+                                    'px-3 py-1.5 rounded-full text-xs font-semibold border-none flex items-center gap-1.5',
+                                    isLimitReached
+                                        ? 'bg-destructive/10 text-destructive'
+                                        : 'bg-primary/10 text-primary'
+                                )}
+                            >
+                                <span className="size-1.5 rounded-full bg-current" />
+                                <span>
+                                    {myPlaylistsCount} / {maxLimit} Created
+                                </span>
+                            </Badge>
+
+                            {/* Create Button with Tooltip when at max limit */}
+                            {isLimitReached ? (
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div>
+                                            <Button
+                                                variant={ButtonVariant.DEFAULT}
+                                                disabled
+                                                className="rounded-md font-semibold gap-1.5 opacity-60 cursor-not-allowed"
+                                            >
+                                                <Plus className="size-4" />
+                                                <span>Create Playlist</span>
+                                            </Button>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        Maximum limit of {maxLimit} playlists reached for this account.
+                                    </TooltipContent>
+                                </Tooltip>
+                            ) : (
+                                <Button
+                                    variant={ButtonVariant.DEFAULT}
+                                    onClick={onCreateClick}
+                                    className="rounded-md bg-primary hover:bg-primary-shade2 text-white font-semibold gap-1.5 shadow-xs transition-colors cursor-pointer"
+                                >
+                                    <Plus className="size-4" />
+                                    <span>Create Playlist</span>
+                                </Button>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

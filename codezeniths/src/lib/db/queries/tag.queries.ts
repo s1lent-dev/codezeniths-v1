@@ -7,14 +7,12 @@ import { AppErrorBuilder } from '@codezeniths/service/error/error';
 import { ErrorCode } from '@codezeniths/service/error/error.types';
 import {
     GetTagsOutputSchema,
-    GetTagsFilteredInputSchema,
-    GetTagsFilteredOutputSchema,
-    GetSingleTagProblemsInputSchema,
-    GetSingleTagProblemsOutputSchema,
-    GetSingleTagProblemProgressInputSchema,
-    GetSingleTagProblemProgressOutputSchema,
+    GetSingleTagProgressInputSchema,
+    GetSingleTagProgressOutputSchema,
     GetSingleTagInputSchema,
     GetSingleTagOutputSchema,
+    GetTagSuggestionsInputSchema,
+    GetTagSuggestionsOutputSchema,
     ToggleTagBookmarkInputSchema,
     ToggleTagBookmarkOutputSchema,
     GetUserTagProgressByLevelInputSchema,
@@ -36,6 +34,30 @@ const tagsL1Cache = createCache<z.infer<typeof GetTagsOutputSchema>>({
     strategy: 'adaptive',
     maxSize: 10,
     ttl: 1000 * 60 * 15, // 15 minutes in RAM
+});
+
+// Multi-Tier Caches for Semantic Tag Suggestions
+const tagSuggestionsCache = redisService.cache.createStore<any>({
+    namespace: 'tag_suggestions',
+    ttlSeconds: 86400, // 24 hours
+});
+
+const tagSuggestionsL1Cache = createCache<any>({
+    strategy: 'adaptive',
+    maxSize: 100,
+    ttl: 1000 * 60 * 30, // 30 minutes in RAM
+});
+
+// Multi-Tier Caches for Tag Difficulty Totals
+const tagDifficultyTotalsCache = redisService.cache.createStore<any>({
+    namespace: 'tag_difficulty_totals',
+    ttlSeconds: 86400, // 24 hours
+});
+
+const tagDifficultyTotalsL1Cache = createCache<any>({
+    strategy: 'adaptive',
+    maxSize: 100,
+    ttl: 1000 * 60 * 30, // 30 minutes in RAM
 });
 
 export class TagQueries implements ITagQueries {
@@ -81,308 +103,6 @@ export class TagQueries implements ITagQueries {
         })
         .build();
 
-    getTagsFiltered = qRPC()
-        .input(GetTagsFilteredInputSchema)
-        .output(GetTagsFilteredOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing getTagsFiltered query', { payload });
-            const { userId, filters, sorting } = payload;
-
-            const where = buildTagsWhere(filters || {});
-            const orderBy = buildTagsOrderBy(sorting);
-
-            const tags = await prisma.tag.findMany({
-                where,
-                orderBy,
-                include: {
-                    module: {
-                        select: {
-                            title: true,
-                            slug: true,
-                        },
-                    },
-                    problems: {
-                        select: {
-                            problemId: true,
-                        },
-                    },
-                },
-            });
-
-            let solvedProblemIds = new Set<string>();
-            let bookmarkedTagIds = new Set<string>();
-            if (userId) {
-                const [userSolved, userBookmarks] = await Promise.all([
-                    prisma.problemProgress.findMany({
-                        where: {
-                            userId,
-                            status: 'solved',
-                        },
-                        select: {
-                            problemId: true,
-                        },
-                    }),
-                    prisma.tagBookmark.findMany({
-                        where: {
-                            userId,
-                            tagId: { in: tags.map((t) => t.id) },
-                        },
-                        select: {
-                            tagId: true,
-                        },
-                    }),
-                ]);
-                solvedProblemIds = new Set(userSolved.map((p) => p.problemId));
-                bookmarkedTagIds = new Set(userBookmarks.map((b) => b.tagId));
-            }
-
-            return tags.map((tag) => {
-                const problemsCount = tag.problems.length;
-                const problemsSolvedCount = tag.problems.filter((p) => solvedProblemIds.has(p.problemId)).length;
-                const problemsSolvedPercentage =
-                    problemsCount > 0
-                        ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2))
-                        : 0;
-
-                return {
-                    id: tag.id,
-                    title: tag.name,
-                    slug: tag.slug,
-                    description: tag.description,
-                    level: tag.level,
-                    module: tag.module ? { title: tag.module.title, slug: tag.module.slug } : undefined,
-                    problemsCount,
-                    problemsSolvedCount,
-                    problemsSolvedPercentage,
-                    isBookmarked: bookmarkedTagIds.has(tag.id),
-                    createdAt: tag.createdAt,
-                };
-            });
-        })
-        .build();
-
-
-
-    getSingleTagProblems = qRPC()
-        .input(GetSingleTagProblemsInputSchema)
-        .output(GetSingleTagProblemsOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing getSingleTagProblems query', { payload });
-            const { id, slug, userId } = payload;
-
-            const userExists = await prisma.user.findUnique({
-                where: { id: userId },
-            });
-            if (!userExists) {
-                logger.warn('User not found while getting single tag problems', { userId });
-                throw new AppErrorBuilder('User not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
-            }
-
-            const tag = await prisma.tag.findFirst({
-                where: {
-                    OR: [
-                        id ? { id } : {},
-                        slug ? { slug } : {},
-                    ].filter((item) => Object.keys(item).length > 0),
-                },
-                include: {
-                    problems: {
-                        include: {
-                            problem: {
-                                include: {
-                                    tags: {
-                                        include: {
-                                            tag: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            });
-
-            if (!tag) {
-                logger.warn('Tag not found', { id, slug });
-                throw new AppErrorBuilder('Tag not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
-            }
-
-            const problems = tag.problems.map((pt) => pt.problem).filter(Boolean);
-            const problemsCount = problems.length;
-            const problemIds = problems.map((p) => p.id);
-
-            const userProgress = await prisma.problemProgress.findMany({
-                where: {
-                    userId,
-                    ...(problemIds.length <= 100 ? { problemId: { in: problemIds } } : {}),
-                },
-                select: {
-                    problemId: true,
-                    status: true,
-                    favourite: true,
-                },
-            });
-
-            const progressMap = new Map(
-                userProgress.map((p) => [p.problemId, { status: p.status, favourite: p.favourite }])
-            );
-
-            let problemsSolvedCount = 0;
-
-            const mappedProblems = problems.map((problem) => {
-                const progress = progressMap.get(problem.id);
-                const status = progress?.status || 'not_solved';
-                const favourite = progress?.favourite ?? false;
-
-                if (status === 'solved') {
-                    problemsSolvedCount++;
-                }
-
-                return {
-                    id: problem.id,
-                    title: problem.title,
-                    slug: problem.slug,
-                    difficulty: problem.difficulty,
-                    order: problem.order,
-                    articleUrl: problem.articleUrl ?? null,
-                    problemUrl: problem.problemUrl ?? null,
-                    favouriteCount: problem.favouriteCount ?? 0,
-                    status,
-                    favourite,
-                    tags: problem.tags.map((pt) => ({
-                        id: pt.tag.id,
-                        name: pt.tag.name,
-                        slug: pt.tag.slug,
-                    })),
-                };
-            });
-
-            mappedProblems.sort((a, b) => a.order - b.order);
-
-            const problemsSolvedPercentage =
-                problemsCount > 0
-                    ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2))
-                    : 0;
-
-            return {
-                id: tag.id,
-                title: tag.name,
-                slug: tag.slug,
-                description: tag.description,
-                level: tag.level,
-                problemsCount,
-                problemsSolvedCount,
-                problemsSolvedPercentage,
-                problems: mappedProblems,
-            };
-        })
-        .build();
-
-    getSingleTagProblemProgress = qRPC()
-        .input(GetSingleTagProblemProgressInputSchema)
-        .output(GetSingleTagProblemProgressOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing getSingleTagProblemProgress query', { payload });
-            const { tagId, tagSlug, userId } = payload;
-
-            const userExists = await prisma.user.findUnique({
-                where: { id: userId },
-            });
-            if (!userExists) {
-                logger.warn('User not found while getting tag progress', { userId });
-                throw new AppErrorBuilder('User not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
-            }
-
-            const tag = await prisma.tag.findFirst({
-                where: {
-                    OR: [
-                        tagId ? { id: tagId } : {},
-                        tagSlug ? { slug: tagSlug } : {},
-                    ].filter((item) => Object.keys(item).length > 0),
-                },
-            });
-
-            if (!tag) {
-                logger.warn('Tag not found for progress calculation', { tagId, tagSlug });
-                throw new AppErrorBuilder('Tag not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
-            }
-
-            const tagProblemsRelation = await prisma.problemTag.findMany({
-                where: {
-                    tagId: tag.id,
-                },
-                include: {
-                    problem: {
-                        select: {
-                            id: true,
-                            difficulty: true,
-                        },
-                    },
-                },
-            });
-
-            const allProblems = tagProblemsRelation.map((pt) => pt.problem).filter(Boolean);
-            const allProblemIds = allProblems.map((p) => p.id);
-
-            const userProgress = await prisma.problemProgress.findMany({
-                where: {
-                    userId,
-                    ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
-                },
-                select: {
-                    status: true,
-                    revisit: true,
-                    problem: {
-                        select: {
-                            id: true,
-                            difficulty: true,
-                        },
-                    },
-                },
-            });
-
-            const problemsCount = allProblems.length;
-            const problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-            const problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
-            const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
-            const problemsSolvedPercentage = problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
-
-            const solvedProgress = userProgress.filter((p) => p.status === 'solved' && p.problem);
-
-            const problemsCountByDifficultyRaw = countBy(allProblems, (p) => p.difficulty);
-            const problemsCountByDifficulty = {
-                easy: problemsCountByDifficultyRaw.easy || 0,
-                medium: problemsCountByDifficultyRaw.medium || 0,
-                hard: problemsCountByDifficultyRaw.hard || 0,
-            };
-
-            const problemsSolvedCountByDifficultyRaw = countBy(solvedProgress, (p) => p.problem!.difficulty);
-            const problemsSolvedCountByDifficulty = {
-                easy: problemsSolvedCountByDifficultyRaw.easy || 0,
-                medium: problemsSolvedCountByDifficultyRaw.medium || 0,
-                hard: problemsSolvedCountByDifficultyRaw.hard || 0,
-            };
-
-            return {
-                problemsCount,
-                problemsSolvedCount,
-                problemsRevisitCount,
-                problemNotSolvedCount,
-                problemsSolvedPercentage,
-                problemsCountByDifficulty,
-                problemsSolvedCountByDifficulty,
-            };
-        })
-        .build();
-
     getSingleTag = qRPC()
         .input(GetSingleTagInputSchema)
         .output(GetSingleTagOutputSchema)
@@ -397,52 +117,105 @@ export class TagQueries implements ITagQueries {
                         slug ? { slug } : {},
                     ].filter((item) => Object.keys(item).length > 0),
                 },
-                include: {
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    description: true,
+                    level: true,
                     module: {
                         select: {
                             title: true,
                             slug: true,
                         },
                     },
-                    problems: {
-                        include: {
-                            problem: {
-                                select: {
-                                    id: true,
-                                    difficulty: true,
-                                },
-                            },
+                    _count: {
+                        select: {
+                            problems: true,
                         },
                     },
                 },
             });
 
             if (!tag) {
-                logger.warn('Tag not found in getSingleTag', { id, slug });
+                logger.warn('Tag not found', { id, slug });
                 throw new AppErrorBuilder('Tag not found')
                     .setCode(ErrorCode.NOT_FOUND)
                     .build();
             }
 
-            const allProblems = tag.problems.map((pt) => pt.problem).filter(Boolean);
-            const problemsCount = allProblems.length;
-            const allProblemIds = allProblems.map((p) => p.id);
-
-            let problemsSolvedCount = 0;
-            let problemsRevisitCount = 0;
-            let solvedProgress: typeof userProgress = [];
-
-            let userProgress: Array<{ status: string; revisit: boolean; problemId: string; problem: { id: string; difficulty: any } | null }> = [];
+            let isBookmarked = false;
             if (userId) {
-                userProgress = await prisma.problemProgress.findMany({
+                const bm = await prisma.tagBookmark.findUnique({
                     where: {
-                        userId,
-                        ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
+                        userId_tagId: {
+                            userId,
+                            tagId: tag.id,
+                        },
                     },
+                });
+                isBookmarked = !!bm;
+            }
+
+            return {
+                id: tag.id,
+                title: tag.name,
+                slug: tag.slug,
+                description: tag.description,
+                level: tag.level,
+                isBookmarked,
+                problemsCount: tag._count.problems,
+                module: tag.module
+                    ? {
+                          title: tag.module.title,
+                          slug: tag.module.slug,
+                      }
+                    : undefined,
+            };
+        })
+        .build();
+
+    getSingleTagProgress = qRPC()
+        .input(GetSingleTagProgressInputSchema)
+        .output(GetSingleTagProgressOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing getSingleTagProgress query', { payload });
+            const { tagId, tagSlug, userId } = payload;
+
+            // 1. Find tag ID
+            const tag = await prisma.tag.findFirst({
+                where: {
+                    OR: [
+                        tagId ? { id: tagId } : {},
+                        tagSlug ? { slug: tagSlug } : {},
+                    ].filter((item) => Object.keys(item).length > 0),
+                },
+                select: { id: true },
+            });
+
+            if (!tag) {
+                logger.warn('Tag not found for progress calculation', { tagId, tagSlug });
+                throw new AppErrorBuilder('Tag not found')
+                    .setCode(ErrorCode.NOT_FOUND)
+                    .build();
+            }
+
+            const targetTagId = tag.id;
+
+            // 2. Static Tag Difficulty Totals & Problem IDs (L1 Memory -> L2 Redis -> DB Fallback)
+            const totalsCacheKey = `tag_difficulty_totals:${targetTagId}`;
+            let tagTotals = tagDifficultyTotalsL1Cache.get(totalsCacheKey);
+            if (!tagTotals) {
+                tagTotals = await tagDifficultyTotalsCache.get(totalsCacheKey);
+                if (tagTotals) {
+                    tagDifficultyTotalsL1Cache.set(totalsCacheKey, tagTotals);
+                }
+            }
+
+            if (!tagTotals) {
+                const problemTags = await prisma.problemTag.findMany({
+                    where: { tagId: targetTagId },
                     select: {
-                        status: true,
-                        revisit: true,
-                        problemId: true,
                         problem: {
                             select: {
                                 id: true,
@@ -452,41 +225,146 @@ export class TagQueries implements ITagQueries {
                     },
                 });
 
-                problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-                problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
-                solvedProgress = userProgress.filter((p) => p.status === 'solved' && p.problem);
+                const problems = problemTags.map((pt) => pt.problem).filter(Boolean);
+                const difficulties: Record<string, 'easy' | 'medium' | 'hard'> = {};
+                const counts = { easy: 0, medium: 0, hard: 0 };
+                const problemIds: string[] = [];
+
+                for (const p of problems) {
+                    problemIds.push(p.id);
+                    const diff = p.difficulty as 'easy' | 'medium' | 'hard';
+                    difficulties[p.id] = diff;
+                    if (diff === 'easy') counts.easy++;
+                    else if (diff === 'medium') counts.medium++;
+                    else if (diff === 'hard') counts.hard++;
+                }
+
+                tagTotals = {
+                    problemIds,
+                    difficulties,
+                    counts,
+                    total: problemIds.length,
+                };
+
+                tagDifficultyTotalsL1Cache.set(totalsCacheKey, tagTotals);
+                void tagDifficultyTotalsCache.set(totalsCacheKey, tagTotals);
             }
 
+            // 3. User Progress: Single Indexed Seek on problem_progress (userId, problemId)
+            let problemsSolvedCount = 0;
+            let problemsRevisitCount = 0;
+            const problemsSolvedCountByDifficulty = { easy: 0, medium: 0, hard: 0 };
+
+            if (userId && tagTotals.problemIds.length > 0) {
+                const userProgress = await prisma.problemProgress.findMany({
+                    where: {
+                        userId,
+                        problemId: { in: tagTotals.problemIds },
+                    },
+                    select: {
+                        problemId: true,
+                        status: true,
+                        revisit: true,
+                    },
+                });
+
+                for (const p of userProgress) {
+                    if (p.status === 'solved') {
+                        problemsSolvedCount++;
+                        const diff = tagTotals.difficulties[p.problemId];
+                        if (diff === 'easy') problemsSolvedCountByDifficulty.easy++;
+                        else if (diff === 'medium') problemsSolvedCountByDifficulty.medium++;
+                        else if (diff === 'hard') problemsSolvedCountByDifficulty.hard++;
+                    }
+                    if (p.revisit === true) {
+                        problemsRevisitCount++;
+                    }
+                }
+            }
+
+            const problemsCount = tagTotals.total;
             const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
             const problemsSolvedPercentage =
-                problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
+                problemsCount > 0
+                    ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2))
+                    : 0;
 
-            const problemsCountByDifficultyRaw = countBy(allProblems, (p) => p.difficulty);
-            const problemsCountByDifficulty = {
-                easy: problemsCountByDifficultyRaw.easy || 0,
-                medium: problemsCountByDifficultyRaw.medium || 0,
-                hard: problemsCountByDifficultyRaw.hard || 0,
+            return {
+                problemsCount,
+                problemsSolvedCount,
+                problemsRevisitCount,
+                problemNotSolvedCount,
+                problemsSolvedPercentage,
+                problemsCountByDifficulty: tagTotals.counts,
+                problemsSolvedCountByDifficulty,
             };
+        })
+        .build();
 
-            const problemsSolvedCountByDifficultyRaw = countBy(solvedProgress, (p) => p.problem!.difficulty);
-            const problemsSolvedCountByDifficulty = {
-                easy: problemsSolvedCountByDifficultyRaw.easy || 0,
-                medium: problemsSolvedCountByDifficultyRaw.medium || 0,
-                hard: problemsSolvedCountByDifficultyRaw.hard || 0,
-            };
+    getTagSuggestions = qRPC()
+        .input(GetTagSuggestionsInputSchema)
+        .output(GetTagSuggestionsOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing getTagSuggestions query', { payload });
+            const { tagId, tagSlug } = payload;
 
-            // ── Semantic Similarity Ranking for Top 10 Similar Tags ────────────
-            const activeProblemIdsSet = new Set(allProblemIds);
+            const tag = await prisma.tag.findFirst({
+                where: {
+                    OR: [
+                        tagId ? { id: tagId } : {},
+                        tagSlug ? { slug: tagSlug } : {},
+                    ].filter((item) => Object.keys(item).length > 0),
+                },
+                select: {
+                    id: true,
+                    moduleId: true,
+                    level: true,
+                    problems: {
+                        select: {
+                            problemId: true,
+                        },
+                    },
+                },
+            });
+
+            if (!tag) {
+                logger.warn('Tag not found for suggestions', { tagId, tagSlug });
+                return [];
+            }
+
+            const targetTagId = tag.id;
+            const suggestionsCacheKey = `tag_suggestions:${targetTagId}`;
+
+            // Check Tier 1 & Tier 2 Cache
+            let cachedSuggestions = tagSuggestionsL1Cache.get(suggestionsCacheKey);
+            if (!cachedSuggestions) {
+                cachedSuggestions = await tagSuggestionsCache.get(suggestionsCacheKey);
+                if (cachedSuggestions) {
+                    tagSuggestionsL1Cache.set(suggestionsCacheKey, cachedSuggestions);
+                }
+            }
+
+            if (cachedSuggestions) {
+                return cachedSuggestions;
+            }
+
+            const activeProblemIdsSet = new Set(tag.problems.map((p) => p.problemId));
 
             // Fetch candidate tags (excluding current tag)
             const candidates = await prisma.tag.findMany({
                 where: {
-                    id: { not: tag.id },
+                    id: { not: targetTagId },
                 },
-                include: {
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    level: true,
+                    moduleId: true,
                     module: {
                         select: {
                             title: true,
+                            slug: true,
                         },
                     },
                     problems: {
@@ -524,48 +402,21 @@ export class TagQueries implements ITagQueries {
                     slug: cand.slug,
                     level: cand.level,
                     moduleTitle: cand.module?.title,
+                    moduleSlug: cand.module?.slug,
                     problemsCount: cand.problems.length,
                     score,
                 };
             });
 
-            // Sort by score DESC, then name ASC
+            // Sort by score DESC, then title ASC
             scoredCandidates.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title));
 
             const top10SimilarTags = scoredCandidates.slice(0, 10).map(({ score, ...rest }) => rest);
 
-            let isBookmarked = false;
-            if (userId) {
-                const bm = await prisma.tagBookmark.findUnique({
-                    where: {
-                        userId_tagId: {
-                            userId,
-                            tagId: tag.id,
-                        },
-                    },
-                });
-                isBookmarked = !!bm;
-            }
+            tagSuggestionsL1Cache.set(suggestionsCacheKey, top10SimilarTags);
+            void tagSuggestionsCache.set(suggestionsCacheKey, top10SimilarTags);
 
-            return {
-                id: tag.id,
-                title: tag.name,
-                slug: tag.slug,
-                description: tag.description,
-                level: tag.level,
-                isBookmarked,
-                module: tag.module ? { title: tag.module.title, slug: tag.module.slug } : undefined,
-                progress: {
-                    problemsCount,
-                    problemsSolvedCount,
-                    problemsRevisitCount,
-                    problemNotSolvedCount,
-                    problemsSolvedPercentage,
-                    problemsCountByDifficulty,
-                    problemsSolvedCountByDifficulty,
-                },
-                similarTags: top10SimilarTags,
-            };
+            return top10SimilarTags;
         })
         .build();
 

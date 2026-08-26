@@ -13,7 +13,7 @@ export const GetModulesOutputSchema = z.array(
 );
 
 // ─── getSingleModule ───────────────────────────────────────────────────────────
-// Returns module info + all topics enriched with per-topic stats for a user.
+// Returns module metadata + all topics with per-topic total & solved counts.
 
 export const GetSingleModuleInputSchema = z.object({
     slug: z.string().optional(),
@@ -32,7 +32,6 @@ const TopicStatsSchema = z.object({
     order: z.number().int(),
     isBookmarked: z.boolean().default(false),
     problemsCount: z.number().int(),
-    problemsCountByDifficulty: z.record(DifficultySchema, z.number().int()),
     problemsSolvedCount: z.number().int(),
     problemsSolvedPercentage: z.number(),
 });
@@ -45,23 +44,7 @@ export const GetSingleModuleOutputSchema = z.object({
     isBookmarked: z.boolean().default(false),
     tagCount: z.number().int().default(0),
     topicCount: z.number().int().default(0),
-    progress: z.object({
-        problemsCount: z.number().int(),
-        problemsSolvedCount: z.number().int(),
-        problemsRevisitCount: z.number().int(),
-        problemNotSolvedCount: z.number().int(),
-        problemsSolvedPercentage: z.number(),
-        problemsCountByDifficulty: z.object({
-            easy: z.number().int(),
-            medium: z.number().int(),
-            hard: z.number().int(),
-        }),
-        problemsSolvedCountByDifficulty: z.object({
-            easy: z.number().int(),
-            medium: z.number().int(),
-            hard: z.number().int(),
-        }),
-    }),
+    problemsCount: z.number().int().default(0),
     topics: z.array(TopicStatsSchema).optional(),
 });
 
@@ -96,12 +79,12 @@ export const ToggleTopicBookmarkOutputSchema = z.object({
 });
 
 // ─── getSingleModuleProgress ───────────────────────────────────────────────────
-// Returns getUserProgress-style aggregate stats scoped to one module.
+// Returns O(1) aggregate progress stats scoped to one module.
 
 export const GetSingleModuleProgressInputSchema = z.object({
     moduleSlug: z.string().optional(),
     moduleId: z.uuidv7().optional(),
-    userId: z.uuidv7(),
+    userId: z.uuidv7().optional(),
 }).refine((d) => d.moduleSlug || d.moduleId, {
     message: 'At least one of moduleSlug or moduleId must be provided',
 });
@@ -110,7 +93,7 @@ export const GetSingleModuleProgressOutputSchema = z.object({
     problemsCount: z.number().int(),
     problemsSolvedCount: z.number().int(),
     problemsRevisitCount: z.number().int(),
-    problemsAttemptedCount: z.number().int(),
+    problemNotSolvedCount: z.number().int(),
     problemsSolvedPercentage: z.number(),
     problemsCountByDifficulty: z.object({
         easy: z.number().int(),
@@ -122,10 +105,6 @@ export const GetSingleModuleProgressOutputSchema = z.object({
         medium: z.number().int(),
         hard: z.number().int(),
     }),
-    problemsCountByTopic: z.record(z.string(), z.number().int()),
-    problemsSolvedCountByTopic: z.record(z.string(), z.number().int()),
-    problemsCountByTags: z.record(z.string(), z.number().int()),
-    problemsSolvedCountByTags: z.record(z.string(), z.number().int()),
 });
 
 // ─── getRecentlySolvedModule ───────────────────────────────────────────────────

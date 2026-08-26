@@ -1,20 +1,21 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
 import { queryKeys } from '../query-keys';
 import { CACHE_TIERS } from '../cache-config';
+import { CacheInvalidationService } from '../cache-invalidation.service';
 import type { ITagQueryService } from '../interfaces';
 import {
     GetTagsTRPCOutputSchema,
-    GetTagsFilteredTRPCInputSchema,
-    GetTagsFilteredTRPCOutputSchema,
-    GetSingleTagProblemsTRPCInputSchema,
-    GetSingleTagProblemsTRPCOutputSchema,
-    GetSingleTagProblemProgressTRPCInputSchema,
-    GetSingleTagProblemProgressTRPCOutputSchema,
+    GetTagsCatalogueTRPCInputSchema,
+    GetTagsCatalogueTRPCOutputSchema,
+    GetSingleTagProgressTRPCInputSchema,
+    GetSingleTagProgressTRPCOutputSchema,
     GetSingleTagTRPCInputSchema,
     GetSingleTagTRPCOutputSchema,
+    GetTagSuggestionsTRPCInputSchema,
+    GetTagSuggestionsTRPCOutputSchema,
     ToggleTagBookmarkTRPCInputSchema,
     GetUserTagProgressByLevelTRPCInputSchema,
     GetUserTagProgressByLevelTRPCOutputSchema,
@@ -33,54 +34,100 @@ export class TagQueryService implements ITagQueryService {
         });
     }
 
-    getTagsFiltered(input?: z.infer<typeof GetTagsFilteredTRPCInputSchema>) {
-        const validatedInput = GetTagsFilteredTRPCInputSchema.optional().parse(input) || {};
+    getTagsCatalogue(
+        input: z.infer<typeof GetTagsCatalogueTRPCInputSchema>,
+        options?: { enabled?: boolean }
+    ) {
+        const validatedInput = GetTagsCatalogueTRPCInputSchema.parse(input);
         return useQuery({
-            queryKey: queryKeys.tag.list(validatedInput),
+            queryKey: queryKeys.tag.catalogue(validatedInput),
             queryFn: async () => {
-                const raw = await trpcClient.tag.getTagsFiltered.query(validatedInput);
-                return GetTagsFilteredTRPCOutputSchema.parse(raw);
+                const raw = await trpcClient.tag.getTagsCatalogue.query(validatedInput);
+                return GetTagsCatalogueTRPCOutputSchema.parse(raw);
             },
+            enabled: options?.enabled ?? true,
             ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
-    getSingleTagProblems(input: z.infer<typeof GetSingleTagProblemsTRPCInputSchema>) {
-        const validatedInput = GetSingleTagProblemsTRPCInputSchema.parse(input);
-        const cacheKey = validatedInput.slug || validatedInput.id || 'unknown';
-        return useQuery({
-            queryKey: queryKeys.tag.singleProblems(cacheKey),
-            queryFn: async () => {
-                const raw = await trpcClient.tag.getSingleTagProblems.query(validatedInput);
-                return GetSingleTagProblemsTRPCOutputSchema.parse(raw);
+    getTagsCatalogueInfinite(
+        input: { filters?: any; sorting?: any; limit?: number },
+        options?: { enabled?: boolean }
+    ) {
+        const limit = input.limit || 6;
+        return useInfiniteQuery({
+            queryKey: queryKeys.tag.catalogueInfinite({ filters: input.filters, sorting: input.sorting, limit }),
+            queryFn: async ({ pageParam }) => {
+                const payload = {
+                    mode: 'infinite' as const,
+                    cursor: pageParam as string | undefined,
+                    limit,
+                    filters: input.filters,
+                    sorting: input.sorting,
+                };
+                const raw = await trpcClient.tag.getTagsCatalogue.query(payload);
+                const parsed = GetTagsCatalogueTRPCOutputSchema.parse(raw);
+                if (parsed.mode !== 'infinite') {
+                    throw new Error('Expected infinite tags output');
+                }
+                return parsed;
             },
+            initialPageParam: undefined as string | undefined,
+            getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+            enabled: options?.enabled ?? true,
             ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
-    getSingleTagProblemProgress(input: z.infer<typeof GetSingleTagProblemProgressTRPCInputSchema>) {
-        const validatedInput = GetSingleTagProblemProgressTRPCInputSchema.parse(input);
+    getSingleTagProgress(
+        input: z.infer<typeof GetSingleTagProgressTRPCInputSchema>,
+        options?: { enabled?: boolean }
+    ) {
+        const validatedInput = GetSingleTagProgressTRPCInputSchema.parse(input);
         const cacheKey = validatedInput.tagSlug || validatedInput.tagId || 'unknown';
         return useQuery({
             queryKey: queryKeys.tag.progress(cacheKey),
             queryFn: async () => {
-                const raw = await trpcClient.tag.getSingleTagProblemProgress.query(validatedInput);
-                return GetSingleTagProblemProgressTRPCOutputSchema.parse(raw);
+                const raw = await trpcClient.tag.getSingleTagProgress.query(validatedInput);
+                return GetSingleTagProgressTRPCOutputSchema.parse(raw);
             },
+            enabled: options?.enabled ?? true,
             ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 
-    getSingleTag(input: z.infer<typeof GetSingleTagTRPCInputSchema>) {
+    getSingleTag(
+        input: z.infer<typeof GetSingleTagTRPCInputSchema>,
+        options?: { enabled?: boolean }
+    ) {
         const validatedInput = GetSingleTagTRPCInputSchema.parse(input);
         const cacheKey = validatedInput.slug || validatedInput.id || 'unknown';
+        const hasValidIdentifier = Boolean(validatedInput.slug) || Boolean(validatedInput.id);
         return useQuery({
             queryKey: queryKeys.tag.single(cacheKey),
             queryFn: async () => {
                 const raw = await trpcClient.tag.getSingleTag.query(validatedInput);
                 return GetSingleTagTRPCOutputSchema.parse(raw);
             },
-            ...CACHE_TIERS.USER_PROGRESS,
+            enabled: options?.enabled ?? hasValidIdentifier,
+            ...CACHE_TIERS.STATIC_CATALOG,
+        });
+    }
+
+    getTagSuggestions(
+        input: z.infer<typeof GetTagSuggestionsTRPCInputSchema>,
+        options?: { enabled?: boolean }
+    ) {
+        const validatedInput = GetTagSuggestionsTRPCInputSchema.parse(input);
+        const cacheKey = validatedInput.tagSlug || validatedInput.tagId || 'unknown';
+        return useQuery({
+            queryKey: queryKeys.tag.suggestions(cacheKey),
+            queryFn: async () => {
+                const raw = await trpcClient.tag.getTagSuggestions.query(validatedInput);
+                return GetTagSuggestionsTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.STATIC_CATALOG,
         });
     }
 
@@ -113,13 +160,12 @@ export class TagQueryService implements ITagQueryService {
                     queryClient.setQueryData(queryKeys.tag.single(context.key), context.previousSingleTag);
                 }
             },
-            onSettled: (_data, _error, variables) => {
+            onSettled: async (_data, _error, variables) => {
                 const key = variables.tagSlug || variables.tagId;
                 if (key) {
-                    queryClient.invalidateQueries({ queryKey: queryKeys.tag.single(key) });
+                    await queryClient.invalidateQueries({ queryKey: queryKeys.tag.single(key) });
                 }
-                queryClient.invalidateQueries({ queryKey: ['tag'] });
-                queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] });
+                await CacheInvalidationService.invalidateOnTagBookmarkChange(queryClient);
             },
         });
     }

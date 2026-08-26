@@ -4,21 +4,14 @@ import {
     GetUserProfileOutputSchema,
     GetUserSocialsInputSchema,
     GetUserSocialsOutputSchema,
-    GetUserProgressInputSchema,
-    GetUserProgressOutputSchema,
     GetUserPreferencesInputSchema,
     GetUserPreferencesOutputSchema,
     GetUserDailyActivityInputSchema,
     GetUserDailyActivityOutputSchema,
-    GetUserActivityInputSchema,
-    GetUserActivityOutputSchema,
     RecordDailyCheckInInputSchema,
     RecordDailyCheckInOutputSchema,
     UpdateUserProfileInputSchema,
-
     UpdateUserProfileOutputSchema,
-    UpdateUserRoleInputSchema,
-    UpdateUserRoleOutputSchema,
     UpsertUserSocialsInputSchema,
     UpsertUserSocialsOutputSchema,
     UpdateUserImageInputSchema,
@@ -31,16 +24,12 @@ import {
     CheckEmailAvailabilityOutputSchema,
     CheckPhoneAvailabilityInputSchema,
     CheckPhoneAvailabilityOutputSchema,
-    GetActiveStreakInputSchema,
-    GetActiveStreakOutputSchema,
     GetUserStreakInputSchema,
     GetUserStreakOutputSchema,
     FollowUserInputSchema,
     FollowUserOutputSchema,
     UnfollowUserInputSchema,
     UnfollowUserOutputSchema,
-    GetFollowStatsInputSchema,
-    GetFollowStatsOutputSchema,
     GetFollowersInputSchema,
     GetFollowersOutputSchema,
     GetFollowingInputSchema,
@@ -66,10 +55,6 @@ export interface IUserQueries {
         payload: z.infer<typeof GetUserSocialsInputSchema>
     ) => Promise<z.infer<typeof GetUserSocialsOutputSchema>>;
 
-    getUserProgress: (
-        payload: z.infer<typeof GetUserProgressInputSchema>
-    ) => Promise<z.infer<typeof GetUserProgressOutputSchema>>;
-
     getUserPreferences: (
         payload: z.infer<typeof GetUserPreferencesInputSchema>
     ) => Promise<z.infer<typeof GetUserPreferencesOutputSchema>>;
@@ -78,14 +63,9 @@ export interface IUserQueries {
         payload: z.infer<typeof GetUserDailyActivityInputSchema>
     ) => Promise<z.infer<typeof GetUserDailyActivityOutputSchema>>;
 
-    getUserActivity: (
-        payload: z.infer<typeof GetUserActivityInputSchema>
-    ) => Promise<z.infer<typeof GetUserActivityOutputSchema>>;
-
     recordDailyCheckIn: (
         payload: z.infer<typeof RecordDailyCheckInInputSchema>
     ) => Promise<z.infer<typeof RecordDailyCheckInOutputSchema>>;
-
 
     updateUserProfile: (
         payload: z.infer<typeof UpdateUserProfileInputSchema>
@@ -98,10 +78,6 @@ export interface IUserQueries {
     updateUserResume: (
         payload: z.infer<typeof UpdateUserResumeInputSchema>
     ) => Promise<z.infer<typeof UpdateUserResumeOutputSchema>>;
-
-    updateUserRole: (
-        payload: z.infer<typeof UpdateUserRoleInputSchema>
-    ) => Promise<z.infer<typeof UpdateUserRoleOutputSchema>>;
 
     upsertUserSocials: (
         payload: z.infer<typeof UpsertUserSocialsInputSchema>
@@ -119,10 +95,6 @@ export interface IUserQueries {
         payload: z.infer<typeof CheckPhoneAvailabilityInputSchema>
     ) => Promise<z.infer<typeof CheckPhoneAvailabilityOutputSchema>>;
 
-    getActiveStreak: (
-        payload: z.infer<typeof GetActiveStreakInputSchema>
-    ) => Promise<z.infer<typeof GetActiveStreakOutputSchema>>;
-
     getUserStreak: (
         payload: z.infer<typeof GetUserStreakInputSchema>
     ) => Promise<z.infer<typeof GetUserStreakOutputSchema>>;
@@ -134,10 +106,6 @@ export interface IUserQueries {
     unfollowUser: (
         payload: z.infer<typeof UnfollowUserInputSchema>
     ) => Promise<z.infer<typeof UnfollowUserOutputSchema>>;
-
-    getFollowStats: (
-        payload: z.infer<typeof GetFollowStatsInputSchema>
-    ) => Promise<z.infer<typeof GetFollowStatsOutputSchema>>;
 
     getFollowers: (
         payload: z.infer<typeof GetFollowersInputSchema>

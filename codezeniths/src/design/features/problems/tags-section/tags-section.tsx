@@ -14,6 +14,7 @@ import {
     ButtonSize,
 } from '@codezeniths/components';
 import { useTags } from './useTags';
+import { TagsSectionSkeleton } from './tags-section-skeleton';
 
 export interface TagsSectionProps {
     className?: string;
@@ -41,21 +42,7 @@ export const TagsSection: React.FC<TagsSectionProps> = ({ className, onTagSelect
     };
 
     if (isLoading) {
-        return (
-            <div className={cn('w-full space-y-3 font-sans text-xs', className)}>
-                <div className="flex items-center justify-between gap-3">
-                    <div className="h-8 w-36 rounded-md bg-foreground-light-shade3/40 dark:bg-foreground-dark-shade3/40 animate-pulse" />
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="px-6 py-2 rounded-full bg-foreground-light-shade3/40 dark:bg-foreground-dark-shade3/40 animate-pulse h-7 w-20"
-                        />
-                    ))}
-                </div>
-            </div>
-        );
+        return <TagsSectionSkeleton className={className} />;
     }
 
     return (

@@ -1,18 +1,29 @@
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { ProblemsetPageSkeleton } from '@codezeniths/design/widgets/problems/problemset-page-skeleton';
+import { Loader } from '@codezeniths/components';
 
 const ProblemsetSection = dynamic(
     () => import('@codezeniths/features').then((mod) => mod.ProblemsetSection),
     {
-        loading: () => <ProblemsetPageSkeleton />,
+        loading: () => (
+            <div className="flex items-center justify-center min-h-[60vh] w-full">
+                <Loader />
+            </div>
+        ),
     }
 );
 
 export default function Page() {
     return (
-        <Suspense fallback={<ProblemsetPageSkeleton />}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-[60vh] w-full">
+                    <Loader />
+                </div>
+            }
+        >
             <ProblemsetSection />
         </Suspense>
     );
 }
+

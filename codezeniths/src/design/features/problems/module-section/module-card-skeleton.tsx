@@ -14,7 +14,7 @@ export const ModuleCardSkeleton: React.FC<ModuleCardSkeletonProps> = ({ classNam
         <Card
             variant={CardVariant.FLAT}
             className={cn(
-                'relative rounded-xl sm:rounded-2xl p-2.5 sm:p-3 md:p-3.5 xl:p-4.5 overflow-hidden border border-foreground-light-shade3 dark:border-foreground-dark-shade3 bg-foreground-light dark:bg-foreground-dark min-h-[120px] sm:min-h-[135px] sm:h-38 md:h-40 xl:h-46 flex flex-col justify-between font-sans select-none w-full min-w-0 max-w-full',
+                'relative rounded-xl sm:rounded-2xl p-2.5 sm:p-3 md:p-3.5 xl:p-4.5 overflow-hidden border border-foreground-light-shade3 dark:border-foreground-dark-shade3 bg-foreground-light dark:bg-foreground-dark min-h-30 sm:min-h-[135px] sm:h-38 md:h-40 xl:h-46 flex flex-col justify-between font-sans select-none w-full min-w-0 max-w-full',
                 className
             )}
         >

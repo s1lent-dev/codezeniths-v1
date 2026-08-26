@@ -9,9 +9,38 @@ export function useTagDetails() {
     const params = useParams();
     const tagSlug = (params?.tag as string) || '';
 
-    const { data: tagDetails, isLoading, isError, error } = tagQueryService.getSingleTag({
-        slug: tagSlug,
-    });
+    const {
+        data: tagDetails,
+        isLoading: isTagQueryLoading,
+        isPending: isTagPending,
+        isError,
+        error,
+    } = tagQueryService.getSingleTag(
+        { slug: tagSlug },
+        { enabled: !!tagSlug }
+    );
+
+    const {
+        data: tagProgress,
+        isLoading: isProgressQueryLoading,
+        isPending: isProgressPending,
+    } = tagQueryService.getSingleTagProgress(
+        { tagSlug },
+        { enabled: !!tagSlug }
+    );
+
+    const {
+        data: tagSuggestions,
+        isLoading: isSuggestionsQueryLoading,
+        isPending: isSuggestionsPending,
+    } = tagQueryService.getTagSuggestions(
+        { tagSlug },
+        { enabled: !!tagSlug }
+    );
+
+    const isLoading = !tagSlug || isTagQueryLoading || (isTagPending && !tagDetails);
+    const isLoadingProgress = !tagSlug || isProgressQueryLoading || (isProgressPending && !tagProgress);
+    const isLoadingSuggestions = !tagSlug || isSuggestionsQueryLoading || (isSuggestionsPending && !tagSuggestions);
 
     const toggleTagBookmarkMutation = tagQueryService.toggleTagBookmark();
     const [isBookmarkBusy, setIsBookmarkBusy] = useState(false);
@@ -50,7 +79,11 @@ export function useTagDetails() {
     return {
         tagSlug,
         tagDetails,
+        tagProgress,
+        tagSuggestions,
         isLoading,
+        isLoadingProgress,
+        isLoadingSuggestions,
         isError,
         error,
         isBookmarkBusy,

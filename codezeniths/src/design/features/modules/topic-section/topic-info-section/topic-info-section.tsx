@@ -2,18 +2,26 @@
 
 import React from 'react';
 import { TopicInfoCard, TopicInfoCardProps } from './topic-info-card';
-import { TopicSuggestions } from './topic-suggestions';
+import { TopicSuggestions, SimilarTopicItem } from './topic-suggestions';
 
 export interface TopicInfoSectionProps {
     topicDetails?: TopicInfoCardProps['topicDetails'];
+    topicProgress?: TopicInfoCardProps['topicProgress'];
+    topicSuggestions?: SimilarTopicItem[];
     isLoading?: boolean;
+    isLoadingProgress?: boolean;
+    isLoadingSuggestions?: boolean;
     onToggleBookmark?: () => void;
     isBookmarkBusy?: boolean;
 }
 
 export const TopicInfoSection: React.FC<TopicInfoSectionProps> = ({
     topicDetails,
+    topicProgress,
+    topicSuggestions,
     isLoading = false,
+    isLoadingProgress = false,
+    isLoadingSuggestions = false,
     onToggleBookmark,
     isBookmarkBusy = false,
 }) => {
@@ -21,18 +29,20 @@ export const TopicInfoSection: React.FC<TopicInfoSectionProps> = ({
         <div className="space-y-6 w-full">
             <TopicInfoCard
                 topicDetails={topicDetails}
+                topicProgress={topicProgress}
                 isLoading={isLoading}
+                isLoadingProgress={isLoadingProgress}
                 onToggleBookmark={onToggleBookmark}
                 isBookmarkBusy={isBookmarkBusy}
             />
-            {isLoading ? (
+            {isLoadingSuggestions ? (
                 <TopicSuggestions isLoading={true} />
             ) : (
-                topicDetails?.similarTopics &&
-                topicDetails.similarTopics.length > 0 && (
+                topicSuggestions &&
+                topicSuggestions.length > 0 && (
                     <TopicSuggestions
-                        similarTopics={topicDetails.similarTopics}
-                        moduleSlug={topicDetails.module?.slug}
+                        similarTopics={topicSuggestions}
+                        moduleSlug={topicDetails?.module?.slug}
                         isLoading={false}
                     />
                 )

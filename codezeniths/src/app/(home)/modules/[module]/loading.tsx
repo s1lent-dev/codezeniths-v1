@@ -1,6 +1,11 @@
 import React from 'react';
-import { DetailPageSkeleton } from '@codezeniths/design/widgets/shared/detail-info-card/detail-page-skeleton';
+import { Loader } from '@codezeniths/components';
 
 export default function Loading() {
-    return <DetailPageSkeleton showSuggestions={true} />;
+    return (
+        <div className="flex items-center justify-center min-h-[60vh] w-full">
+            <Loader />
+        </div>
+    );
 }
+

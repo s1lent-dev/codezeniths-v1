@@ -61,26 +61,28 @@ export const NavbarMenus = () => {
 export const NavbarDesktopButtons = () => {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
 
-    let buttonLabel = 'Sign In';
+    let buttonLabel = '';
     let buttonRoute = '/sign-in';
 
-    if (isAuthenticated && user) {
-        if (user.isOnboardingComplete) {
-            buttonLabel = 'Home';
-            buttonRoute = '/problemset';
+    if (!isLoading) {
+        if (isAuthenticated && user) {
+            if (user.isOnboardingComplete) {
+                buttonLabel = 'Home';
+                buttonRoute = '/problemset';
+            } else {
+                buttonLabel = 'Complete Profile';
+                buttonRoute = '/complete-profile';
+            }
         } else {
-            buttonLabel = 'Complete Profile';
-            buttonRoute = '/complete-profile';
-        }
-    } else {
-        if (pathname === '/sign-in') {
-            buttonLabel = 'Sign Up';
-            buttonRoute = '/sign-up';
-        } else {
-            buttonLabel = 'Sign In';
-            buttonRoute = '/sign-in';
+            if (pathname === '/sign-in') {
+                buttonLabel = 'Sign Up';
+                buttonRoute = '/sign-up';
+            } else {
+                buttonLabel = 'Sign In';
+                buttonRoute = '/sign-in';
+            }
         }
     }
 
@@ -89,8 +91,14 @@ export const NavbarDesktopButtons = () => {
             <ThemeToggler />
             <Button 
                 variant={ButtonVariant.DEFAULT}
-                onClick={() => router.push(buttonRoute)}
-                className="px-5 py-2 typography-base bg-primary text-foreground-light hover:bg-primary-shade2 rounded-md transition-colors focus:outline-none focus:ring-0 focus:ring-primary focus:ring-offset-0 cursor-pointer capitalize"
+                isLoading={isLoading}
+                disabled={isLoading}
+                onClick={() => {
+                    if (!isLoading) {
+                        router.push(buttonRoute);
+                    }
+                }}
+                className="px-5 py-2 min-w-24 h-9.5 typography-base bg-primary text-foreground-light hover:bg-primary-shade2 rounded-md transition-colors focus:outline-none focus:ring-0 focus:ring-primary focus:ring-offset-0 cursor-pointer capitalize justify-center"
             >
                 {buttonLabel}
             </Button>

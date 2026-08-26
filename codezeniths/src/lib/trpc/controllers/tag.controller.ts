@@ -2,14 +2,14 @@ import { TRPCContext } from '../trpc/trpc.context';
 import { ITagController } from './interfaces';
 import {
     GetTagsTRPCOutputSchema,
-    GetTagsFilteredTRPCInputSchema,
-    GetTagsFilteredTRPCOutputSchema,
-    GetSingleTagProblemsTRPCInputSchema,
-    GetSingleTagProblemsTRPCOutputSchema,
-    GetSingleTagProblemProgressTRPCInputSchema,
-    GetSingleTagProblemProgressTRPCOutputSchema,
+    GetTagsCatalogueTRPCInputSchema,
+    GetTagsCatalogueTRPCOutputSchema,
+    GetSingleTagProgressTRPCInputSchema,
+    GetSingleTagProgressTRPCOutputSchema,
     GetSingleTagTRPCInputSchema,
     GetSingleTagTRPCOutputSchema,
+    GetTagSuggestionsTRPCInputSchema,
+    GetTagSuggestionsTRPCOutputSchema,
     ToggleTagBookmarkTRPCInputSchema,
     ToggleTagBookmarkTRPCOutputSchema,
     GetUserTagProgressByLevelTRPCInputSchema,
@@ -18,6 +18,7 @@ import {
 import { TRPCError } from '@trpc/server';
 import { logger } from '@/service/logging';
 import { z } from 'zod';
+import { tagCatalogueService } from '../utils/tag-catalogue.service';
 
 export class TagController implements ITagController {
     async getTags({
@@ -41,93 +42,41 @@ export class TagController implements ITagController {
         }
     }
 
-    async getTagsFiltered({
+    async getTagsCatalogue({
         ctx,
         input,
     }: {
         ctx: TRPCContext;
-        input: z.infer<typeof GetTagsFilteredTRPCInputSchema>;
-    }): Promise<z.infer<typeof GetTagsFilteredTRPCOutputSchema>> {
-        logger.info('Executing getTagsFiltered controller', { input });
+        input: z.infer<typeof GetTagsCatalogueTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetTagsCatalogueTRPCOutputSchema>> {
+        logger.info('Executing getTagsCatalogue controller', { mode: input.mode });
 
         try {
-            const userId = ctx.user?.id;
-            const result = await ctx.queries.tag.getTagsFiltered({
-                userId,
-                filters: input.filters,
-                sorting: input.sorting,
-            });
-            return result;
+            return await tagCatalogueService.getTagsCatalogue({ ctx, input });
         } catch (error: any) {
-            logger.error('Error in getTagsFiltered controller', { error });
+            logger.error('Error in getTagsCatalogue controller', { error, mode: input.mode });
             if (error instanceof TRPCError) throw error;
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
-                message: error.message || 'Something went wrong while fetching filtered tags list.',
+                message: error.message || 'Something went wrong while fetching tags catalogue.',
                 cause: error,
             });
         }
     }
 
-
-
-    async getSingleTagProblems({
+    async getSingleTagProgress({
         ctx,
         input,
     }: {
         ctx: TRPCContext;
-        input: z.infer<typeof GetSingleTagProblemsTRPCInputSchema>;
-    }): Promise<z.infer<typeof GetSingleTagProblemsTRPCOutputSchema>> {
-        logger.info('Executing getSingleTagProblems controller', { input });
+        input: z.infer<typeof GetSingleTagProgressTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetSingleTagProgressTRPCOutputSchema>> {
+        logger.info('Executing getSingleTagProgress controller', { input });
 
         const userId = ctx.user?.id;
-        if (!userId) {
-            logger.warn('Unauthorized attempt to fetch single tag problems');
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
-        }
 
         try {
-            const result = await ctx.queries.tag.getSingleTagProblems({
-                id: input.id,
-                slug: input.slug,
-                userId,
-            });
-
-            return result;
-        } catch (error: any) {
-            logger.error('Error in getSingleTagProblems controller', { error, userId });
-            if (error instanceof TRPCError) throw error;
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: error.message || 'Something went wrong while fetching tag problems details.',
-                cause: error,
-            });
-        }
-    }
-
-    async getSingleTagProblemProgress({
-        ctx,
-        input,
-    }: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetSingleTagProblemProgressTRPCInputSchema>;
-    }): Promise<z.infer<typeof GetSingleTagProblemProgressTRPCOutputSchema>> {
-        logger.info('Executing getSingleTagProblemProgress controller', { input });
-
-        const userId = ctx.user?.id;
-        if (!userId) {
-            logger.warn('Unauthorized attempt to fetch single tag progress');
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User authentication required.',
-            });
-        }
-
-        try {
-            const result = await ctx.queries.tag.getSingleTagProblemProgress({
+            const result = await ctx.queries.tag.getSingleTagProgress({
                 tagId: input.tagId,
                 tagSlug: input.tagSlug,
                 userId,
@@ -135,7 +84,7 @@ export class TagController implements ITagController {
 
             return result;
         } catch (error: any) {
-            logger.error('Error in getSingleTagProblemProgress controller', { error, userId });
+            logger.error('Error in getSingleTagProgress controller', { error, userId });
             if (error instanceof TRPCError) throw error;
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
@@ -154,8 +103,8 @@ export class TagController implements ITagController {
     }): Promise<z.infer<typeof GetSingleTagTRPCOutputSchema>> {
         logger.info('Executing getSingleTag controller', { input });
 
+        const userId = ctx.user?.id;
         try {
-            const userId = ctx.user?.id;
             const result = await ctx.queries.tag.getSingleTag({
                 id: input.id,
                 slug: input.slug,
@@ -164,11 +113,38 @@ export class TagController implements ITagController {
 
             return result;
         } catch (error: any) {
-            logger.error('Error in getSingleTag controller', { error });
+            logger.error('Error in getSingleTag controller', { error, userId });
             if (error instanceof TRPCError) throw error;
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: error.message || 'Something went wrong while fetching tag details.',
+                cause: error,
+            });
+        }
+    }
+
+    async getTagSuggestions({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetTagSuggestionsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetTagSuggestionsTRPCOutputSchema>> {
+        logger.info('Executing getTagSuggestions controller', { input });
+
+        try {
+            const result = await ctx.queries.tag.getTagSuggestions({
+                tagId: input.tagId,
+                tagSlug: input.tagSlug,
+            });
+
+            return result;
+        } catch (error: any) {
+            logger.error('Error in getTagSuggestions controller', { error });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error.message || 'Something went wrong while fetching tag suggestions.',
                 cause: error,
             });
         }
@@ -242,4 +218,3 @@ export class TagController implements ITagController {
         }
     }
 }
-

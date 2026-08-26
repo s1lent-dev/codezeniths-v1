@@ -21,6 +21,8 @@ const TwitterIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+import { motion } from 'motion/react';
+
 export interface UserMetadataSkillsProps {
     email?: string | null;
     location?: string | null;
@@ -53,15 +55,32 @@ export const UserMetadataSkills: React.FC<UserMetadataSkillsProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <div className={cn('space-y-5 w-full animate-pulse', className)}>
+            <div className={cn('space-y-5 w-full select-none', className)}>
                 <div className="space-y-3">
-                    <div className="h-4 w-32 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                    <div className="h-4 w-44 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                    <div className="h-4 w-36 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                        className="h-4 w-32 bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60 rounded-md"
+                    />
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                        className="h-4 w-44 bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60 rounded-md"
+                    />
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                        className="h-4 w-36 bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60 rounded-md"
+                    />
                 </div>
                 <div className="flex flex-wrap gap-2 pt-1">
                     {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="h-6 w-16 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-full" />
+                        <motion.div
+                            key={i}
+                            animate={{ opacity: [0.35, 0.8, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.05 }}
+                            className="h-6 w-16 bg-primary/10 dark:bg-primary/20 rounded-full"
+                        />
                     ))}
                 </div>
             </div>

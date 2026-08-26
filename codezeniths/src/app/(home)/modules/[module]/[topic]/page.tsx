@@ -1,18 +1,29 @@
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { DetailPageSkeleton } from '@codezeniths/design/widgets/shared/detail-info-card/detail-page-skeleton';
+import { Loader } from '@codezeniths/components';
 
 const TopicSection = dynamic(
     () => import('@codezeniths/features').then((mod) => mod.TopicSection),
     {
-        loading: () => <DetailPageSkeleton showSuggestions={true} />,
+        loading: () => (
+            <div className="flex items-center justify-center min-h-[60vh] w-full">
+                <Loader />
+            </div>
+        ),
     }
 );
 
 export default function SingleTopicPage() {
     return (
-        <Suspense fallback={<DetailPageSkeleton showSuggestions={true} />}>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center min-h-[60vh] w-full">
+                    <Loader />
+                </div>
+            }
+        >
             <TopicSection />
         </Suspense>
     );
 }
+

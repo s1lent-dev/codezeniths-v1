@@ -115,7 +115,7 @@ export const HomeNavbarMobileToggle = () => {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
     const { isDark } = useTheme();
 
     const isProfileRoute = pathname.startsWith('/profile');
@@ -201,7 +201,17 @@ export const HomeNavbarMobileToggle = () => {
                         </div>
 
                         {/* 2. Direct User Profile Header Card (Not a dropdown) */}
-                        {isAuthenticated && user ? (
+                        {isLoading ? (
+                            <div className="p-3.5 rounded-sm bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/60 border border-foreground-light-shade3 dark:border-foreground-dark-shade3 space-y-3.5 animate-pulse">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0" />
+                                    <div className="min-w-0 flex-1 space-y-2">
+                                        <div className="h-3.5 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-xs w-28" />
+                                        <div className="h-2.5 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-xs w-20" />
+                                    </div>
+                                </div>
+                            </div>
+                        ) : isAuthenticated && user ? (
                             <div className="p-3.5 rounded-sm bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/60 border border-foreground-light-shade3 dark:border-foreground-dark-shade3 space-y-3.5">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-md overflow-hidden shrink-0 ring-2 ring-primary/30">
@@ -422,7 +432,7 @@ export const HomeNavbarMobileToggle = () => {
                                         </Link>
 
                                         <Link
-                                            href="/settings"
+                                            href="/settings/profile-details"
                                             onClick={() => setIsOpen(false)}
                                             className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-body-light dark:text-body-dark hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 rounded-sm transition-colors"
                                         >
@@ -469,7 +479,15 @@ export const HomeNavbarMobileToggle = () => {
                         <div className="flex items-center justify-between px-2 pt-3.5 mt-auto border-t border-foreground-light-shade3 dark:border-foreground-dark-shade3">
                             <ThemeToggler />
 
-                            {isAuthenticated ? (
+                            {isLoading ? (
+                                <Button
+                                    variant={ButtonVariant.GHOST}
+                                    size={ButtonSize.SM}
+                                    isLoading={true}
+                                    disabled={true}
+                                    className="h-8 w-16"
+                                />
+                            ) : isAuthenticated ? (
                                 <Button
                                     variant={ButtonVariant.GHOST}
                                     size={ButtonSize.SM}

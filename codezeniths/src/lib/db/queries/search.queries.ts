@@ -15,8 +15,6 @@ import {
     GetSearchProductsOutputSchema,
     GetSearchUsersInputSchema,
     GetSearchUsersOutputSchema,
-    RecordSearchSelectionInputSchema,
-    RecordSearchSelectionOutputSchema,
     GetRecentSearchHistoryInputSchema,
     GetRecentSearchHistoryOutputSchema,
     DeleteSearchHistoryItemInputSchema,
@@ -147,24 +145,34 @@ export class SearchQueries implements ISearchQueries {
         .handler(async (payload) => {
             logger.info('Executing getSearchTags query', { payload });
             const tags = await prisma.tag.findMany({
+                orderBy: { name: 'asc' },
                 include: {
                     module: true,
-                    _count: {
-                        select: { problems: true },
+                    problems: {
+                        select: {
+                            problemId: true,
+                        },
                     },
                 },
             });
 
-            return tags.map((t) => ({
-                id: t.id,
-                name: t.name,
-                slug: t.slug,
-                description: t.description || null,
-                level: t.level || null,
-                module: t.module?.title || null,
-                problemsCount: t._count.problems || 0,
-                phoneticName: t.name,
-            }));
+            return tags.map((t) => {
+                const problemIds = t.problems.map((p) => p.problemId);
+                return {
+                    id: t.id,
+                    name: t.name,
+                    slug: t.slug,
+                    description: t.description || null,
+                    level: t.level || null,
+                    module: t.module?.title || null,
+                    moduleSlug: t.module?.slug || null,
+                    moduleId: t.module?.id || null,
+                    problemIds,
+                    problemsCount: problemIds.length,
+                    phoneticName: t.name,
+                    createdAt: t.createdAt,
+                };
+            });
         })
         .build();
 
@@ -217,45 +225,6 @@ export class SearchQueries implements ISearchQueries {
                 phoneticName: u.name,
                 phoneticUsername: u.username || undefined,
             }));
-        })
-        .build();
-
-    recordSearchHistory = qRPC()
-
-        .input(RecordSearchSelectionInputSchema)
-        .output(RecordSearchSelectionOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing recordSearchHistory query', {
-                userId: payload.userId,
-                collection: payload.collection,
-                resultId: payload.resultId,
-            });
-
-            await prisma.userSearchHistory.upsert({
-                where: {
-                    userId_collection_resultId: {
-                        userId: payload.userId,
-                        collection: payload.collection,
-                        resultId: payload.resultId,
-                    },
-                },
-                create: {
-                    userId: payload.userId,
-                    collection: payload.collection,
-                    resultId: payload.resultId,
-                    title: payload.title,
-                    slug: payload.slug || null,
-                    metadata: payload.document,
-                },
-                update: {
-                    title: payload.title,
-                    slug: payload.slug || null,
-                    metadata: payload.document,
-                    updatedAt: new Date(),
-                },
-            });
-
-            return { success: true };
         })
         .build();
 

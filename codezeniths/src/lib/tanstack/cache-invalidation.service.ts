@@ -5,15 +5,23 @@ import { refetchAuthSession } from '@/lib/auth/auth';
 export class CacheInvalidationService {
     /**
      * 1. Triggered on problem solve, status update (revisit/untouched), or favourite toggle.
-     * Invalidates all problem lists, progress cards, module & tag solved counts, active streak, & activity calendar.
+     * Invalidates all problem lists, progress cards, module/topic/tag progress, favourites, playlists,
+     * leaderboards, active streak, & activity calendar.
      */
     static async invalidateOnProblemProgressChange(queryClient: QueryClient) {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: queryKeys.problem.progress() }),
-            queryClient.invalidateQueries({ queryKey: queryKeys.user.activeStreak() }),
+            queryClient.invalidateQueries({ queryKey: ['problem'] }),
+            queryClient.invalidateQueries({ queryKey: ['module'] }),
+            queryClient.invalidateQueries({ queryKey: ['topic'] }),
+            queryClient.invalidateQueries({ queryKey: ['tag'] }),
+            queryClient.invalidateQueries({ queryKey: ['favourite'] }),
+            queryClient.invalidateQueries({ queryKey: ['playlist'] }),
+            queryClient.invalidateQueries({ queryKey: ['leaderboard'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'streak'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'monthlyActivity'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'yearlyActivity'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
         ]);
     }
 
@@ -29,8 +37,6 @@ export class CacheInvalidationService {
                 queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
                 queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
                 queryClient.invalidateQueries({ queryKey: ['user', 'settings'] }),
-                queryClient.invalidateQueries({ queryKey: ['user', 'avatar'] }),
-                queryClient.invalidateQueries({ queryKey: ['user', 'socials'] }),
                 queryClient.invalidateQueries({ queryKey: ['user', 'availability'] }),
                 queryClient.invalidateQueries({ queryKey: queryKeys.auth.session() }),
             ]);
@@ -59,8 +65,6 @@ export class CacheInvalidationService {
             queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'settings'] }),
-            queryClient.invalidateQueries({ queryKey: ['user', 'avatar'] }),
-            queryClient.invalidateQueries({ queryKey: ['user', 'socials'] }),
             queryClient.invalidateQueries({ queryKey: ['leaderboard'] }),
             queryClient.invalidateQueries({ queryKey: ['playlist'] }),
         ]);
@@ -69,7 +73,7 @@ export class CacheInvalidationService {
 
     /**
      * 4. Triggered on core account changes (username, email, phone number, password).
-     * Refetches auth session, purges availability checks, and refreshes profile & settings caches.
+     * Refetches auth session, purges availability checks, and refreshes profile, playlist, & settings caches.
      */
     static async invalidateOnAccountSettingsChange(queryClient: QueryClient) {
         await Promise.all([
@@ -79,6 +83,7 @@ export class CacheInvalidationService {
             queryClient.invalidateQueries({ queryKey: ['user', 'settings'] }),
             queryClient.invalidateQueries({ queryKey: queryKeys.auth.session() }),
             queryClient.invalidateQueries({ queryKey: ['leaderboard'] }),
+            queryClient.invalidateQueries({ queryKey: ['playlist'] }),
         ]);
         return await refetchAuthSession();
     }
@@ -98,11 +103,10 @@ export class CacheInvalidationService {
 
     /**
      * 6. Triggered on user follow or unfollow mutations.
-     * Invalidates follow statistics, follower lists, following lists, profile headers, and scoped leaderboards.
+     * Invalidates follower lists, following lists, profile headers, and scoped leaderboards.
      */
     static async invalidateOnFollowChange(queryClient: QueryClient, targetUserId?: string) {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['user', 'followStats'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'followers'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'following'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
@@ -166,7 +170,6 @@ export class CacheInvalidationService {
      */
     static async invalidateOnStreakChange(queryClient: QueryClient) {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: queryKeys.user.activeStreak() }),
             queryClient.invalidateQueries({ queryKey: ['user', 'streak'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'yearlyActivity'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'monthlyActivity'] }),
@@ -204,6 +207,16 @@ export class CacheInvalidationService {
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: ['module'] }),
             queryClient.invalidateQueries({ queryKey: ['topic'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
+        ]);
+    }
+
+    /**
+     * 15. Triggered on tag bookmark toggle.
+     */
+    static async invalidateOnTagBookmarkChange(queryClient: QueryClient) {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['tag'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
         ]);
     }

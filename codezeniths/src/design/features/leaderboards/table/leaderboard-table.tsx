@@ -13,7 +13,7 @@ import { ChevronLeft, ChevronRight, Trophy, Search, Loader2 } from 'lucide-react
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { LeaderboardRow } from './leaderboard-row';
 import { LeaderboardControls } from './leaderboard-controls';
-import { LeaderboardSkeleton } from './leaderboard-skeleton';
+import { LeaderboardSkeleton, LeaderboardRowSkeleton } from './leaderboard-skeleton';
 import type { LeaderboardItem, LeaderboardScope } from '@codezeniths/schemas/db';
 
 export interface LeaderboardTableProps {
@@ -269,6 +269,13 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                                     <td className="w-28 min-w-24 max-w-32 p-0 border-0" />
                                 </tr>
                             )}
+                            {isFetchingNextPage &&
+                                Array.from({ length: 3 }).map((_, idx) => (
+                                    <LeaderboardRowSkeleton
+                                        key={`infinite-skeleton-${idx}`}
+                                        index={items.length + idx}
+                                    />
+                                ))}
                         </TableBody>
                     </Table>
 

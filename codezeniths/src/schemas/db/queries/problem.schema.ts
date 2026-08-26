@@ -28,20 +28,6 @@ export const ProblemOutputSchema = z.object({
     favourite: z.boolean().nullable().optional(),
 });
 
-// ─── getProblems ───────────────────────────────────────────────────────────────
-
-export const GetProblemsInputSchema = z.object({
-    userId: z.uuidv7().optional(),
-    filters: ProblemFilterInputSchema.optional(),
-    sorting: ProblemSortingInputSchema.optional(),
-});
-
-export const GetProblemsOutputSchema = z.object({
-    problems: z.array(ProblemOutputSchema),
-    total: z.number().int(),
-    solvedCount: z.number().int(),
-});
-
 // ─── getProblemsPaginated ──────────────────────────────────────────────────────
 
 export const GetProblemsPaginatedInputSchema = z

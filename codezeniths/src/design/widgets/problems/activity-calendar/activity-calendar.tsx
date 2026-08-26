@@ -10,7 +10,6 @@ import { ActivityCalendarSkeleton } from './activity-calendar-skeleton';
 export interface ActivityCalendarProps {
     initialYear?: number;
     initialMonth?: number; // 1-12
-    isLoading?: boolean;
     className?: string;
     onMonthChange?: (year: number, month: number) => void;
 }
@@ -22,7 +21,6 @@ export { ActivityCalendarSkeleton } from './activity-calendar-skeleton';
 export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
     initialYear,
     initialMonth,
-    isLoading: isPropsLoading = false,
     className,
     onMonthChange,
 }) => {
@@ -42,12 +40,10 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
     const month = currentDate.getUTCMonth() + 1; // 1-indexed (1-12)
 
     // Query user monthly activity via TanStack Query Service
-    const { data: activityData, isLoading: isQueryLoading } = userQueryService.getUserMonthlyActivity(
+    const { data: activityData, isLoading } = userQueryService.getUserMonthlyActivity(
         { year, month },
         { enabled: true }
     );
-
-    const isLoading = isPropsLoading || isQueryLoading;
 
     if (isLoading && !activityData) {
         return <ActivityCalendarSkeleton className={className} />;
@@ -128,7 +124,7 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
                     <h2 className="text-lg font-bold tracking-tight text-heading-light dark:text-heading-dark ml-3">
                         Day {currentDayNumber}
                     </h2>
-                    {isQueryLoading && <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="w-3.5 h-3.5 text-primary" />}
+                    {isLoading && <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="w-3.5 h-3.5 text-primary" />}
                 </div>
 
                 {/* Right: Nav Controls with Emblem Badge in the Middle & slightly offset top */}

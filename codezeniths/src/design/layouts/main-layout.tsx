@@ -3,7 +3,6 @@
 import React from 'react';
 import { Navbar, Footer } from '@codezeniths/widgets';
 import { cn } from '@codezeniths/design/cn';
-import { useDailyCheckIn } from '@codezeniths/features';
 
 export interface MainLayoutProps {
     children: React.ReactNode;
@@ -20,9 +19,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
     className,
     mainClassName,
 }) => {
-    // Automatically handles daily check-in for authenticated users on home & profile pages
-    useDailyCheckIn();
-
     return (
         <div className={cn("min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-body-light dark:text-body-dark", className)}>
             {showNavbar && <Navbar />}

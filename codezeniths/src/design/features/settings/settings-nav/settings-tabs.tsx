@@ -40,7 +40,10 @@ export const SettingsNav: React.FC<SettingsNavProps> = ({ className }) => {
     return (
         <nav className={cn('flex flex-col gap-1.5 pb-2', className)}>
             {SETTINGS_TABS.map((tab) => {
-                const isActive = pathname === tab.href || pathname.startsWith(tab.href + '/');
+                const isActive =
+                    pathname === tab.href ||
+                    pathname.startsWith(tab.href + '/') ||
+                    (pathname === '/settings' && tab.href === '/settings/profile-details');
                 const Icon = tab.icon;
                 return (
                     <Link
@@ -87,7 +90,10 @@ export const MobileSettingsNav: React.FC<SettingsNavProps> = ({ className }) => 
         <div className={cn('w-full overflow-x-auto no-scrollbar rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark p-1.5 shadow-xs', className)}>
             <nav className="flex items-center gap-1 min-w-max">
                 {SETTINGS_TABS.map((tab) => {
-                    const isActive = pathname === tab.href || pathname.startsWith(tab.href + '/');
+                    const isActive =
+                        pathname === tab.href ||
+                        pathname.startsWith(tab.href + '/') ||
+                        (pathname === '/settings' && tab.href === '/settings/profile-details');
                     const Icon = tab.icon;
                     return (
                         <Link

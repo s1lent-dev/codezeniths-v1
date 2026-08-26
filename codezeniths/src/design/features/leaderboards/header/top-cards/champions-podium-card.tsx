@@ -9,7 +9,10 @@ import { Card, CardVariant, CardBorderEffect } from '@codezeniths/modules';
 import { cn } from '@codezeniths/design/cn';
 import { RANK_SVG_MAP } from '@/assets/ranks';
 import { getRankFromScore } from '@/utils/rank.utils';
+import { ChampionsPodiumCardSkeleton } from './champions-podium-card-skeleton';
 import type { LeaderboardItem } from '@codezeniths/schemas/db';
+
+export { ChampionsPodiumCardSkeleton };
 
 export interface ChampionsPodiumCardProps {
     topThree?: LeaderboardItem[];
@@ -74,7 +77,7 @@ export const ChampionsPodiumCard: React.FC<ChampionsPodiumCardProps> = ({
                     <div className="flex flex-col">
                         <Typography
                             variant={TypographyVariant.SPAN}
-                            className="text-xs sm:text-sm font-bold tracking-wider text-heading-light dark:text-heading-dark"
+                            className="text-xs sm:text-sm font-bold tracking-wider text-purple-400 dark:text-purple-300"
                         >
                             Champions Podium
                         </Typography>
@@ -189,8 +192,8 @@ const CylinderPodiumColumn: React.FC<CylinderPodiumColumnProps> = ({
     const rankSvg = rankMeta ? RANK_SVG_MAP[rankMeta.svgKey] || RANK_SVG_MAP['Unranked'] : null;
 
     return (
-        <div className="flex flex-col items-center justify-end text-center gap-1.5 min-w-0 group/cylinder w-full">
-            {/* ─── 1. Floating Crown with Sparkle (Consistent height for both full & empty states) ─── */}
+        <div className="flex flex-col items-center justify-end text-center gap-1.5 min-w-0 group/cylinder w-full transition-transform duration-300 hover:-translate-y-1">
+            {/* ─── 1. Floating Crown with Sparkle ─── */}
             <div className="h-7 flex items-center justify-center">
                 {isFirstPlace && (
                     <div className="relative animate-bounce">
@@ -350,33 +353,3 @@ const CylinderPodiumColumn: React.FC<CylinderPodiumColumnProps> = ({
         </div>
     );
 };
-
-export const ChampionsPodiumCardSkeleton: React.FC<{ className?: string }> = ({ className }) => (
-    <div className={cn('rounded-xl bg-foreground-light dark:bg-foreground-dark border border-secondary/20 p-5 sm:p-6 flex flex-col justify-between font-sans gap-5 animate-pulse w-full h-full min-h-110', className)}>
-        <div className="flex items-center justify-between">
-            <div className="w-36 h-5 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
-            <div className="w-24 h-4 rounded-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
-        </div>
-        <div className="grid grid-cols-3 gap-3.5 sm:gap-5 md:gap-7 items-end pt-4 flex-1 max-w-2xl mx-auto w-full">
-            <div className="flex flex-col items-center gap-2 w-full">
-                <div className="size-12 rounded-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
-                <div className="w-16 h-3 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
-                <div className="w-full h-34 rounded-b-3xl bg-foreground-light-shade3/50 dark:bg-foreground-dark-shade3/50" />
-            </div>
-            <div className="flex flex-col items-center gap-2 w-full">
-                <div className="size-16 rounded-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
-                <div className="w-20 h-3.5 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
-                <div className="w-full h-44 rounded-b-3xl bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/70" />
-            </div>
-            <div className="flex flex-col items-center gap-2 w-full">
-                <div className="size-11 rounded-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
-                <div className="w-16 h-3 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
-                <div className="w-full h-26 rounded-b-3xl bg-foreground-light-shade3/50 dark:bg-foreground-dark-shade3/50" />
-            </div>
-        </div>
-        <div className="pt-3 border-t border-secondary/15 flex justify-between">
-            <div className="w-28 h-3.5 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
-            <div className="w-24 h-3.5 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
-        </div>
-    </div>
-);

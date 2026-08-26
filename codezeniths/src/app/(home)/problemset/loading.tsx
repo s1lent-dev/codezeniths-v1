@@ -1,6 +1,11 @@
 import React from 'react';
-import { ProblemsetPageSkeleton } from '@codezeniths/design/widgets/problems/problemset-page-skeleton';
+import { Loader } from '@codezeniths/components';
 
 export default function Loading() {
-    return <ProblemsetPageSkeleton />;
+    return (
+        <div className="flex items-center justify-center min-h-[60vh] w-full">
+            <Loader />
+        </div>
+    );
 }
+

@@ -57,38 +57,6 @@ export class PlaylistQueryService implements IPlaylistQueryService {
         });
     }
 
-    getCommunityPlaylistsInfinite(input?: {
-        search?: string;
-        sortBy?: 'popular' | 'recent' | 'name';
-        order?: 'asc' | 'desc';
-        limit?: number;
-    }) {
-        const limit = input?.limit || 10;
-        return useInfiniteQuery({
-            queryKey: queryKeys.playlist.communityInfinite(input),
-            queryFn: async ({ pageParam = 1 }) => {
-                const queryInput = {
-                    page: pageParam,
-                    limit,
-                    search: input?.search,
-                    sortBy: input?.sortBy,
-                    order: input?.order,
-                };
-                const validatedInput = GetCommunityPlaylistsTRPCInputSchema.parse(queryInput);
-                const raw = await trpcClient.playlist.getCommunityPlaylists.query(validatedInput);
-                return GetCommunityPlaylistsTRPCOutputSchema.parse(raw);
-            },
-            initialPageParam: 1,
-            getNextPageParam: (lastPage) => {
-                if (lastPage.hasNextPage) {
-                    return lastPage.page + 1;
-                }
-                return undefined;
-            },
-            ...CACHE_TIERS.DYNAMIC,
-        });
-    }
-
     getPlaylistInfo(
         input: z.infer<typeof GetPlaylistInfoTRPCInputSchema>,
         options?: { enabled?: boolean }
@@ -240,7 +208,7 @@ export class PlaylistQueryService implements IPlaylistQueryService {
                 return ToggleProblemInPlaylistTRPCOutputSchema.parse(raw);
             },
             onMutate: async (variables) => {
-                const queryKey = ['playlist', 'forProblem', variables.problemId];
+                const queryKey = queryKeys.playlist.forProblem(variables.problemId);
                 await queryClient.cancelQueries({ queryKey });
 
                 const previousPlaylists = queryClient.getQueryData<Array<any>>(queryKey);
@@ -282,7 +250,7 @@ export class PlaylistQueryService implements IPlaylistQueryService {
     ) {
         const validatedInput = GetPlaylistsForProblemTRPCInputSchema.parse(input);
         return useQuery({
-            queryKey: ['playlist', 'forProblem', validatedInput.problemId],
+            queryKey: queryKeys.playlist.forProblem(validatedInput.problemId),
             queryFn: async () => {
                 const raw = await trpcClient.playlist.getPlaylistsForProblem.query(validatedInput);
                 return GetPlaylistsForProblemTRPCOutputSchema.parse(raw);

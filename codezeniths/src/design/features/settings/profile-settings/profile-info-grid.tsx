@@ -48,6 +48,8 @@ const TwitterIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+import { motion } from 'motion/react';
+
 export interface ProfileInfoGridProps {
     profile?: UserProfileDetails | null;
     isLoading?: boolean;
@@ -81,18 +83,42 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <div className="space-y-6 sm:space-y-7 animate-pulse">
+            <div className="space-y-6 sm:space-y-7 select-none font-sans">
                 {/* 1. Personal Details Card Skeleton */}
-                <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
-                    <div className="flex items-center gap-3">
-                        <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 relative overflow-hidden group">
+                    {/* Sweeping Shimmer Beam */}
+                    <motion.div
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{
+                            duration: 1.8,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                            repeatDelay: 0.2,
+                        }}
+                        className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                    />
+
+                    <div className="flex items-center gap-3 relative z-10">
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.8, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                            className="size-10 sm:size-12 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                        />
                         <div className="space-y-2 flex-1">
-                            <div className="h-4.5 w-36 rounded bg-secondary/20" />
-                            <div className="h-3 w-56 xs:w-72 rounded bg-secondary/15" />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                                className="h-4.5 w-36 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                            />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                                className="h-3 w-56 xs:w-72 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                            />
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 gap-y-5 xs:gap-y-6 sm:gap-y-7 gap-x-6 sm:gap-x-8 pt-4 sm:pt-6">
+                    <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 gap-y-5 xs:gap-y-6 sm:gap-y-7 gap-x-6 sm:gap-x-8 pt-4 sm:pt-6 relative z-10">
                         {[
                             'First Name',
                             'Last Name',
@@ -102,32 +128,80 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
                             'Location',
                         ].map((label, idx) => (
                             <div key={idx} className="flex flex-col gap-2">
-                                <div className="h-3 w-20 rounded bg-secondary/15" />
-                                <div className="h-4 w-28 xs:w-36 rounded bg-secondary/20" />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 + idx * 0.03 }}
+                                    className="h-3 w-20 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 + idx * 0.03 }}
+                                    className="h-4 w-28 xs:w-36 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
                             </div>
                         ))}
                     </div>
                 </Card>
 
                 {/* 2. Professional Background Card Skeleton */}
-                <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-8 sm:space-y-10">
-                    <div className="w-full flex flex-col gap-3">
+                <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-8 sm:space-y-10 relative overflow-hidden group">
+                    {/* Sweeping Shimmer Beam */}
+                    <motion.div
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{
+                            duration: 1.8,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                            repeatDelay: 0.2,
+                        }}
+                        className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                    />
+
+                    <div className="w-full flex flex-col gap-3 relative z-10">
                         <div className="flex items-center gap-3">
-                            <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                                className="size-10 sm:size-12 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                            />
                             <div className="space-y-2 flex-1">
-                                <div className="h-4.5 w-44 rounded bg-secondary/20" />
-                                <div className="h-3 w-64 xs:w-80 rounded bg-secondary/15" />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                                    className="h-4.5 w-44 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                                    className="h-3 w-64 xs:w-80 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 xs:grid-cols-2 gap-y-5 xs:gap-y-6 sm:gap-y-7 gap-x-6 sm:gap-x-8 pt-4 sm:pt-6">
                             <div className="flex flex-col gap-2">
-                                <div className="h-3 w-20 rounded bg-secondary/15" />
-                                <div className="h-4 w-32 rounded bg-secondary/20" />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                                    className="h-3 w-20 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 }}
+                                    className="h-4 w-32 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
                             </div>
                             <div className="flex flex-col gap-2">
-                                <div className="h-3 w-28 rounded bg-secondary/15" />
-                                <div className="h-4 w-36 rounded bg-secondary/20" />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.12 }}
+                                    className="h-3 w-28 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.17 }}
+                                    className="h-4 w-36 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
                             </div>
                         </div>
 
@@ -135,11 +209,27 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
 
                         {/* About / Bio Skeleton */}
                         <div className="space-y-3">
-                            <div className="h-3 w-24 rounded bg-secondary/15" />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 }}
+                                className="h-3 w-24 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                            />
                             <div className="p-5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 space-y-2.5">
-                                <div className="h-3.5 w-full rounded bg-secondary/20" />
-                                <div className="h-3.5 w-5/6 rounded bg-secondary/15" />
-                                <div className="h-3.5 w-3/4 rounded bg-secondary/15" />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
+                                    className="h-3.5 w-full rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.25 }}
+                                    className="h-3.5 w-5/6 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
+                                    className="h-3.5 w-3/4 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                />
                             </div>
                         </div>
 
@@ -148,15 +238,23 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
                         {/* Skills Skeleton */}
                         <div className="space-y-3.5">
                             <div className="flex items-center justify-between">
-                                <div className="h-3 w-36 rounded bg-secondary/15" />
-                                <div className="h-5 w-16 rounded-full bg-primary/10" />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
+                                    className="h-3 w-36 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.25 }}
+                                    className="h-5 w-16 rounded-full bg-primary/10 dark:bg-primary/20"
+                                />
                             </div>
                             <div className="flex flex-wrap gap-2.5 pt-1">
-                                <div className="h-7 w-20 rounded-md bg-primary/10" />
-                                <div className="h-7 w-24 rounded-md bg-primary/10" />
-                                <div className="h-7 w-28 rounded-md bg-primary/10" />
-                                <div className="h-7 w-20 rounded-md bg-primary/10" />
-                                <div className="h-7 w-32 rounded-md bg-primary/10" />
+                                <motion.div animate={{ opacity: [0.35, 0.8, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }} className="h-7 w-20 rounded-md bg-primary/10 dark:bg-primary/20" />
+                                <motion.div animate={{ opacity: [0.35, 0.8, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.25 }} className="h-7 w-24 rounded-md bg-primary/10 dark:bg-primary/20" />
+                                <motion.div animate={{ opacity: [0.35, 0.8, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }} className="h-7 w-28 rounded-md bg-primary/10 dark:bg-primary/20" />
+                                <motion.div animate={{ opacity: [0.35, 0.8, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.35 }} className="h-7 w-20 rounded-md bg-primary/10 dark:bg-primary/20" />
+                                <motion.div animate={{ opacity: [0.35, 0.8, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }} className="h-7 w-32 rounded-md bg-primary/10 dark:bg-primary/20" />
                             </div>
                         </div>
 
@@ -164,42 +262,70 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
 
                         {/* Resume Document Skeleton */}
                         <div className="space-y-3">
-                            <div className="h-3 w-32 rounded bg-secondary/15" />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.25 }}
+                                className="h-3 w-32 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                            />
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4.5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40">
                                 <div className="flex items-center gap-3.5 min-w-0">
-                                    <div className="size-9 rounded-md bg-primary/15 shrink-0" />
+                                    <motion.div animate={{ opacity: [0.35, 0.8, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }} className="size-9 rounded-md bg-primary/15 dark:bg-primary/25 shrink-0" />
                                     <div className="space-y-1.5 min-w-0">
-                                        <div className="h-4 w-44 rounded bg-secondary/20" />
-                                        <div className="h-3 w-28 rounded bg-secondary/15" />
+                                        <motion.div animate={{ opacity: [0.35, 0.8, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }} className="h-4 w-44 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3" />
+                                        <motion.div animate={{ opacity: [0.35, 0.75, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }} className="h-3 w-28 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60" />
                                     </div>
                                 </div>
-                                <div className="h-8 w-28 rounded-sm bg-primary/15 shrink-0" />
+                                <motion.div animate={{ opacity: [0.35, 0.8, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 }} className="h-8 w-28 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0" />
                             </div>
                         </div>
                     </div>
                 </Card>
 
                 {/* 3. Social Profiles Card Skeleton */}
-                <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7">
-                    <div className="flex items-center gap-3">
-                        <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 relative overflow-hidden group">
+                    {/* Sweeping Shimmer Beam */}
+                    <motion.div
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{
+                            duration: 1.8,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                            repeatDelay: 0.2,
+                        }}
+                        className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                    />
+
+                    <div className="flex items-center gap-3 relative z-10">
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.8, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                            className="size-10 sm:size-12 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                        />
                         <div className="space-y-2 flex-1">
-                            <div className="h-4.5 w-32 rounded bg-secondary/20" />
-                            <div className="h-3 w-64 xs:w-72 rounded bg-secondary/15" />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                                className="h-4.5 w-32 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                            />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                                className="h-3 w-64 xs:w-72 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                            />
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 pt-4 sm:pt-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 pt-4 sm:pt-6 relative z-10">
                         {[1, 2, 3, 4].map((idx) => (
                             <div
                                 key={idx}
                                 className="p-4 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 flex items-center justify-between gap-3"
                             >
                                 <div className="flex items-center gap-2.5">
-                                    <div className="size-4.5 rounded bg-secondary/20 shrink-0" />
-                                    <div className="h-3.5 w-16 rounded bg-secondary/15" />
+                                    <motion.div animate={{ opacity: [0.35, 0.75, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 + idx * 0.04 }} className="size-4.5 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0" />
+                                    <motion.div animate={{ opacity: [0.35, 0.75, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 + idx * 0.04 }} className="h-3.5 w-16 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60" />
                                 </div>
-                                <div className="h-3.5 w-24 rounded bg-secondary/20" />
+                                <motion.div animate={{ opacity: [0.35, 0.8, 0.35] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 + idx * 0.04 }} className="h-3.5 w-24 rounded bg-primary/15 dark:bg-primary/25" />
                             </div>
                         ))}
                     </div>

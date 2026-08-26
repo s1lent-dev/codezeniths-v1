@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { cn } from '@codezeniths/design/cn';
 import { ProblemRow, ProblemItem } from './problem-row';
+import { ProblemRowSkeleton } from './problem-list-skeleton';
 import {
     ProblemFilterInput,
     ProblemSortingInput,
@@ -754,28 +755,14 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                         <td className="w-44 min-w-44 max-w-44 p-0 border-0" />
                                     </tr>
                                 )}
-                                {/* Infinite Scroll Skeleton Row Placeholders (Zero Layout Shift) */}
+                                {/* Infinite Scroll Skeleton Row Placeholders (Zero Layout Shift with Breathing Effect) */}
                                 {viewMode === 'infinite' && isFetchingNextPage && (
                                     <>
                                         {Array.from({ length: 3 }).map((_, idx) => (
-                                            <tr
+                                            <ProblemRowSkeleton
                                                 key={`fetching-skeleton-${idx}`}
-                                                className="h-13 box-border border-0 bg-foreground-light-shade1/40 dark:bg-foreground-dark-shade1/40 animate-pulse rounded-md"
-                                            >
-                                                <td className="w-12 min-w-[48px] max-w-[48px] pl-4 py-3.5 text-center align-middle rounded-l-md border-0">
-                                                    <div className="w-4 h-4 mx-auto rounded bg-foreground-light-shade3/60 dark:bg-foreground-dark-shade3/60" />
-                                                </td>
-                                                <td className="w-auto py-3.5 px-3 align-middle border-0">
-                                                    <div className="h-4 w-2/5 rounded-md bg-foreground-light-shade3/60 dark:bg-foreground-dark-shade3/60" />
-                                                </td>
-                                                <td className="w-48 min-w-48 max-w-48 pr-4 py-3.5 text-right align-middle rounded-r-md border-0">
-                                                    <div className="flex items-center justify-end gap-3.5">
-                                                        <div className="w-4 h-4 rounded bg-foreground-light-shade3/60 dark:bg-foreground-dark-shade3/60" />
-                                                        <div className="w-12 h-4 rounded-md bg-foreground-light-shade3/60 dark:bg-foreground-dark-shade3/60" />
-                                                        <div className="w-4 h-4 rounded-full bg-foreground-light-shade3/60 dark:bg-foreground-dark-shade3/60" />
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                                index={problems.length + idx}
+                                            />
                                         ))}
                                     </>
                                 )}

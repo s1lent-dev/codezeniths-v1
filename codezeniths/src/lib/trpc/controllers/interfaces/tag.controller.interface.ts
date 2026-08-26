@@ -1,14 +1,14 @@
 import { TRPCContext } from '../../trpc/trpc.context';
 import {
     GetTagsTRPCOutputSchema,
-    GetTagsFilteredTRPCInputSchema,
-    GetTagsFilteredTRPCOutputSchema,
-    GetSingleTagProblemsTRPCInputSchema,
-    GetSingleTagProblemsTRPCOutputSchema,
-    GetSingleTagProblemProgressTRPCInputSchema,
-    GetSingleTagProblemProgressTRPCOutputSchema,
+    GetTagsCatalogueTRPCInputSchema,
+    GetTagsCatalogueTRPCOutputSchema,
+    GetSingleTagProgressTRPCInputSchema,
+    GetSingleTagProgressTRPCOutputSchema,
     GetSingleTagTRPCInputSchema,
     GetSingleTagTRPCOutputSchema,
+    GetTagSuggestionsTRPCInputSchema,
+    GetTagSuggestionsTRPCOutputSchema,
     ToggleTagBookmarkTRPCInputSchema,
     ToggleTagBookmarkTRPCOutputSchema,
     GetUserTagProgressByLevelTRPCInputSchema,
@@ -21,25 +21,25 @@ export interface ITagController {
         ctx: TRPCContext;
     }): Promise<z.infer<typeof GetTagsTRPCOutputSchema>>;
 
-    getTagsFiltered(args: {
+    getTagsCatalogue(args: {
         ctx: TRPCContext;
-        input: z.infer<typeof GetTagsFilteredTRPCInputSchema>;
-    }): Promise<z.infer<typeof GetTagsFilteredTRPCOutputSchema>>;
+        input: z.infer<typeof GetTagsCatalogueTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetTagsCatalogueTRPCOutputSchema>>;
 
-    getSingleTagProblems(args: {
+    getSingleTagProgress(args: {
         ctx: TRPCContext;
-        input: z.infer<typeof GetSingleTagProblemsTRPCInputSchema>;
-    }): Promise<z.infer<typeof GetSingleTagProblemsTRPCOutputSchema>>;
-
-    getSingleTagProblemProgress(args: {
-        ctx: TRPCContext;
-        input: z.infer<typeof GetSingleTagProblemProgressTRPCInputSchema>;
-    }): Promise<z.infer<typeof GetSingleTagProblemProgressTRPCOutputSchema>>;
+        input: z.infer<typeof GetSingleTagProgressTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetSingleTagProgressTRPCOutputSchema>>;
 
     getSingleTag(args: {
         ctx: TRPCContext;
         input: z.infer<typeof GetSingleTagTRPCInputSchema>;
     }): Promise<z.infer<typeof GetSingleTagTRPCOutputSchema>>;
+
+    getTagSuggestions(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetTagSuggestionsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetTagSuggestionsTRPCOutputSchema>>;
 
     toggleTagBookmark(args: {
         ctx: TRPCContext;

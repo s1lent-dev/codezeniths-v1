@@ -11,8 +11,6 @@ import {
     GetSearchProductsOutputSchema,
     GetSearchUsersInputSchema,
     GetSearchUsersOutputSchema,
-    RecordSearchSelectionInputSchema,
-    RecordSearchSelectionOutputSchema,
     GetRecentSearchHistoryInputSchema,
     GetRecentSearchHistoryOutputSchema,
     DeleteSearchHistoryItemInputSchema,
@@ -34,12 +32,9 @@ export interface ISearchQueries {
     getSearchProducts(input?: z.infer<typeof GetSearchProductsInputSchema>): Promise<z.infer<typeof GetSearchProductsOutputSchema>>;
     getSearchUsers(input?: z.infer<typeof GetSearchUsersInputSchema>): Promise<z.infer<typeof GetSearchUsersOutputSchema>>;
 
-    recordSearchHistory(input: z.infer<typeof RecordSearchSelectionInputSchema>): Promise<z.infer<typeof RecordSearchSelectionOutputSchema>>;
     getRecentSearchHistory(input: z.infer<typeof GetRecentSearchHistoryInputSchema>): Promise<z.infer<typeof GetRecentSearchHistoryOutputSchema>>;
     getSearchHistoryInfinite(input: z.infer<typeof GetSearchHistoryInfiniteInputSchema>): Promise<z.infer<typeof GetSearchHistoryInfiniteOutputSchema>>;
     getSearchHistoryStats(input: z.infer<typeof GetSearchHistoryStatsInputSchema>): Promise<z.infer<typeof GetSearchHistoryStatsOutputSchema>>;
     deleteSearchHistoryItem(input: z.infer<typeof DeleteSearchHistoryItemInputSchema>): Promise<z.infer<typeof DeleteSearchHistoryItemOutputSchema>>;
     clearSearchHistory(input: z.infer<typeof ClearSearchHistoryInputSchema>): Promise<z.infer<typeof ClearSearchHistoryOutputSchema>>;
 }
-
-

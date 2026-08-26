@@ -1,6 +1,5 @@
 import { IFavouriteQueries } from './interfaces/favourite.queries.interface';
 import { qRPC } from './utils/qrpc.utils';
-import { countBy } from './utils/problem.utils';
 import {
     GetFavouriteInfoInputSchema,
     GetFavouriteInfoOutputSchema,
@@ -24,40 +23,64 @@ export class FavouriteQueries implements IFavouriteQueries {
                 select: {
                     status: true,
                     revisit: true,
-                    problemId: true,
                     problem: {
                         select: {
-                            id: true,
                             difficulty: true,
                         },
                     },
                 },
             });
 
-            const allProblems = userFavourites.map((f) => f.problem).filter((p): p is { id: string; difficulty: any } => Boolean(p));
-            const problemsCount = allProblems.length;
+            // Fast-path for empty favourites list (0ms)
+            if (userFavourites.length === 0) {
+                return {
+                    title: 'Favourite Problems',
+                    description: 'Access and practice your starred and bookmarked coding problems in one place.',
+                    progress: {
+                        problemsCount: 0,
+                        problemsSolvedCount: 0,
+                        problemsRevisitCount: 0,
+                        problemNotSolvedCount: 0,
+                        problemsSolvedPercentage: 0,
+                        problemsCountByDifficulty: { easy: 0, medium: 0, hard: 0 },
+                        problemsSolvedCountByDifficulty: { easy: 0, medium: 0, hard: 0 },
+                    },
+                };
+            }
 
-            const problemsSolvedCount = userFavourites.filter((p) => p.status === 'solved').length;
-            const problemsRevisitCount = userFavourites.filter((p) => p.revisit === true).length;
-            const solvedProgress = userFavourites.filter((p) => p.status === 'solved' && p.problem);
+            // Single-Pass O(N) Accumulator across all favourite problems
+            let problemsCount = 0;
+            let problemsSolvedCount = 0;
+            let problemsRevisitCount = 0;
+            const problemsCountByDifficulty = { easy: 0, medium: 0, hard: 0 };
+            const problemsSolvedCountByDifficulty = { easy: 0, medium: 0, hard: 0 };
+
+            for (const item of userFavourites) {
+                if (!item.problem) continue;
+
+                problemsCount++;
+                const diff = item.problem.difficulty as 'easy' | 'medium' | 'hard';
+                if (diff === 'easy') problemsCountByDifficulty.easy++;
+                else if (diff === 'medium') problemsCountByDifficulty.medium++;
+                else if (diff === 'hard') problemsCountByDifficulty.hard++;
+
+                if (item.status === 'solved') {
+                    problemsSolvedCount++;
+                    if (diff === 'easy') problemsSolvedCountByDifficulty.easy++;
+                    else if (diff === 'medium') problemsSolvedCountByDifficulty.medium++;
+                    else if (diff === 'hard') problemsSolvedCountByDifficulty.hard++;
+                }
+
+                if (item.revisit === true) {
+                    problemsRevisitCount++;
+                }
+            }
 
             const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
             const problemsSolvedPercentage =
-                problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
-
-            const problemsCountByDifficultyRaw = countBy(allProblems, (p) => p.difficulty);
-            const problemsCountByDifficulty = {
-                easy: problemsCountByDifficultyRaw.easy || 0,
-                medium: problemsCountByDifficultyRaw.medium || 0,
-                hard: problemsCountByDifficultyRaw.hard || 0,
-            };
-
-            const problemsSolvedCountByDifficultyRaw = countBy(solvedProgress, (p) => p.problem!.difficulty);
-            const problemsSolvedCountByDifficulty = {
-                easy: problemsSolvedCountByDifficultyRaw.easy || 0,
-                medium: problemsSolvedCountByDifficultyRaw.medium || 0,
-                hard: problemsSolvedCountByDifficultyRaw.hard || 0,
-            };
+                problemsCount > 0
+                    ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2))
+                    : 0;
 
             return {
                 title: 'Favourite Problems',

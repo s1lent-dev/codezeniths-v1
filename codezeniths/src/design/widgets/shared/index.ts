@@ -10,4 +10,5 @@ export * from './detail-info-card';
 export * from './sidebar';
 export * from './breadcrumb-header';
 export * from './rank-card';
+export * from './resume-module-card';
 export { Navbar, Footer, Sidebar };

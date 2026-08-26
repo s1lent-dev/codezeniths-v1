@@ -103,9 +103,6 @@ export function useProfile({ username }: UseProfileOptions = {}) {
                     queryClient.invalidateQueries({
                         queryKey: queryKeys.user.profileDetails(username || targetUserId),
                     });
-                    queryClient.invalidateQueries({
-                        queryKey: queryKeys.user.followStats(targetUserId),
-                    });
                 },
             }
         );
@@ -119,9 +116,6 @@ export function useProfile({ username }: UseProfileOptions = {}) {
                 onSuccess: () => {
                     queryClient.invalidateQueries({
                         queryKey: queryKeys.user.profileDetails(username || targetUserId),
-                    });
-                    queryClient.invalidateQueries({
-                        queryKey: queryKeys.user.followStats(targetUserId),
                     });
                 },
             }

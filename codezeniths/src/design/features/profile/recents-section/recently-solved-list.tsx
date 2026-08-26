@@ -42,6 +42,8 @@ export function formatTimeAgo(dateInput?: string | Date | null): string {
     });
 }
 
+import { motion } from 'motion/react';
+
 export const RecentlySolvedList: React.FC<RecentlySolvedListProps> = ({
     problems = [],
     isLoading = false,
@@ -51,24 +53,48 @@ export const RecentlySolvedList: React.FC<RecentlySolvedListProps> = ({
         return (
             <div
                 className={cn(
-                    'rounded-lg bg-foreground-light dark:bg-foreground-dark border border-secondary/20 p-5 shadow-xs font-sans w-full space-y-3.5',
+                    'rounded-lg bg-foreground-light dark:bg-foreground-dark border border-secondary/20 p-5 shadow-xs font-sans w-full space-y-3.5 relative overflow-hidden select-none',
                     className
                 )}
             >
-                <div className="h-5 w-44 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md animate-pulse" />
-                <div className="flex flex-col gap-1.5">
+                {/* Sweeping Shimmer Beam */}
+                <motion.div
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{
+                        duration: 1.8,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        repeatDelay: 0.2,
+                    }}
+                    className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                />
+
+                <motion.div
+                    animate={{ opacity: [0.35, 0.85, 0.35] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                    className="h-5 w-44 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md relative z-10"
+                />
+                <div className="flex flex-col gap-1.5 relative z-10">
                     {[1, 2, 3, 4, 5].map((i, index) => (
                         <div
                             key={i}
                             className={cn(
-                                'py-3.5 px-4 rounded-md flex justify-between items-center animate-pulse',
+                                'py-3.5 px-4 rounded-md flex justify-between items-center',
                                 index % 2 === 0
-                                    ? 'bg-foreground-light-shade1 dark:bg-foreground-dark-shade1'
+                                    ? 'bg-foreground-light-shade1/70 dark:bg-foreground-dark-shade1/70'
                                     : 'bg-transparent'
                             )}
                         >
-                            <div className="h-4 w-48 bg-foreground-dark-shade1/60 dark:bg-foreground-dark-shade1/60 rounded-md" />
-                            <div className="h-3.5 w-16 bg-foreground-dark-shade1/60 dark:bg-foreground-dark-shade1/60 rounded-md" />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: index * 0.05 }}
+                                className="h-4 w-48 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
+                            />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: index * 0.05 + 0.03 }}
+                                className="h-3.5 w-16 bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60 rounded-md"
+                            />
                         </div>
                     ))}
                 </div>

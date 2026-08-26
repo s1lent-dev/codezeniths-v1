@@ -2,12 +2,16 @@
 
 import React from 'react';
 import { TagInfoCard, TagInfoCardProps } from './tag-info-card';
-import { TagSuggestions } from './tag-suggestions';
+import { TagSuggestions, SimilarTagItem } from './tag-suggestions';
 import { cn } from '@codezeniths/design/cn';
 
 export interface TagInfoSectionProps {
     tagDetails?: TagInfoCardProps['tagDetails'];
+    tagProgress?: TagInfoCardProps['tagProgress'];
+    tagSuggestions?: SimilarTagItem[];
     isLoading?: boolean;
+    isLoadingProgress?: boolean;
+    isLoadingSuggestions?: boolean;
     onToggleBookmark?: () => void;
     isBookmarkBusy?: boolean;
     className?: string;
@@ -15,7 +19,11 @@ export interface TagInfoSectionProps {
 
 export const TagInfoSection: React.FC<TagInfoSectionProps> = ({
     tagDetails,
+    tagProgress,
+    tagSuggestions,
     isLoading = false,
+    isLoadingProgress = false,
+    isLoadingSuggestions = false,
     onToggleBookmark,
     isBookmarkBusy = false,
     className,
@@ -25,18 +33,20 @@ export const TagInfoSection: React.FC<TagInfoSectionProps> = ({
             {/* Tag Info & Progress Card */}
             <TagInfoCard
                 tagDetails={tagDetails}
+                tagProgress={tagProgress}
                 isLoading={isLoading}
+                isLoadingProgress={isLoadingProgress}
                 onToggleBookmark={onToggleBookmark}
                 isBookmarkBusy={isBookmarkBusy}
             />
 
             {/* Separate Tag Suggestions / Similar Tags Card */}
-            {isLoading ? (
+            {isLoadingSuggestions ? (
                 <TagSuggestions isLoading={true} />
             ) : (
-                tagDetails?.similarTags &&
-                tagDetails.similarTags.length > 0 && (
-                    <TagSuggestions similarTags={tagDetails.similarTags} isLoading={false} />
+                tagSuggestions &&
+                tagSuggestions.length > 0 && (
+                    <TagSuggestions similarTags={tagSuggestions} isLoading={false} />
                 )
             )}
         </div>

@@ -12,8 +12,6 @@ import {
     MarkAllAsReadTRPCOutputSchema,
     UpsertDeviceTokenTRPCInputSchema,
     UpsertDeviceTokenTRPCOutputSchema,
-    RemoveDeviceTokenTRPCInputSchema,
-    RemoveDeviceTokenTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { z } from 'zod';
 import type { INotificationQueryService } from '../interfaces';
@@ -95,16 +93,6 @@ export class NotificationQueryService implements INotificationQueryService {
                 const validatedInput = UpsertDeviceTokenTRPCInputSchema.parse(variables);
                 const raw = await trpcClient.notification.upsertDeviceToken.mutate(validatedInput);
                 return UpsertDeviceTokenTRPCOutputSchema.parse(raw);
-            },
-        });
-    }
-
-    removeDeviceToken() {
-        return useMutation({
-            mutationFn: async (variables: z.infer<typeof RemoveDeviceTokenTRPCInputSchema>) => {
-                const validatedInput = RemoveDeviceTokenTRPCInputSchema.parse(variables);
-                const raw = await trpcClient.notification.removeDeviceToken.mutate(validatedInput);
-                return RemoveDeviceTokenTRPCOutputSchema.parse(raw);
             },
         });
     }

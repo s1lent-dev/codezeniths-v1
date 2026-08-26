@@ -6,6 +6,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@codezeniths/components';
 import { Typography } from '@codezeniths/components';
 import { cn } from '@codezeniths/design/cn';
 
+import { motion } from 'motion/react';
+
 export interface UserInfoCardProps {
     name?: string | null;
     username?: string | null;
@@ -38,12 +40,28 @@ export const UserInfoCard: React.FC<UserInfoCardProps> = ({
 
     if (isLoading) {
         return (
-            <div className={cn('flex items-center gap-4 w-full animate-pulse', className)}>
-                <div className="size-18 sm:size-20 rounded-full bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 shrink-0" />
+            <div className={cn('flex items-center gap-4 w-full select-none relative overflow-hidden', className)}>
+                <motion.div
+                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                    className="size-18 sm:size-20 rounded-full bg-primary/15 dark:bg-primary/25 shrink-0"
+                />
                 <div className="flex flex-col gap-2 flex-1 min-w-0">
-                    <div className="h-6 w-32 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                    <div className="h-4 w-24 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-md" />
-                    <div className="h-5 w-20 bg-foreground-dark-shade1 dark:bg-foreground-dark-shade1 rounded-full" />
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.85, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                        className="h-6 w-32 bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 rounded-md"
+                    />
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                        className="h-4 w-24 bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60 rounded-md"
+                    />
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 }}
+                        className="h-5 w-20 bg-primary/10 dark:bg-primary/20 rounded-full"
+                    />
                 </div>
             </div>
         );

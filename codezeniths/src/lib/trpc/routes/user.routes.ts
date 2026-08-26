@@ -1,11 +1,6 @@
 import { createTRPCRouter } from "../trpc";
 import { publicProcedure, protectedProcedure } from "../trpc/trpc.procedure";
-import { UserSocialLinksSchema } from "@codezeniths/schemas/db";
 import {
-    GetProfileByIdInputSchema,
-    GetProfileByIdOutputSchema,
-    GetProfileByUsernameInputSchema,
-    GetProfileByUsernameOutputSchema,
     GetSettingsInputSchema,
     GetSettingsOutputSchema,
     UpdateProfileInputSchema,
@@ -22,16 +17,12 @@ import {
     RemoveResumeOutputSchema,
     GetExtractionProgressInputSchema,
     GetExtractionProgressOutputSchema,
-    GetAvatarInputSchema,
-    GetAvatarOutputSchema,
     CheckUserNameAvailabilityInputSchema,
     CheckUserNameAvailabilityOutputSchema,
     CheckEmailAvailabilityInputSchema,
     CheckEmailAvailabilityOutputSchema,
     CheckPhoneAvailabilityInputSchema,
     CheckPhoneAvailabilityOutputSchema,
-    GetAvatarUploadUrlInputSchema,
-    GetAvatarUploadUrlOutputSchema,
     GetOnboardingProfileInputSchema,
     GetOnboardingProfileOutputSchema,
     UpdateOnboardingStep0InputSchema,
@@ -44,22 +35,16 @@ import {
     UpdateOnboardingStep3OutputSchema,
     ExtractResumeSkillsInputSchema,
     ExtractResumeSkillsOutputSchema,
-    GetResumeDownloadUrlInputSchema,
-    GetResumeDownloadUrlOutputSchema,
     GetUserMonthlyActivityInputSchema,
     GetUserMonthlyActivityOutputSchema,
-    GetActiveStreakTRPCOutputSchema,
     GetUserStreakTRPCInputSchema,
     GetUserStreakTRPCOutputSchema,
     RecordDailyCheckInTRPCInputSchema,
     RecordDailyCheckInTRPCOutputSchema,
     FollowUserTRPCInputSchema,
-
     FollowUserTRPCOutputSchema,
     UnfollowUserTRPCInputSchema,
     UnfollowUserTRPCOutputSchema,
-    GetFollowStatsTRPCInputSchema,
-    GetFollowStatsTRPCOutputSchema,
     GetFollowersTRPCInputSchema,
     GetFollowersTRPCOutputSchema,
     GetFollowingTRPCInputSchema,
@@ -85,18 +70,6 @@ import {
 } from "@/schemas/trpc";
 
 export const userRouter = createTRPCRouter({
-    getProfileById: protectedProcedure
-        .input(GetProfileByIdInputSchema)
-        .output(GetProfileByIdOutputSchema)
-        .query(({ ctx, input }) => ctx.controllers.user.getProfileById({ ctx, input })),
-
-    getProfileByUsername: publicProcedure
-        .input(GetProfileByUsernameInputSchema)
-        .output(GetProfileByUsernameOutputSchema)
-        .query(({ ctx, input }) =>
-            ctx.controllers.user.getProfileByUsername({ ctx, input }),
-        ),
-
     getSettings: protectedProcedure
         .input(GetSettingsInputSchema)
         .output(GetSettingsOutputSchema)
@@ -109,12 +82,6 @@ export const userRouter = createTRPCRouter({
         .output(UpdateProfileOutputSchema)
         .mutation(({ ctx, input }) =>
             ctx.controllers.user.updateProfile({ ctx, input }),
-        ),
-
-    getSocialLinks: protectedProcedure
-        .output(UserSocialLinksSchema.nullable())
-        .query(({ ctx }) =>
-            ctx.controllers.user.getSettings({ ctx, input: { userId: ctx.user.id } }).then(s => s.socials)
         ),
 
     upsertSocialLinks: protectedProcedure
@@ -151,18 +118,6 @@ export const userRouter = createTRPCRouter({
         .mutation(({ ctx, input }) =>
             ctx.controllers.user.removeResume({ ctx, input }),
         ),
-
-    getAvatarUploadUrl: protectedProcedure
-        .input(GetAvatarUploadUrlInputSchema)
-        .output(GetAvatarUploadUrlOutputSchema)
-        .mutation(({ ctx, input }) =>
-            ctx.controllers.user.getAvatarUploadUrl({ ctx, input }),
-        ),
-
-    getAvatar: protectedProcedure
-        .input(GetAvatarInputSchema)
-        .output(GetAvatarOutputSchema)
-        .query(({ ctx, input }) => ctx.controllers.user.getAvatar({ ctx, input })),
 
     checkUserNameAvailability: publicProcedure
         .input(CheckUserNameAvailabilityInputSchema)
@@ -214,19 +169,10 @@ export const userRouter = createTRPCRouter({
         .output(GetExtractionProgressOutputSchema)
         .query(({ ctx, input }) => ctx.controllers.user.getExtractionProgress({ ctx, input })),
 
-    getResumeDownloadUrl: protectedProcedure
-        .input(GetResumeDownloadUrlInputSchema)
-        .output(GetResumeDownloadUrlOutputSchema)
-        .query(({ ctx, input }) => ctx.controllers.user.getResumeDownloadUrl({ ctx, input })),
-
     getUserMonthlyActivity: protectedProcedure
         .input(GetUserMonthlyActivityInputSchema)
         .output(GetUserMonthlyActivityOutputSchema)
         .query(({ ctx, input }) => ctx.controllers.user.getUserMonthlyActivity({ ctx, input })),
-
-    getActiveStreak: publicProcedure
-        .output(GetActiveStreakTRPCOutputSchema)
-        .query(({ ctx }) => ctx.controllers.user.getActiveStreak({ ctx })),
 
     getUserStreak: publicProcedure
         .input(GetUserStreakTRPCInputSchema)
@@ -238,7 +184,6 @@ export const userRouter = createTRPCRouter({
         .output(RecordDailyCheckInTRPCOutputSchema)
         .mutation(({ ctx, input }) => ctx.controllers.user.recordDailyCheckIn({ ctx, input })),
 
-
     followUser: protectedProcedure
         .input(FollowUserTRPCInputSchema)
         .output(FollowUserTRPCOutputSchema)
@@ -248,11 +193,6 @@ export const userRouter = createTRPCRouter({
         .input(UnfollowUserTRPCInputSchema)
         .output(UnfollowUserTRPCOutputSchema)
         .mutation(({ ctx, input }) => ctx.controllers.user.unfollowUser({ ctx, input })),
-
-    getFollowStats: publicProcedure
-        .input(GetFollowStatsTRPCInputSchema)
-        .output(GetFollowStatsTRPCOutputSchema)
-        .query(({ ctx, input }) => ctx.controllers.user.getFollowStats({ ctx, input })),
 
     getFollowers: publicProcedure
         .input(GetFollowersTRPCInputSchema)
@@ -312,5 +252,3 @@ export const userRouter = createTRPCRouter({
     deleteAccount: protectedProcedure
         .mutation(({ ctx }) => ctx.controllers.user.deleteAccount({ ctx })),
 });
-
-

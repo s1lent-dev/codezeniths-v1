@@ -4,6 +4,8 @@ import {
     GetSingleTopicOutputSchema,
     GetSingleTopicProgressInputSchema,
     GetSingleTopicProgressOutputSchema,
+    GetTopicSuggestionsInputSchema,
+    GetTopicSuggestionsOutputSchema,
 } from '@codezeniths/schemas/db';
 
 export interface ITopicQueries {
@@ -14,4 +16,9 @@ export interface ITopicQueries {
     getSingleTopicProgress: (
         payload: z.infer<typeof GetSingleTopicProgressInputSchema>,
     ) => Promise<z.infer<typeof GetSingleTopicProgressOutputSchema>>;
+
+    getTopicSuggestions: (
+        payload: z.infer<typeof GetTopicSuggestionsInputSchema>,
+    ) => Promise<z.infer<typeof GetTopicSuggestionsOutputSchema>>;
 }
+

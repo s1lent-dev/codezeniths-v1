@@ -5,8 +5,9 @@ import { Button, ButtonVariant } from '@codezeniths/components';
 import { Carousel, CarouselContent, CarouselItem } from '@codezeniths/modules';
 import AutoScroll from 'embla-carousel-auto-scroll';
 import { animate } from 'motion';
-import { Sparkles, Layers } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { moduleQueryService } from '@/lib/tanstack/services/module.query-service';
+import { TagsQuickTabsSkeleton } from './tags-quick-tabs-skeleton';
 
 export interface TagsQuickTabsProps {
     selectedModuleSlug?: string;
@@ -66,6 +67,10 @@ export const TagsQuickTabs: React.FC<TagsQuickTabsProps> = ({
         setSpeedSmoothly(NORMAL_SPEED);
     }, [setSpeedSmoothly]);
 
+    if (isLoading) {
+        return <TagsQuickTabsSkeleton />;
+    }
+
     const badgeClass = (active: boolean) =>
         `inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all cursor-pointer border ${
             active
@@ -75,11 +80,11 @@ export const TagsQuickTabs: React.FC<TagsQuickTabsProps> = ({
 
     return (
         <div className="w-full rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark p-4 shadow-xs space-y-3 overflow-hidden relative">
-            {/* Header */}
+            {/* Header: Subtle module filter heading */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-light dark:text-muted-dark uppercase tracking-wider">
-                    <Sparkles className="size-3.5 text-primary" />
-                    <span>Popular Topic Categories</span>
+                    <Layers className="size-3.5 text-primary" />
+                    <span>Filter Tags by Module</span>
                 </div>
                 {selectedModuleSlug && (
                     <Button
@@ -100,50 +105,40 @@ export const TagsQuickTabs: React.FC<TagsQuickTabsProps> = ({
                 onMouseLeave={handleMouseLeave}
             >
                 <Carousel
-                    key={isLoading ? 'loading' : `loaded-${modules?.length ?? 0}`}
+                    key={`loaded-${modules?.length ?? 0}`}
                     options={{ loop: true, align: 'start', dragFree: true }}
                     plugins={[autoScrollPlugin.current]}
                     className="w-full"
                 >
                     <CarouselContent className="flex items-center ml-0">
-                        {isLoading ? (
-                            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-                                <CarouselItem key={i} className="pl-2 basis-auto">
-                                    <div className="h-7 w-28 rounded-md bg-foreground-light-shade3 dark:bg-foreground-dark-shade1 animate-pulse" />
-                                </CarouselItem>
-                            ))
-                        ) : (
-                            <>
-                                {/* All Topics */}
-                                <CarouselItem className="pl-2 basis-auto">
-                                    <button
-                                        type="button"
-                                        onClick={() => onSelectModuleSlug(undefined)}
-                                        className={badgeClass(selectedModuleSlug === undefined)}
-                                    >
-                                        <Layers className="size-3.5" />
-                                        <span>All Topics</span>
-                                    </button>
-                                </CarouselItem>
+                        {/* All Modules / Reset Option */}
+                        <CarouselItem className="pl-2 basis-auto">
+                            <button
+                                type="button"
+                                onClick={() => onSelectModuleSlug(undefined)}
+                                className={badgeClass(selectedModuleSlug === undefined)}
+                            >
+                                <Layers className="size-3.5" />
+                                <span>All Modules</span>
+                            </button>
+                        </CarouselItem>
 
-                                {/* Module badges */}
-                                {modules?.map((m) => (
-                                    <CarouselItem key={m.id} className="pl-2 basis-auto">
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                onSelectModuleSlug(
-                                                    selectedModuleSlug === m.slug ? undefined : m.slug
-                                                )
-                                            }
-                                            className={badgeClass(selectedModuleSlug === m.slug)}
-                                        >
-                                            <span>{m.title}</span>
-                                        </button>
-                                    </CarouselItem>
-                                ))}
-                            </>
-                        )}
+                        {/* Module badges */}
+                        {modules?.map((m) => (
+                            <CarouselItem key={m.id} className="pl-2 basis-auto">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        onSelectModuleSlug(
+                                            selectedModuleSlug === m.slug ? undefined : m.slug
+                                        )
+                                    }
+                                    className={badgeClass(selectedModuleSlug === m.slug)}
+                                >
+                                    <span>{m.title}</span>
+                                </button>
+                            </CarouselItem>
+                        ))}
                     </CarouselContent>
                 </Carousel>
 

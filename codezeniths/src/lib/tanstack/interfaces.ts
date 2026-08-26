@@ -1,20 +1,18 @@
 import { z } from 'zod';
 import {
-    GetProfileByIdInputSchema,
-    GetProfileByUsernameInputSchema,
     GetSettingsInputSchema,
-    GetAvatarInputSchema,
     
     GetSingleModuleTRPCInputSchema,
     GetSingleModuleProgressTRPCInputSchema,
 
     GetSingleTopicTRPCInputSchema,
     GetSingleTopicProgressTRPCInputSchema,
+    GetTopicSuggestionsTRPCInputSchema,
 
-    GetSingleTagProblemsTRPCInputSchema,
-    GetSingleTagProblemProgressTRPCInputSchema,
+    GetSingleTagProgressTRPCInputSchema,
     GetSingleTagTRPCInputSchema,
-    GetTagsFilteredTRPCInputSchema,
+    GetTagSuggestionsTRPCInputSchema,
+    GetTagsCatalogueTRPCInputSchema,
 
     GetProblemsTRPCInputSchema,
 
@@ -22,26 +20,19 @@ import {
 
     CheckEmailAvailabilityInputSchema,
     CheckPhoneAvailabilityInputSchema,
-    AutocompleteTRPCInputSchema,
-    MoreLikeThisTRPCInputSchema,
     SearchTRPCInputSchema,
 } from '@/schemas/trpc';
 
 // ─── User Query Service Interface ──────────────────────────────────────────────
 
 export interface IUserQueryService {
-    getProfileById(input: z.infer<typeof GetProfileByIdInputSchema>): any;
-    getProfileByUsername(input: z.infer<typeof GetProfileByUsernameInputSchema>): any;
     getSettings(input: z.infer<typeof GetSettingsInputSchema>, options?: { enabled?: boolean }): any;
     updateProfile(): any;
-    getSocialLinks(): any;
     upsertSocialLinks(): any;
     uploadAvatar(): any;
     removeAvatar(): any;
     uploadResume(): any;
     removeResume(): any;
-    getAvatar(input: z.infer<typeof GetAvatarInputSchema>): any;
-    getAvatarUploadUrl(): any;
     checkUserNameAvailability(input: any): any;
     checkEmailAvailability(
         input: Partial<z.infer<typeof CheckEmailAvailabilityInputSchema>>,
@@ -58,11 +49,9 @@ export interface IUserQueryService {
     updateOnboardingStep3(): any;
     extractResumeSkills(): any;
     getExtractionProgress(variables: any, options?: any): any;
-    getActiveStreak(): any;
     getUserStreak(input?: { userId?: string }, options?: { enabled?: boolean }): any;
     recordDailyCheckIn(): any;
 
-    getFollowStats(input: { userId: string }, options?: { enabled?: boolean }): any;
     getFollowers(input: { userId: string; page?: number; limit?: number }, options?: { enabled?: boolean }): any;
     getFollowing(input: { userId: string; page?: number; limit?: number }, options?: { enabled?: boolean }): any;
     followUser(): any;
@@ -85,8 +74,8 @@ export interface IUserQueryService {
 
 export interface IModuleQueryService {
     getModules(): any;
-    getSingleModule(input: z.infer<typeof GetSingleModuleTRPCInputSchema>): any;
-    getSingleModuleProgress(input: z.infer<typeof GetSingleModuleProgressTRPCInputSchema>): any;
+    getSingleModule(input: z.infer<typeof GetSingleModuleTRPCInputSchema>, options?: { enabled?: boolean }): any;
+    getSingleModuleProgress(input: z.infer<typeof GetSingleModuleProgressTRPCInputSchema>, options?: { enabled?: boolean }): any;
     getRecentlySolvedModule(): any;
     getModulesWithTopics(): any;
     toggleModuleBookmark(): any;
@@ -96,18 +85,20 @@ export interface IModuleQueryService {
 // ─── Topic Query Service Interface ──────────────────────────────────────────────
 
 export interface ITopicQueryService {
-    getSingleTopic(input: z.infer<typeof GetSingleTopicTRPCInputSchema>): any;
-    getSingleTopicProgress(input: z.infer<typeof GetSingleTopicProgressTRPCInputSchema>): any;
+    getSingleTopic(input: z.infer<typeof GetSingleTopicTRPCInputSchema>, options?: { enabled?: boolean }): any;
+    getSingleTopicProgress(input: z.infer<typeof GetSingleTopicProgressTRPCInputSchema>, options?: { enabled?: boolean }): any;
+    getTopicSuggestions(input: z.infer<typeof GetTopicSuggestionsTRPCInputSchema>, options?: { enabled?: boolean }): any;
 }
 
 // ─── Tag Query Service Interface ────────────────────────────────────────────────
 
 export interface ITagQueryService {
     getTags(): any;
-    getTagsFiltered(input?: z.infer<typeof GetTagsFilteredTRPCInputSchema>): any;
-    getSingleTagProblems(input: z.infer<typeof GetSingleTagProblemsTRPCInputSchema>): any;
-    getSingleTagProblemProgress(input: z.infer<typeof GetSingleTagProblemProgressTRPCInputSchema>): any;
-    getSingleTag(input: z.infer<typeof GetSingleTagTRPCInputSchema>): any;
+    getTagsCatalogue(input: z.infer<typeof GetTagsCatalogueTRPCInputSchema>, options?: { enabled?: boolean }): any;
+    getTagsCatalogueInfinite(input: { filters?: any; sorting?: any; limit?: number }, options?: { enabled?: boolean }): any;
+    getSingleTagProgress(input: z.infer<typeof GetSingleTagProgressTRPCInputSchema>, options?: { enabled?: boolean }): any;
+    getSingleTag(input: z.infer<typeof GetSingleTagTRPCInputSchema>, options?: { enabled?: boolean }): any;
+    getTagSuggestions(input: z.infer<typeof GetTagSuggestionsTRPCInputSchema>, options?: { enabled?: boolean }): any;
     toggleTagBookmark(): any;
     getUserTagProgressByLevel(input?: { userId?: string; moduleSlug?: string; moduleId?: string }, options?: { enabled?: boolean }): any;
 }
@@ -136,15 +127,12 @@ export interface INotificationQueryService {
     markAsRead(): any;
     markAllAsRead(): any;
     upsertDeviceToken(): any;
-    removeDeviceToken(): any;
 }
 
 // ─── Search Query Service Interface ──────────────────────────────────────────────
 
 export interface ISearchQueryService {
     search(collectionName: string, input: Omit<z.infer<typeof SearchTRPCInputSchema>, 'collection'>, enabled?: boolean): any;
-    autocomplete(collectionName: string, input: Omit<z.infer<typeof AutocompleteTRPCInputSchema>, 'collection'>, enabled?: boolean): any;
-    getRecommendations(collectionName: string, input: Omit<z.infer<typeof MoreLikeThisTRPCInputSchema>, 'collection'>, enabled?: boolean): any;
     getRecentHistory(options?: { enabled?: boolean; limit?: number }): any;
     getSearchHistoryInfinite(filters?: any, limit?: number): any;
     getSearchHistoryStats(): any;
@@ -152,7 +140,6 @@ export interface ISearchQueryService {
     deleteHistoryItem(): any;
     clearHistory(): any;
 }
-
 
 // ─── Skill Query Service Interface ──────────────────────────────────────────────
 
@@ -165,7 +152,6 @@ export interface ISkillQueryService {
 
 export interface IProductQueryService {
     getProducts(input?: any): any;
-    getSingleProduct(input: any): any;
 }
 
 // ─── Leaderboard Query Service Interface ─────────────────────────────────────────
@@ -197,7 +183,6 @@ export interface ILeaderboardQueryService {
 export interface IPlaylistQueryService {
     getMyPlaylists(options?: { enabled?: boolean }): any;
     getCommunityPlaylists(input?: any, options?: { enabled?: boolean }): any;
-    getCommunityPlaylistsInfinite(input?: any): any;
     getPlaylistInfo(input: { slug?: string; id?: string }, options?: { enabled?: boolean }): any;
     createPlaylist(): any;
     updatePlaylist(): any;
@@ -206,4 +191,3 @@ export interface IPlaylistQueryService {
     toggleProblemInPlaylist(): any;
     getPlaylistsForProblem(input: { problemId: string }, options?: { enabled?: boolean }): any;
 }
-

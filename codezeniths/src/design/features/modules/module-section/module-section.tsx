@@ -9,9 +9,16 @@ import { ModuleTopicsSection } from './module-topics-section';
 import { ModuleProblemSection } from '@codezeniths/design/features/shared/problem-list-section';
 
 export const SingleModuleSection: React.FC = () => {
-    const { moduleDetails, isLoading, isError, handleToggleModuleBookmark } = useModuleDetails();
+    const {
+        moduleDetails,
+        moduleProgress,
+        isLoading,
+        isLoadingProgress,
+        isError,
+        handleToggleModuleBookmark,
+    } = useModuleDetails();
 
-    if (isError || (!isLoading && !moduleDetails)) {
+    if (!isLoading && (isError || !moduleDetails)) {
         return (
             <div className="w-full py-16 flex flex-col items-center justify-center text-center space-y-4">
                 <h2 className="text-xl font-bold text-heading-light dark:text-heading-dark">Module Not Found</h2>
@@ -42,7 +49,9 @@ export const SingleModuleSection: React.FC = () => {
             {/* 2] Header Section (Info Card + Progress Card) */}
             <ModuleHeaderSection
                 moduleDetails={moduleDetails}
+                moduleProgress={moduleProgress}
                 isLoading={isLoading}
+                isLoadingProgress={isLoadingProgress}
                 onToggleBookmark={handleToggleModuleBookmark}
             />
 

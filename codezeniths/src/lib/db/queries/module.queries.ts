@@ -48,6 +48,17 @@ const modulesWithTopicsL1Cache = createCache<any>({
     ttl: 1000 * 60 * 15, // 15 minutes in RAM
 });
 
+const moduleDifficultyTotalsCache = redisService.cache.createStore<any>({
+    namespace: 'module_difficulty_totals',
+    ttlSeconds: 86400, // 24 hours
+});
+
+const moduleDifficultyTotalsL1Cache = createCache<any>({
+    strategy: 'adaptive',
+    maxSize: 50,
+    ttl: 1000 * 60 * 30, // 30 minutes in RAM
+});
+
 export class ModuleQueries implements IModuleQueries {
     getModules = qRPC()
         .output(GetModulesOutputSchema)
@@ -86,19 +97,6 @@ export class ModuleQueries implements IModuleQueries {
             logger.info('Executing getSingleModule query', { payload });
             const { id, slug, userId } = payload;
 
-            if (userId) {
-                const userExists = await prisma.user.findUnique({
-                    where: { id: userId },
-                });
-                if (!userExists) {
-                    logger.warn('User not found while getting single module', { userId });
-                    throw new AppErrorBuilder('User not found')
-                        .setCode(ErrorCode.NOT_FOUND)
-                        .build();
-                }
-            }
-
-            // Find module
             const module = await prisma.module.findFirst({
                 where: {
                     OR: [
@@ -106,13 +104,23 @@ export class ModuleQueries implements IModuleQueries {
                         slug ? { slug } : {},
                     ].filter((item) => Object.keys(item).length > 0),
                 },
-                include: {
+                select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    description: true,
                     topics: {
-                        orderBy: {
-                            order: 'asc',
-                        },
-                        include: {
-                            problems: true,
+                        orderBy: { order: 'asc' },
+                        select: {
+                            id: true,
+                            title: true,
+                            slug: true,
+                            description: true,
+                            level: true,
+                            order: true,
+                            problems: {
+                                select: { id: true },
+                            },
                         },
                     },
                 },
@@ -133,66 +141,16 @@ export class ModuleQueries implements IModuleQueries {
             });
 
             const topicCount = module.topics.length;
+            const allProblemIds = module.topics.flatMap((topic) => topic.problems.map((p) => p.id));
+            const problemsCount = allProblemIds.length;
 
-            // Fetch all problems in this module across topics
-            const allProblems = module.topics.flatMap((topic) => topic.problems);
-            const problemsCount = allProblems.length;
-            const allProblemIds = allProblems.map((p) => p.id);
-
-            let problemsSolvedCount = 0;
-            let problemsRevisitCount = 0;
-            let solvedProgress: Array<{ status: string; problemId: string; problem: { id: string; difficulty: any } | null }> = [];
-
-            if (userId && allProblemIds.length > 0) {
-                const userProgress = await prisma.problemProgress.findMany({
-                    where: {
-                        userId,
-                        ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
-                    },
-                    select: {
-                        status: true,
-                        revisit: true,
-                        problemId: true,
-                        problem: {
-                            select: {
-                                id: true,
-                                difficulty: true,
-                            },
-                        },
-                    },
-                });
-
-                problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-                problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
-                solvedProgress = userProgress.filter((p) => p.status === 'solved' && p.problem);
-            }
-
-            const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
-            const problemsSolvedPercentage =
-                problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
-
-            const problemsCountByDifficultyRaw = countBy(allProblems, (p) => p.difficulty);
-            const problemsCountByDifficulty = {
-                easy: problemsCountByDifficultyRaw.easy || 0,
-                medium: problemsCountByDifficultyRaw.medium || 0,
-                hard: problemsCountByDifficultyRaw.hard || 0,
-            };
-
-            const problemsSolvedCountByDifficultyRaw = countBy(solvedProgress, (p) => p.problem!.difficulty);
-            const problemsSolvedCountByDifficulty = {
-                easy: problemsSolvedCountByDifficultyRaw.easy || 0,
-                medium: problemsSolvedCountByDifficultyRaw.medium || 0,
-                hard: problemsSolvedCountByDifficultyRaw.hard || 0,
-            };
-
-            const solvedProblemIds = new Set(solvedProgress.map((p) => p.problemId));
-
-            // Fetch bookmarks for module & topics if userId is present
+            // Fetch bookmarks and solved status for user if userId is provided
             let isModuleBookmarked = false;
             const bookmarkedTopicIds = new Set<string>();
+            let solvedProblemIds = new Set<string>();
 
             if (userId) {
-                const [modBm, topicBms] = await Promise.all([
+                const [modBm, topicBms, userSolvedProgress] = await Promise.all([
                     prisma.moduleBookmark.findUnique({
                         where: {
                             userId_moduleId: {
@@ -210,28 +168,27 @@ export class ModuleQueries implements IModuleQueries {
                             topicId: true,
                         },
                     }),
+                    allProblemIds.length > 0
+                        ? prisma.problemProgress.findMany({
+                              where: {
+                                  userId,
+                                  status: 'solved',
+                                  problemId: { in: allProblemIds },
+                              },
+                              select: { problemId: true },
+                          })
+                        : [],
                 ]);
                 isModuleBookmarked = !!modBm;
                 topicBms.forEach((tb) => bookmarkedTopicIds.add(tb.topicId));
+                solvedProblemIds = new Set(userSolvedProgress.map((p) => p.problemId));
             }
 
             const topics = module.topics.map((topic) => {
-                const problems = topic.problems;
-                const tpProblemsCount = problems.length;
-
-                const tpProblemsCountByDifficulty = {
-                    easy: 0,
-                    medium: 0,
-                    hard: 0,
-                };
-
+                const tpProblemsCount = topic.problems.length;
                 let tpProblemsSolvedCount = 0;
 
-                for (const problem of problems) {
-                    if (problem.difficulty === 'easy') tpProblemsCountByDifficulty.easy++;
-                    else if (problem.difficulty === 'medium') tpProblemsCountByDifficulty.medium++;
-                    else if (problem.difficulty === 'hard') tpProblemsCountByDifficulty.hard++;
-
+                for (const problem of topic.problems) {
                     if (solvedProblemIds.has(problem.id)) {
                         tpProblemsSolvedCount++;
                     }
@@ -251,7 +208,6 @@ export class ModuleQueries implements IModuleQueries {
                     order: topic.order,
                     isBookmarked: bookmarkedTopicIds.has(topic.id),
                     problemsCount: tpProblemsCount,
-                    problemsCountByDifficulty: tpProblemsCountByDifficulty,
                     problemsSolvedCount: tpProblemsSolvedCount,
                     problemsSolvedPercentage: tpProblemsSolvedPercentage,
                 };
@@ -265,15 +221,7 @@ export class ModuleQueries implements IModuleQueries {
                 isBookmarked: isModuleBookmarked,
                 tagCount,
                 topicCount,
-                progress: {
-                    problemsCount,
-                    problemsSolvedCount,
-                    problemsRevisitCount,
-                    problemNotSolvedCount,
-                    problemsSolvedPercentage,
-                    problemsCountByDifficulty,
-                    problemsSolvedCountByDifficulty,
-                },
+                problemsCount,
                 topics,
             };
         })
@@ -388,18 +336,7 @@ export class ModuleQueries implements IModuleQueries {
             logger.info('Executing getSingleModuleProgress query', { payload });
             const { moduleId, moduleSlug, userId } = payload;
 
-            // Verify user exists first
-            const userExists = await prisma.user.findUnique({
-                where: { id: userId },
-            });
-            if (!userExists) {
-                logger.warn('User not found while getting single module progress', { userId });
-                throw new AppErrorBuilder('User not found')
-                    .setCode(ErrorCode.NOT_FOUND)
-                    .build();
-            }
-
-            // Find the module first to ensure it exists
+            // 1. Find module ID
             const module = await prisma.module.findFirst({
                 where: {
                     OR: [
@@ -407,6 +344,7 @@ export class ModuleQueries implements IModuleQueries {
                         moduleSlug ? { slug: moduleSlug } : {},
                     ].filter((item) => Object.keys(item).length > 0),
                 },
+                select: { id: true },
             });
 
             if (!module) {
@@ -416,128 +354,103 @@ export class ModuleQueries implements IModuleQueries {
                     .build();
             }
 
-            // Fetch all problems under this module
-            const allProblems = await prisma.problem.findMany({
-                where: {
-                    topic: {
-                        moduleId: module.id,
-                    },
-                },
-                select: {
-                    id: true,
-                    difficulty: true,
-                    topic: {
-                        select: {
-                            title: true,
+            const targetModuleId = module.id;
+
+            // 2. Static difficulty totals for this module (L1 Memory -> L2 Redis -> DB Fallback)
+            const totalsCacheKey = `module_difficulty_totals:${targetModuleId}`;
+            let difficultyGroupCounts = moduleDifficultyTotalsL1Cache.get(totalsCacheKey);
+            if (!difficultyGroupCounts) {
+                difficultyGroupCounts = await moduleDifficultyTotalsCache.get(totalsCacheKey);
+                if (difficultyGroupCounts) {
+                    moduleDifficultyTotalsL1Cache.set(totalsCacheKey, difficultyGroupCounts);
+                }
+            }
+
+            if (!difficultyGroupCounts) {
+                difficultyGroupCounts = await prisma.problem.groupBy({
+                    by: ['difficulty'],
+                    where: {
+                        topic: {
+                            moduleId: targetModuleId,
                         },
                     },
-                    tags: {
-                        select: {
-                            tag: {
-                                select: {
-                                    name: true,
-                                },
-                            },
-                        },
-                    },
-                },
-            });
+                    _count: { _all: true },
+                });
+                moduleDifficultyTotalsL1Cache.set(totalsCacheKey, difficultyGroupCounts);
+                void moduleDifficultyTotalsCache.set(totalsCacheKey, difficultyGroupCounts);
+            }
 
-            const allProblemIds = allProblems.map((p) => p.id);
+            // 3. Parallel O(1) user stats: UserModuleStats PK seek + Indexed Revisit Count
+            const [userModuleStats, problemsRevisitCount] = await Promise.all([
+                userId
+                    ? prisma.userModuleStats.findUnique({
+                          where: {
+                              userId_moduleId: {
+                                  userId,
+                                  moduleId: targetModuleId,
+                              },
+                          },
+                          select: {
+                              totalSolvedCount: true,
+                              easySolved: true,
+                              mediumSolved: true,
+                              hardSolved: true,
+                          },
+                      })
+                    : null,
+                userId
+                    ? prisma.problemProgress.count({
+                          where: {
+                              userId,
+                              revisit: true,
+                              problem: {
+                                  topic: {
+                                      moduleId: targetModuleId,
+                                  },
+                              },
+                          },
+                      })
+                    : 0,
+            ]);
 
-            // Fetch user's progress records scoped to this module's problems
-            const userProgress = await prisma.problemProgress.findMany({
-                where: {
-                    userId,
-                    ...(allProblemIds.length <= 100 ? { problemId: { in: allProblemIds } } : {}),
-                },
-                select: {
-                    status: true,
-                    revisit: true,
-                    problem: {
-                        select: {
-                            id: true,
-                            difficulty: true,
-                            topic: {
-                                select: {
-                                    title: true,
-                                },
-                            },
-                            tags: {
-                                select: {
-                                    tag: {
-                                        select: {
-                                            name: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            });
-
-            const problemsCount = allProblems.length;
-            const problemsSolvedCount = userProgress.filter((p) => p.status === 'solved').length;
-            const problemsRevisitCount = userProgress.filter((p) => p.revisit === true).length;
-            const problemsAttemptedCount = userProgress.length;
-            const problemsSolvedPercentage = problemsCount > 0 ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
-
-            // Filter solved progress records
-            const solvedProgress = userProgress.filter((p) => p.status === 'solved' && p.problem);
-
-            // Group overall problems by difficulty using countBy
-            const problemsCountByDifficultyRaw = countBy(allProblems, (p) => p.difficulty);
             const problemsCountByDifficulty = {
-                easy: problemsCountByDifficultyRaw.easy || 0,
-                medium: problemsCountByDifficultyRaw.medium || 0,
-                hard: problemsCountByDifficultyRaw.hard || 0,
+                easy: 0,
+                medium: 0,
+                hard: 0,
             };
 
-            // Group solved problems by difficulty using countBy
-            const problemsSolvedCountByDifficultyRaw = countBy(solvedProgress, (p) => p.problem!.difficulty);
+            for (const item of difficultyGroupCounts) {
+                if (item.difficulty === 'easy') problemsCountByDifficulty.easy = item._count._all;
+                else if (item.difficulty === 'medium') problemsCountByDifficulty.medium = item._count._all;
+                else if (item.difficulty === 'hard') problemsCountByDifficulty.hard = item._count._all;
+            }
+
+            const problemsCount =
+                problemsCountByDifficulty.easy +
+                problemsCountByDifficulty.medium +
+                problemsCountByDifficulty.hard;
+
             const problemsSolvedCountByDifficulty = {
-                easy: problemsSolvedCountByDifficultyRaw.easy || 0,
-                medium: problemsSolvedCountByDifficultyRaw.medium || 0,
-                hard: problemsSolvedCountByDifficultyRaw.hard || 0,
+                easy: userModuleStats?.easySolved ?? 0,
+                medium: userModuleStats?.mediumSolved ?? 0,
+                hard: userModuleStats?.hardSolved ?? 0,
             };
 
-            // Group overall problems by topic using countBy
-            const problemsCountByTopic = countBy(allProblems, (p) => p.topic?.title || 'Unknown');
-
-            // Group solved problems by topic (seeded to match all topics from problemsCountByTopic)
-            const problemsSolvedCountByTopicRaw = countBy(solvedProgress, (p) => p.problem!.topic?.title || 'Unknown');
-            const problemsSolvedCountByTopic: Record<string, number> = {};
-            Object.keys(problemsCountByTopic).forEach((topicTitle) => {
-                problemsSolvedCountByTopic[topicTitle] = problemsSolvedCountByTopicRaw[topicTitle] || 0;
-            });
-
-            // Group overall problems by tags using countBy
-            const problemsCountByTags = countBy(allProblems, (p) => {
-                return p.tags.map((t) => t.tag?.name).filter(Boolean) as string[];
-            });
-
-            // Group solved problems by tags (seeded to match all tags from problemsCountByTags)
-            const problemsSolvedCountByTagsRaw = countBy(solvedProgress, (p) => {
-                return p.problem!.tags.map((t) => t.tag?.name).filter(Boolean) as string[];
-            });
-            const problemsSolvedCountByTags: Record<string, number> = {};
-            Object.keys(problemsCountByTags).forEach((tagName) => {
-                problemsSolvedCountByTags[tagName] = problemsSolvedCountByTagsRaw[tagName] || 0;
-            });
+            const problemsSolvedCount = userModuleStats?.totalSolvedCount ?? 0;
+            const problemNotSolvedCount = Math.max(0, problemsCount - problemsSolvedCount);
+            const problemsSolvedPercentage =
+                problemsCount > 0
+                    ? parseFloat(((problemsSolvedCount / problemsCount) * 100).toFixed(2))
+                    : 0;
 
             return {
                 problemsCount,
                 problemsSolvedCount,
                 problemsRevisitCount,
-                problemsAttemptedCount,
+                problemNotSolvedCount,
                 problemsSolvedPercentage,
                 problemsCountByDifficulty,
                 problemsSolvedCountByDifficulty,
-                problemsCountByTopic,
-                problemsSolvedCountByTopic,
-                problemsCountByTags,
-                problemsSolvedCountByTags,
             };
         })
         .build();

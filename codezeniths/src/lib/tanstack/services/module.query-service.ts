@@ -45,7 +45,7 @@ export class ModuleQueryService implements IModuleQueryService {
         });
     }
 
-    getSingleModuleProgress(input: z.infer<typeof GetSingleModuleProgressTRPCInputSchema>) {
+    getSingleModuleProgress(input: z.infer<typeof GetSingleModuleProgressTRPCInputSchema>, options?: { enabled?: boolean }) {
         const validatedInput = GetSingleModuleProgressTRPCInputSchema.parse(input);
         const cacheKey = validatedInput.moduleSlug || validatedInput.moduleId || 'unknown';
         return useQuery({
@@ -54,6 +54,7 @@ export class ModuleQueryService implements IModuleQueryService {
                 const raw = await trpcClient.module.getSingleModuleProgress.query(validatedInput);
                 return GetSingleModuleProgressTRPCOutputSchema.parse(raw);
             },
+            enabled: options?.enabled,
             ...CACHE_TIERS.USER_PROGRESS,
         });
     }
