@@ -189,7 +189,7 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
                         <Typography
                             variant={TypographyVariant.H3}
                             weight={TypographyWeight.BOLD}
-                            className="text-base sm:text-lg text-body-light-shade3 dark:text-body-dark group-hover:text-primary transition-colors leading-tight line-clamp-1"
+                            className="text-h5! sm:text-h6! xs:text-h6! text-body-light-shade3 dark:text-body-dark group-hover:text-heading-light dark:group-hover:text-heading-dark transition-colors leading-tight truncate"
                         >
                             {playlist.title}
                         </Typography>

@@ -121,9 +121,9 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
     }, [skillSearchQuery, handleAddSkill]);
 
     return (
-        <div className="w-full flex flex-col gap-20">
+        <div className="w-full flex flex-col gap-10 sm:gap-14 md:gap-20">
             {/* 1. Profile Picture Upload Section */}
-            <div className="w-full rounded-md bg-foreground-light-shade2/40 dark:bg-foreground-dark-shade1/30 p-6 sm:p-7">
+            <div className="w-full rounded-md bg-foreground-light-shade2/40 dark:bg-foreground-dark-shade1/30 p-4 xs:p-5 sm:p-7">
                 <UploadInput
                     value={currentImage}
                     onChange={(_, previewUrl) => {
@@ -143,52 +143,52 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
             </div>
 
             {/* 2. Read-Only Primary Identifiers (Locked with Badge) */}
-            <div className="space-y-4 rounded-md bg-foreground-light-shade2/40 dark:bg-foreground-dark-shade1/30 p-6 sm:p-7">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                        <Lock className="size-4 text-muted-light dark:text-muted-dark" />
+            <div className="space-y-4 rounded-md bg-foreground-light-shade2/40 dark:bg-foreground-dark-shade1/30 p-4 xs:p-5 sm:p-7">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <Lock className="size-3.5 sm:size-4 text-muted-light dark:text-muted-dark shrink-0" />
                         <Typography
                             as="h4"
                             variant={TypographyVariant.MUTED}
                             weight={TypographyWeight.SEMIBOLD}
-                            className="text-xs uppercase tracking-wider text-muted-light/80 dark:text-muted-dark/80"
+                            className="text-[11px] sm:text-xs uppercase tracking-wider text-muted-light/80 dark:text-muted-dark/80 truncate"
                         >
                             Account Identifiers
                         </Typography>
                     </div>
-                    <Badge variant="secondary" className="text-[10px] px-2.5 py-0.5 h-5 bg-secondary/15 text-muted-light dark:text-muted-dark border-none rounded-sm">
-                        Managed in Account Settings
+                    <Badge variant="secondary" className="text-[10px] px-2 sm:px-2.5 py-0.5 h-auto min-h-5 max-w-full bg-secondary/15 text-muted-light dark:text-muted-dark border-none rounded-sm shrink-0">
+                        <span className="truncate max-w-[200px] xs:max-w-none">Managed in Account Settings</span>
                     </Badge>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-2">
                     {/* Username */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 min-w-0">
                         <Label className="text-xs text-muted-light dark:text-muted-dark font-medium">Username</Label>
                         <Input
                             disabled
                             value={profile?.username ? `@${profile.username}` : 'Not set'}
-                            className="h-10 text-xs bg-foreground-light-shade1/50 dark:bg-foreground-dark-shade2/50 text-muted-light dark:text-muted-dark border-none rounded-md cursor-not-allowed"
+                            className="h-10 text-xs bg-foreground-light-shade1/50 dark:bg-foreground-dark-shade2/50 text-muted-light dark:text-muted-dark border-none rounded-md cursor-not-allowed truncate"
                         />
                     </div>
 
                     {/* Email */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 min-w-0">
                         <Label className="text-xs text-muted-light dark:text-muted-dark font-medium">Email Address</Label>
                         <Input
                             disabled
                             value={profile?.email || 'Not set'}
-                            className="h-10 text-xs bg-foreground-light-shade1/50 dark:bg-foreground-dark-shade2/50 text-muted-light dark:text-muted-dark border-none rounded-md cursor-not-allowed"
+                            className="h-10 text-xs bg-foreground-light-shade1/50 dark:bg-foreground-dark-shade2/50 text-muted-light dark:text-muted-dark border-none rounded-md cursor-not-allowed truncate"
                         />
                     </div>
 
                     {/* Phone */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 min-w-0">
                         <Label className="text-xs text-muted-light dark:text-muted-dark font-medium">Phone Number</Label>
                         <Input
                             disabled
                             value={profile?.phoneNumber || 'Not set'}
-                            className="h-10 text-xs bg-foreground-light-shade1/50 dark:bg-foreground-dark-shade2/50 text-muted-light dark:text-muted-dark border-none rounded-md cursor-not-allowed"
+                            className="h-10 text-xs bg-foreground-light-shade1/50 dark:bg-foreground-dark-shade2/50 text-muted-light dark:text-muted-dark border-none rounded-md cursor-not-allowed truncate"
                         />
                     </div>
                 </div>

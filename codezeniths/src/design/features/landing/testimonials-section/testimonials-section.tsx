@@ -66,14 +66,20 @@ const TESTIMONIALS = [
     {
         name: "Labhesh Bhurewal",
         handle: "Full Stack Developer @ Microsoft",
-        avatar: "https://i.pravatar.cc/150?img=9",
+        avatar: "https://i.pravatar.cc/150?img=68",
         content: "I use ZenDraw daily to map out architectures. Having a collaborative whiteboard integrated directly with the cloud-based ZenLab workspace makes building and explaining full-stack projects seamless."
     },
     {
         name: "Shubham Vyavhare",
         handle: "SDE @ Netflix",
-        avatar: "https://i.pravatar.cc/150?img=15",
+        avatar: "https://i.pravatar.cc/150?img=60",
         content: "AlgoWars gave me the competitive edge I needed. The live leaderboards and post-contest hack phases sharpened my speed and accuracy, preparing me perfectly for high-pressure coding rounds."
+    },
+    {
+        name: "Yash Magare",
+        handle: "Software Engineer @ Stripe",
+        avatar: "https://i.pravatar.cc/150?img=13",
+        content: "The curated Playlists and targeted problem sets streamlined my interview preparation. Tracking custom revision queues and practicing pattern-based tracks gave me immense confidence during system coding rounds."
     }
 ];
 

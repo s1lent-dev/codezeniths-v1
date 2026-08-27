@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Star, ExternalLink, Bookmark, MoreVertical, NotebookPen } from 'lucide-react';
+import { Star, ExternalLink, Bookmark, MoreVertical, NotebookPen, ListPlus } from 'lucide-react';
 import { cn } from '@codezeniths/design/cn';
 import {
     TableRow,
@@ -15,6 +15,7 @@ import {
 } from '@codezeniths/modules';
 import { Checkbox, Tooltip, TooltipTrigger, TooltipContent } from '@codezeniths/components';
 import { ProblemPlaylistSubmenu } from './problem-playlist-submenu';
+import { ProblemPlaylistDialog } from './problem-playlist-dialog';
 import { ProblemNoteDialog } from './problem-note-dialog';
 
 export interface ProblemItem {
@@ -68,6 +69,7 @@ const ProblemRowComponent = React.forwardRef<HTMLTableRowElement, ProblemRowProp
     ) => {
         const [dropdownOpen, setDropdownOpen] = useState(false);
         const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+        const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false);
 
         const formatDifficulty = (difficulty: 'easy' | 'medium' | 'hard') => {
             if (difficulty === 'medium') return 'Med';
@@ -247,8 +249,22 @@ const ProblemRowComponent = React.forwardRef<HTMLTableRowElement, ProblemRowProp
 
                                     <DropdownMenuSeparator className="my-1 bg-foreground-light-shade3 dark:bg-foreground-dark-shade1 h-px" />
 
-                                    {/* Add to Playlist Submenu */}
-                                    <ProblemPlaylistSubmenu problemId={problem.id} />
+                                    {/* Mobile / Tablet: Trigger Modal Dialog (< md) */}
+                                    <DropdownMenuItem
+                                        onSelect={() => {
+                                            setDropdownOpen(false);
+                                            setPlaylistDialogOpen(true);
+                                        }}
+                                        className="flex md:hidden items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-primary hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none"
+                                    >
+                                        <ListPlus className="size-3.5 text-primary shrink-0" />
+                                        <span>Add to Playlist</span>
+                                    </DropdownMenuItem>
+
+                                    {/* Desktop: Flyout Submenu (>= md) */}
+                                    <div className="hidden md:block">
+                                        <ProblemPlaylistSubmenu problemId={problem.id} />
+                                    </div>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
@@ -259,6 +275,13 @@ const ProblemRowComponent = React.forwardRef<HTMLTableRowElement, ProblemRowProp
                 <ProblemNoteDialog
                     open={noteDialogOpen}
                     onOpenChange={setNoteDialogOpen}
+                    problem={problem}
+                />
+
+                {/* Problem Playlist Modal (Adaptive for Mobile / Small Screens) */}
+                <ProblemPlaylistDialog
+                    open={playlistDialogOpen}
+                    onOpenChange={setPlaylistDialogOpen}
                     problem={problem}
                 />
             </>

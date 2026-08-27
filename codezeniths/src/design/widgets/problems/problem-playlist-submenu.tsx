@@ -59,7 +59,12 @@ export const ProblemPlaylistSubmenu: React.FC<ProblemPlaylistSubmenuProps> = ({ 
                 <span>Add to Playlist</span>
             </DropdownMenuSubTrigger>
 
-            <DropdownMenuSubContent className="w-56 p-1 rounded-md bg-foreground-light dark:bg-foreground-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-xl text-body-light-shade3 dark:text-body-dark space-y-0.5 z-110">
+            <DropdownMenuSubContent
+                sideOffset={4}
+                alignOffset={-4}
+                collisionPadding={8}
+                className="w-52 xs:w-56 max-w-[calc(100vw-1.5rem)] p-1 rounded-md bg-foreground-light dark:bg-foreground-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-xl text-body-light-shade3 dark:text-body-dark space-y-0.5 z-110"
+            >
                 <div className="px-2.5 py-1.5 text-[10px] font-bold text-muted-light dark:text-muted-dark uppercase tracking-wider">
                     My Playlists ({playlists.length})
                 </div>
@@ -107,7 +112,7 @@ export const ProblemPlaylistSubmenu: React.FC<ProblemPlaylistSubmenuProps> = ({ 
                                             'size-4 rounded-xs border flex items-center justify-center shrink-0 transition-colors',
                                             playlist.isContained
                                                 ? 'bg-primary border-primary text-white'
-                                                : 'border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-transparent'
+                                                : 'border-foreground-light-shade3 dark:border-foreground-dark-shade3 bg-transparent'
                                         )}
                                     >
                                         {playlist.isContained && <Check className="size-3 stroke-3" />}

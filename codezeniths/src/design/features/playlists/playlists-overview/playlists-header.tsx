@@ -62,14 +62,14 @@ export const PlaylistsHeader: React.FC<PlaylistsHeaderProps> = ({
                     </div>
                     <Typography
                         variant={TypographyVariant.P}
-                        className="text-xs sm:text-sm text-muted-light dark:text-muted-dark ml-10 leading-relaxed block max-w-lg"
+                        className="text-xs sm:text-sm text-muted-light dark:text-muted-dark sm:ml-10 leading-relaxed block max-w-lg"
                     >
                         Create, bookmark, and practice curated problem tracks to master algorithms and interview topics.
                     </Typography>
                 </div>
 
                 {/* Right Quota Tracker Badge & Create Button */}
-                <div className="flex items-center gap-3 shrink-0 z-10">
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0 z-10">
                     {isLoading ? (
                         <>
                             <div className="h-7 w-28 rounded-full bg-primary/10 animate-pulse" />

@@ -103,8 +103,8 @@ export const PlaylistsOverviewSection: React.FC<PlaylistsOverviewSectionProps> =
             />
 
             {/* 2. Modern Segmented Tab Bar (Full row-wise, left-aligned) */}
-            <div className="w-full flex items-center justify-between gap-4 border-b border-foreground-light-shade3/60 dark:border-foreground-dark-shade1/60 pb-3">
-                <div className="inline-flex items-center gap-1.5 p-1 rounded-lg bg-foreground-light dark:bg-foreground-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-xs">
+            <div className="w-full flex items-center justify-start border-b border-foreground-light-shade3/60 dark:border-foreground-dark-shade1/60 pb-3 overflow-x-auto scrollbar-none">
+                <div className="inline-flex items-center gap-1 sm:gap-1.5 p-1 rounded-lg bg-foreground-light dark:bg-foreground-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-xs min-w-full xs:min-w-0 sm:w-auto">
                     {tabsConfig.map((tab) => {
                         const isActive = activeTab === tab.id;
                         return (
@@ -113,18 +113,18 @@ export const PlaylistsOverviewSection: React.FC<PlaylistsOverviewSectionProps> =
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
                                 className={cn(
-                                    'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none',
+                                    'flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 xs:px-3 sm:px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none whitespace-nowrap',
                                     isActive
                                         ? 'bg-primary text-white shadow-xs'
                                         : 'text-muted-light dark:text-muted-dark hover:text-body-light-shade3 dark:hover:text-body-dark hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2'
                                 )}
                             >
-                                {tab.icon}
+                                <span className="shrink-0">{tab.icon}</span>
                                 <span>{tab.label}</span>
                                 {tab.count !== undefined && (
                                     <span
                                         className={cn(
-                                            'text-[10px] sm:text-[11px] font-bold px-1.5 py-0.2 rounded-full transition-colors',
+                                            'text-[10px] sm:text-[11px] font-bold px-1.5 py-0.2 rounded-full transition-colors shrink-0',
                                             isActive
                                                 ? 'bg-white/20 text-white'
                                                 : 'bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 text-muted-light dark:text-muted-dark'

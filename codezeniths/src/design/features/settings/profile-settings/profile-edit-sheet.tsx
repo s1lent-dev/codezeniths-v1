@@ -78,7 +78,7 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
                     onInteractOutside={(e) => {
                         e.preventDefault();
                     }}
-                    className="fixed inset-y-0 right-0 z-100 w-full data-[side=right]:sm:max-w-4xl data-[side=right]:md:max-w-5xl data-[side=right]:lg:max-w-6xl sm:max-w-4xl md:max-w-5xl lg:max-w-6xl flex flex-col p-0 bg-background-light dark:bg-background-dark border-l border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-2xl overflow-hidden"
+                    className="fixed inset-y-0 right-0 z-100 w-full max-w-full data-[side=right]:w-full data-[side=right]:max-w-full data-[side=right]:sm:w-full data-[side=right]:sm:max-w-full sm:w-full sm:max-w-full data-[side=right]:md:w-full data-[side=right]:md:max-w-2xl md:max-w-2xl data-[side=right]:lg:max-w-4xl lg:max-w-4xl data-[side=right]:xl:max-w-5xl xl:max-w-5xl flex flex-col p-0 bg-background-light dark:bg-background-dark border-l border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-2xl overflow-hidden"
                 >
                     {/* Internal Dimming Scrim Layer when Discard Dialog is active */}
                     {isDiscardDialogOpen && (
@@ -86,8 +86,8 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
                     )}
 
                     {/* Header */}
-                    <SheetHeader className="px-4.5 py-5 sm:px-8 sm:py-6 md:px-10 md:py-6 border-b border-foreground-light-shade3 dark:border-foreground-dark-shade1 shrink-0">
-                        <SheetTitle className="text-lg sm:text-xl font-bold text-heading-light dark:text-heading-dark">
+                    <SheetHeader className="px-4 py-4 xs:px-6 xs:py-5 sm:px-8 sm:py-6 md:px-10 md:py-6 border-b border-foreground-light-shade3 dark:border-foreground-dark-shade1 shrink-0">
+                        <SheetTitle className="text-base xs:text-lg sm:text-xl font-bold text-heading-light dark:text-heading-dark">
                             Edit Profile Details
                         </SheetTitle>
                         <SheetDescription className="text-xs text-muted-light dark:text-muted-dark mt-1">
@@ -97,7 +97,7 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
 
                     {/* Scrollable Form Content with in-house ScrollArea and ScrollBar */}
                     <ScrollArea className="flex-1 w-full">
-                        <div className="px-4.5 py-6 sm:px-8 sm:py-8 md:px-10 md:py-10">
+                        <div className="px-3.5 py-5 xs:px-6 xs:py-6 sm:px-8 sm:py-8 md:px-10 md:py-10">
                             <form id="profile-edit-form" onSubmit={onSubmit}>
                                 <ProfileEditForm
                                     form={form}
@@ -116,7 +116,7 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
                     </ScrollArea>
 
                     {/* Sticky Footer */}
-                    <SheetFooter className="px-4.5 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 border-t border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light/95 dark:bg-foreground-dark/95 backdrop-blur-xs flex flex-row items-center justify-end gap-3.5 shrink-0">
+                    <SheetFooter className="px-4 py-3.5 xs:px-6 xs:py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 border-t border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light/95 dark:bg-foreground-dark/95 backdrop-blur-xs flex flex-row items-center justify-end gap-2.5 xs:gap-3.5 shrink-0">
                         <Button
                             type="button"
                             variant={ButtonVariant.GHOST}
@@ -137,7 +137,7 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
                             loadingText="Saving Changes..."
                             disabled={isBusy}
                             leftIcon={<Save className="size-4" />}
-                            className="text-xs sm:text-sm font-medium min-w-36"
+                            className="text-xs sm:text-sm font-medium min-w-32 xs:min-w-36"
                         >
                             Save Changes
                         </Button>
@@ -149,8 +149,7 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
             <AlertDialog open={isDiscardDialogOpen} onOpenChange={(open: boolean) => !open && cancelDiscard()}>
                 <AlertDialogContent
                     className={cn(
-                        'z-200 sm:max-w-md bg-background-light dark:bg-background-dark border border-secondary/25 dark:border-secondary/30 shadow-2xl rounded-xl',
-                        'sm:left-[calc(100vw-(min(100vw,56rem)/2))] md:left-[calc(100vw-(min(100vw,64rem)/2))] lg:left-[calc(100vw-(min(100vw,72rem)/2))]'
+                        'z-200 w-[calc(100%-2rem)] sm:max-w-md bg-background-light dark:bg-background-dark border border-secondary/25 dark:border-secondary/30 shadow-2xl rounded-xl'
                     )}
                 >
                     <AlertDialogHeader>

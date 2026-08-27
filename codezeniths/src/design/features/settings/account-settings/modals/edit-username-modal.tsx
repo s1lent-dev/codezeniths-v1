@@ -125,7 +125,7 @@ export const EditUsernameModal: React.FC<EditUsernameModalProps> = ({
                 onInteractOutside={(e) => {
                     e.preventDefault();
                 }}
-                className="sm:max-w-md bg-foreground-light dark:bg-foreground-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade1 rounded-md p-0 overflow-hidden shadow-xl gap-0"
+                className="sm:max-w-md bg-foreground-light dark:bg-foreground-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade1 rounded-md p-0 overflow-hidden shadow-xl gap-0 z-100"
             >
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-0">
                     <div className="p-6 space-y-4">

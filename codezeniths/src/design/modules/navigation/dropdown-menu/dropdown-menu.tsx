@@ -231,14 +231,22 @@ function DropdownMenuSubTrigger({
 
 function DropdownMenuSubContent({
     className,
+    sideOffset = 4,
+    alignOffset = -4,
+    collisionPadding = 8,
     ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
     return (
-        <DropdownMenuPrimitive.SubContent
-            data-slot="dropdown-menu-sub-content"
-            className={cn('data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ring-foreground-dark/10 bg-foreground-dark text-body-dark min-w-lg-2 rounded-md p-1 shadow-lg ring-1 duration-100 z-50 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden', className )}
-            {...props}
-        />
+        <DropdownMenuPrimitive.Portal>
+            <DropdownMenuPrimitive.SubContent
+                data-slot="dropdown-menu-sub-content"
+                sideOffset={sideOffset}
+                alignOffset={alignOffset}
+                collisionPadding={collisionPadding}
+                className={cn('data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ring-foreground-dark/10 bg-foreground-dark text-body-dark min-w-lg-2 rounded-md p-1 shadow-lg ring-1 duration-100 z-50 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden', className )}
+                {...props}
+            />
+        </DropdownMenuPrimitive.Portal>
     );
 }
 

@@ -66,7 +66,7 @@ export const CreatePlaylistCard: React.FC<CreatePlaylistCardProps> = ({
                     variant={TypographyVariant.H3}
                     weight={TypographyWeight.BOLD}
                     align={TypographyAlign.CENTER}
-                    className="text-base sm:text-lg text-body-light-shade3 dark:text-body-dark group-hover:text-primary transition-colors text-center w-full mb-1"
+                    className="text-h4! sm:text-h6! xs:text-h6! text-body-light-shade3 dark:text-body-dark group-hover:text-primary transition-colors text-center w-full mb-1"
                 >
                     {isLimitReached ? 'Playlist Limit Reached' : 'Create New Playlist'}
                 </Typography>
