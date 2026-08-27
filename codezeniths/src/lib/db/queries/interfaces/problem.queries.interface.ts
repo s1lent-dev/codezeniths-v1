@@ -8,6 +8,8 @@ import {
     GetProblemsWithFiltersOutputSchema,
     UpdateProblemStatusInputSchema,
     UpdateProblemStatusOutputSchema,
+    GetProblemNoteInputSchema,
+    GetProblemNoteOutputSchema,
     UpdateProblemNoteInputSchema,
     UpdateProblemNoteOutputSchema,
     UpdateProblemFavouriteInputSchema,
@@ -38,6 +40,10 @@ export interface IProblemQueries {
     getProblemsWithFilters: (
         payload: z.infer<typeof GetProblemsWithFiltersInputSchema>,
     ) => Promise<z.infer<typeof GetProblemsWithFiltersOutputSchema>>;
+
+    getProblemNote: (
+        payload: z.infer<typeof GetProblemNoteInputSchema>,
+    ) => Promise<z.infer<typeof GetProblemNoteOutputSchema>>;
 
     updateProblemStatus: (
         payload: z.infer<typeof UpdateProblemStatusInputSchema>,

@@ -3,6 +3,8 @@ import { publicProcedure, protectedProcedure } from '../trpc/trpc.procedure';
 import {
     GetProblemsTRPCInputSchema,
     GetProblemsTRPCOutputSchema,
+    GetProblemNoteTRPCInputSchema,
+    GetProblemNoteTRPCOutputSchema,
     UpdateProblemTRPCInputSchema,
     UpdateProblemTRPCOutputSchema,
     GetProblemTablePrimitivesTRPCInputSchema,
@@ -23,6 +25,11 @@ export const problemRouter = createTRPCRouter({
         .input(GetProblemsTRPCInputSchema)
         .output(GetProblemsTRPCOutputSchema)
         .query(({ ctx, input }) => ctx.controllers.problem.getProblems({ ctx, input })),
+
+    getProblemNote: publicProcedure
+        .input(GetProblemNoteTRPCInputSchema)
+        .output(GetProblemNoteTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.problem.getProblemNote({ ctx, input })),
 
     updateProblem: protectedProcedure
         .input(UpdateProblemTRPCInputSchema)

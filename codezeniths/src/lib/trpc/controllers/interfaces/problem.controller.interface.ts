@@ -2,6 +2,8 @@ import { TRPCContext } from '../../trpc/trpc.context';
 import {
     GetProblemsTRPCInputSchema,
     GetProblemsTRPCOutputSchema,
+    GetProblemNoteTRPCInputSchema,
+    GetProblemNoteTRPCOutputSchema,
     UpdateProblemTRPCInputSchema,
     UpdateProblemTRPCOutputSchema,
     GetProblemTablePrimitivesTRPCInputSchema,
@@ -18,6 +20,11 @@ export interface IProblemController {
         ctx: TRPCContext;
         input: z.infer<typeof GetProblemsTRPCInputSchema>;
     }): Promise<z.infer<typeof GetProblemsTRPCOutputSchema>>;
+
+    getProblemNote(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetProblemNoteTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetProblemNoteTRPCOutputSchema>>;
 
     updateProblem(args: {
         ctx: TRPCContext;

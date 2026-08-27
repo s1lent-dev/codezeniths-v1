@@ -85,6 +85,17 @@ export const UpdateProblemTRPCOutputSchema = z.object({
     problemSlug: z.string(),
 });
 
+// ─── getProblemNote ───────────────────────────────────────────────────────────
+
+export const GetProblemNoteTRPCInputSchema = z.object({
+    problemId: z.string().uuid(),
+});
+
+export const GetProblemNoteTRPCOutputSchema = z.object({
+    problemId: z.string().uuid(),
+    notes: z.string().nullable(),
+});
+
 // ─── getProblemTablePrimitives ──────────────────────────────────────────────────
 
 export const GetProblemTablePrimitivesTRPCInputSchema = z.object({

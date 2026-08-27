@@ -57,6 +57,41 @@ export class PlaylistQueryService implements IPlaylistQueryService {
         });
     }
 
+    getCommunityPlaylistsInfinite(
+        input?: {
+            creatorId?: string;
+            creatorUsername?: string;
+            search?: string;
+            sortBy?: 'popular' | 'recent' | 'name';
+            order?: 'asc' | 'desc';
+            limit?: number;
+        },
+        options?: { enabled?: boolean }
+    ) {
+        const limit = input?.limit || 6;
+        return useInfiniteQuery({
+            queryKey: queryKeys.playlist.communityInfinite({ ...input, limit }),
+            queryFn: async ({ pageParam = 1 }) => {
+                const payload = {
+                    creatorId: input?.creatorId,
+                    creatorUsername: input?.creatorUsername,
+                    search: input?.search,
+                    sortBy: input?.sortBy ?? 'popular',
+                    order: input?.order ?? 'desc',
+                    page: pageParam as number,
+                    limit,
+                };
+                const validatedInput = GetCommunityPlaylistsTRPCInputSchema.parse(payload);
+                const raw = await trpcClient.playlist.getCommunityPlaylists.query(validatedInput);
+                return GetCommunityPlaylistsTRPCOutputSchema.parse(raw);
+            },
+            initialPageParam: 1,
+            getNextPageParam: (lastPage) => (lastPage.hasNextPage ? lastPage.page + 1 : undefined),
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.DYNAMIC,
+        });
+    }
+
     getPlaylistInfo(
         input: z.infer<typeof GetPlaylistInfoTRPCInputSchema>,
         options?: { enabled?: boolean }

@@ -49,6 +49,8 @@ export const queryKeys = {
         progress: (userId?: string) => ['problem', 'progress', userId ?? 'me'] as const,
         recentlySolved: (userId?: string, limit?: number) =>
             ['problem', 'recentlySolved', userId ?? 'me', limit ?? 10] as const,
+        note: (problemId: string, userId?: string) =>
+            ['problem', 'note', problemId, userId ?? 'me'] as const,
     },
     search: {
         query: (collection: string, config: unknown) => ['search', 'query', collection, config] as const,
@@ -80,6 +82,7 @@ export const queryKeys = {
     playlist: {
         myList: () => ['playlist', 'my'] as const,
         communityList: (filters?: unknown) => ['playlist', 'community', filters ?? {}] as const,
+        communityInfinite: (filters?: unknown) => ['playlist', 'community', 'infinite', filters ?? {}] as const,
         info: (idOrSlug: string) => ['playlist', 'info', idOrSlug] as const,
         forProblem: (problemId: string) => ['playlist', 'forProblem', problemId] as const,
     },

@@ -28,6 +28,16 @@ export const PlaylistsOverviewSection: React.FC<PlaylistsOverviewSectionProps> =
         setSearchQuery,
         sortBy,
         setSortBy,
+        viewMode,
+        setViewMode,
+        page,
+        setPage,
+        pageSize,
+        totalCommunity,
+        totalPages,
+        hasNextPage,
+        isFetchingNextPage,
+        onLoadMore,
 
         myPlaylists,
         isMyPlaylistsLoading,
@@ -151,6 +161,16 @@ export const PlaylistsOverviewSection: React.FC<PlaylistsOverviewSectionProps> =
                         sortBy={sortBy}
                         onSortChange={setSortBy}
                         onClearFilters={() => setSearchQuery('')}
+                        viewMode={viewMode}
+                        onViewModeChange={setViewMode}
+                        page={page}
+                        pageSize={pageSize}
+                        total={totalCommunity}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                        hasNextPage={hasNextPage}
+                        isFetchingNextPage={isFetchingNextPage}
+                        onLoadMore={onLoadMore}
                     />
                 )}
 

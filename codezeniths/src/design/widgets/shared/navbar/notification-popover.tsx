@@ -51,7 +51,7 @@ const FILTER_TITLE_MAP: Record<NotificationFilter, string> = {
     social: 'Social & Activity',
 };
 
-function formatRelativeTime(dateInput: string | Date): string {
+export function formatRelativeTime(dateInput: string | Date): string {
     const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     if (isNaN(date.getTime())) return 'Just now';
 
@@ -66,7 +66,7 @@ function formatRelativeTime(dateInput: string | Date): string {
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-function getNotificationVisuals(type: string): {
+export function getNotificationVisuals(type: string): {
     icon: React.ComponentType<{ className?: string }>;
     bgClass: string;
     textClass: string;

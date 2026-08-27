@@ -3,6 +3,8 @@ import { IProblemController } from './interfaces';
 import {
     GetProblemsTRPCInputSchema,
     GetProblemsTRPCOutputSchema,
+    GetProblemNoteTRPCInputSchema,
+    GetProblemNoteTRPCOutputSchema,
     UpdateProblemTRPCInputSchema,
     UpdateProblemTRPCOutputSchema,
     GetProblemTablePrimitivesTRPCInputSchema,
@@ -91,6 +93,38 @@ export class ProblemController implements IProblemController {
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: error.message || 'Something went wrong while retrieving problems.',
+                cause: error,
+            });
+        }
+    }
+
+    async getProblemNote({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetProblemNoteTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetProblemNoteTRPCOutputSchema>> {
+        logger.info('Executing getProblemNote controller', { input });
+        const userId = ctx.user?.id;
+        if (!userId) {
+            return {
+                problemId: input.problemId,
+                notes: null,
+            };
+        }
+
+        try {
+            return await ctx.queries.problem.getProblemNote({
+                userId,
+                problemId: input.problemId,
+            });
+        } catch (error: any) {
+            logger.error('Error in getProblemNote controller', { error, userId, problemId: input.problemId });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error.message || 'Something went wrong while retrieving problem note.',
                 cause: error,
             });
         }

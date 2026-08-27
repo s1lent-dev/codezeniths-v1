@@ -114,6 +114,7 @@ export interface IFavouriteQueryService {
 export interface IProblemQueryService {
     getProblemTablePrimitives(input?: any): any;
     getProblems(input: z.infer<typeof GetProblemsTRPCInputSchema>): any;
+    getProblemNote(input: { problemId: string }, options?: { enabled?: boolean }): any;
     updateProblem(): any;
     getProblemProgress(input?: { userId?: string }, options?: { enabled?: boolean }): any;
     getRecentlySolvedProblems(input?: { userId?: string; limit?: number }, options?: { enabled?: boolean }): any;
@@ -183,6 +184,7 @@ export interface ILeaderboardQueryService {
 export interface IPlaylistQueryService {
     getMyPlaylists(options?: { enabled?: boolean }): any;
     getCommunityPlaylists(input?: any, options?: { enabled?: boolean }): any;
+    getCommunityPlaylistsInfinite(input?: any, options?: { enabled?: boolean }): any;
     getPlaylistInfo(input: { slug?: string; id?: string }, options?: { enabled?: boolean }): any;
     createPlaylist(): any;
     updatePlaylist(): any;

@@ -72,6 +72,7 @@ export const ProfilePopover = () => {
 
     const displayName = user?.name || user?.firstName || 'CodeZenith User';
     const displayUsername = user?.username ? `@${user.username}` : user?.email || '@zenith';
+    const profileUrl = user?.username ? `/profile/${user.username}` : '/profile';
 
     return (
         <Popover open={isProfilePopoverOpen} onOpenChange={setProfilePopoverOpen}>
@@ -100,9 +101,18 @@ export const ProfilePopover = () => {
                 sideOffset={12}
                 className="w-80 p-8 bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 rounded-2xl shadow-2xl z-999 space-y-4"
             >
-                {/* 1. Header row: PFP + Name + @username */}
-                <Container size="none" direction="row" align="center" gap="3" className='p-2'>
-                    <div className="w-11 h-11 rounded-full bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md overflow-hidden shrink-0 ring-2 ring-primary/30">
+                {/* 1. Header row: PFP + Name + @username (Clickable) */}
+                <div
+                    onClick={() => {
+                        setProfilePopoverOpen(false);
+                        router.push(profileUrl);
+                    }}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 transition-all cursor-pointer group"
+                    role="button"
+                    tabIndex={0}
+                    aria-label="View your profile"
+                >
+                    <div className="w-11 h-11 rounded-full bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md overflow-hidden shrink-0 ring-2 ring-primary/30 group-hover:ring-primary transition-all">
                         {user?.image ? (
                             <img src={user.image} alt={displayName} className="w-full h-full object-cover" />
                         ) : (
@@ -112,18 +122,19 @@ export const ProfilePopover = () => {
                     <div className="min-w-0 flex-1">
                         <Typography
                             variant={TypographyVariant.H6}
-                            className="text-sm font-bold text-heading-light dark:text-heading-dark truncate"
+                            className="text-sm font-bold text-heading-light dark:text-heading-dark truncate group-hover:text-primary transition-colors"
                         >
                             {displayName}
                         </Typography>
                         <Typography
                             variant={TypographyVariant.MUTED}
-                            className="text-xs text-muted-light dark:text-muted-dark truncate font-medium"
+                            className="text-xs text-muted-light dark:text-muted-dark truncate font-medium group-hover:text-body-light dark:group-hover:text-body-dark transition-colors"
                         >
                             {displayUsername}
                         </Typography>
                     </div>
-                </Container>
+                    <ChevronRight className="w-4 h-4 text-muted-light dark:text-muted-dark opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+                </div>
 
                 {/* 2. Upgrade to Premium card */}
                 <Card
@@ -198,14 +209,18 @@ export const ProfilePopover = () => {
 
                 {/* 6. Menu list: Profile / Settings / Appearance / Logout */}
                 <div className="space-y-2 mb-2">
-                    <Link
-                        href={user?.username ? `/profile/${user.username}` : '/profile'}
-                        onClick={() => setProfilePopoverOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2 text-xs font-medium text-body-light dark:text-body-dark hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 rounded-sm transition-colors"
+                    <div
+                        onClick={() => {
+                            setProfilePopoverOpen(false);
+                            router.push(profileUrl);
+                        }}
+                        className="flex items-center gap-3 px-3 py-2 text-xs font-medium text-body-light dark:text-body-dark hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 rounded-sm transition-colors cursor-pointer"
+                        role="button"
+                        tabIndex={0}
                     >
                         <UserIcon className="w-4 h-4 text-muted-light dark:text-muted-dark" />
                         <Typography variant={TypographyVariant.P} className="text-xs font-medium">Profile</Typography>
-                    </Link>
+                    </div>
 
                     <Link
                         href="/settings/profile-details"

@@ -9,6 +9,8 @@ import type { IProblemQueryService } from '../interfaces';
 import {
     GetProblemsTRPCInputSchema,
     GetProblemsTRPCOutputSchema,
+    GetProblemNoteTRPCInputSchema,
+    GetProblemNoteTRPCOutputSchema,
     UpdateProblemTRPCInputSchema,
     UpdateProblemTRPCOutputSchema,
     GetProblemTablePrimitivesTRPCInputSchema,
@@ -74,6 +76,22 @@ export class ProblemQueryService implements IProblemQueryService {
         });
     }
 
+    getProblemNote(
+        input: z.infer<typeof GetProblemNoteTRPCInputSchema>,
+        options?: { enabled?: boolean }
+    ) {
+        const validatedInput = GetProblemNoteTRPCInputSchema.parse(input);
+        return useQuery({
+            queryKey: queryKeys.problem.note(validatedInput.problemId),
+            queryFn: async () => {
+                const raw = await trpcClient.problem.getProblemNote.query(validatedInput);
+                return GetProblemNoteTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
+
     updateProblem() {
         const queryClient = useQueryClient();
         return useMutation({
@@ -91,6 +109,14 @@ export class ProblemQueryService implements IProblemQueryService {
                 // Apply optimistic update immediately to all cached problem queries
                 applyOptimisticProblemUpdate(queryClient, variables);
 
+                // Optimistically update note query cache if notes are modified
+                if (variables.notes !== undefined) {
+                    queryClient.setQueryData(queryKeys.problem.note(variables.problemId), {
+                        problemId: variables.problemId,
+                        notes: variables.notes,
+                    });
+                }
+
                 return { previousProblemQueries };
             },
             onError: (_err, _variables, context) => {
@@ -100,8 +126,13 @@ export class ProblemQueryService implements IProblemQueryService {
                     });
                 }
             },
-            onSettled: async () => {
+            onSettled: async (_data, _error, variables) => {
                 await CacheInvalidationService.invalidateOnProblemProgressChange(queryClient);
+                if (variables?.problemId) {
+                    await queryClient.invalidateQueries({
+                        queryKey: queryKeys.problem.note(variables.problemId),
+                    });
+                }
             },
         });
     }

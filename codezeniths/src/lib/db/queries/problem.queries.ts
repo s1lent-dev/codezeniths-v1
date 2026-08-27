@@ -15,6 +15,8 @@ import {
     GetProblemsWithFiltersOutputSchema,
     UpdateProblemStatusInputSchema,
     UpdateProblemStatusOutputSchema,
+    GetProblemNoteInputSchema,
+    GetProblemNoteOutputSchema,
     UpdateProblemNoteInputSchema,
     UpdateProblemNoteOutputSchema,
     UpdateProblemFavouriteInputSchema,
@@ -497,6 +499,29 @@ export class ProblemQueries implements IProblemQueries {
                 status: progress.status,
                 revisit: progress.revisit,
                 favourite: progress.favourite,
+            };
+        })
+        .build();
+
+    getProblemNote = qRPC()
+        .input(GetProblemNoteInputSchema)
+        .output(GetProblemNoteOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing getProblemNote query', { payload });
+            const { userId, problemId } = payload;
+
+            const progress = await prisma.problemProgress.findUnique({
+                where: {
+                    userId_problemId: { userId, problemId },
+                },
+                select: {
+                    notes: true,
+                },
+            });
+
+            return {
+                problemId,
+                notes: progress?.notes ?? null,
             };
         })
         .build();

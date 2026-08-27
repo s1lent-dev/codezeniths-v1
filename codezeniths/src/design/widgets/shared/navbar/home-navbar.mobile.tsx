@@ -17,16 +17,6 @@ import {
     Inbox,
     ChevronRight,
     Loader2,
-    CheckCircle2,
-    Crown,
-    Flame,
-    GraduationCap,
-    Eye,
-    UserPlus,
-    Bookmark,
-    CreditCard,
-    ShieldAlert,
-    Megaphone,
     SlidersHorizontal,
     Compass,
     Tag,
@@ -38,6 +28,7 @@ import {
     Heart,
     Code2,
     LayoutDashboard,
+    ArrowRight,
 } from 'lucide-react';
 import {
     Popover,
@@ -64,40 +55,9 @@ import {
 import { useAuth, authClient } from '@/lib/auth/auth';
 import { useNavigationStore } from '../store/navigation.store';
 import { notificationQueryService } from '@/lib/tanstack/services/notification.query-service';
+import { getNotificationVisuals, formatRelativeTime } from './notification-popover';
 import { NavbarSearch } from './navbar-search';
 import { cn } from '@codezeniths/design/cn';
-
-function formatRelativeTime(dateInput: string | Date | undefined): string {
-    if (!dateInput) return 'Just now';
-    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-    if (isNaN(date.getTime())) return 'Just now';
-
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
-
-function getNotificationIcon(type: string | undefined) {
-    const lower = (type || '').toLowerCase();
-    if (lower.includes('rank') || lower.includes('tier')) return Crown;
-    if (lower.includes('streak')) return Flame;
-    if (lower.includes('module') || lower.includes('topic') || lower.includes('tag')) return GraduationCap;
-    if (lower.includes('solve')) return CheckCircle2;
-    if (lower.includes('profile_view') || lower.includes('viewer')) return Eye;
-    if (lower.includes('follow')) return UserPlus;
-    if (lower.includes('playlist') || lower.includes('bookmark') || lower.includes('star')) return Bookmark;
-    if (lower.includes('welcome')) return Sparkles;
-    if (lower.includes('payment') || lower.includes('subscription')) return CreditCard;
-    if (lower.includes('session') || lower.includes('device') || lower.includes('security')) return ShieldAlert;
-    if (lower.includes('admin') || lower.includes('broadcast') || lower.includes('announcement')) return Megaphone;
-    return Bell;
-}
 
 const PROFILE_NAV_ITEMS = [
     { name: 'Problems', href: '/problemset', icon: LayoutDashboard },
@@ -137,6 +97,7 @@ export const HomeNavbarMobileToggle = () => {
 
     const displayName = user?.name || user?.firstName || 'CodeZenith User';
     const displayUsername = user?.username ? `@${user.username}` : user?.email || '@zenith';
+    const profileUrl = user?.username ? `/profile/${user.username}` : '/profile';
 
     const handleSignOut = async () => {
         setIsOpen(false);
@@ -200,7 +161,7 @@ export const HomeNavbarMobileToggle = () => {
                             <NavbarSearch behavior="inline" className="mx-0 w-full max-w-full" />
                         </div>
 
-                        {/* 2. Direct User Profile Header Card (Not a dropdown) */}
+                        {/* 2. Direct User Profile Header Card (Clickable to User Profile) */}
                         {isLoading ? (
                             <div className="p-3.5 rounded-sm bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/60 border border-foreground-light-shade3 dark:border-foreground-dark-shade3 space-y-3.5 animate-pulse">
                                 <div className="flex items-center gap-3">
@@ -212,9 +173,18 @@ export const HomeNavbarMobileToggle = () => {
                                 </div>
                             </div>
                         ) : isAuthenticated && user ? (
-                            <div className="p-3.5 rounded-sm bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/60 border border-foreground-light-shade3 dark:border-foreground-dark-shade3 space-y-3.5">
+                            <div
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    router.push(profileUrl);
+                                }}
+                                className="p-3.5 rounded-sm bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/60 border border-foreground-light-shade3 dark:border-foreground-dark-shade3 space-y-3.5 cursor-pointer hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 transition-all group"
+                                role="button"
+                                tabIndex={0}
+                                aria-label="View your profile"
+                            >
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-md overflow-hidden shrink-0 ring-2 ring-primary/30">
+                                    <div className="w-10 h-10 rounded-full bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-md overflow-hidden shrink-0 ring-2 ring-primary/30 group-hover:ring-primary transition-all">
                                         {user.image ? (
                                             <img src={user.image} alt={displayName} className="w-full h-full object-cover" />
                                         ) : (
@@ -224,17 +194,18 @@ export const HomeNavbarMobileToggle = () => {
                                     <div className="min-w-0 flex-1">
                                         <Typography
                                             variant={TypographyVariant.H6}
-                                            className="text-xs sm:text-sm font-bold text-heading-light dark:text-heading-dark truncate"
+                                            className="text-xs sm:text-sm font-bold text-heading-light dark:text-heading-dark truncate group-hover:text-primary transition-colors"
                                         >
                                             {displayName}
                                         </Typography>
                                         <Typography
                                             variant={TypographyVariant.MUTED}
-                                            className="text-[11px] text-muted-light dark:text-muted-dark truncate font-medium"
+                                            className="text-[11px] text-muted-light dark:text-muted-dark truncate font-medium group-hover:text-body-light dark:group-hover:text-body-dark transition-colors"
                                         >
                                             {displayUsername}
                                         </Typography>
                                     </div>
+                                    <ChevronRight className="w-4 h-4 text-muted-light dark:text-muted-dark opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
                                 </div>
 
                                 {/* Upgrade to Premium mini banner */}
@@ -245,8 +216,9 @@ export const HomeNavbarMobileToggle = () => {
                                             [CardBackgroundEffect.MAGIC]: magicConfig,
                                         },
                                     }}
-                                    className="relative overflow-hidden bg-foreground-light dark:bg-foreground-dark rounded-sm p-2.5 shadow-xs border border-primary/20 cursor-pointer group"
-                                    onClick={() => {
+                                    className="relative overflow-hidden bg-foreground-light dark:bg-foreground-dark rounded-sm p-2.5 shadow-xs border border-primary/20 cursor-pointer group/card"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
                                         setIsOpen(false);
                                         router.push('/pricing');
                                     }}
@@ -260,7 +232,7 @@ export const HomeNavbarMobileToggle = () => {
                                                 Upgrade to Premium
                                             </Typography>
                                         </div>
-                                        <ChevronRight className="w-3.5 h-3.5 text-muted-light dark:text-muted-dark group-hover:translate-x-0.5 transition-transform" />
+                                        <ChevronRight className="w-3.5 h-3.5 text-muted-light dark:text-muted-dark group-hover/card:translate-x-0.5 transition-transform" />
                                     </div>
                                 </Card>
                             </div>
@@ -325,7 +297,7 @@ export const HomeNavbarMobileToggle = () => {
                             </AdaptiveDropdownMenu>
                         )}
 
-                        {/* 4. Notifications Adaptive Dropdown (Scrollable in itself) */}
+                        {/* 4. Notifications Adaptive Dropdown (Styled with desktop visual theme) */}
                         <AdaptiveDropdownMenu behavior="inline">
                             <AdaptiveDropdownMenuTrigger className="px-4 py-3 typography-p text-body-light dark:text-body-dark hover:text-primary transition-colors flex items-center justify-between rounded-sm bg-foreground-light-shade1/40 dark:bg-foreground-dark-shade1/40 border border-foreground-light-shade3 dark:border-foreground-dark-shade3 w-full focus:outline-none text-xs sm:text-sm font-medium">
                                 <div className="flex items-center gap-2.5">
@@ -339,16 +311,22 @@ export const HomeNavbarMobileToggle = () => {
                                 </div>
                                 <ChevronDown className="size-4 opacity-50 transition-transform group-open:rotate-180" />
                             </AdaptiveDropdownMenuTrigger>
-                            <AdaptiveDropdownMenuContent className="w-full max-h-60 overflow-y-auto overscroll-contain p-2.5 bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 rounded-sm">
+                            <AdaptiveDropdownMenuContent className="w-full max-h-72 overflow-y-auto overscroll-contain p-2.5 bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 rounded-sm">
                                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-foreground-light-shade3/40 dark:border-foreground-dark-shade3/40 px-1">
                                     <span className="text-[11px] font-bold text-muted-light dark:text-muted-dark">Recent Alerts</span>
                                     {unreadCount > 0 && (
                                         <button
                                             type="button"
                                             onClick={() => markAllAsReadMutation.mutate()}
+                                            disabled={markAllAsReadMutation.isPending}
                                             className="text-[10px] text-primary font-semibold hover:underline flex items-center gap-1 cursor-pointer"
                                         >
-                                            <CheckCheck className="w-3 h-3" /> Mark all read
+                                            {markAllAsReadMutation.isPending ? (
+                                                <Loader2 className="w-3 h-3 animate-spin" />
+                                            ) : (
+                                                <CheckCheck className="w-3 h-3" />
+                                            )}
+                                            <span>Mark all read</span>
                                         </button>
                                     )}
                                 </div>
@@ -358,36 +336,62 @@ export const HomeNavbarMobileToggle = () => {
                                         <Loader2 className="w-4 h-4 animate-spin text-primary mx-auto" />
                                     </div>
                                 ) : notifications.length === 0 ? (
-                                    <div className="py-6 text-center text-xs text-muted-light dark:text-muted-dark flex flex-col items-center gap-1">
-                                        <Inbox className="w-5 h-5 opacity-40" />
-                                        <span>No notifications yet</span>
+                                    <div className="py-6 text-center text-xs text-muted-light dark:text-muted-dark flex flex-col items-center gap-1.5">
+                                        <div className="size-9 rounded-full bg-secondary/10 flex items-center justify-center text-muted-light dark:text-muted-dark">
+                                            <Inbox className="w-4.5 h-4.5 opacity-60" />
+                                        </div>
+                                        <span className="text-[11px]">No notifications yet</span>
                                     </div>
                                 ) : (
-                                    <div className="space-y-2">
+                                    <div className="divide-y divide-foreground-light-shade3/40 dark:divide-foreground-dark-shade3/40 flex flex-col gap-1">
                                         {notifications.map((n) => {
-                                            const IconComp = getNotificationIcon(n.type);
+                                            const visuals = getNotificationVisuals(n.type);
+                                            const IconComp = visuals.icon;
+                                            const timeStr = formatRelativeTime(n.createdAt);
+
                                             return (
                                                 <div
                                                     key={n.id}
                                                     onClick={() => !n.read && markAsReadMutation.mutate({ notificationId: n.id })}
                                                     className={cn(
-                                                        'p-2.5 rounded-sm transition-colors cursor-pointer flex items-start gap-2.5 text-left',
-                                                        !n.read ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1'
+                                                        'p-2.5 transition-all hover:bg-foreground-light-shade1/60 dark:hover:bg-foreground-dark-shade1/60 cursor-pointer flex items-start gap-2.5 relative rounded-sm text-left',
+                                                        !n.read && 'bg-primary/4 dark:bg-primary/6'
                                                     )}
                                                 >
-                                                    <div className="size-6 rounded-xs bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
-                                                        <IconComp className="w-3 h-3" />
+                                                    {/* Unread indicator dot */}
+                                                    {!n.read && (
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0 animate-pulse" />
+                                                    )}
+
+                                                    {/* Category Icon Badge */}
+                                                    <div
+                                                        className={cn(
+                                                            'size-7 rounded-sm flex items-center justify-center shrink-0 shadow-2xs mt-0.5',
+                                                            visuals.bgClass
+                                                        )}
+                                                    >
+                                                        <IconComp className="w-3.5 h-3.5" />
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center justify-between gap-1">
-                                                            <span className={cn('text-xs truncate', !n.read ? 'font-bold text-heading-light dark:text-heading-dark' : 'font-medium text-body-light dark:text-body-dark')}>
+
+                                                    {/* Content Block */}
+                                                    <div className="flex-1 min-w-0 space-y-0.5">
+                                                        <div className="flex items-center justify-between gap-1.5">
+                                                            <span
+                                                                className={cn(
+                                                                    'text-xs truncate leading-tight',
+                                                                    !n.read
+                                                                        ? 'font-bold text-heading-light dark:text-heading-dark'
+                                                                        : 'font-semibold text-body-light dark:text-body-dark'
+                                                                )}
+                                                            >
                                                                 {n.title}
                                                             </span>
-                                                            <span className="text-[9px] text-muted-light dark:text-muted-dark whitespace-nowrap shrink-0">
-                                                                {formatRelativeTime(n.createdAt)}
+                                                            <span className="text-[10px] text-muted-light dark:text-muted-dark whitespace-nowrap shrink-0 font-medium">
+                                                                {timeStr}
                                                             </span>
                                                         </div>
-                                                        <p className="text-[10px] text-muted-light dark:text-muted-dark line-clamp-2 leading-tight mt-0.5">
+
+                                                        <p className="text-[11px] text-muted-light dark:text-muted-dark line-clamp-2 leading-relaxed">
                                                             {n.message}
                                                         </p>
                                                     </div>
@@ -397,13 +401,14 @@ export const HomeNavbarMobileToggle = () => {
                                     </div>
                                 )}
 
-                                <div className="pt-2 mt-2 border-t border-foreground-light-shade3/40 dark:border-foreground-dark-shade3/40 text-center">
+                                <div className="pt-2.5 mt-2 border-t border-foreground-light-shade3/40 dark:border-foreground-dark-shade3/40 text-center">
                                     <Link
                                         href="/settings/notifications"
                                         onClick={() => setIsOpen(false)}
-                                        className="text-[11px] font-semibold text-primary hover:underline inline-block"
+                                        className="w-full py-1 text-xs font-semibold text-primary hover:text-primary-shade1 hover:underline inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                                     >
-                                        View all notifications →
+                                        <span>See more in Settings</span>
+                                        <ArrowRight className="w-3.5 h-3.5" />
                                     </Link>
                                 </div>
                             </AdaptiveDropdownMenuContent>
@@ -422,23 +427,31 @@ export const HomeNavbarMobileToggle = () => {
                                 <AdaptiveDropdownMenuContent className="w-full p-3.5 bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 rounded-sm space-y-3">
                                     {/* Navigation links to Profile & Settings */}
                                     <div className="space-y-1">
-                                        <Link
-                                            href={user?.username ? `/profile/${user.username}` : '/profile'}
-                                            onClick={() => setIsOpen(false)}
-                                            className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-body-light dark:text-body-dark hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 rounded-sm transition-colors"
+                                        <div
+                                            onClick={() => {
+                                                setIsOpen(false);
+                                                router.push(profileUrl);
+                                            }}
+                                            className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-body-light dark:text-body-dark hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 rounded-sm transition-colors cursor-pointer"
+                                            role="button"
+                                            tabIndex={0}
                                         >
                                             <UserIcon className="w-4 h-4 text-muted-light dark:text-muted-dark" />
                                             <span>My Profile</span>
-                                        </Link>
+                                        </div>
 
-                                        <Link
-                                            href="/settings/profile-details"
-                                            onClick={() => setIsOpen(false)}
-                                            className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-body-light dark:text-body-dark hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 rounded-sm transition-colors"
+                                        <div
+                                            onClick={() => {
+                                                setIsOpen(false);
+                                                router.push('/settings/profile-details');
+                                            }}
+                                            className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-body-light dark:text-body-dark hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 rounded-sm transition-colors cursor-pointer"
+                                            role="button"
+                                            tabIndex={0}
                                         >
                                             <SettingsIcon className="w-4 h-4 text-muted-light dark:text-muted-dark" />
                                             <span>Settings</span>
-                                        </Link>
+                                        </div>
                                     </div>
 
                                     <Separator className="bg-foreground-light-shade3/40 dark:border-foreground-dark-shade3/40 my-1" />

@@ -104,6 +104,18 @@ export const UpdateProblemStatusOutputSchema = z.object({
     favourite: z.boolean(),
 });
 
+// ─── getProblemNote ───────────────────────────────────────────────────────────
+
+export const GetProblemNoteInputSchema = z.object({
+    userId: z.uuidv7(),
+    problemId: z.uuidv7(),
+});
+
+export const GetProblemNoteOutputSchema = z.object({
+    problemId: z.uuidv7(),
+    notes: z.string().nullable(),
+});
+
 // ─── updateProblemNote ─────────────────────────────────────────────────────────
 
 export const UpdateProblemNoteInputSchema = z.object({
