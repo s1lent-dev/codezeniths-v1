@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useProfile } from './useProfile';
 import { ProfileSidebar, ProfileRightSectionSkeleton } from './profile-section';
-import { ProfileSummaryCards } from './proress-section';
+import { ProfileSummaryCards } from './progress-section';
 import { ActivityHeatmap } from './activity-section';
 import { RecentlySolvedList } from './recents-section';
 import { ProfileNetworkList } from './network-section/profile-network-list';

@@ -5,6 +5,7 @@ export * from './utils/scoring';
 export * from './query-builder';
 export * from './collections/collection';
 export * from './client';
+export * from './memory-index';
 export * from './useSearch';
 export * from './types/schemas';
 

@@ -4,7 +4,8 @@ import { SearchError, SearchValidationError, IndexingError } from '../utils/sear
 import { SearchQueryBuilder } from '../query-builder';
 import { MoreLikeThisStrategy } from '../utils/scoring';
 import { phoneticAlgorithmRegistry } from '../utils/algorithms';
-import { redisService } from '@codezeniths/lib/redis';
+import { redisService, RedisStore } from '@codezeniths/lib/redis';
+import { memorySearchIndex } from '../memory-index';
 
 export class Collection<TDoc> {
   private readonly similarityStrategy: MoreLikeThisStrategy<TDoc>;
@@ -35,8 +36,7 @@ export class Collection<TDoc> {
 
 
   async moreLikeThis(id: string, opts?: { limit?: number }): Promise<TDoc[]> {
-    const documentsRaw = await redisService.client.get(`search:${this.definition.name}:all`);
-    const documents: TDoc[] = documentsRaw ? JSON.parse(documentsRaw) : [];
+    const documents: TDoc[] = await memorySearchIndex.getDocuments<TDoc>(this.definition.name);
     if (!documents.length) return [];
     return this.similarityStrategy.findSimilar(id, documents, opts?.limit ?? 5);
   }
@@ -113,6 +113,9 @@ export class Collection<TDoc> {
       }
 
       await redisService.client.set(`${liveNamespace}:all`, JSON.stringify(documents));
+      const newVersion = Date.now().toString();
+      await redisService.client.set(RedisStore.search.version(collectionName), newVersion);
+      memorySearchIndex.setDocuments(collectionName, documents, newVersion);
       return ok(undefined);
     } catch (error) {
       return err(new IndexingError(
@@ -137,6 +140,9 @@ export class Collection<TDoc> {
 
       const remainingDocs = documents.filter(d => (d as Record<string, unknown>)[idField as string] !== id);
       await redisService.client.set(`${liveNamespace}:all`, JSON.stringify(remainingDocs));
+      const newVersion = Date.now().toString();
+      await redisService.client.set(RedisStore.search.version(collectionName), newVersion);
+      memorySearchIndex.setDocuments(collectionName, remainingDocs, newVersion);
 
       // Clean up orphaned autocomplete prefixes
       if (this.definition.autocompleteFields && this.definition.autocompleteFields.length > 0) {
@@ -301,8 +307,10 @@ export class Collection<TDoc> {
         }
       }
 
+      const newVersion = Date.now().toString();
+      await redisService.client.set(RedisStore.search.version(collectionName), newVersion);
+      memorySearchIndex.setDocuments(collectionName, validDocs, newVersion);
 
-      
       return ok({
         collection: collectionName,
         documentsIndexed: validDocs.length,

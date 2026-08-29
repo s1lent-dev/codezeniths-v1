@@ -64,7 +64,7 @@ export const ProfilePlaylistCard: React.FC<ProfilePlaylistCardProps> = ({
                                     'px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 border-none',
                                     playlist.isPublic
                                         ? 'bg-primary/10 text-primary dark:bg-primary/15'
-                                        : 'bg-muted-light-shade3 dark:bg-muted-dark-shade3 text-muted-light dark:text-muted-dark'
+                                        : 'bg-amber-500/10 dark:bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 dark:border-amber-500/20'
                                 )}
                             >
                                 {playlist.isPublic ? (
@@ -97,7 +97,7 @@ export const ProfilePlaylistCard: React.FC<ProfilePlaylistCardProps> = ({
                         <Typography
                             variant={TypographyVariant.H3}
                             weight={TypographyWeight.BOLD}
-                            className="text-base sm:text-lg text-body-light-shade3 dark:text-body-dark group-hover:text-primary transition-colors leading-tight line-clamp-1"
+                            className="text-h5! sm:text-h6! xs:text-h6! text-body-light-shade3 dark:text-body-dark group-hover:text-primary transition-colors leading-tight line-clamp-1"
                         >
                             {playlist.title}
                         </Typography>

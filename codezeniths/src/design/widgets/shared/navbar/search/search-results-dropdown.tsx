@@ -7,6 +7,7 @@ import {
   TypographyAlign,
   Spinner,
   SpinnerVariant,
+  ScrollArea,
 } from '@codezeniths/components';
 import { SearchResultItem, SearchResultHit } from './search-result-item';
 
@@ -69,12 +70,21 @@ export const SearchResultsDropdown: React.FC<SearchResultsDropdownProps> = ({
         isInline
           ? 'mt-2.5 w-full bg-background-light dark:bg-background-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade3 rounded-sm shadow-none z-10 overflow-hidden flex flex-col p-2.5 space-y-2'
           : cn(
-              'absolute top-full mt-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border border-foreground-light-shade3/80 dark:border-foreground-dark-shade3/80 rounded-md shadow-2xl z-9999 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-3 duration-200 p-3.5 space-y-3',
+              'absolute top-full mt-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border border-foreground-light-shade3/80 dark:border-foreground-dark-shade3/80 rounded-md shadow-2xl z-9999 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-3 duration-200 p-3 sm:p-3.5',
               alignClass
             )
       )}
     >
-      <div className={cn(isInline ? 'max-h-60 overflow-y-auto overscroll-contain pr-1 space-y-2' : 'max-h-120 h-[65vh] overflow-y-auto pr-1 space-y-3')}>
+      <ScrollArea
+        type="auto"
+        className={cn(
+          isInline
+            ? 'h-64 sm:h-72 w-full'
+            : 'h-88 sm:h-96 md:h-104 w-full'
+        )}
+        scrollbarClassName="mr-0.5"
+      >
+        <div className={cn(isInline ? 'pr-2 space-y-2' : 'pr-2.5 sm:pr-3 space-y-3')}>
 
         {/* ─── RECENT SEARCH HISTORY MODE (When search query is empty) ─── */}
         {isQueryEmpty ? (
@@ -230,8 +240,8 @@ export const SearchResultsDropdown: React.FC<SearchResultsDropdownProps> = ({
             )}
           </>
         )}
-
-      </div>
+        </div>
+      </ScrollArea>
     </div>
   );
 };

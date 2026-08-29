@@ -2,6 +2,7 @@ import type { FuzzyAlgorithmName, PhoneticAlgorithmName, QueryConfig, SearchHit,
 import { fuzzyAlgorithmRegistry, phoneticAlgorithmRegistry } from './utils/algorithms';
 import { scoringStrategyRegistry, ScoringPipeline } from './utils/scoring';
 import { redisService } from '@codezeniths/lib/redis';
+import { memorySearchIndex } from './memory-index';
 
 
 export class SearchQueryBuilder<TDoc> {
@@ -62,8 +63,7 @@ export class SearchQueryBuilder<TDoc> {
     let hits: SearchHit<TDoc>[] = [];
 
     if (this.config.query.length > 0) {
-      const documentsRaw = await redisService.client.get(`search:${this.definition.name}:all`);
-      const documents: TDoc[] = documentsRaw ? JSON.parse(documentsRaw) : [];
+      const documents: TDoc[] = await memorySearchIndex.getDocuments<TDoc>(this.definition.name);
       
       if (documents && documents.length > 0) {
         const fields = this.definition.searchableFields.map(f => ({
@@ -130,20 +130,28 @@ export class SearchQueryBuilder<TDoc> {
               metadata = { ...metadata, didYouMean: undefined };
             }
           }
-
-
         }
 
         hits = hits.slice(0, this.config.limit);
       }
     }
 
-
-    metadata = { ...metadata, autocomplete: undefined };
+    let autocompleteSuggestions: string[] | undefined;
+    if (this.config.autocomplete) {
+      try {
+        autocompleteSuggestions = await this.computeSuggestions(this.config.query, hits);
+      } catch {
+        autocompleteSuggestions = undefined;
+      }
+    }
 
     return {
       hits,
-      metadata: { ...metadata, tookMs: Date.now() - startTime },
+      metadata: {
+        ...metadata,
+        autocomplete: autocompleteSuggestions && autocompleteSuggestions.length > 0 ? autocompleteSuggestions : undefined,
+        tookMs: Date.now() - startTime,
+      },
     };
   }
 

@@ -1,5 +1,5 @@
 export * from './profile-section';
-export * from './proress-section';
+export * from './progress-section';
 export * from './activity-section';
 export * from './recents-section';
 export * from './network-section/profile-network-list';
