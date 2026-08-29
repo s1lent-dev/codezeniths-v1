@@ -36,7 +36,6 @@ export class SearchQueryService implements ISearchQueryService {
             },
             enabled,
             staleTime: 1000 * 60 * 5, // 5 minutes cache
-            placeholderData: (previousData) => previousData,
         });
     }
 

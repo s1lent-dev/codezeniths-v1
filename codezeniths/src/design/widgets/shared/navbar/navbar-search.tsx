@@ -47,7 +47,7 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({
         autocomplete: { limit: 5 },
         didYouMean: true,
         limit: 10,
-        debounceMs: 150,
+        debounceMs: 500,
     });
 
     const isQueryEmpty = searchQuery.trim().length === 0;

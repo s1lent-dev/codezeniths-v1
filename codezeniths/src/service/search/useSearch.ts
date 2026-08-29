@@ -26,8 +26,7 @@ export function useSearch<TDoc = any>(
     setCollection(initialCollection);
   }, [initialCollection]);
 
-  const debounceMs = config.debounceMs ?? 150;
-
+  const debounceMs = config.debounceMs ?? 500;
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -36,6 +35,7 @@ export function useSearch<TDoc = any>(
     return () => clearTimeout(handler);
   }, [query, debounceMs]);
 
+  const isDebouncing = query.trim().length > 0 && query.trim() !== debouncedQuery.trim();
   const isEnabled = debouncedQuery.trim().length > 0;
 
   const searchInput = useMemo(() => ({
@@ -52,12 +52,14 @@ export function useSearch<TDoc = any>(
     autocomplete: config.autocomplete ? { limit: config.autocomplete.limit ?? 10 } : undefined,
   }), [debouncedQuery, config]);
 
-  const { data, isLoading, error } = searchQueryService.search(collection, searchInput, isEnabled);
+  const { data, isLoading, isFetching, error } = searchQueryService.search(collection, searchInput, isEnabled);
 
-  const autocompletes = (data?.metadata?.autocomplete ?? []) as string[];
+  const isSearching = query.trim().length > 0 && (isDebouncing || isLoading || isFetching);
+
+  const autocompletes = (!isSearching && data?.metadata?.autocomplete ? data.metadata.autocomplete : []) as string[];
 
   const topSuggestion = useMemo(() => {
-    if (!query.trim()) return '';
+    if (!query.trim() || isSearching) return '';
     const lowerQuery = query.toLowerCase();
 
     // 1. Check autocompletes from server Trie metadata
@@ -78,16 +80,20 @@ export function useSearch<TDoc = any>(
     }
 
     return match || '';
-  }, [query, autocompletes, data?.hits]);
+  }, [query, isSearching, autocompletes, data?.hits]);
 
   const inlineSuffix = useMemo(() => {
-    if (!topSuggestion || !query) return '';
+    if (!topSuggestion || !query || isSearching) return '';
     if (topSuggestion.toLowerCase().startsWith(query.toLowerCase())) {
       return topSuggestion.slice(query.length);
     }
     return '';
-  }, [topSuggestion, query]);
+  }, [topSuggestion, query, isSearching]);
 
+  const results = useMemo(() => {
+    if (!query.trim() || isDebouncing) return [];
+    return (data?.hits ?? []) as Array<{ document: TDoc & { _collection?: string }; score: number; matchedStrategies: string[] }>;
+  }, [query, isDebouncing, data?.hits]);
 
   return {
     query,
@@ -99,13 +105,15 @@ export function useSearch<TDoc = any>(
     setConfig,
     topSuggestion,
     inlineSuffix,
-    results: (data?.hits ?? []) as Array<{ document: TDoc & { _collection?: string }; score: number; matchedStrategies: string[] }>,
+    results,
     metadata: {
-      didYouMean: data?.metadata?.didYouMean as string | undefined,
+      didYouMean: (!isSearching ? data?.metadata?.didYouMean : undefined) as string | undefined,
       autocomplete: autocompletes,
       tookMs: data?.metadata?.tookMs ?? 0,
     },
-    isLoading: isEnabled ? isLoading : false,
+    isLoading: isSearching,
+    isDebouncing,
+    isFetching,
     error,
   };
 }
