@@ -34,7 +34,10 @@ export class ProblemQueryService implements IProblemQueryService {
         });
     }
 
-    getProblems(input: z.infer<typeof GetProblemsTRPCInputSchema>) {
+    getProblems(
+        input: z.infer<typeof GetProblemsTRPCInputSchema>,
+        options?: { enabled?: boolean }
+    ) {
         const validatedInput = GetProblemsTRPCInputSchema.parse(input);
         return useQuery({
             queryKey: queryKeys.problem.list(validatedInput),
@@ -42,6 +45,7 @@ export class ProblemQueryService implements IProblemQueryService {
                 const raw = await trpcClient.problem.getProblems.query(validatedInput);
                 return GetProblemsTRPCOutputSchema.parse(raw);
             },
+            enabled: options?.enabled ?? true,
             ...CACHE_TIERS.USER_PROGRESS,
         });
     }

@@ -44,24 +44,40 @@ export const EditPlaylistModal: React.FC<EditPlaylistModalProps> = ({
     const [description, setDescription] = useState('');
     const [isPublic, setIsPublic] = useState(true);
     const [selectedProblems, setSelectedProblems] = useState<ProblemPickerItem[]>([]);
+    const [syncedPlaylistId, setSyncedPlaylistId] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Fetch existing problems in this playlist
-    const { data: problemsData } = problemQueryService.getProblems({
-        mode: 'filtered',
-        filters: playlist?.slug ? { playlistSlug: playlist.slug } : undefined,
-    });
+    const currentPlaylistId = playlist?.id ?? null;
+    const isQueryEnabled = open && Boolean(playlist?.slug);
 
+    // Sync metadata and reset selected problems when switching playlist
     useEffect(() => {
         if (playlist) {
             setTitle(playlist.title);
             setDescription(playlist.description || '');
             setIsPublic(playlist.isPublic);
         }
-    }, [playlist]);
+        if (currentPlaylistId !== syncedPlaylistId) {
+            setSelectedProblems([]);
+        }
+    }, [playlist, currentPlaylistId, syncedPlaylistId]);
 
+    // Fetch existing problems in this playlist (only when open & slug is present)
+    const {
+        data: problemsData,
+        isLoading: isProblemsLoading,
+        isFetching: isProblemsFetching,
+    } = problemQueryService.getProblems(
+        {
+            mode: 'filtered',
+            filters: playlist?.slug ? { playlistSlug: playlist.slug } : undefined,
+        },
+        { enabled: isQueryEnabled }
+    );
+
+    // Sync loaded problem tracks into form state once for this playlist
     useEffect(() => {
-        if (problemsData?.mode === 'filtered' && problemsData.problems) {
+        if (open && playlist && problemsData?.mode === 'filtered' && problemsData.problems && syncedPlaylistId !== playlist.id) {
             setSelectedProblems(
                 problemsData.problems.map((p) => ({
                     id: p.id,
@@ -70,8 +86,11 @@ export const EditPlaylistModal: React.FC<EditPlaylistModalProps> = ({
                     difficulty: p.difficulty,
                 }))
             );
+            setSyncedPlaylistId(playlist.id);
         }
-    }, [problemsData]);
+    }, [open, playlist, problemsData, syncedPlaylistId]);
+
+    const isLoadingProblems = isQueryEnabled && (isProblemsLoading || (isProblemsFetching && syncedPlaylistId !== playlist?.id));
 
     const updateMutation = playlistQueryService.updatePlaylist();
 
@@ -191,6 +210,7 @@ export const EditPlaylistModal: React.FC<EditPlaylistModalProps> = ({
                             <PlaylistProblemPicker
                                 selectedProblems={selectedProblems}
                                 onSelectedProblemsChange={setSelectedProblems}
+                                isLoadingProblems={isLoadingProblems}
                             />
                         </div>
                     </ScrollArea>

@@ -24,25 +24,31 @@ export interface ProblemPickerItem {
 export interface PlaylistProblemPickerProps {
     selectedProblems: ProblemPickerItem[];
     onSelectedProblemsChange: (problems: ProblemPickerItem[]) => void;
+    isLoadingProblems?: boolean;
     className?: string;
 }
 
 export const PlaylistProblemPicker: React.FC<PlaylistProblemPickerProps> = ({
     selectedProblems,
     onSelectedProblemsChange,
+    isLoadingProblems = false,
     className,
 }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const debouncedSearch = useDebouncedValue(searchQuery, 300);
+    const hasSearch = Boolean(debouncedSearch.trim());
 
     const {
         data: searchResult,
         isLoading: isSearching,
         isFetching,
-    } = problemQueryService.getProblems({
-        mode: 'filtered',
-        filters: debouncedSearch.trim() ? { search: debouncedSearch.trim() } : undefined,
-    });
+    } = problemQueryService.getProblems(
+        {
+            mode: 'filtered',
+            filters: hasSearch ? { search: debouncedSearch.trim() } : undefined,
+        },
+        { enabled: hasSearch }
+    );
 
     const problemsList = searchResult?.mode === 'filtered' ? searchResult.problems : [];
 
@@ -198,7 +204,18 @@ export const PlaylistProblemPicker: React.FC<PlaylistProblemPickerProps> = ({
                     )}
                 </div>
 
-                {selectedProblems.length === 0 ? (
+                {isLoadingProblems ? (
+                    <div className="p-4 rounded-xl border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark space-y-2">
+                        <div className="flex flex-wrap gap-2">
+                            {[1, 2, 3].map((i) => (
+                                <div
+                                    key={i}
+                                    className="h-7 w-28 sm:w-36 rounded-md bg-foreground-light-shade3/60 dark:bg-foreground-dark-shade2/60 animate-pulse"
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ) : selectedProblems.length === 0 ? (
                     <div className="p-5 rounded-xl border border-dashed border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light/30 dark:bg-foreground-dark/30 text-center text-xs text-muted-light dark:text-muted-dark">
                         No problems selected yet. Search above to add problems to this playlist.
                     </div>

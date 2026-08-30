@@ -113,7 +113,7 @@ export interface IFavouriteQueryService {
 
 export interface IProblemQueryService {
     getProblemTablePrimitives(input?: any): any;
-    getProblems(input: z.infer<typeof GetProblemsTRPCInputSchema>): any;
+    getProblems(input: z.infer<typeof GetProblemsTRPCInputSchema>, options?: { enabled?: boolean }): any;
     getProblemNote(input: { problemId: string }, options?: { enabled?: boolean }): any;
     updateProblem(): any;
     getProblemProgress(input?: { userId?: string }, options?: { enabled?: boolean }): any;
