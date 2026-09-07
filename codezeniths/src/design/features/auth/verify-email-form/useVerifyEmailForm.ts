@@ -4,10 +4,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth, authClient, refetchAuthSession } from '@/lib/auth/auth';
+import { useAuth, authClient } from '@/lib/auth/auth';
 import { useToast } from '@codezeniths/modules';
 import { useQueryClient } from '@tanstack/react-query';
 import { userQueryService } from '@/lib/tanstack/services/user.query-service';
+import { CacheInvalidationService } from '@/lib/tanstack/cache-invalidation.service';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
 import { verifyEmailSchema, VerifyEmailFormValues } from './verify-email.types';
 
@@ -152,10 +153,9 @@ export const useVerifyEmailForm = () => {
                     }
                 }
 
-                // Invalidate cookie cache and refetch fresh session directly from server
-                const freshSession = await refetchAuthSession().catch(() => null);
+                // Central invalidation: invalidates profile details, settings, availability, and refetches Better-Auth session
+                const freshSession = await CacheInvalidationService.invalidateOnVerification(queryClient).catch(() => null);
                 await refetch().catch(() => null);
-                void queryClient.invalidateQueries({ queryKey: ['user'] });
 
                 const updatedUser = freshSession?.data?.user as any;
                 const isSessionVerified = Boolean(updatedUser?.emailVerified);
@@ -271,11 +271,10 @@ export const useVerifyEmailForm = () => {
             if (res.error) throw new Error(res.error.message);
 
             toast.success('Email verified successfully!');
-            await refetch();
 
-            // Invalidate session cookie cache & fetch fresh session from server
-            const session = await refetchAuthSession();
-            await queryClient.invalidateQueries({ queryKey: ['user'] });
+            // Central invalidation: invalidates profile details, settings, availability, and refetches Better-Auth session
+            const session = await CacheInvalidationService.invalidateOnVerification(queryClient);
+            await refetch().catch(() => null);
             const updatedUser = session?.data?.user as any;
 
             setIsVerificationSuccess(true);

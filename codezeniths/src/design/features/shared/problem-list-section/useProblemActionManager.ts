@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { problemQueryService, applyOptimisticProblemUpdate } from '@/lib/tanstack/services/problem.query-service';
+import { problemQueryService } from '@/lib/tanstack/services/problem.query-service';
 import { toast } from '@codezeniths/modules';
 
 export function useProblemActionManager() {
-    const queryClient = useQueryClient();
     const updateMutation = problemQueryService.updateProblem();
     const [busyProblemIds, setBusyProblemIds] = useState<Set<string>>(new Set());
     const busyRef = useRef<Set<string>>(new Set());
@@ -40,13 +38,7 @@ export function useProblemActionManager() {
 
         const nextStatus: 'solved' | 'not_solved' = currentSolved ? 'not_solved' : 'solved';
 
-        // 2. Instant 0ms Optimistic UI Update
-        applyOptimisticProblemUpdate(queryClient, {
-            problemId,
-            status: nextStatus,
-        });
-
-        // 3. Dispatch Mutation and unlock when response returns
+        // 2. Dispatch Mutation (optimistic update is handled atomically in mutation's onMutate)
         try {
             await updateMutation.mutateAsync({
                 problemId,
@@ -57,7 +49,7 @@ export function useProblemActionManager() {
         } finally {
             unmarkBusy(problemId);
         }
-    }, [queryClient, updateMutation, markBusy, unmarkBusy]);
+    }, [updateMutation, markBusy, unmarkBusy]);
 
     const toggleFavourite = useCallback(async (problemId: string, currentFavourite: boolean) => {
         // 1. Throttling guard: block if mutation is already in-flight for this problem
@@ -66,13 +58,7 @@ export function useProblemActionManager() {
 
         const nextFavourite = !currentFavourite;
 
-        // 2. Instant 0ms Optimistic UI Update
-        applyOptimisticProblemUpdate(queryClient, {
-            problemId,
-            favourite: nextFavourite,
-        });
-
-        // 3. Dispatch Mutation and unlock when response returns
+        // 2. Dispatch Mutation (optimistic update is handled atomically in mutation's onMutate)
         try {
             await updateMutation.mutateAsync({
                 problemId,
@@ -83,7 +69,7 @@ export function useProblemActionManager() {
         } finally {
             unmarkBusy(problemId);
         }
-    }, [queryClient, updateMutation, markBusy, unmarkBusy]);
+    }, [updateMutation, markBusy, unmarkBusy]);
 
     const toggleRevisit = useCallback(async (problemId: string, currentRevisit: boolean) => {
         // 1. Throttling guard: block if mutation is already in-flight for this problem
@@ -92,13 +78,7 @@ export function useProblemActionManager() {
 
         const nextRevisit = !currentRevisit;
 
-        // 2. Instant 0ms Optimistic UI Update
-        applyOptimisticProblemUpdate(queryClient, {
-            problemId,
-            revisit: nextRevisit,
-        });
-
-        // 3. Dispatch Mutation and unlock when response returns
+        // 2. Dispatch Mutation (optimistic update is handled atomically in mutation's onMutate)
         try {
             await updateMutation.mutateAsync({
                 problemId,
@@ -109,7 +89,7 @@ export function useProblemActionManager() {
         } finally {
             unmarkBusy(problemId);
         }
-    }, [queryClient, updateMutation, markBusy, unmarkBusy]);
+    }, [updateMutation, markBusy, unmarkBusy]);
 
     return {
         toggleSolved,

@@ -89,6 +89,23 @@ export class CacheInvalidationService {
     }
 
     /**
+     * 4b. Triggered on user email or phone verification (OTP, magic link, or token redirect).
+     * Refetches auth session, invalidates availability checks, profile details, settings, and onboarding status.
+     */
+    static async invalidateOnVerification(queryClient: QueryClient) {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['user', 'availability'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'settings'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'onboardingProfile'] }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.auth.session() }),
+            queryClient.invalidateQueries({ queryKey: ['leaderboard'] }),
+        ]);
+        return await refetchAuthSession();
+    }
+
+    /**
      * 5. Triggered on user preferences update (theme, notification channels, profile visibility).
      * Refetches auth session and invalidates settings queries.
      */

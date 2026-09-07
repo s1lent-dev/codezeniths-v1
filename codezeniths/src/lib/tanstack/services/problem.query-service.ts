@@ -110,8 +110,42 @@ export class ProblemQueryService implements IProblemQueryService {
                 // Snapshot previous data for all queries matching ['problem']
                 const previousProblemQueries = queryClient.getQueriesData({ queryKey: ['problem'] });
 
+                // Auto-resolve problem difficulty from cache if not provided in variables
+                let resolvedDifficulty: 'easy' | 'medium' | 'hard' | undefined = undefined;
+                for (const [_queryKey, queryData] of previousProblemQueries) {
+                    if (!queryData) continue;
+                    const data: any = queryData;
+                    if (Array.isArray(data.items)) {
+                        const found = data.items.find((p: any) => p?.id === variables.problemId);
+                        if (found?.difficulty) {
+                            resolvedDifficulty = found.difficulty;
+                            break;
+                        }
+                    } else if (Array.isArray(data.problems)) {
+                        const found = data.problems.find((p: any) => p?.id === variables.problemId);
+                        if (found?.difficulty) {
+                            resolvedDifficulty = found.difficulty;
+                            break;
+                        }
+                    } else if (Array.isArray(data.pages)) {
+                        for (const page of data.pages) {
+                            if (Array.isArray(page?.items)) {
+                                const found = page.items.find((p: any) => p?.id === variables.problemId);
+                                if (found?.difficulty) {
+                                    resolvedDifficulty = found.difficulty;
+                                    break;
+                                }
+                            }
+                        }
+                        if (resolvedDifficulty) break;
+                    }
+                }
+
                 // Apply optimistic update immediately to all cached problem queries
-                applyOptimisticProblemUpdate(queryClient, variables);
+                applyOptimisticProblemUpdate(queryClient, {
+                    ...variables,
+                    difficulty: resolvedDifficulty,
+                });
 
                 // Optimistically update note query cache if notes are modified
                 if (variables.notes !== undefined) {

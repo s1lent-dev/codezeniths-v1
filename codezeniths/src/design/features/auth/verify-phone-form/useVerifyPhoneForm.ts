@@ -4,14 +4,17 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useAuth, authClient, refetchAuthSession } from '@/lib/auth/auth';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth, authClient } from '@/lib/auth/auth';
 import { useToast } from '@codezeniths/modules';
 import { userQueryService } from '@/lib/tanstack/services/user.query-service';
+import { CacheInvalidationService } from '@/lib/tanstack/cache-invalidation.service';
 import { verifyPhoneSchema, VerifyPhoneFormValues } from './verify-phone.types';
 import { DEFAULT_COUNTRY_CODE, splitE164, validatePhoneNumber } from '@/utils/phone.utils';
 
 export const useVerifyPhoneForm = () => {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const { user, refetch, isLoading: isAuthLoading } = useAuth();
     const toast = useToast();
     
@@ -149,10 +152,11 @@ export const useVerifyPhoneForm = () => {
             if (res.error) throw new Error(res.error.message);
             
             toast.success('Phone verified successfully!');
-            await refetch();
-            
-            // Invalidate session cookie cache & fetch fresh session from server
-            const session = await refetchAuthSession();
+
+            // Central invalidation: invalidates profile details, settings, availability, and refetches Better-Auth session
+            const session = await CacheInvalidationService.invalidateOnVerification(queryClient);
+            await refetch().catch(() => null);
+
             const updatedUser = session?.data?.user;
             
             if (updatedUser && !updatedUser.isOnboardingComplete) {
