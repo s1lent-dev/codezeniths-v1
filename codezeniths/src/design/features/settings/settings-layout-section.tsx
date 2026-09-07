@@ -13,7 +13,7 @@ export const SettingsLayoutSection: React.FC<SettingsLayoutSectionProps> = ({
     className,
 }) => {
     return (
-        <div className={cn('w-full space-y-4 sm:space-y-5 pb-12 font-sans', className)}>
+        <div className={cn('w-full flex-1 flex flex-col space-y-4 sm:space-y-5 pb-12 font-sans min-h-[calc(100vh-12rem)]', className)}>
 
             {/* 1. Breadcrumb — full width at top */}
             <SettingsBreadcrumb />
@@ -24,7 +24,7 @@ export const SettingsLayoutSection: React.FC<SettingsLayoutSectionProps> = ({
             </div>
 
             {/* 3. Body: nav card (left) + content (right) */}
-            <div className="flex flex-col lg:flex-row gap-5 items-start w-full min-w-0 max-w-full">
+            <div className="flex flex-col lg:flex-row gap-5 items-start w-full flex-1 min-w-0 max-w-full">
 
                 {/* Left nav card (Visible only on lg+) */}
                 <aside className="hidden lg:block w-64 shrink-0 sticky top-6 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark shadow-xs overflow-hidden">
@@ -39,7 +39,7 @@ export const SettingsLayoutSection: React.FC<SettingsLayoutSectionProps> = ({
                 </aside>
 
                 {/* Right content area */}
-                <main className="w-full lg:w-0 lg:flex-1 min-w-0 max-w-full">
+                <main className="w-full lg:w-0 lg:flex-1 min-w-0 max-w-full flex-1 flex flex-col min-h-[calc(100vh-16rem)]">
                     {children}
                 </main>
 

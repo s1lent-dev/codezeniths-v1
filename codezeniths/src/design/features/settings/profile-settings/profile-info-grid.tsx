@@ -380,12 +380,6 @@ export const ProfileInfoGrid: React.FC<ProfileInfoGridProps> = ({
                             profile?.phoneNumber ? (
                                 <div className="flex items-center gap-2">
                                     <span>{profile.phoneNumber}</span>
-                                    {profile.phoneNumberVerified && (
-                                        <Badge variant="success" className="px-2 py-0.5 text-[10px] h-5 gap-1 rounded-sm">
-                                            <CheckCircle2 className="size-2.5" />
-                                            Verified
-                                        </Badge>
-                                    )}
                                 </div>
                             ) : (
                                 '—'

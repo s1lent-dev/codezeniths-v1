@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@codezeniths/design/cn';
@@ -20,6 +20,19 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
     defaultMode = 'difficulty',
 }) => {
     const [isHovered, setIsHovered] = useState(false);
+    const rawId = useId();
+    const uniqueId = rawId.replace(/[^a-zA-Z0-9_-]/g, '');
+
+    // Unique SVG filter and mask IDs to avoid DOM collisions
+    const glowEasyId = `glow-cp-easy-${uniqueId}`;
+    const glowMediumId = `glow-cp-medium-${uniqueId}`;
+    const glowHardId = `glow-cp-hard-${uniqueId}`;
+    const glowSolvedId = `glow-cp-solved-${uniqueId}`;
+
+    const maskEasyId = `mask-cp-easy-${uniqueId}`;
+    const maskMediumId = `mask-cp-medium-${uniqueId}`;
+    const maskHardId = `mask-cp-hard-${uniqueId}`;
+    const maskStatusId = `mask-cp-status-${uniqueId}`;
 
     // Determine current mode (hover swaps mode when interactive)
     const isStatusMode = interactive
@@ -42,11 +55,18 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
     const calcTotalProblems = Math.max(1, actualTotalProblems);
 
     // ── DIFFICULTY MODE: Proportional Slices (Easy = Teal, Medium = Yellow, Hard = Red) ──
-    const easyShare = Math.min(1, Math.max(0, easy.total / calcTotalProblems));
-    const mediumShare = Math.min(1 - easyShare, Math.max(0, medium.total / calcTotalProblems));
-    const hardShare = Math.min(1 - easyShare - mediumShare, Math.max(0, hard.total / calcTotalProblems));
+    const easyTotal = Math.max(0, easy.total);
+    const mediumTotal = Math.max(0, medium.total);
+    const hardTotal = Math.max(0, hard.total);
 
-    const activeDiffSegmentsCount = (easyShare > 0 ? 1 : 0) + (mediumShare > 0 ? 1 : 0) + (hardShare > 0 ? 1 : 0);
+    const sumDiffTotals = easyTotal + mediumTotal + hardTotal;
+    const diffBaseTotal = sumDiffTotals > 0 ? sumDiffTotals : calcTotalProblems;
+
+    const easyShare = easyTotal / diffBaseTotal;
+    const mediumShare = mediumTotal / diffBaseTotal;
+    const hardShare = hardTotal / diffBaseTotal;
+
+    const activeDiffSegmentsCount = (easyTotal > 0 ? 1 : 0) + (mediumTotal > 0 ? 1 : 0) + (hardTotal > 0 ? 1 : 0);
     const totalDiffGapsPx = activeDiffSegmentsCount > 1 ? (activeDiffSegmentsCount - 1) * gapPx : 0;
     const availableDiffLength = Math.max(0, totalGaugeArcLength - totalDiffGapsPx);
 
@@ -55,76 +75,52 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
     const mediumAlloc = availableDiffLength * mediumShare;
     const hardAlloc = availableDiffLength * hardShare;
 
-    // Track dash lengths (subtract strokeWidthVal so the outer rounded ends fit within the allocation)
+    // Track dash lengths (subtract strokeWidthVal so outer rounded ends fit exactly within allocation)
     const easyTrackLength = Math.max(0, easyAlloc - strokeWidthVal);
     const mediumTrackLength = Math.max(0, mediumAlloc - strokeWidthVal);
     const hardTrackLength = Math.max(0, hardAlloc - strokeWidthVal);
 
-    // Exact linear fill lengths with rounded linecap scaling (ensuring min dot visibility for solved > 0)
-    const easyFillLength = easy.total > 0 && easy.solved > 0
-        ? Math.max(0.5, easyTrackLength * Math.min(1, Math.max(0, easy.solved / easy.total)))
-        : 0;
-    const mediumFillLength = medium.total > 0 && medium.solved > 0
-        ? Math.max(0.5, mediumTrackLength * Math.min(1, Math.max(0, medium.solved / medium.total)))
-        : 0;
-    const hardFillLength = hard.total > 0 && hard.solved > 0
-        ? Math.max(0.5, hardTrackLength * Math.min(1, Math.max(0, hard.solved / hard.total)))
-        : 0;
+    // Sequential start positions along the 270° gauge
+    let currentPos = 0;
+    let posEasy = 0;
+    let posMedium = 0;
+    let posHard = 0;
+
+    if (easyTotal > 0) {
+        posEasy = currentPos;
+        currentPos += easyAlloc + gapPx;
+    }
+    if (mediumTotal > 0) {
+        posMedium = currentPos;
+        currentPos += mediumAlloc + gapPx;
+    }
+    if (hardTotal > 0) {
+        posHard = currentPos;
+        currentPos += hardAlloc + gapPx;
+    }
 
     // Rotational offsets (shifted by strokeCapRadius so rounded start caps align precisely with segment start)
-    const posEasy = 0;
-    const posMedium = easyShare > 0 ? easyAlloc + gapPx : 0;
-    const posHard = (easyShare > 0 ? easyAlloc + gapPx : 0) + (mediumShare > 0 ? mediumAlloc + gapPx : 0);
-
     const offsetEasy = -(posEasy + strokeCapRadius);
     const offsetMedium = -(posMedium + strokeCapRadius);
     const offsetHard = -(posHard + strokeCapRadius);
 
+    // Exact linear progress ratios and fill lengths (100% mathematically exact without cap bloat)
+    const easyRatio = easyTotal > 0 ? Math.min(1, Math.max(0, easy.solved / easyTotal)) : 0;
+    const mediumRatio = mediumTotal > 0 ? Math.min(1, Math.max(0, medium.solved / mediumTotal)) : 0;
+    const hardRatio = hardTotal > 0 ? Math.min(1, Math.max(0, hard.solved / hardTotal)) : 0;
+
+    const easyFillLength = easyAlloc * easyRatio;
+    const mediumFillLength = mediumAlloc * mediumRatio;
+    const hardFillLength = hardAlloc * hardRatio;
+
     // ── STATUS DISTRIBUTION MODE: Solved (Green) & Unsolved (Dim Slate) ──
     const safeSolved = Math.max(0, Math.min(actualTotalProblems, solved));
     const safeUnsolved = Math.max(0, actualTotalProblems - safeSolved);
+    const solvedRatio = calcTotalProblems > 0 ? safeSolved / calcTotalProblems : 0;
 
-    const activeStatusSegmentsCount = (safeSolved > 0 ? 1 : 0) + (safeUnsolved > 0 ? 1 : 0);
-    const totalStatusGapsPx = activeStatusSegmentsCount > 1 ? (activeStatusSegmentsCount - 1) * gapPx : 0;
-    const availableStatusLength = Math.max(0, totalGaugeArcLength - totalStatusGapsPx);
-
-    // Minimum visible allocation for a rounded cap dot (~4px = strokeWidthVal + 0.5)
-    // Ensures a single solved or unsolved problem is always visibly rendered even with thousands of problems
-    const minSegmentAlloc = strokeWidthVal + 0.5;
-
-    let solvedAlloc = 0;
-    let unsolvedAlloc = 0;
-
-    if (activeStatusSegmentsCount === 2) {
-        const rawSolvedAlloc = availableStatusLength * (safeSolved / calcTotalProblems);
-        const rawUnsolvedAlloc = availableStatusLength * (safeUnsolved / calcTotalProblems);
-
-        if (rawSolvedAlloc < minSegmentAlloc) {
-            solvedAlloc = minSegmentAlloc;
-            unsolvedAlloc = Math.max(0, availableStatusLength - solvedAlloc);
-        } else if (rawUnsolvedAlloc < minSegmentAlloc) {
-            unsolvedAlloc = minSegmentAlloc;
-            solvedAlloc = Math.max(0, availableStatusLength - unsolvedAlloc);
-        } else {
-            solvedAlloc = rawSolvedAlloc;
-            unsolvedAlloc = rawUnsolvedAlloc;
-        }
-    } else if (safeSolved > 0) {
-        solvedAlloc = availableStatusLength;
-        unsolvedAlloc = 0;
-    } else if (safeUnsolved > 0) {
-        solvedAlloc = 0;
-        unsolvedAlloc = availableStatusLength;
-    }
-
-    const distSolvedLength = safeSolved > 0 ? Math.max(0.2, solvedAlloc - strokeWidthVal) : 0;
-    const distUnsolvedLength = safeUnsolved > 0 ? Math.max(0.2, unsolvedAlloc - strokeWidthVal) : 0;
-
-    const posDistSolved = 0;
-    const posDistUnsolved = safeSolved > 0 ? solvedAlloc + gapPx : 0;
-
-    const offsetDistSolved = -(posDistSolved + strokeCapRadius);
-    const offsetDistUnsolved = -(posDistUnsolved + strokeCapRadius);
+    const statusTrackLength = Math.max(0, totalGaugeArcLength - strokeWidthVal);
+    const offsetStatusTrack = -strokeCapRadius;
+    const statusFillLength = totalGaugeArcLength * solvedRatio;
 
     // Format Completion Percentage integer and decimal parts
     const integerPart = Math.floor(completionPercentage || 0);
@@ -150,7 +146,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                 >
                     <defs>
                         {/* Refined, crisp luminescent filters */}
-                        <filter id="glow-cp-easy" x="-20%" y="-20%" width="140%" height="140%">
+                        <filter id={glowEasyId} x="-20%" y="-20%" width="140%" height="140%">
                             <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur" />
                             <feFlood floodColor="#00b8a3" floodOpacity="0.35" result="c" />
                             <feComposite in="c" in2="blur" operator="in" result="glow" />
@@ -160,7 +156,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                             </feMerge>
                         </filter>
 
-                        <filter id="glow-cp-medium" x="-20%" y="-20%" width="140%" height="140%">
+                        <filter id={glowMediumId} x="-20%" y="-20%" width="140%" height="140%">
                             <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur" />
                             <feFlood floodColor="#feb800" floodOpacity="0.35" result="c" />
                             <feComposite in="c" in2="blur" operator="in" result="glow" />
@@ -170,7 +166,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                             </feMerge>
                         </filter>
 
-                        <filter id="glow-cp-hard" x="-20%" y="-20%" width="140%" height="140%">
+                        <filter id={glowHardId} x="-20%" y="-20%" width="140%" height="140%">
                             <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur" />
                             <feFlood floodColor="#ff2d55" floodOpacity="0.35" result="c" />
                             <feComposite in="c" in2="blur" operator="in" result="glow" />
@@ -180,7 +176,7 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                             </feMerge>
                         </filter>
 
-                        <filter id="glow-cp-solved" x="-20%" y="-20%" width="140%" height="140%">
+                        <filter id={glowSolvedId} x="-20%" y="-20%" width="140%" height="140%">
                             <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur" />
                             <feFlood floodColor="#2cbb5d" floodOpacity="0.35" result="c" />
                             <feComposite in="c" in2="blur" operator="in" result="glow" />
@@ -189,11 +185,74 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 <feMergeNode in="SourceGraphic" />
                             </feMerge>
                         </filter>
+
+                        {/* Track Masks: Clip fill arcs to exact rounded track boundaries for pixel-perfect precision */}
+                        {easyAlloc > 0 && (
+                            <mask id={maskEasyId}>
+                                <circle
+                                    cx="50"
+                                    cy="50"
+                                    r={radius}
+                                    strokeWidth={strokeWidthVal}
+                                    fill="none"
+                                    stroke="white"
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${easyTrackLength} ${circumference - easyTrackLength}`}
+                                    strokeDashoffset={offsetEasy}
+                                />
+                            </mask>
+                        )}
+
+                        {mediumAlloc > 0 && (
+                            <mask id={maskMediumId}>
+                                <circle
+                                    cx="50"
+                                    cy="50"
+                                    r={radius}
+                                    strokeWidth={strokeWidthVal}
+                                    fill="none"
+                                    stroke="white"
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${mediumTrackLength} ${circumference - mediumTrackLength}`}
+                                    strokeDashoffset={offsetMedium}
+                                />
+                            </mask>
+                        )}
+
+                        {hardAlloc > 0 && (
+                            <mask id={maskHardId}>
+                                <circle
+                                    cx="50"
+                                    cy="50"
+                                    r={radius}
+                                    strokeWidth={strokeWidthVal}
+                                    fill="none"
+                                    stroke="white"
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${hardTrackLength} ${circumference - hardTrackLength}`}
+                                    strokeDashoffset={offsetHard}
+                                />
+                            </mask>
+                        )}
+
+                        <mask id={maskStatusId}>
+                            <circle
+                                cx="50"
+                                cy="50"
+                                r={radius}
+                                strokeWidth={strokeWidthVal}
+                                fill="none"
+                                stroke="white"
+                                strokeLinecap="round"
+                                strokeDasharray={`${statusTrackLength} ${circumference - statusTrackLength}`}
+                                strokeDashoffset={offsetStatusTrack}
+                            />
+                        </mask>
                     </defs>
 
                     <AnimatePresence mode="wait">
                         {!isStatusMode ? (
-                            /* MODE 1: Difficulty Mode (Easy = Teal, Medium = Yellow, Hard = Red) with Rounded Linecaps */
+                            /* MODE 1: Difficulty Mode (Easy = Teal, Medium = Yellow, Hard = Red) */
                             <motion.g
                                 key="difficulty-arcs"
                                 className="transform rotate-135 origin-[50px_50px]"
@@ -202,113 +261,128 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                {/* Easy Tier: Background Track & Solved Fill */}
+                                {/* Easy Tier: Background Track & Masked Linear Solved Fill */}
                                 {easyAlloc > 0 && (
-                                    <motion.circle
-                                        cx="50"
-                                        cy="50"
-                                        r={radius}
-                                        strokeWidth={strokeWidthVal}
-                                        fill="none"
-                                        strokeLinecap="round"
-                                        className="stroke-teal/20"
-                                        strokeDasharray={`${easyTrackLength} ${circumference - easyTrackLength}`}
-                                        strokeDashoffset={offsetEasy}
-                                        initial={{ strokeDasharray: `0 ${circumference}` }}
-                                        animate={{ strokeDasharray: `${easyTrackLength} ${circumference - easyTrackLength}` }}
-                                        transition={{ duration: 0.4, delay: 0, ease: 'easeOut' }}
-                                    />
-                                )}
-                                {easy.solved > 0 && (
-                                    <motion.circle
-                                        cx="50"
-                                        cy="50"
-                                        r={radius}
-                                        strokeWidth={strokeWidthVal}
-                                        fill="none"
-                                        strokeLinecap="round"
-                                        stroke="var(--color-teal)"
-                                        filter="url(#glow-cp-easy)"
-                                        strokeDasharray={`${easyFillLength} ${circumference - easyFillLength}`}
-                                        strokeDashoffset={offsetEasy}
-                                        initial={{ strokeDasharray: `0 ${circumference}` }}
-                                        animate={{ strokeDasharray: `${easyFillLength} ${circumference - easyFillLength}` }}
-                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.08 }}
-                                    />
+                                    <g key="easy-tier-group">
+                                        <motion.circle
+                                            cx="50"
+                                            cy="50"
+                                            r={radius}
+                                            strokeWidth={strokeWidthVal}
+                                            fill="none"
+                                            strokeLinecap="round"
+                                            className="stroke-teal/20"
+                                            strokeDasharray={`${easyTrackLength} ${circumference - easyTrackLength}`}
+                                            strokeDashoffset={offsetEasy}
+                                            initial={{ strokeDasharray: `0 ${circumference}` }}
+                                            animate={{ strokeDasharray: `${easyTrackLength} ${circumference - easyTrackLength}` }}
+                                            transition={{ duration: 0.4, delay: 0, ease: 'easeOut' }}
+                                        />
+                                        {easy.solved > 0 && easyFillLength > 0 && (
+                                            <g filter={`url(#${glowEasyId})`}>
+                                                <g mask={`url(#${maskEasyId})`}>
+                                                    <motion.circle
+                                                        cx="50"
+                                                        cy="50"
+                                                        r={radius}
+                                                        strokeWidth={strokeWidthVal}
+                                                        fill="none"
+                                                        strokeLinecap="butt"
+                                                        stroke="var(--color-teal)"
+                                                        strokeDasharray={`${easyFillLength} ${circumference - easyFillLength}`}
+                                                        strokeDashoffset={-posEasy}
+                                                        initial={{ strokeDasharray: `0 ${circumference}` }}
+                                                        animate={{ strokeDasharray: `${easyFillLength} ${circumference - easyFillLength}` }}
+                                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.08 }}
+                                                    />
+                                                </g>
+                                            </g>
+                                        )}
+                                    </g>
                                 )}
 
-                                {/* Medium Tier: Background Track & Solved Fill */}
+                                {/* Medium Tier: Background Track & Masked Linear Solved Fill */}
                                 {mediumAlloc > 0 && (
-                                    <motion.circle
-                                        cx="50"
-                                        cy="50"
-                                        r={radius}
-                                        strokeWidth={strokeWidthVal}
-                                        fill="none"
-                                        strokeLinecap="round"
-                                        className="stroke-warning/20"
-                                        strokeDasharray={`${mediumTrackLength} ${circumference - mediumTrackLength}`}
-                                        strokeDashoffset={offsetMedium}
-                                        initial={{ strokeDasharray: `0 ${circumference}` }}
-                                        animate={{ strokeDasharray: `${mediumTrackLength} ${circumference - mediumTrackLength}` }}
-                                        transition={{ duration: 0.4, delay: 0.08, ease: 'easeOut' }}
-                                    />
-                                )}
-                                {medium.solved > 0 && (
-                                    <motion.circle
-                                        cx="50"
-                                        cy="50"
-                                        r={radius}
-                                        strokeWidth={strokeWidthVal}
-                                        fill="none"
-                                        strokeLinecap="round"
-                                        stroke="var(--color-warning)"
-                                        filter="url(#glow-cp-medium)"
-                                        strokeDasharray={`${mediumFillLength} ${circumference - mediumFillLength}`}
-                                        strokeDashoffset={offsetMedium}
-                                        initial={{ strokeDasharray: `0 ${circumference}` }}
-                                        animate={{ strokeDasharray: `${mediumFillLength} ${circumference - mediumFillLength}` }}
-                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.16 }}
-                                    />
+                                    <g key="medium-tier-group">
+                                        <motion.circle
+                                            cx="50"
+                                            cy="50"
+                                            r={radius}
+                                            strokeWidth={strokeWidthVal}
+                                            fill="none"
+                                            strokeLinecap="round"
+                                            className="stroke-warning/20"
+                                            strokeDasharray={`${mediumTrackLength} ${circumference - mediumTrackLength}`}
+                                            strokeDashoffset={offsetMedium}
+                                            initial={{ strokeDasharray: `0 ${circumference}` }}
+                                            animate={{ strokeDasharray: `${mediumTrackLength} ${circumference - mediumTrackLength}` }}
+                                            transition={{ duration: 0.4, delay: 0.08, ease: 'easeOut' }}
+                                        />
+                                        {medium.solved > 0 && mediumFillLength > 0 && (
+                                            <g filter={`url(#${glowMediumId})`}>
+                                                <g mask={`url(#${maskMediumId})`}>
+                                                    <motion.circle
+                                                        cx="50"
+                                                        cy="50"
+                                                        r={radius}
+                                                        strokeWidth={strokeWidthVal}
+                                                        fill="none"
+                                                        strokeLinecap="butt"
+                                                        stroke="var(--color-warning)"
+                                                        strokeDasharray={`${mediumFillLength} ${circumference - mediumFillLength}`}
+                                                        strokeDashoffset={-posMedium}
+                                                        initial={{ strokeDasharray: `0 ${circumference}` }}
+                                                        animate={{ strokeDasharray: `${mediumFillLength} ${circumference - mediumFillLength}` }}
+                                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.16 }}
+                                                    />
+                                                </g>
+                                            </g>
+                                        )}
+                                    </g>
                                 )}
 
-                                {/* Hard Tier: Background Track & Solved Fill */}
+                                {/* Hard Tier: Background Track & Masked Linear Solved Fill */}
                                 {hardAlloc > 0 && (
-                                    <motion.circle
-                                        cx="50"
-                                        cy="50"
-                                        r={radius}
-                                        strokeWidth={strokeWidthVal}
-                                        fill="none"
-                                        strokeLinecap="round"
-                                        className="stroke-destructive/20"
-                                        strokeDasharray={`${hardTrackLength} ${circumference - hardTrackLength}`}
-                                        strokeDashoffset={offsetHard}
-                                        initial={{ strokeDasharray: `0 ${circumference}` }}
-                                        animate={{ strokeDasharray: `${hardTrackLength} ${circumference - hardTrackLength}` }}
-                                        transition={{ duration: 0.4, delay: 0.16, ease: 'easeOut' }}
-                                    />
-                                )}
-                                {hard.solved > 0 && (
-                                    <motion.circle
-                                        cx="50"
-                                        cy="50"
-                                        r={radius}
-                                        strokeWidth={strokeWidthVal}
-                                        fill="none"
-                                        strokeLinecap="round"
-                                        stroke="var(--color-destructive)"
-                                        filter="url(#glow-cp-hard)"
-                                        strokeDasharray={`${hardFillLength} ${circumference - hardFillLength}`}
-                                        strokeDashoffset={offsetHard}
-                                        initial={{ strokeDasharray: `0 ${circumference}` }}
-                                        animate={{ strokeDasharray: `${hardFillLength} ${circumference - hardFillLength}` }}
-                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.24 }}
-                                    />
+                                    <g key="hard-tier-group">
+                                        <motion.circle
+                                            cx="50"
+                                            cy="50"
+                                            r={radius}
+                                            strokeWidth={strokeWidthVal}
+                                            fill="none"
+                                            strokeLinecap="round"
+                                            className="stroke-destructive/20"
+                                            strokeDasharray={`${hardTrackLength} ${circumference - hardTrackLength}`}
+                                            strokeDashoffset={offsetHard}
+                                            initial={{ strokeDasharray: `0 ${circumference}` }}
+                                            animate={{ strokeDasharray: `${hardTrackLength} ${circumference - hardTrackLength}` }}
+                                            transition={{ duration: 0.4, delay: 0.16, ease: 'easeOut' }}
+                                        />
+                                        {hard.solved > 0 && hardFillLength > 0 && (
+                                            <g filter={`url(#${glowHardId})`}>
+                                                <g mask={`url(#${maskHardId})`}>
+                                                    <motion.circle
+                                                        cx="50"
+                                                        cy="50"
+                                                        r={radius}
+                                                        strokeWidth={strokeWidthVal}
+                                                        fill="none"
+                                                        strokeLinecap="butt"
+                                                        stroke="var(--color-destructive)"
+                                                        strokeDasharray={`${hardFillLength} ${circumference - hardFillLength}`}
+                                                        strokeDashoffset={-posHard}
+                                                        initial={{ strokeDasharray: `0 ${circumference}` }}
+                                                        animate={{ strokeDasharray: `${hardFillLength} ${circumference - hardFillLength}` }}
+                                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.24 }}
+                                                    />
+                                                </g>
+                                            </g>
+                                        )}
+                                    </g>
                                 )}
                             </motion.g>
                         ) : (
-                            /* MODE 2: Status Distribution Mode (Solved = Green, Unsolved = Dim) with Rounded Linecaps */
+                            /* MODE 2: Status Distribution Mode (Solved = Green, Unsolved = Dim) */
                             <motion.g
                                 key="status-arcs"
                                 className="transform rotate-135 origin-[50px_50px]"
@@ -317,41 +391,42 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                {/* 1. Solved Share Arc (Green) */}
-                                {safeSolved > 0 && distSolvedLength > 0 && (
-                                    <motion.circle
-                                        cx="50"
-                                        cy="50"
-                                        r={radius}
-                                        strokeWidth={strokeWidthVal}
-                                        fill="none"
-                                        stroke="var(--color-success)"
-                                        filter="url(#glow-cp-solved)"
-                                        strokeLinecap="round"
-                                        strokeDasharray={`${distSolvedLength} ${circumference - distSolvedLength}`}
-                                        strokeDashoffset={offsetDistSolved}
-                                        initial={{ strokeDasharray: `0 ${circumference}` }}
-                                        animate={{ strokeDasharray: `${distSolvedLength} ${circumference - distSolvedLength}` }}
-                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0 }}
-                                    />
-                                )}
+                                {/* 1. Full 270° Unsolved Track (Dim Slate) */}
+                                <motion.circle
+                                    cx="50"
+                                    cy="50"
+                                    r={radius}
+                                    strokeWidth={strokeWidthVal}
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    className="stroke-foreground-light-shade3/30 dark:stroke-foreground-dark-shade3/30"
+                                    strokeDasharray={`${statusTrackLength} ${circumference - statusTrackLength}`}
+                                    strokeDashoffset={offsetStatusTrack}
+                                    initial={{ strokeDasharray: `0 ${circumference}` }}
+                                    animate={{ strokeDasharray: `${statusTrackLength} ${circumference - statusTrackLength}` }}
+                                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                                />
 
-                                {/* 2. Unsolved Share Arc (Dim Slate/Grey) */}
-                                {safeUnsolved > 0 && distUnsolvedLength > 0 && (
-                                    <motion.circle
-                                        cx="50"
-                                        cy="50"
-                                        r={radius}
-                                        strokeWidth={strokeWidthVal}
-                                        fill="none"
-                                        strokeLinecap="round"
-                                        className="stroke-foreground-light-shade3/30 dark:stroke-foreground-dark-shade3/30"
-                                        strokeDasharray={`${distUnsolvedLength} ${circumference - distUnsolvedLength}`}
-                                        strokeDashoffset={offsetDistUnsolved}
-                                        initial={{ strokeDasharray: `0 ${circumference}` }}
-                                        animate={{ strokeDasharray: `${distUnsolvedLength} ${circumference - distUnsolvedLength}` }}
-                                        transition={{ type: 'spring', stiffness: 120, damping: 14, delay: safeSolved > 0 ? 0.08 : 0 }}
-                                    />
+                                {/* 2. Exact Linear Solved Portion (Green) Masked to Gauge Track */}
+                                {safeSolved > 0 && statusFillLength > 0 && (
+                                    <g filter={`url(#${glowSolvedId})`}>
+                                        <g mask={`url(#${maskStatusId})`}>
+                                            <motion.circle
+                                                cx="50"
+                                                cy="50"
+                                                r={radius}
+                                                strokeWidth={strokeWidthVal}
+                                                fill="none"
+                                                strokeLinecap="butt"
+                                                stroke="var(--color-success)"
+                                                strokeDasharray={`${statusFillLength} ${circumference - statusFillLength}`}
+                                                strokeDashoffset={0}
+                                                initial={{ strokeDasharray: `0 ${circumference}` }}
+                                                animate={{ strokeDasharray: `${statusFillLength} ${circumference - statusFillLength}` }}
+                                                transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0 }}
+                                            />
+                                        </g>
+                                    </g>
                                 )}
                             </motion.g>
                         )}
@@ -419,3 +494,4 @@ export const ProblemProgress: React.FC<ProblemProgressProps> = ({
         </motion.div>
     );
 };
+

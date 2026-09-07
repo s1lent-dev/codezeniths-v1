@@ -11,7 +11,7 @@ const ProfileDetailsSection = dynamic(
     () => import('@codezeniths/features').then((mod) => mod.ProfileDetailsSection),
     {
         loading: () => (
-            <div className="flex h-full min-h-[50vh] w-full items-center justify-center">
+            <div className="flex flex-1 min-h-[450px] sm:min-h-[550px] lg:min-h-[calc(100vh-16rem)] w-full items-center justify-center py-12">
                 <Loader />
             </div>
         ),
@@ -22,7 +22,7 @@ export default function ProfileDetailsPage() {
     return (
         <Suspense
             fallback={
-                <div className="flex h-full min-h-[50vh] w-full items-center justify-center">
+                <div className="flex flex-1 min-h-[450px] sm:min-h-[550px] lg:min-h-[calc(100vh-16rem)] w-full items-center justify-center py-12">
                     <Loader />
                 </div>
             }

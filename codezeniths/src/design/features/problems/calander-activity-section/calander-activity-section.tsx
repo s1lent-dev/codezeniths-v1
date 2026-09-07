@@ -12,34 +12,32 @@ export interface CalendarActivitySectionProps {
 export const CalendarActivitySection: React.FC<CalendarActivitySectionProps> = ({
     className,
 }) => {
-    // 1. Compute exact calendar week data for current month (handles 4, 5, or 6 week months) in UTC
+    // 1. Compute exact calendar week data for current month (handles 4, 5, or 6 week months) in Sunday-first UTC
     const { activeWeekIndex, totalWeeks, endOfWeek, monthName } = useMemo(() => {
         const now = new Date();
         const year = now.getUTCFullYear();
         const month = now.getUTCMonth();
         const date = now.getUTCDate();
+        const dayOfWeek = now.getUTCDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
 
-        // Find 1st day of month & calculate offset (Monday = 0, Tuesday = 1, ..., Sunday = 6)
+        // Find 1st day of month & calculate offset in Sunday-first UTC (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
         const firstOfMonth = new Date(Date.UTC(year, month, 1));
-        const firstDayOfWeek = firstOfMonth.getUTCDay();
-        const firstDayOffset = (firstDayOfWeek + 6) % 7;
+        const firstDayOffset = firstOfMonth.getUTCDay();
 
         // Total days in current month
         const lastOfMonth = new Date(Date.UTC(year, month + 1, 0));
         const totalDaysInMonth = lastOfMonth.getUTCDate();
 
-        // Calculate total calendar weeks in month (can be 4, 5, or 6)
+        // Calculate total calendar weeks in month (can be 4, 5, or 6) matching ActivityCalendar grid rows
         const calculatedTotalWeeks = Math.ceil((firstDayOffset + totalDaysInMonth) / 7);
 
-        // Calculate current active week index (1-based)
+        // Calculate current active week index (1-based) matching the active row in ActivityCalendar
         const calculatedActiveWeek = Math.ceil((date + firstDayOffset) / 7);
         const currentWeekIdx = Math.min(Math.max(calculatedActiveWeek, 1), calculatedTotalWeeks);
 
-        // End of current calendar week (Sunday 23:59:59.999 UTC)
-        const dayOfWeek = now.getUTCDay();
-        const daysSinceMonday = (dayOfWeek + 6) % 7;
-        const daysUntilSunday = 6 - daysSinceMonday;
-        const endOfWeekDate = new Date(Date.UTC(year, month, date + daysUntilSunday, 23, 59, 59, 999));
+        // End of current calendar week: Saturday 23:59:59.999 UTC (resets to Week N+1 on Sunday 00:00:00.000 UTC)
+        const daysUntilSaturday = 6 - dayOfWeek;
+        const endOfWeekDate = new Date(Date.UTC(year, month, date + daysUntilSaturday, 23, 59, 59, 999));
 
         return {
             activeWeekIndex: currentWeekIdx,
