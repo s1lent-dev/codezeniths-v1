@@ -31,15 +31,19 @@ export const ShinyLayer: React.FC<{
     style: React.CSSProperties;
 }> = ({ children, style }) => {
     return (
-        <span
-            style={style}
-            className={cn(
-                'dark:text-body-dark text-body-light',
-                'animate-shiny-text bg-[length:var(--shiny-width)_100%] bg-clip-text bg-[position:0_0] bg-no-repeat [transition:background-position_1s_cubic-bezier(.6,.6,0,1)_infinite]',
-                'bg-gradient-to-r from-transparent dark:via-[#f7f6ff] via-[#1C2136] via-50% to-transparent',
-            )}
-        >
-            {children}
+        <span className="relative inline-block">
+            <span>{children}</span>
+            <span
+                style={style}
+                aria-hidden="true"
+                className={cn(
+                    'pointer-events-none absolute inset-0 select-none inline-block',
+                    'animate-shiny-text bg-[length:var(--shiny-width,100px)_100%] bg-clip-text text-transparent [background-clip:text] [-webkit-background-clip:text] [-webkit-text-fill-color:transparent] bg-no-repeat',
+                    'bg-gradient-to-r from-transparent via-[var(--shiny-color,#ffffff)] via-50% to-transparent',
+                )}
+            >
+                {children}
+            </span>
         </span>
     );
 };

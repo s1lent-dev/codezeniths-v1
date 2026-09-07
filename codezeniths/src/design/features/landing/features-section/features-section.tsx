@@ -67,7 +67,7 @@ const FeatureCard = ({ feature, scrollToDetails }: { feature: any, scrollToDetai
                 <div className="flex flex-row items-center md:flex-col md:items-start justify-between md:justify-start gap-4 md:gap-3 p-1 md:p-0 w-full">
                     {/* Left on xs/sm, Below icon on md+ */}
                     <div className="flex flex-col flex-1 order-1 md:order-2 min-w-0">
-                        <CardTitle className="text-xl xs:text-2xl sm:text-2xl md:text-xxl font-bold text-body-light dark:text-foreground-light-shade3 px-0 md:px-md-2 mt-0 md:mt-md-2">
+                        <CardTitle className="text-lg xs:text-xl md:text-xl lg:text-xl font-normal lg:font-semibold text-body-light dark:text-foreground-light-shade3 px-0 md:px-md-2 mt-0 md:mt-md-2">
                             {feature.name}
                         </CardTitle>
                         <CardDescription className="px-0 md:px-md-2 mt-1 sm:mt-1.5 md:mt-md-1 text-muted-light dark:text-muted-dark text-xs sm:text-sm line-clamp-2 max-w-52 xs:max-w-[16rem] sm:max-w-[20rem] md:max-w-none">

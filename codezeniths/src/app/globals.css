@@ -12,6 +12,48 @@ body {
   font-family: var(--font-sans);
 }
 
+/* ==================== Custom Scrollbar ==================== */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(106, 124, 255, 1) transparent;
+}
+
+.dark html,
+:root.dark {
+  scrollbar-color: rgba(106, 124, 255, 1) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(106, 124, 255, 1);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(106, 124, 255, 1);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(106, 124, 255, 1);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(106, 124, 255, 1);
+}
+
 @theme {
   /* Color Palette */
   --color-primary: #6a7cff;

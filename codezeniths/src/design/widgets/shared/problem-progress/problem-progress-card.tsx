@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Target, Sparkles, RotateCcw, TrendingUp } from 'lucide-react';
-import { Typography } from '@codezeniths/components';
+import { Typography, TypographyVariant, TypographyEffect } from '@codezeniths/components';
 import { Card, CardVariant, CardBorderEffect, ProblemProgress } from '@codezeniths/modules';
 import { cn } from '@codezeniths/design/cn';
 import { ProblemProgressCardSkeleton } from './problem-progress-skeleton';
@@ -71,7 +71,12 @@ export const ProblemProgressCard: React.FC<ProblemProgressCardProps> = ({
                     <div className="size-9 rounded-md bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary flex items-center justify-center shrink-0">
                         <Target className="size-5" />
                     </div>
-                    <Typography className="text-xs font-bold tracking-wider text-primary dark:text-primary leading-tight truncate">
+                    <Typography
+                        variant={TypographyVariant.SPAN}
+                        effect={TypographyEffect.SHINY}
+                        shineColor="#c7d2fe"
+                        className="text-xs font-bold tracking-wider text-primary dark:text-primary leading-tight truncate"
+                    >
                         Problem Progress
                     </Typography>
                 </div>

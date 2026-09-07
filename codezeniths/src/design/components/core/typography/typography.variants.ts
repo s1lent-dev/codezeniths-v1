@@ -192,9 +192,7 @@ export const typographyVariants = cva(
                 [TypographyEffect.AURORA]: [
                     'relative inline-block',
                 ].join(' '),
-                [TypographyEffect.SHINY]: [
-                    'mx-auto max-w-md',
-                ].join(' '),
+                [TypographyEffect.SHINY]: '',
                 [TypographyEffect.GRADIENT]: [
                     'inline bg-clip-text text-transparent',
                 ].join(' '),

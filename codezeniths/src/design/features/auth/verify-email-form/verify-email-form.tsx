@@ -200,20 +200,20 @@ export const VerifyEmailForm = () => {
                                         }}
                                         className="w-full flex flex-col items-center gap-5 sm:gap-6"
                                     >
-                                        <Container direction="col" align="center" size="none" padded={false} centered={false} className="w-full gap-2 overflow-x-auto py-1">
+                                        <Container direction="col" align="center" size="none" padded={false} centered={false} className="w-full gap-2 py-1">
                                             <InputOTP
                                                 maxLength={6}
                                                 value={watchedOtp || ''}
                                                 onChange={setOtpValue}
-                                                containerClassName="gap-1 xs:gap-1.5 sm:gap-3 flex justify-center w-full"
+                                                containerClassName="flex justify-center w-full"
                                             >
-                                                <InputOTPGroup className="gap-1 xs:gap-1.5 sm:gap-3 flex justify-center w-full">
-                                                    <InputOTPSlot index={0} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                                    <InputOTPSlot index={1} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                                    <InputOTPSlot index={2} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                                    <InputOTPSlot index={3} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                                    <InputOTPSlot index={4} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
-                                                    <InputOTPSlot index={5} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${errors.otp ? 'border-destructive' : ''}`} />
+                                                <InputOTPGroup className="gap-1 xs:gap-1.5 sm:gap-2.5 md:gap-3 flex justify-center w-full">
+                                                    <InputOTPSlot index={0} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', errors.otp && 'border-destructive')} />
+                                                    <InputOTPSlot index={1} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', errors.otp && 'border-destructive')} />
+                                                    <InputOTPSlot index={2} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', errors.otp && 'border-destructive')} />
+                                                    <InputOTPSlot index={3} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', errors.otp && 'border-destructive')} />
+                                                    <InputOTPSlot index={4} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', errors.otp && 'border-destructive')} />
+                                                    <InputOTPSlot index={5} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', errors.otp && 'border-destructive')} />
                                                 </InputOTPGroup>
                                             </InputOTP>
                                             {errors.otp && (

@@ -13,6 +13,7 @@ import {
     Container,
 } from '@codezeniths/components';
 import { InputOTP, InputOTPGroup, InputOTPSlot, PhoneInput } from '@codezeniths/modules';
+import { cn } from '@codezeniths/design/cn';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useForgotPasswordForm } from './useForgotPasswordForm';
 import { DEFAULT_COUNTRY_CODE, validateCombinedPhone } from '@/utils/phone.utils';
@@ -191,20 +192,20 @@ export const ForgotPasswordForm = () => {
                 {step === 'verify' && (
                     <form onSubmit={handleVerify} className="w-full sm:w-[90%] md:w-[85%] flex flex-col items-center gap-6 sm:gap-8">
                         
-                        <Container direction="col" align="center" size="none" padded={false} centered={false} className="w-full gap-2 overflow-x-auto py-1">
+                        <Container direction="col" align="center" size="none" padded={false} centered={false} className="w-full gap-2 py-1">
                             <InputOTP 
                                 maxLength={6} 
                                 value={verifyForm.watch('otp')} 
                                 onChange={(val) => verifyForm.setValue('otp', val, { shouldValidate: true })}
-                                containerClassName="gap-1 xs:gap-1.5 sm:gap-3 flex justify-center w-full"
+                                containerClassName="flex justify-center w-full"
                             >
-                                <InputOTPGroup className="gap-1 xs:gap-1.5 sm:gap-3 flex justify-center w-full">
-                                    <InputOTPSlot index={0} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={1} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={2} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={3} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={4} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
-                                    <InputOTPSlot index={5} className={`w-9.5 h-12 xs:w-11 xs:h-13 sm:w-14 sm:h-16 text-base xs:text-lg sm:text-2xl ${verifyForm.formState.errors.otp ? 'border-destructive' : ''}`} />
+                                <InputOTPGroup className="gap-1 xs:gap-1.5 sm:gap-2.5 md:gap-3 flex justify-center w-full">
+                                    <InputOTPSlot index={0} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', verifyForm.formState.errors.otp && 'border-destructive')} />
+                                    <InputOTPSlot index={1} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', verifyForm.formState.errors.otp && 'border-destructive')} />
+                                    <InputOTPSlot index={2} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', verifyForm.formState.errors.otp && 'border-destructive')} />
+                                    <InputOTPSlot index={3} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', verifyForm.formState.errors.otp && 'border-destructive')} />
+                                    <InputOTPSlot index={4} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', verifyForm.formState.errors.otp && 'border-destructive')} />
+                                    <InputOTPSlot index={5} className={cn('w-9 h-11.5 xs:w-11 xs:h-13 sm:w-13.5 sm:h-15 text-base xs:text-lg sm:text-2xl rounded-xs xs:rounded-sm sm:rounded-md', verifyForm.formState.errors.otp && 'border-destructive')} />
                                 </InputOTPGroup>
                             </InputOTP>
                             {verifyForm.formState.errors.otp && (

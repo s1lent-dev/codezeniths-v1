@@ -7,6 +7,7 @@ import {
     Typography,
     TypographyVariant,
     TypographyWeight,
+    TypographyEffect,
     Button,
     ButtonEffect,
 } from '@codezeniths/components';
@@ -96,9 +97,14 @@ export const ResumeModuleCard: React.FC<ResumeModuleCardProps> = ({
                     <div className="size-9 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                         <BookOpen className="size-5" />
                     </div>
-                    <span className="text-xs font-bold tracking-wider text-emerald-600 dark:text-emerald-400">
+                    <Typography
+                        variant={TypographyVariant.SPAN}
+                        effect={TypographyEffect.SHINY}
+                        shineColor="#a7f3d0"
+                        className="text-xs font-bold tracking-wider text-emerald-600 dark:text-emerald-400"
+                    >
                         {recentModule ? 'Resume Learning' : 'Featured Module'}
-                    </span>
+                    </Typography>
                 </div>
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                     <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Flame, Trophy, Activity, ShieldCheck } from 'lucide-react';
-import { Typography } from '@codezeniths/components';
+import { Typography, TypographyVariant, TypographyEffect } from '@codezeniths/components';
 import { Card, CardVariant, CardBorderEffect } from '@codezeniths/modules';
 import { cn } from '@codezeniths/design/cn';
 import { StreakCardSkeleton } from './streak-card-skeleton';
@@ -72,6 +72,9 @@ export const StreakCard: React.FC<StreakCardProps> = ({
                         <Flame className="size-5 animate-pulse" />
                     </div>
                     <Typography
+                        variant={TypographyVariant.SPAN}
+                        effect={TypographyEffect.SHINY}
+                        shineColor="#fef08a"
                         className="text-xs font-bold tracking-wider text-amber-500 dark:text-amber-400"
                     >
                         Active Streak

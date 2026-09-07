@@ -3,13 +3,24 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Trophy, Award, Zap, Sparkles, Globe } from 'lucide-react';
-import { Typography, TypographyVariant, Progress } from '@codezeniths/components';
+import { Typography, TypographyVariant, TypographyEffect, Progress } from '@codezeniths/components';
 import { Card, CardVariant, CardBorderEffect } from '@codezeniths/modules';
 import { cn } from '@codezeniths/design/cn';
-import { getRankProgress, UserRankProgress } from '@/utils/rank.utils';
+import { getRankProgress, UserRankProgress, type RankTier } from '@/utils/rank.utils';
 import { RankBadge } from './rank-badge';
 import { RANK_SVG_MAP } from '@/assets/ranks';
 import { RankCardSkeleton } from './rank-card-skeleton';
+
+export const RANK_SHINE_COLORS: Record<RankTier, string> = {
+    UNRANKED: '#cbd5e1',
+    GUARDIAN: '#e2e8f0',
+    KNIGHT: '#99f6e4',
+    VANGUARD: '#fecdd3',
+    MAVEN: '#fef08a',
+    ASCENDANT: '#a7f3d0',
+    OMNISCIENT: '#f5d0fe',
+    ZENITH: '#c7d2fe',
+};
 
 export interface RankCardData {
     isUnranked?: boolean;
@@ -117,7 +128,10 @@ export const RankCard: React.FC<RankCardProps> = ({
                     </div>
                     <Typography
                         variant={TypographyVariant.SPAN}
-                        className="text-xs font-bold tracking-wider text-heading-light dark:text-heading-dark"
+                        effect={TypographyEffect.SHINY}
+                        shineColor={RANK_SHINE_COLORS[currentRank.tier] || '#c7d2fe'}
+                        style={{ color: currentRank.color }}
+                        className="text-xs font-bold tracking-wider"
                     >
                         Rank & Standing
                     </Typography>

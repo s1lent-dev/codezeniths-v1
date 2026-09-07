@@ -35,13 +35,20 @@ export function useAuroraEffect(props: AuroraEffectProps) {
 
 // ==================== SHINY EFFECT ====================
 export function useShinyEffect(props: ShinyEffectProps) {
-    const { shimmerWidth = 100 } = props;
+    const { shimmerWidth = 80, shineColor, speed = 1 } = props;
 
     const style = useMemo(() => {
-        return {
+        const s: React.CSSProperties = {
             '--shiny-width': `${shimmerWidth}px`,
         } as React.CSSProperties;
-    }, [shimmerWidth]);
+        if (shineColor) {
+            (s as any)['--shiny-color'] = shineColor;
+        }
+        if (speed && speed !== 1) {
+            s.animationDuration = `${8 / speed}s`;
+        }
+        return s;
+    }, [shimmerWidth, shineColor, speed]);
 
     return { style };
 }

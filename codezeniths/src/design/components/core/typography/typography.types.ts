@@ -83,6 +83,8 @@ interface AuroraEffectProps {
 // Shiny effect props
 interface ShinyEffectProps {
     shimmerWidth?: number;
+    shineColor?: string;
+    speed?: number;
 }
 
 // Gradient effect props
@@ -184,7 +186,7 @@ export interface EffectPropsMap {
 // TYPOGRAPHY_EFFECT_PROP_KEYS tuple
 export const TYPOGRAPHY_EFFECT_PROP_KEYS = [
     'colors', 'speed',
-    'shimmerWidth',
+    'shimmerWidth', 'shineColor',
     'colorFrom', 'colorTo',
     'texts',
     'words', 'typeSpeed', 'deleteSpeed', 'delay', 'pauseDelay', 'loop',

@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Crown, Sparkles, User as UserIcon, Zap } from 'lucide-react';
-import { Typography, TypographyVariant, Avatar, AvatarImage, AvatarFallback, Badge } from '@codezeniths/components';
+import { Typography, TypographyVariant, TypographyEffect, Avatar, AvatarImage, AvatarFallback, Badge } from '@codezeniths/components';
 import { Card, CardVariant, CardBorderEffect } from '@codezeniths/modules';
 import { cn } from '@codezeniths/design/cn';
 import { RANK_SVG_MAP } from '@/assets/ranks';
@@ -77,6 +77,8 @@ export const ChampionsPodiumCard: React.FC<ChampionsPodiumCardProps> = ({
                     <div className="flex flex-col">
                         <Typography
                             variant={TypographyVariant.SPAN}
+                            effect={TypographyEffect.SHINY}
+                            shineColor="#f5d0fe"
                             className="text-xs sm:text-sm font-bold tracking-wider text-purple-400 dark:text-purple-300"
                         >
                             Champions Podium
