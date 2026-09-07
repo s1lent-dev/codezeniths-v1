@@ -74,9 +74,9 @@ export const AccountHeroCard: React.FC<AccountHeroCardProps> = ({
                         <div className="flex items-center gap-2">
                             <Typography
                                 as="h2"
-                                variant={TypographyVariant.H3}
-                                weight={TypographyWeight.BOLD}
-                                className="text-heading-light dark:text-heading-dark text-h4! xs:text-lg! sm:text-xl! md:text-2xl! tracking-tight truncate"
+                                variant={TypographyVariant.H4}
+                                weight={TypographyWeight.SEMIBOLD}
+                                className="text-heading-light dark:text-heading-dark text-base xs:text-h5! sm:text-h5! md:text-h4 tracking-tight truncate"
                             >
                                 {fullName}
                             </Typography>
