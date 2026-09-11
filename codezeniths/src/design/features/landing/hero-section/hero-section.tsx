@@ -21,11 +21,11 @@ import { motion } from "motion/react";
 
 export const HeroSection = () => {
   return (
-    <section className="relative px-4 xs:px-6 sm:px-10 lg:px-16 pt-24 xs:pt-28 lg:pt-32 pb-12 xs:pb-16 lg:pb-24 overflow-hidden">
+    <section id="hero" className="relative px-4 xs:px-6 sm:px-10 lg:px-16 pt-24 xs:pt-28 lg:pt-32 pb-12 xs:pb-16 lg:pb-24 overflow-hidden scroll-mt-20 sm:scroll-mt-24">
       {/* Light Rays Background Effect */}
       <Background variant={BackgroundVariant.LIGHT_RAYS} count={7} speed={14} color="rgba(106, 124, 255, 0.2)" blur={36} />
       
-      <Container size="7xl" className="mx-auto px-0 sm:px-4 lg:px-8 relative z-10">
+      <Container size="7xl" className="mx-auto px-0 sm:px-4 md:px:6 lg:px-8 relative z-10">
         <Grid className="grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-8 items-center">
           {/* Left Content */}
           <div className="flex flex-col items-center text-center lg:items-start lg:text-left gap-6 lg:pr-8">
@@ -59,7 +59,7 @@ export const HeroSection = () => {
               <Typography
                 variant={TypographyVariant.H2}
                 align={TypographyAlign.CENTER}
-                className="font-extrabold font-serif text-2xl xs:text-3xl sm:text-4xl lg:text-5xl leading-tight lg:text-left text-foreground-dark-shade3 dark:text-foreground-light-shade3"
+                className="font-semibold! font-serif text-2xl xs:text-3xl sm:text-4xl lg:text-5xl leading-tight lg:text-left text-foreground-dark-shade3 dark:text-foreground-light-shade3"
               >
                 Where every coder finds their peak. Unified, unstoppable, always
                 at your zenith.
@@ -95,17 +95,21 @@ export const HeroSection = () => {
           </div>
 
           {/* Right Content - LCP Image */}
-          <div className="relative w-full h-64 xs:h-80 sm:h-96 lg:h-110 flex justify-center items-center mt-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
+            className="flex items-center justify-center lg:justify-end w-full mt-8"
+          >
             <Image
               src={phoneScene}
               alt="CodeZeniths Platform"
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 50vw"
-              className="object-contain"
               priority
-              quality={85}
+              quality={90}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 50vw"
+              className="w-full h-auto max-w-md xs:max-w-lg sm:max-w-lg lg:max-w-none xl:max-w-lg object-contain drop-shadow-2xl"
             />
-          </div>
+          </motion.div>
         </Grid>
       </Container>
     </section>

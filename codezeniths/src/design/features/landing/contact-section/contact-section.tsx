@@ -40,7 +40,7 @@ export const ContactSection = () => {
     const termsChecked = watch('terms');
 
     return (
-        <section className="py-12 sm:py-16 lg:py-24 relative bg-background-light dark:bg-background-dark overflow-visible">
+        <section id="contact" className="py-12 sm:py-16 lg:py-24 relative bg-background-light dark:bg-background-dark overflow-visible scroll-mt-20 sm:scroll-mt-24">
             <Container size="3xl" className="mx-auto px-4 xs:px-6 lg:px-8 relative">
                 <motion.div
                     variants={{

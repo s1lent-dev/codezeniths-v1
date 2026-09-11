@@ -100,7 +100,7 @@ export const TestimonialsSection = () => {
     }, [isInView]);
 
     return (
-        <section ref={sectionRef} className="py-16 sm:py-20 lg:py-24 mt-4 lg:mt-6 relative bg-background-light dark:bg-background-dark overflow-hidden">
+        <section id="testimonials" ref={sectionRef} className="py-16 sm:py-20 lg:py-24 mt-4 lg:mt-6 relative bg-background-light dark:bg-background-dark overflow-hidden scroll-mt-20 sm:scroll-mt-24">
             <Container size="5xl" className="mx-auto px-4 xs:px-6 lg:px-8 relative z-10">
                 {/* Header */}
                 <motion.div 

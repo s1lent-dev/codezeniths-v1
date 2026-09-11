@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation';
 export const CtaSection = () => {
     const router = useRouter();
     return (
-        <section className="py-12 sm:py-16 lg:py-24 relative overflow-hidden">
+        <section id="cta" className="py-12 sm:py-16 lg:py-24 relative overflow-hidden scroll-mt-20 sm:scroll-mt-24">
             <Container size="5xl" className="mx-auto px-4 xs:px-6 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}

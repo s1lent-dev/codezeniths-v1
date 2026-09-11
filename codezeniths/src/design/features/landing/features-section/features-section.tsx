@@ -114,7 +114,7 @@ export const FeaturesSection = () => {
     };
 
     return (
-        <section className="py-16 sm:py-20 lg:py-24 bg-background-light dark:bg-background-dark relative">
+        <section id="features" className="py-16 sm:py-20 lg:py-24 bg-background-light dark:bg-background-dark relative scroll-mt-20 sm:scroll-mt-24">
             <Container size="5xl" className="mx-auto px-4 xs:px-6 lg:px-8">
                 {/* Header */}
                 <motion.div 

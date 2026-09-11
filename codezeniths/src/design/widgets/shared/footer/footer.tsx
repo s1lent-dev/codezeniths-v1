@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Container, Typography, TypographyVariant, Button, Grid } from '@codezeniths/components';
 import { PhoneCall, Mail } from 'lucide-react';
 import { Logo } from '../common/logo';
@@ -48,7 +49,31 @@ interface FooterListItem {
 
 const ExpandableList = ({ items }: { items: FooterListItem[] }) => {
     const [expanded, setExpanded] = useState(false);
+    const pathname = usePathname();
+    const router = useRouter();
     const visibleItems = expanded ? items : items.slice(0, 4);
+
+    const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+        if (href.startsWith('/#') || href.startsWith('#')) {
+            const targetId = href.replace(/^\/?#/, '');
+            
+            if (pathname === '/' || pathname === '') {
+                e.preventDefault();
+                if (targetId === 'hero') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) {
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+                window.history.pushState(null, '', `/#${targetId}`);
+            } else {
+                e.preventDefault();
+                router.push(`/#${targetId}`);
+            }
+        }
+    };
     
     return (
         <div className="flex flex-col gap-3.5">
@@ -57,7 +82,8 @@ const ExpandableList = ({ items }: { items: FooterListItem[] }) => {
                     key={`${item.label}-${idx}`} 
                     href={item.href} 
                     title={item.label}
-                    className="text-sm font-medium text-muted-light-shade1 dark:text-muted-dark-shade1 hover:text-primary transition-colors truncate max-w-40 sm:max-w-48 block"
+                    onClick={(e) => handleClick(e, item.href)}
+                    className="text-sm font-medium text-muted-light-shade1 dark:text-muted-dark-shade1 hover:text-primary transition-colors truncate max-w-40 sm:max-w-48 block cursor-pointer"
                 >
                     {item.label}
                 </a>
@@ -73,6 +99,18 @@ const ExpandableList = ({ items }: { items: FooterListItem[] }) => {
         </div>
     );
 };
+
+const DEFAULT_LINKS: FooterListItem[] = [
+    { label: 'Hero', href: '/#hero' },
+    { label: 'Brands', href: '/#brands' },
+    { label: 'Features', href: '/#features' },
+    { label: 'Stats', href: '/#stats' },
+    { label: 'Feature Details', href: '/#feature-details' },
+    { label: 'CTA', href: '/#cta' },
+    { label: 'Testimonials', href: '/#testimonials' },
+    { label: 'Pricing', href: '/#pricing' },
+    { label: 'Contact', href: '/#contact' },
+];
 
 const DEFAULT_PRODUCTS: FooterListItem[] = [
     { label: 'AlgoZenith', href: '/products/algozenith' },
@@ -204,11 +242,7 @@ const Footer = () => {
                         <Typography variant={TypographyVariant.H6} className="font-bold text-foreground-dark-shade3 dark:text-foreground-light-shade3 text-base">
                             Links
                         </Typography>
-                        <div className="flex flex-col gap-3.5">
-                            {['hero', 'brands', 'pricing', 'testimonials'].map((item) => (
-                                <a key={item} href="#" className="text-sm font-medium text-muted-light-shade1 dark:text-muted-dark-shade1 hover:text-primary transition-colors capitalize">{item}</a>
-                            ))}
-                        </div>
+                        <ExpandableList items={DEFAULT_LINKS} />
                     </div>
 
                     {/* Contact Us Column */}

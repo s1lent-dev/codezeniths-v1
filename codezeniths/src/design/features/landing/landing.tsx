@@ -34,6 +34,21 @@ const ContactSection = dynamic(() => import('./contact-section').then((mod) => m
 });
 
 export const Landing = () => {
+    React.useEffect(() => {
+        if (typeof window !== 'undefined' && window.location.hash) {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                const timer = setTimeout(() => {
+                    const el = document.getElementById(hash);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 300);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, []);
+
     return (
         <Main className="flex flex-col w-full min-h-screen">
             <HeroSection />

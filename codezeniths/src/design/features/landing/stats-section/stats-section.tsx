@@ -94,8 +94,9 @@ export const StatsSection = () => {
 
     return (
         <section 
+            id="stats"
             ref={sectionRef} 
-            className="py-16 sm:py-24 lg:py-32 mt-8 lg:mt-16 bg-background-light dark:bg-background-dark relative overflow-hidden min-h-auto lg:min-h-225 flex flex-col justify-center"
+            className="py-16 sm:py-24 lg:py-32 mt-8 lg:mt-16 bg-background-light dark:bg-background-dark relative overflow-hidden min-h-auto lg:min-h-225 flex flex-col justify-center scroll-mt-20 sm:scroll-mt-24"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >

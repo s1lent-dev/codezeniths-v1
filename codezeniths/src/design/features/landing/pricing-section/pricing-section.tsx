@@ -234,7 +234,7 @@ const PricingCardItem = ({ plan }: { plan: any }) => {
 
 export const PricingSection = () => {
     return (
-        <section className="py-12 sm:py-16 lg:py-24 relative bg-background-light dark:bg-background-dark overflow-hidden">
+        <section id="pricing" className="py-12 sm:py-16 lg:py-24 relative bg-background-light dark:bg-background-dark overflow-hidden scroll-mt-20 sm:scroll-mt-24">
             <Container size="5xl" className="mx-auto px-4 xs:px-6 lg:px-8 relative z-10">
                 {/* Header */}
                 <motion.div 

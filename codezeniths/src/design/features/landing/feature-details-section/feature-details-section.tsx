@@ -156,7 +156,7 @@ export const FeatureDetailsSection = () => {
     };
 
     return (
-        <Section id="feature-details" className="bg-background-light dark:bg-background-dark relative pb-16 pt-12 sm:pb-24 sm:pt-18">
+        <Section id="feature-details" className="bg-background-light dark:bg-background-dark relative pb-16 pt-12 sm:pb-24 sm:pt-18 scroll-mt-20 sm:scroll-mt-24">
             <Container size="5xl" className="mx-auto px-4 xs:px-6 lg:px-8">
                 
                 {/* Square Tabber Navigation with Pagination */}
