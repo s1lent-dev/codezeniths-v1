@@ -111,28 +111,28 @@ export const StreakCard: React.FC<StreakCardProps> = ({
                             <TooltipContent
                                 side="bottom"
                                 sideOffset={6}
-                                className="z-50 p-2.5 bg-background-light dark:bg-foreground-dark border border-secondary/20 shadow-xl rounded-lg text-xs font-sans"
+                                className="z-50 p-3.5! bg-background-light dark:bg-foreground-dark border border-amber-500/20 dark:border-amber-500/25 shadow-xl rounded-lg text-xs font-sans"
                             >
-                                <div className="flex flex-col gap-1.5 min-w-[170px]">
-                                    <div className="flex items-center gap-1.5 pb-1.5 border-b border-secondary/15 text-heading-light dark:text-heading-dark font-semibold text-[11px] tracking-wide uppercase">
-                                        <CalendarCheck className="size-3.5 text-amber-500" />
+                                <div className="flex flex-col gap-2 min-w-[180px]">
+                                    <div className="flex items-center gap-1.5 pb-2 border-b border-amber-500/15 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-[11px] tracking-wide">
+                                        <CalendarCheck className="size-3.5 text-amber-500 shrink-0" />
                                         <span>Check-In Streak</span>
                                     </div>
                                     <div className="flex items-center justify-between gap-4 text-muted-light dark:text-muted-dark">
-                                        <span className="flex items-center gap-1">
-                                            <Zap className="size-3 text-amber-500" />
+                                        <span className="flex items-center gap-1.5">
+                                            <Zap className="size-3 text-amber-500 shrink-0" />
                                             Current Streak:
                                         </span>
-                                        <span className="font-bold text-heading-light dark:text-heading-dark">
+                                        <span className="font-semibold text-[11px] text-amber-600 dark:text-amber-300">
                                             {currentCheckInStreak} {currentCheckInStreak === 1 ? 'Day' : 'Days'}
                                         </span>
                                     </div>
                                     <div className="flex items-center justify-between gap-4 text-muted-light dark:text-muted-dark">
-                                        <span className="flex items-center gap-1">
-                                            <Trophy className="size-3 text-amber-500" />
+                                        <span className="flex items-center gap-1.5">
+                                            <Trophy className="size-3 text-amber-500 shrink-0" />
                                             Best Streak:
                                         </span>
-                                        <span className="font-bold text-heading-light dark:text-heading-dark">
+                                        <span className="font-semibold text-[11px] text-amber-600 dark:text-amber-300">
                                             {longestCheckInStreak} {longestCheckInStreak === 1 ? 'Day' : 'Days'}
                                         </span>
                                     </div>
