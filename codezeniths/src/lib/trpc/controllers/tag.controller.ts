@@ -193,14 +193,6 @@ export class TagController implements ITagController {
         logger.info('Executing getUserTagProgressByLevel controller', { input, userId: ctx.user?.id });
         const targetUserId = input.userId || ctx.user?.id;
 
-        if (!targetUserId) {
-            return {
-                fundamental: [],
-                intermediate: [],
-                advanced: [],
-            };
-        }
-
         try {
             return await ctx.queries.tag.getUserTagProgressByLevel({
                 userId: targetUserId,

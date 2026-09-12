@@ -20,8 +20,8 @@ export interface TagProgressItem {
     name: string;
     slug: string;
     level?: string | null;
-    solvedCount: number;
-    totalProblems: number;
+    totalProblems?: number;
+    solvedCount?: number;
 }
 
 export interface SkillModuleOption {
@@ -71,7 +71,6 @@ const SkillCategorySection: React.FC<SkillCategorySectionProps> = ({
     const visibleTags = isExpanded ? tags.slice(0, 10) : tags.slice(0, 5);
     const hasMore = tags.length > 5;
     const remainingCount = Math.min(5, tags.length - 5);
-    const totalSolved = tags.reduce((acc, t) => acc + t.solvedCount, 0);
 
     if (tags.length === 0) {
         return (
@@ -88,7 +87,7 @@ const SkillCategorySection: React.FC<SkillCategorySectionProps> = ({
                     </span>
                 </div>
                 <div className="text-[11px] text-muted-light/60 dark:text-muted-dark/60 italic pl-4">
-                    No problems solved yet
+                    No tags available
                 </div>
             </div>
         );
@@ -104,24 +103,20 @@ const SkillCategorySection: React.FC<SkillCategorySectionProps> = ({
                     </Typography>
                 </div>
                 <span className="text-[11px] text-muted-light dark:text-muted-dark font-medium">
-                    {totalSolved} solved
+                    {tags.length} {tags.length === 1 ? 'tag' : 'tags'}
                 </span>
             </div>
 
-            {/* Tag Badges with count outside badge */}
+            {/* Tag Badges */}
             <div className="flex flex-wrap items-center gap-2">
                 {visibleTags.map((tag) => (
-                    <div key={tag.id} className="inline-flex items-center gap-1.5 shrink-0">
-                        <Link
-                            href={`/tags/${tag.slug}`}
-                            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-foreground-light-shade1/80 dark:bg-foreground-dark-shade1/80 border border-secondary/20 hover:border-secondary/40 text-body-light dark:text-body-dark hover:text-heading-light dark:hover:text-heading-dark transition-colors"
-                        >
-                            <span>{tag.name}</span>
-                        </Link>
-                        <span className="text-xs font-medium text-muted-light dark:text-muted-dark select-none">
-                            x{tag.solvedCount}
-                        </span>
-                    </div>
+                    <Link
+                        key={tag.id}
+                        href={`/tags/${tag.slug}`}
+                        className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-foreground-light-shade1/80 dark:bg-foreground-dark-shade1/80 border border-secondary/20 hover:border-secondary/40 text-body-light dark:text-body-dark hover:text-heading-light dark:hover:text-heading-dark transition-colors shrink-0"
+                    >
+                        <span>{tag.name}</span>
+                    </Link>
                 ))}
             </div>
 

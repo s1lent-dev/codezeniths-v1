@@ -476,19 +476,7 @@ export class TagQueries implements ITagQueries {
         .output(GetUserTagProgressByLevelOutputSchema)
         .handler(async (payload) => {
             logger.info('Executing getUserTagProgressByLevel query', { payload });
-            const { userId, moduleSlug, moduleId } = payload;
-
-            const solvedRecords = await prisma.problemProgress.findMany({
-                where: {
-                    userId,
-                    status: 'solved',
-                },
-                select: {
-                    problemId: true,
-                },
-            });
-
-            const solvedProblemIds = new Set(solvedRecords.map((r) => r.problemId));
+            const { moduleSlug, moduleId } = payload;
 
             const isModuleFilter = moduleSlug && moduleSlug !== 'all';
             const tags = await prisma.tag.findMany({
@@ -507,49 +495,28 @@ export class TagQueries implements ITagQueries {
                     name: true,
                     slug: true,
                     level: true,
-                    problems: {
+                    _count: {
                         select: {
-                            problemId: true,
+                            problems: true,
                         },
                     },
                 },
+                orderBy: {
+                    name: 'asc',
+                },
             });
 
-            const processedTags = tags.map((t) => {
-                const totalProblems = t.problems.length;
-                let solvedCount = 0;
-                for (const p of t.problems) {
-                    if (solvedProblemIds.has(p.problemId)) {
-                        solvedCount++;
-                    }
-                }
-                return {
-                    id: t.id,
-                    name: t.name,
-                    slug: t.slug,
-                    level: t.level,
-                    solvedCount,
-                    totalProblems,
-                };
-            });
+            const processedTags = tags.map((t) => ({
+                id: t.id,
+                name: t.name,
+                slug: t.slug,
+                level: t.level,
+                totalProblems: t._count.problems,
+            }));
 
-            const sortBySolvedDesc = (a: (typeof processedTags)[number], b: (typeof processedTags)[number]) =>
-                b.solvedCount - a.solvedCount || b.totalProblems - a.totalProblems || a.name.localeCompare(b.name);
-
-            const fundamental = processedTags
-                .filter((t) => t.level === 'fundamental')
-                .sort(sortBySolvedDesc)
-                .slice(0, 10);
-
-            const intermediate = processedTags
-                .filter((t) => t.level === 'intermediate')
-                .sort(sortBySolvedDesc)
-                .slice(0, 10);
-
-            const advanced = processedTags
-                .filter((t) => t.level === 'advanced')
-                .sort(sortBySolvedDesc)
-                .slice(0, 10);
+            const fundamental = processedTags.filter((t) => t.level === 'fundamental');
+            const intermediate = processedTags.filter((t) => t.level === 'intermediate');
+            const advanced = processedTags.filter((t) => t.level === 'advanced');
 
             return {
                 fundamental,

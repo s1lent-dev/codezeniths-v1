@@ -18,9 +18,14 @@ export const UserStreakCardWrapper: React.FC<UserStreakCardWrapperProps> = ({
               currentStreak: streakResponse.currentStreak ?? 0,
               longestStreak: streakResponse.longestStreak ?? 0,
               totalActiveDays: streakResponse.totalActiveDays ?? 0,
+              currentCheckInStreak: streakResponse.currentCheckInStreak ?? 0,
+              longestCheckInStreak: streakResponse.longestCheckInStreak ?? 0,
+              streakFreezeAvailable: streakResponse.streakFreezeAvailable ?? 0,
+              streakFreezeUsed: streakResponse.streakFreezeUsed ?? 0,
               lastActiveDate: streakResponse.lastActiveDate,
               lastProblemSolvedDate: streakResponse.lastProblemSolvedDate,
               isSolvedToday: Boolean(streakResponse.isSolvedToday),
+              isCheckedInToday: Boolean(streakResponse.isCheckedInToday),
           }
         : null;
 

@@ -108,8 +108,8 @@ export const TagProgressItemTRPCSchema = z.object({
     name: z.string(),
     slug: z.string(),
     level: z.enum(['fundamental', 'intermediate', 'advanced']).nullable().optional(),
-    solvedCount: z.number().int(),
-    totalProblems: z.number().int(),
+    solvedCount: z.number().int().optional(),
+    totalProblems: z.number().int().optional(),
 });
 
 export const GetUserTagProgressByLevelTRPCOutputSchema = z.object({

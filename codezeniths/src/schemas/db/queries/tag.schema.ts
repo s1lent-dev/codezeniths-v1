@@ -207,7 +207,7 @@ export const ToggleTagBookmarkOutputSchema = z.object({
 // ─── getUserTagProgressByLevel ───────────────────────────────────────────────
 
 export const GetUserTagProgressByLevelInputSchema = z.object({
-    userId: z.string(),
+    userId: z.string().optional(),
     moduleSlug: z.string().optional(),
     moduleId: z.string().optional(),
 });
@@ -217,8 +217,8 @@ export const TagProgressItemSchema = z.object({
     name: z.string(),
     slug: z.string(),
     level: LevelSchema.nullable().optional(),
-    solvedCount: z.number().int(),
-    totalProblems: z.number().int(),
+    solvedCount: z.number().int().optional(),
+    totalProblems: z.number().int().optional(),
 });
 
 export const GetUserTagProgressByLevelOutputSchema = z.object({

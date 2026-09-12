@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Flame, Trophy, Activity, ShieldCheck } from 'lucide-react';
-import { Typography, TypographyVariant, TypographyEffect } from '@codezeniths/components';
+import { Flame, Trophy, Activity, ShieldCheck, CalendarCheck, Zap } from 'lucide-react';
+import { Typography, TypographyVariant, TypographyEffect, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@codezeniths/components';
 import { Card, CardVariant, CardBorderEffect } from '@codezeniths/modules';
 import { cn } from '@codezeniths/design/cn';
 import { StreakCardSkeleton } from './streak-card-skeleton';
@@ -15,6 +15,9 @@ export interface UserStreakData {
     bestStreak?: number;
     totalActiveDays?: number;
     activeDaysCount?: number;
+    currentCheckInStreak?: number;
+    longestCheckInStreak?: number;
+    bestCheckInStreak?: number;
     lastActiveDate?: string | Date | null;
     lastProblemSolvedDate?: string | Date | null;
     streakFreezeAvailable?: number;
@@ -44,6 +47,8 @@ export const StreakCard: React.FC<StreakCardProps> = ({
     const currentStreak = streakData?.currentStreak ?? 0;
     const bestStreak = streakData?.longestStreak ?? streakData?.bestStreak ?? 0;
     const activeDaysCount = streakData?.totalActiveDays ?? streakData?.activeDaysCount ?? 0;
+    const currentCheckInStreak = streakData?.currentCheckInStreak ?? 0;
+    const longestCheckInStreak = streakData?.longestCheckInStreak ?? streakData?.bestCheckInStreak ?? 0;
     const streakFreezeCount = streakData?.streakFreezeAvailable ?? streakData?.streakFreezeCount ?? 0;
     const isSolvedToday = Boolean(streakData?.isSolvedToday);
 
@@ -94,9 +99,47 @@ export const StreakCard: React.FC<StreakCardProps> = ({
                     {currentStreak === 1 ? 'Day Streak' : 'Days Streak'}
                 </span>
                 {activeDaysCount > 0 && (
-                    <span className="text-xs text-muted-light dark:text-muted-dark font-medium mt-0.5">
-                        {activeDaysCount} Active {activeDaysCount === 1 ? 'Day Total' : 'Days Total'}
-                    </span>
+                    <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="inline-flex items-center gap-1.5 text-xs text-muted-light dark:text-muted-dark hover:text-amber-600 dark:hover:text-amber-400 font-medium mt-0.5 px-2 py-0.5 rounded-full hover:bg-amber-500/10 transition-colors duration-200 cursor-help select-none">
+                                    <span>
+                                        {activeDaysCount} Active {activeDaysCount === 1 ? 'Day Total' : 'Days Total'}
+                                    </span>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent
+                                side="bottom"
+                                sideOffset={6}
+                                className="z-50 p-2.5 bg-background-light dark:bg-foreground-dark border border-secondary/20 shadow-xl rounded-lg text-xs font-sans"
+                            >
+                                <div className="flex flex-col gap-1.5 min-w-[170px]">
+                                    <div className="flex items-center gap-1.5 pb-1.5 border-b border-secondary/15 text-heading-light dark:text-heading-dark font-semibold text-[11px] tracking-wide uppercase">
+                                        <CalendarCheck className="size-3.5 text-amber-500" />
+                                        <span>Check-In Streak</span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-4 text-muted-light dark:text-muted-dark">
+                                        <span className="flex items-center gap-1">
+                                            <Zap className="size-3 text-amber-500" />
+                                            Current Streak:
+                                        </span>
+                                        <span className="font-bold text-heading-light dark:text-heading-dark">
+                                            {currentCheckInStreak} {currentCheckInStreak === 1 ? 'Day' : 'Days'}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-4 text-muted-light dark:text-muted-dark">
+                                        <span className="flex items-center gap-1">
+                                            <Trophy className="size-3 text-amber-500" />
+                                            Best Streak:
+                                        </span>
+                                        <span className="font-bold text-heading-light dark:text-heading-dark">
+                                            {longestCheckInStreak} {longestCheckInStreak === 1 ? 'Day' : 'Days'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 )}
             </div>
 
