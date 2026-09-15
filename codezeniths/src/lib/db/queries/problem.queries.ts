@@ -379,7 +379,7 @@ export class ProblemQueries implements IProblemQueries {
                 await recordProblemSolvedAndSyncStreak({ userId, pointsEarned: points, problemsSolved: 1 });
                 logger.info('Recorded user problem solved activity and synced streak', { userId, points });
 
-                // Publish domain events to MQ for asynchronous notification & push delivery
+                // Publish domain event to MQ for asynchronous processing (in-app, push, and milestones)
                 void (async () => {
                     try {
                         const module = problemExists.topic?.module?.title || 'algorithms';
@@ -391,68 +391,8 @@ export class ProblemQueries implements IProblemQueries {
                             module,
                             isFirstSolve: previousStatus !== 'solved',
                         });
-
-                        // 1. Topic completion check
-                        if (problemExists.topicId) {
-                            const topicId = problemExists.topicId;
-                            const [topic, topicTotal, topicSolved] = await Promise.all([
-                                prisma.topic.findUnique({
-                                    where: { id: topicId },
-                                    select: { title: true, slug: true },
-                                }),
-                                prisma.problem.count({
-                                    where: { topicId },
-                                }),
-                                prisma.problemProgress.count({
-                                    where: {
-                                        userId,
-                                        status: 'solved',
-                                        problem: { topicId },
-                                    },
-                                }),
-                            ]);
-
-                            if (topicTotal > 0 && topicSolved === topicTotal) {
-                                await notificationProducer.publishInApp({
-                                    userId,
-                                    type: 'topic_completed',
-                                    title: 'Topic Completed! 🚀',
-                                    message: `You have solved all problems in "${topic?.title || 'the topic'}".`,
-                                    link: `/problems?topic=${topic?.slug || topicId}`,
-                                });
-                            }
-                        }
-
-                        // 2. Module completion check
-                        const moduleId = problemExists.topic?.moduleId;
-                        if (moduleId) {
-                            const [moduleData, modTotal, modSolved] = await Promise.all([
-                                prisma.module.findUnique({
-                                    where: { id: moduleId },
-                                    select: { title: true, slug: true },
-                                }),
-                                prisma.problem.count({
-                                    where: { topic: { moduleId } },
-                                }),
-                                prisma.problemProgress.count({
-                                    where: {
-                                        userId,
-                                        status: 'solved',
-                                        problem: { topic: { moduleId } },
-                                    },
-                                }),
-                            ]);
-
-                            if (modTotal > 0 && modSolved === modTotal) {
-                                await progressProducer.moduleMastered({
-                                    userId,
-                                    moduleSlug: moduleData?.slug || moduleId,
-                                    moduleTitle: moduleData?.title || 'Module',
-                                });
-                            }
-                        }
-                    } catch (notifErr) {
-                        logger.error('Failed to publish problem/module completion MQ events', { error: notifErr, userId });
+                    } catch (mqErr) {
+                        logger.error('Failed to publish problem solved MQ event', { error: mqErr, userId, problemId });
                     }
                 })();
             } else if (isTransitioningFromSolved) {

@@ -207,6 +207,22 @@ export const messageRegistry = {
         module: z.string().optional(),
         unsolvedAt: z.string().optional(),
     }),
+    'progress.topic.completed': z.object({
+        correlationId,
+        userId: z.string(),
+        topicId: z.string(),
+        topicTitle: z.string(),
+        topicSlug: z.string(),
+        moduleTitle: z.string().optional(),
+    }),
+    'progress.tag.completed': z.object({
+        correlationId,
+        userId: z.string(),
+        tagId: z.string(),
+        tagName: z.string(),
+        tagSlug: z.string(),
+        moduleTitle: z.string().optional(),
+    }),
     'progress.module.mastered': z.object({
         correlationId,
         userId: z.string(),
@@ -240,6 +256,12 @@ export const messageRegistry = {
         followerName: z.string(),
         followerUsername: z.string().nullable().optional(),
         followerImage: z.string().nullable().optional(),
+        followingId: z.string(),
+    }),
+    'social.user.unfollowed': z.object({
+        correlationId,
+        followerId: z.string(),
+        followerName: z.string().optional(),
         followingId: z.string(),
     }),
     'social.profile.viewed': z.object({

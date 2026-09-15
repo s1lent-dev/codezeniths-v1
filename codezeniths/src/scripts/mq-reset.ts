@@ -47,6 +47,9 @@ const QUEUES_TO_DELETE: string[] = [
     'q.payment.subscription.expired',
     // ── Progress ─────────────────────────────────────────────────────
     'q.progress.problem_solved',
+    'q.progress.problem_unsolved',
+    'q.progress.topic_completed',
+    'q.progress.tag_completed',
     'q.progress.module_mastered',
     'q.progress.streak_milestone',
     'q.progress.weekly_digest',
@@ -54,6 +57,7 @@ const QUEUES_TO_DELETE: string[] = [
     'q.progress.event_generic',
     // ── Social ───────────────────────────────────────────────────────
     'q.social.user_followed',
+    'q.social.user_unfollowed',
     'q.social.profile_viewed',
     'q.social.playlist_interacted',
     // ── Notification ─────────────────────────────────────────────────

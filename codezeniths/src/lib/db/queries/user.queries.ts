@@ -597,6 +597,25 @@ export class UserQueries implements IUserQueries {
                 },
             });
 
+            // Dispatch user_unfollowed event to Social MQ Producer
+            if (followerId !== followingId) {
+                void (async () => {
+                    try {
+                        const follower = await prisma.user.findUnique({
+                            where: { id: followerId },
+                            select: { name: true },
+                        });
+                        await socialProducer.userUnfollowed({
+                            followerId,
+                            followerName: follower?.name,
+                            followingId,
+                        });
+                    } catch (notifErr) {
+                        logger.error('Failed to dispatch user_unfollowed MQ event', { error: notifErr, followingId });
+                    }
+                })();
+            }
+
             const [followerCount, followingCount] = await Promise.all([
                 prisma.userFollow.count({ where: { followingId } }),
                 prisma.userFollow.count({ where: { followerId: followingId } }),

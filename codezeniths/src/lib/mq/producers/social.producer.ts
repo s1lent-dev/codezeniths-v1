@@ -13,6 +13,11 @@ export class SocialProducer {
         routingKey: MqRoutingKey.SOCIAL_USER_FOLLOWED,
     });
 
+    private readonly userUnfollowedProducer = createProducer('social.user.unfollowed', {
+        exchange: MqExchange.SOCIAL,
+        routingKey: MqRoutingKey.SOCIAL_USER_UNFOLLOWED,
+    });
+
     private readonly profileViewedProducer = createProducer('social.profile.viewed', {
         exchange: MqExchange.SOCIAL,
         routingKey: MqRoutingKey.SOCIAL_PROFILE_VIEWED,
@@ -28,6 +33,13 @@ export class SocialProducer {
      */
     async userFollowed(payload: PayloadOf<'social.user.followed'>): Promise<void> {
         await this.userFollowedProducer.publish(payload);
+    }
+
+    /**
+     * Publishes a user-unfollowed event.
+     */
+    async userUnfollowed(payload: PayloadOf<'social.user.unfollowed'>): Promise<void> {
+        await this.userUnfollowedProducer.publish(payload);
     }
 
     /**

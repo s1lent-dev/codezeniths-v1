@@ -44,6 +44,9 @@ export function useProblemActionManager() {
                 problemId,
                 status: nextStatus,
             });
+            if (nextStatus === 'solved') {
+                toast.success('Problem Solved', 'This problem is successfully solved.');
+            }
         } catch (error: any) {
             toast.error('Failed to update problem status', error?.message || 'Could not update status.');
         } finally {

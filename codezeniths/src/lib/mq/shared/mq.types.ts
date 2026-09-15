@@ -117,6 +117,8 @@ export const MqQueue = {
     // ── Progress Queues ───────────────────────────────────────────
     PROGRESS_PROBLEM_SOLVED:        'q.progress.problem_solved',
     PROGRESS_PROBLEM_UNSOLVED:      'q.progress.problem_unsolved',
+    PROGRESS_TOPIC_COMPLETED:       'q.progress.topic_completed',
+    PROGRESS_TAG_COMPLETED:         'q.progress.tag_completed',
     PROGRESS_MODULE_MASTERED:       'q.progress.module_mastered',
     PROGRESS_STREAK_MILESTONE:      'q.progress.streak_milestone',
     PROGRESS_WEEKLY_DIGEST:         'q.progress.weekly_digest',
@@ -124,6 +126,7 @@ export const MqQueue = {
 
     // ── Social Queues ─────────────────────────────────────────────
     SOCIAL_USER_FOLLOWED:           'q.social.user_followed',
+    SOCIAL_USER_UNFOLLOWED:         'q.social.user_unfollowed',
     SOCIAL_PROFILE_VIEWED:          'q.social.profile_viewed',
     SOCIAL_PLAYLIST_INTERACTED:     'q.social.playlist_interacted',
 
@@ -185,6 +188,8 @@ export const MqRoutingKey = {
     // ── Progress Routing Keys ─────────────────────────────────────
     PROGRESS_PROBLEM_SOLVED:        'progress.problem.solved',
     PROGRESS_PROBLEM_UNSOLVED:      'progress.problem.unsolved',
+    PROGRESS_TOPIC_COMPLETED:       'progress.topic.completed',
+    PROGRESS_TAG_COMPLETED:         'progress.tag.completed',
     PROGRESS_MODULE_MASTERED:       'progress.module.mastered',
     PROGRESS_STREAK_MILESTONE:      'progress.streak.milestone',
     PROGRESS_WEEKLY_DIGEST:         'progress.weekly.digest',
@@ -192,6 +197,7 @@ export const MqRoutingKey = {
 
     // ── Social Routing Keys ───────────────────────────────────────
     SOCIAL_USER_FOLLOWED:           'social.user.followed',
+    SOCIAL_USER_UNFOLLOWED:         'social.user.unfollowed',
     SOCIAL_PROFILE_VIEWED:          'social.profile.viewed',
     SOCIAL_PLAYLIST_INTERACTED:     'social.playlist.interacted',
 

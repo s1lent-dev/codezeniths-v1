@@ -11,7 +11,13 @@ export enum FcmTemplate {
   NEW_DEVICE = 'new_device',
   STREAK_REMINDER = 'streak_reminder',
   PROBLEM_SOLVED = 'problem_solved',
+  TOPIC_COMPLETED = 'topic_completed',
+  TAG_COMPLETED = 'tag_completed',
   MODULE_MASTERED = 'module_mastered',
+  RANK_PROMOTED = 'rank_promoted',
+  USER_FOLLOWED = 'user_followed',
+  PROFILE_VIEWED = 'profile_viewed',
+  PLAYLIST_INTERACTED = 'playlist_interacted',
   NEW_CONTENT = 'new_content',
   PAYMENT_SUCCESS = 'payment_success',
   PAYMENT_FAILED = 'payment_failed',
@@ -98,12 +104,58 @@ export const fcmTemplateRegistry = {
     title: 'Problem Solved! 🎉',
     body: 'Congratulations! You solved: "{{problemName}}". Keep up the amazing work!',
   },
+  [FcmTemplate.TOPIC_COMPLETED]: {
+    schema: z.object({
+      topicTitle: z.string(),
+      moduleTitle: z.string().optional(),
+    }),
+    title: 'Topic Completed! 🚀',
+    body: 'Congratulations! You solved all problems in "{{topicTitle}}".',
+  },
+  [FcmTemplate.TAG_COMPLETED]: {
+    schema: z.object({
+      tagName: z.string(),
+    }),
+    title: 'Tag Mastered! 🏷️',
+    body: 'Awesome job! You solved all problems in #{{tagName}}.',
+  },
   [FcmTemplate.MODULE_MASTERED]: {
     schema: z.object({
       moduleName: z.string(),
     }),
     title: 'Module Mastered! 🏆',
     body: 'Outstanding! You have mastered the entire {{moduleName}} module.',
+  },
+  [FcmTemplate.RANK_PROMOTED]: {
+    schema: z.object({
+      newRank: z.string(),
+      division: z.string().optional(),
+    }),
+    title: 'Rank Promotion! 🎖️',
+    body: 'Congratulations! You were promoted to {{newRank}}.',
+  },
+  [FcmTemplate.USER_FOLLOWED]: {
+    schema: z.object({
+      followerName: z.string(),
+    }),
+    title: 'New Follower! 👤',
+    body: '{{followerName}} started following you.',
+  },
+  [FcmTemplate.PROFILE_VIEWED]: {
+    schema: z.object({
+      viewerName: z.string(),
+    }),
+    title: 'Profile Viewed 👀',
+    body: '{{viewerName}} viewed your developer profile.',
+  },
+  [FcmTemplate.PLAYLIST_INTERACTED]: {
+    schema: z.object({
+      actorName: z.string(),
+      playlistTitle: z.string(),
+      action: z.string(),
+    }),
+    title: 'Playlist Activity 📚',
+    body: '{{actorName}} {{action}} your playlist "{{playlistTitle}}".',
   },
   [FcmTemplate.NEW_CONTENT]: {
     schema: z.object({

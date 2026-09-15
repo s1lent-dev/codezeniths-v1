@@ -18,6 +18,16 @@ export class ProgressProducer {
         routingKey: MqRoutingKey.PROGRESS_PROBLEM_UNSOLVED,
     });
 
+    private readonly topicCompletedProducer = createProducer('progress.topic.completed', {
+        exchange: MqExchange.PROGRESS,
+        routingKey: MqRoutingKey.PROGRESS_TOPIC_COMPLETED,
+    });
+
+    private readonly tagCompletedProducer = createProducer('progress.tag.completed', {
+        exchange: MqExchange.PROGRESS,
+        routingKey: MqRoutingKey.PROGRESS_TAG_COMPLETED,
+    });
+
     private readonly moduleMasteredProducer = createProducer('progress.module.mastered', {
         exchange: MqExchange.PROGRESS,
         routingKey: MqRoutingKey.PROGRESS_MODULE_MASTERED,
@@ -50,6 +60,20 @@ export class ProgressProducer {
      */
     async problemUnsolved(payload: PayloadOf<'progress.problem.unsolved'>): Promise<void> {
         await this.problemUnsolvedProducer.publish(payload);
+    }
+
+    /**
+     * Publishes a topic-completed event.
+     */
+    async topicCompleted(payload: PayloadOf<'progress.topic.completed'>): Promise<void> {
+        await this.topicCompletedProducer.publish(payload);
+    }
+
+    /**
+     * Publishes a tag-completed event.
+     */
+    async tagCompleted(payload: PayloadOf<'progress.tag.completed'>): Promise<void> {
+        await this.tagCompletedProducer.publish(payload);
     }
 
     /**
