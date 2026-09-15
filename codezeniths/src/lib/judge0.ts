@@ -20,6 +20,8 @@ export interface Judge0Result {
   memory: number | null;
 }
 
+
+
 export async function submitBatch(submissions: Judge0Submission[]): Promise<string[]> {
   const res = await fetch(`${JUDGE0_URL}/submissions/batch?base64_encoded=false`, {
     method: 'POST',

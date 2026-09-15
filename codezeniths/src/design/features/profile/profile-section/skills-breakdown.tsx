@@ -75,19 +75,14 @@ const SkillCategorySection: React.FC<SkillCategorySectionProps> = ({
     if (tags.length === 0) {
         return (
             <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className={cn('size-2 rounded-full shrink-0', indicatorColorClass)} />
-                        <Typography className="text-xs font-semibold text-body-light dark:text-body-dark">
-                            {title}
-                        </Typography>
-                    </div>
-                    <span className="text-[11px] text-muted-light/70 dark:text-muted-dark/70">
-                        0 tags
-                    </span>
+                <div className="flex items-center gap-2">
+                    <span className={cn('size-2 rounded-full shrink-0', indicatorColorClass)} />
+                    <Typography className="text-xs font-semibold text-body-light dark:text-body-dark">
+                        {title}
+                    </Typography>
                 </div>
                 <div className="text-[11px] text-muted-light/60 dark:text-muted-dark/60 italic pl-4">
-                    No tags available
+                    No problems solved yet
                 </div>
             </div>
         );
@@ -95,28 +90,28 @@ const SkillCategorySection: React.FC<SkillCategorySectionProps> = ({
 
     return (
         <div className="space-y-2.5">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <span className={cn('size-2 rounded-full shrink-0', indicatorColorClass)} />
-                    <Typography className="text-xs font-semibold text-body-light dark:text-body-dark">
-                        {title}
-                    </Typography>
-                </div>
-                <span className="text-[11px] text-muted-light dark:text-muted-dark font-medium">
-                    {tags.length} {tags.length === 1 ? 'tag' : 'tags'}
-                </span>
+            {/* Level Title Header - Clean and Minimalist */}
+            <div className="flex items-center gap-2">
+                <span className={cn('size-2 rounded-full shrink-0', indicatorColorClass)} />
+                <Typography className="text-xs font-semibold text-body-light dark:text-body-dark">
+                    {title}
+                </Typography>
             </div>
 
-            {/* Tag Badges */}
+            {/* Tag Badges with solved count */}
             <div className="flex flex-wrap items-center gap-2">
                 {visibleTags.map((tag) => (
-                    <Link
-                        key={tag.id}
-                        href={`/tags/${tag.slug}`}
-                        className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-foreground-light-shade1/80 dark:bg-foreground-dark-shade1/80 border border-secondary/20 hover:border-secondary/40 text-body-light dark:text-body-dark hover:text-heading-light dark:hover:text-heading-dark transition-colors shrink-0"
-                    >
-                        <span>{tag.name}</span>
-                    </Link>
+                    <div key={tag.id} className="inline-flex items-center gap-1.5 shrink-0">
+                        <Link
+                            href={`/tags/${tag.slug}`}
+                            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-foreground-light-shade1/80 dark:bg-foreground-dark-shade1/80 border border-secondary/20 hover:border-secondary/40 text-body-light dark:text-body-dark hover:text-heading-light dark:hover:text-heading-dark transition-colors"
+                        >
+                            <span>{tag.name}</span>
+                        </Link>
+                        <span className="text-xs font-medium text-muted-light dark:text-muted-dark select-none">
+                            x{tag.solvedCount ?? 0}
+                        </span>
+                    </div>
                 ))}
             </div>
 

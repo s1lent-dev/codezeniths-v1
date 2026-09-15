@@ -476,52 +476,117 @@ export class TagQueries implements ITagQueries {
         .output(GetUserTagProgressByLevelOutputSchema)
         .handler(async (payload) => {
             logger.info('Executing getUserTagProgressByLevel query', { payload });
-            const { moduleSlug, moduleId } = payload;
+            const { userId, moduleSlug, moduleId } = payload;
+
+            if (!userId) {
+                return {
+                    fundamental: [],
+                    intermediate: [],
+                    advanced: [],
+                };
+            }
 
             const isModuleFilter = moduleSlug && moduleSlug !== 'all';
-            const tags = await prisma.tag.findMany({
+
+            // 1. Fetch all problem IDs solved by the target user
+            const solvedProgress = await prisma.problemProgress.findMany({
                 where: {
-                    level: {
-                        in: ['fundamental', 'intermediate', 'advanced'],
-                    },
-                    ...(isModuleFilter
-                        ? { module: { slug: moduleSlug } }
-                        : moduleId
-                        ? { moduleId }
-                        : {}),
+                    userId,
+                    status: 'solved',
                 },
                 select: {
-                    id: true,
-                    name: true,
-                    slug: true,
-                    level: true,
-                    _count: {
-                        select: {
-                            problems: true,
-                        },
-                    },
-                },
-                orderBy: {
-                    name: 'asc',
+                    problemId: true,
                 },
             });
 
-            const processedTags = tags.map((t) => ({
-                id: t.id,
-                name: t.name,
-                slug: t.slug,
-                level: t.level,
-                totalProblems: t._count.problems,
-            }));
+            if (solvedProgress.length === 0) {
+                return {
+                    fundamental: [],
+                    intermediate: [],
+                    advanced: [],
+                };
+            }
 
-            const fundamental = processedTags.filter((t) => t.level === 'fundamental');
-            const intermediate = processedTags.filter((t) => t.level === 'intermediate');
-            const advanced = processedTags.filter((t) => t.level === 'advanced');
+            const solvedProblemIds = Array.from(new Set(solvedProgress.map((p) => p.problemId)));
+
+            // 2. Fetch tags associated with the solved problems matching level & module filter
+            const problemTags = await prisma.problemTag.findMany({
+                where: {
+                    problemId: { in: solvedProblemIds },
+                    tag: {
+                        level: {
+                            in: ['fundamental', 'intermediate', 'advanced'],
+                        },
+                        ...(isModuleFilter
+                            ? { module: { slug: moduleSlug } }
+                            : moduleId
+                            ? { moduleId }
+                            : {}),
+                    },
+                },
+                select: {
+                    problemId: true,
+                    tag: {
+                        select: {
+                            id: true,
+                            name: true,
+                            slug: true,
+                            level: true,
+                            _count: {
+                                select: {
+                                    problems: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            // 3. Count unique solved problems per tag
+            const tagSolvedMap = new Map<
+                string,
+                {
+                    id: string;
+                    name: string;
+                    slug: string;
+                    level: 'fundamental' | 'intermediate' | 'advanced';
+                    totalProblems: number;
+                    solvedCount: number;
+                }
+            >();
+
+            for (const pt of problemTags) {
+                const tag = pt.tag;
+                if (!tag || !tag.level) continue;
+
+                const existing = tagSolvedMap.get(tag.id);
+                if (existing) {
+                    existing.solvedCount += 1;
+                } else {
+                    tagSolvedMap.set(tag.id, {
+                        id: tag.id,
+                        name: tag.name,
+                        slug: tag.slug,
+                        level: tag.level as 'fundamental' | 'intermediate' | 'advanced',
+                        totalProblems: tag._count.problems,
+                        solvedCount: 1,
+                    });
+                }
+            }
+
+            const allTags = Array.from(tagSolvedMap.values());
+
+            // 4. Group by level, sort by solvedCount DESC then name ASC, and take top 10 per level
+            const getTop10 = (lvl: 'fundamental' | 'intermediate' | 'advanced') =>
+                allTags
+                    .filter((t) => t.level === lvl)
+                    .sort((a, b) => b.solvedCount - a.solvedCount || a.name.localeCompare(b.name))
+                    .slice(0, 10);
 
             return {
-                fundamental,
-                intermediate,
-                advanced,
+                fundamental: getTop10('fundamental'),
+                intermediate: getTop10('intermediate'),
+                advanced: getTop10('advanced'),
             };
         })
         .build();

@@ -81,7 +81,7 @@ export function useProfile({ username }: UseProfileOptions = {}) {
             userId: targetUserId,
             moduleSlug: selectedModuleSlug !== 'all' ? selectedModuleSlug : undefined,
         },
-        { enabled: !isRestrictedPrivate }
+        { enabled: !isRestrictedPrivate && Boolean(targetUserId) }
     );
 
     // 9. Recently Solved 10 Problems
