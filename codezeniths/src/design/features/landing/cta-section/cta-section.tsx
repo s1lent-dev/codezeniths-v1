@@ -17,9 +17,23 @@ import { motion } from 'motion/react';
 import Image from 'next/image';
 import RocketIllustration from '@codezeniths/assets/landing/cta/rocket_illustration.png';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth/auth';
 
 export const CtaSection = () => {
     const router = useRouter();
+    const { user, isAuthenticated, isLoading } = useAuth();
+
+    const handleCtaClick = () => {
+        if (!isLoading && isAuthenticated && user) {
+            if (user.isOnboardingComplete === false) {
+                router.push('/complete-profile');
+            } else {
+                router.push('/explore');
+            }
+        } else {
+            router.push('/sign-up');
+        }
+    };
     return (
         <section id="cta" className="py-12 sm:py-16 lg:py-24 relative overflow-hidden scroll-mt-20 sm:scroll-mt-24">
             <Container size="5xl" className="mx-auto px-4 xs:px-6 lg:px-8">
@@ -73,8 +87,8 @@ export const CtaSection = () => {
                                     size={ButtonSize.LG}
                                     variant={ButtonVariant.DEFAULT}
                                     effect={ButtonEffect.GRADIENT_HOVER}
-                                    className="w-full xs:w-auto rounded-full"
-                                    onClick={() => router.push('/sign-up')}
+                                    className="w-full xs:w-auto rounded-full cursor-pointer"
+                                    onClick={handleCtaClick}
                                 >
                                     Sign up free
                                 </Button>

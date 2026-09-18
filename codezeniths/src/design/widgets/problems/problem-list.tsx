@@ -750,7 +750,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                             <TableBody>
                                 {paddingTop > 0 && (
                                     <tr style={{ height: `${paddingTop}px` }} className="border-0 p-0 m-0">
-                                        <td className="w-12 min-w-[48px] max-w-[48px] p-0 border-0" />
+                                        <td className="w-10 sm:w-12 min-w-[40px] sm:min-w-[48px] max-w-[40px] sm:max-w-[48px] p-0 border-0" />
                                         <td className="w-auto p-0 border-0" />
                                         <td className={cn("p-0 border-0", showDirectActions ? "w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]" : "w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]")} />
                                     </tr>
@@ -776,7 +776,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                 })}
                                 {paddingBottom > 0 && (
                                     <tr style={{ height: `${paddingBottom}px` }} className="border-0 p-0 m-0">
-                                        <td className="w-12 min-w-[48px] max-w-[48px] p-0 border-0" />
+                                        <td className="w-10 sm:w-12 min-w-[40px] sm:min-w-[48px] max-w-[40px] sm:max-w-[48px] p-0 border-0" />
                                         <td className="w-auto p-0 border-0" />
                                         <td className={cn("p-0 border-0", showDirectActions ? "w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]" : "w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]")} />
                                     </tr>

@@ -56,7 +56,13 @@ export const ProblemsSection: React.FC<ProblemsSectionProps> = ({
     });
 
     if (isLoading && problems.length === 0) {
-        return <ProblemListSkeleton rowsCount={6} className={className} />;
+        return (
+            <ProblemListSkeleton
+                rowsCount={6}
+                showDirectActions={showDirectActions ?? (pageContext === 'problemset')}
+                className={className}
+            />
+        );
     }
 
     if (isError) {

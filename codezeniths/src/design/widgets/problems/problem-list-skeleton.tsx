@@ -63,52 +63,62 @@ export const ProblemRowSkeleton: React.FC<ProblemRowSkeletonProps> = ({
                         : 'w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]'
                 )}
             >
-                <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+                <div className="flex items-center justify-end gap-1 sm:gap-2">
                     {/* Direct Action: Favourite (Star) Bone */}
                     {showDirectActions && (
-                        <motion.div
-                            animate={{ opacity: [0.35, 0.75, 0.35] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.08 }}
-                            className="size-4 rounded-xs bg-amber-500/20 dark:bg-amber-400/25 shrink-0"
-                        />
+                        <div className="p-1 sm:p-1.5 shrink-0 flex items-center justify-center">
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.08 }}
+                                className="size-3.5 sm:size-4 rounded-xs bg-amber-500/20 dark:bg-amber-400/25 shrink-0"
+                            />
+                        </div>
                     )}
 
                     {/* Direct Action: Bookmark (Revisit) Bone */}
                     {showDirectActions && (
-                        <motion.div
-                            animate={{ opacity: [0.35, 0.75, 0.35] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.1 }}
-                            className="size-4 rounded-xs bg-blue-500/20 dark:bg-blue-400/25 shrink-0"
-                        />
+                        <div className="p-1 sm:p-1.5 shrink-0 flex items-center justify-center">
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.1 }}
+                                className="size-3.5 sm:size-4 rounded-xs bg-blue-500/20 dark:bg-blue-400/25 shrink-0"
+                            />
+                        </div>
                     )}
 
                     {/* External Link Icon Bone */}
-                    <motion.div
-                        animate={{ opacity: [0.35, 0.75, 0.35] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.12 }}
-                        className="hidden xs:block size-4 rounded-xs bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
-                    />
+                    <div className="p-1 shrink-0 flex items-center justify-center">
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.12 }}
+                            className="size-3.5 sm:size-4 rounded-xs bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
+                        />
+                    </div>
 
                     {/* Difficulty Badge Bone */}
-                    <motion.div
-                        animate={{ opacity: [0.35, 0.8, 0.35] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.15 }}
-                        className={cn(
-                            'h-4 rounded-md shrink-0',
-                            index % 3 === 0
-                                ? 'w-10 bg-emerald-500/20 dark:bg-emerald-400/25'
-                                : index % 3 === 1
-                                ? 'w-8 bg-amber-500/20 dark:bg-amber-400/25'
-                                : 'w-10 bg-rose-500/20 dark:bg-rose-400/25'
-                        )}
-                    />
+                    <div className="w-8 xs:w-10 sm:w-12 flex items-center justify-center shrink-0">
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.8, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.15 }}
+                            className={cn(
+                                'h-3.5 sm:h-4 w-full rounded-md shrink-0',
+                                index % 3 === 0
+                                    ? 'bg-emerald-500/20 dark:bg-emerald-400/25'
+                                    : index % 3 === 1
+                                    ? 'bg-amber-500/20 dark:bg-amber-400/25'
+                                    : 'bg-rose-500/20 dark:bg-rose-400/25'
+                            )}
+                        />
+                    </div>
 
                     {/* 3-Dot Menu Button Bone */}
-                    <motion.div
-                        animate={{ opacity: [0.35, 0.75, 0.35] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.2 }}
-                        className="size-6 sm:size-7 rounded-md bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
-                    />
+                    <div className="p-1 sm:p-1.5 shrink-0 flex items-center justify-center">
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.2 }}
+                            className="size-3.5 sm:size-4 rounded-xs bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
+                        />
+                    </div>
                 </div>
             </TableCell>
         </TableRow>

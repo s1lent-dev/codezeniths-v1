@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Container,
   Grid,
@@ -18,8 +19,30 @@ import {
 } from "@codezeniths/components";
 import phoneScene from "@/assets/landing/hero/phone-scene.png";
 import { motion } from "motion/react";
+import { useAuth } from "@/lib/auth/auth";
 
 export const HeroSection = () => {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  const handleGetStarted = () => {
+    if (!isLoading && isAuthenticated && user) {
+      if (user.isOnboardingComplete === false) {
+        router.push('/complete-profile');
+      } else {
+        router.push('/explore');
+      }
+    } else if (!isLoading && !isAuthenticated) {
+      router.push('/sign-in');
+    } else {
+      // Fallback if auth is still resolving
+      if (isAuthenticated) {
+        router.push('/explore');
+      } else {
+        router.push('/sign-in');
+      }
+    }
+  };
   return (
     <section id="hero" className="relative px-4 xs:px-6 sm:px-10 lg:px-16 pt-24 xs:pt-28 lg:pt-32 pb-12 xs:pb-16 lg:pb-24 overflow-hidden scroll-mt-20 sm:scroll-mt-24">
       {/* Light Rays Background Effect */}
@@ -87,6 +110,7 @@ export const HeroSection = () => {
                 size={ButtonSize.LG}
                 variant={ButtonVariant.DEFAULT}
                 effect={ButtonEffect.INTERACTIVE_HOVER}
+                onClick={handleGetStarted}
                 className="w-full xs:w-auto rounded-full bg-background-light-shade2 dark:bg-background-dark-shade2 cursor-pointer"
               >
                 Getting started
