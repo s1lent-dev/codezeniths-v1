@@ -282,7 +282,7 @@ export const useVerifyEmailForm = () => {
             if (updatedUser && !updatedUser.isOnboardingComplete) {
                 router.push('/complete-profile');
             } else if (updatedUser) {
-                router.push('/problemset');
+                router.push('/explore');
             }
         } catch (error: any) {
             toast.error(error.message || 'Invalid verification code.');
@@ -296,7 +296,7 @@ export const useVerifyEmailForm = () => {
             if (user && !user.isOnboardingComplete) {
                 router.push('/complete-profile');
             } else if (user) {
-                router.push('/problemset');
+                router.push('/explore');
             } else {
                 router.push('/sign-in');
             }

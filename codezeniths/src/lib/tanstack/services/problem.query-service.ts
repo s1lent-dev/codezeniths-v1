@@ -19,6 +19,10 @@ import {
     GetProblemProgressTRPCOutputSchema,
     GetRecentlySolvedProblemsTRPCInputSchema,
     GetRecentlySolvedProblemsTRPCOutputSchema,
+    GetRecentlySolvedContextTRPCInputSchema,
+    GetRecentlySolvedContextTRPCOutputSchema,
+    GetTrendingProblemsTRPCInputSchema,
+    GetTrendingProblemsTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { z } from 'zod';
 
@@ -206,6 +210,38 @@ export class ProblemQueryService implements IProblemQueryService {
             ...CACHE_TIERS.USER_PROGRESS,
         });
     }
+
+    getRecentlySolvedContext(
+        input?: { userId?: string },
+        options?: { enabled?: boolean }
+    ) {
+        return useQuery({
+            queryKey: queryKeys.problem.recentlySolvedContext(input?.userId),
+            queryFn: async () => {
+                const validatedInput = GetRecentlySolvedContextTRPCInputSchema.parse(input ?? {});
+                const raw = await trpcClient.problem.getRecentlySolvedContext.query(validatedInput);
+                return GetRecentlySolvedContextTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
+
+    getTrendingProblems(
+        input?: { limit?: number; userId?: string },
+        options?: { enabled?: boolean }
+    ) {
+        return useQuery({
+            queryKey: queryKeys.problem.trending(input?.limit),
+            queryFn: async () => {
+                const validatedInput = GetTrendingProblemsTRPCInputSchema.parse(input ?? {});
+                const raw = await trpcClient.problem.getTrendingProblems.query(validatedInput);
+                return GetTrendingProblemsTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.USER_PROGRESS,
+        });
+    }
 }
 
 export const problemQueryService = new ProblemQueryService();
@@ -343,6 +379,23 @@ export function applyOptimisticProblemUpdate(
                 problems: newProblems,
                 solvedCount: Math.max(0, (oldData.solvedCount ?? 0) + totalDeltaSolved),
             };
+        }
+
+        // 6. Direct Array (Trending Problems list)
+        if (Array.isArray(oldData)) {
+            return oldData.map((item: any) => {
+                if (!item || item.id !== problemId) return item;
+                let nextFavCount = item.favouriteCount ?? 0;
+                if (favourite !== undefined && Boolean(item.isFavourite) !== Boolean(favourite)) {
+                    nextFavCount = favourite ? nextFavCount + 1 : Math.max(0, nextFavCount - 1);
+                }
+                return {
+                    ...item,
+                    ...(status !== undefined && { isSolved: status === 'solved' }),
+                    ...(favourite !== undefined && { isFavourite: favourite }),
+                    favouriteCount: nextFavCount,
+                };
+            });
         }
 
         return oldData;

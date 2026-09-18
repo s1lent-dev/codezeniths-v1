@@ -74,7 +74,7 @@ export const SubscriptionConfirmedEmail: React.FC<SubscriptionConfirmedEmailProp
         </table>
       </EmailCallout>
 
-      <EmailButton href={`${appUrl}/problemset`} isDark={isDark} variant="primary">
+      <EmailButton href={`${appUrl}/explore`} isDark={isDark} variant="primary">
         Explore Premium Content
       </EmailButton>
     </EmailLayout>

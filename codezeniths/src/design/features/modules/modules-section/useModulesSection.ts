@@ -58,9 +58,21 @@ export function useModulesSection() {
 
     const { data: rawModules, isLoading: isLoadingModules, isError, error } = moduleQueryService.getModules();
     const { data: streakData, isLoading: isLoadingStreak } = userQueryService.getUserStreak();
-    const { data: recentModuleData, isLoading: isLoadingRecent } = moduleQueryService.getRecentlySolvedModule();
+    const { data: recentlySolvedContext, isLoading: isLoadingRecent } = problemQueryService.getRecentlySolvedContext();
     const { data: problemProgress, isLoading: isLoadingProgress } = problemQueryService.getProblemProgress();
     const { data: modulesWithTopics, isLoading: isLoadingWithTopics } = moduleQueryService.getModulesWithTopics();
+
+    const recentModuleData = recentlySolvedContext?.module
+        ? {
+              module: recentlySolvedContext.module,
+              lastProblem: recentlySolvedContext.problem
+                  ? {
+                        title: recentlySolvedContext.problem.title,
+                        slug: recentlySolvedContext.problem.slug,
+                    }
+                  : null,
+          }
+        : null;
 
     const hasRecentModule = Boolean(recentModuleData?.module);
     const { data: featuredModuleData, isLoading: isLoadingFeatured } = moduleQueryService.getSingleModule(

@@ -43,6 +43,7 @@ export interface ProblemRowProps extends React.HTMLAttributes<HTMLTableRowElemen
     isRevisit?: boolean;
     isFavourite?: boolean;
     isBusy?: boolean;
+    showDirectActions?: boolean;
     onToggleSolved?: (problemId: string, currentSolved: boolean) => void;
     onToggleRevisit?: (problemId: string, currentRevisit: boolean) => void;
     onToggleFavourite?: (problemId: string, currentFavourite: boolean) => void;
@@ -59,6 +60,7 @@ const ProblemRowComponent = React.forwardRef<HTMLTableRowElement, ProblemRowProp
             isRevisit = Boolean(problem.revisit),
             isFavourite = Boolean(problem.favourite),
             isBusy = false,
+            showDirectActions = false,
             onToggleSolved,
             onToggleRevisit,
             onToggleFavourite,
@@ -115,9 +117,78 @@ const ProblemRowComponent = React.forwardRef<HTMLTableRowElement, ProblemRowProp
                         </Link>
                     </TableCell>
 
-                    {/* 3. Right Actions (External Link, Difficulty, 3-Dot Actions Dropdown) Column */}
-                    <TableCell className="w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px] pr-2 sm:pr-4 py-2.5 sm:py-3 text-right align-middle rounded-r-md border-0">
-                        <div className="flex items-center justify-end gap-1.5 xs:gap-2.5">
+                    {/* 3. Right Actions Column */}
+                    <TableCell
+                        className={cn(
+                            'pr-2 sm:pr-4 py-2.5 sm:py-3 text-right align-middle rounded-r-md border-0',
+                            showDirectActions
+                                ? 'w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]'
+                                : 'w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]'
+                        )}
+                    >
+                        <div className="flex items-center justify-end gap-1 sm:gap-2">
+                            {/* Direct Action: Favourite (Star) when showDirectActions is true */}
+                            {showDirectActions && (
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <button
+                                            type="button"
+                                            disabled={isBusy}
+                                            onClick={() => {
+                                                if (!isBusy) onToggleFavourite?.(problem.id, isFavourite);
+                                            }}
+                                            className={cn(
+                                                'p-1 sm:p-1.5 rounded-md text-muted-light dark:text-muted-dark hover:text-amber-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 transition-colors cursor-pointer shrink-0',
+                                                isFavourite && 'text-amber-500',
+                                                isBusy && 'opacity-50 cursor-not-allowed pointer-events-none'
+                                            )}
+                                            aria-label={isFavourite ? 'Remove from Favourites' : 'Add to Favourites'}
+                                        >
+                                            <Star
+                                                className={cn(
+                                                    'size-3.5 sm:size-4 transition-transform group-hover:scale-105',
+                                                    isFavourite ? 'fill-amber-400 text-amber-400' : 'text-muted-light dark:text-muted-dark'
+                                                )}
+                                            />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="text-xs">
+                                        {isFavourite ? 'Remove from Favourites' : 'Add to Favourites'}
+                                    </TooltipContent>
+                                </Tooltip>
+                            )}
+
+                            {/* Direct Action: Bookmark (Revisit) when showDirectActions is true */}
+                            {showDirectActions && (
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <button
+                                            type="button"
+                                            disabled={isBusy}
+                                            onClick={() => {
+                                                if (!isBusy) onToggleRevisit?.(problem.id, isRevisit);
+                                            }}
+                                            className={cn(
+                                                'p-1 sm:p-1.5 rounded-md text-muted-light dark:text-muted-dark hover:text-blue-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 transition-colors cursor-pointer shrink-0',
+                                                isRevisit && 'text-blue-500',
+                                                isBusy && 'opacity-50 cursor-not-allowed pointer-events-none'
+                                            )}
+                                            aria-label={isRevisit ? 'Remove from Revisit' : 'Mark for Revisit'}
+                                        >
+                                            <Bookmark
+                                                className={cn(
+                                                    'size-3.5 sm:size-4 transition-transform group-hover:scale-105',
+                                                    isRevisit ? 'fill-blue-500 text-blue-500' : 'text-muted-light dark:text-muted-dark'
+                                                )}
+                                            />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="text-xs">
+                                        {isRevisit ? 'Remove from Revisit' : 'Mark for Revisit'}
+                                    </TooltipContent>
+                                </Tooltip>
+                            )}
+
                             {/* External Link (Visible across all screens) */}
                             {problem.problemUrl || problem.articleUrl ? (
                                 <Tooltip>
@@ -203,49 +274,51 @@ const ProblemRowComponent = React.forwardRef<HTMLTableRowElement, ProblemRowProp
                                         <span>Problem Notes</span>
                                     </DropdownMenuItem>
 
-                                    <DropdownMenuSeparator className="my-1 bg-foreground-light-shade3 dark:bg-foreground-dark-shade1 h-px" />
+                                    {/* Toggle Favourite in 3-dots menu only if NOT direct actions */}
+                                    {!showDirectActions && (
+                                        <>
+                                            <DropdownMenuSeparator className="my-1 bg-foreground-light-shade3 dark:border-foreground-dark-shade1 h-px" />
+                                            <DropdownMenuItem
+                                                disabled={isBusy}
+                                                onSelect={(e) => {
+                                                    e.preventDefault();
+                                                    if (!isBusy) onToggleFavourite?.(problem.id, isFavourite);
+                                                }}
+                                                className={cn(
+                                                    'flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-amber-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none',
+                                                    isBusy && 'opacity-50 pointer-events-none cursor-not-allowed'
+                                                )}
+                                            >
+                                                <Star
+                                                    className={cn(
+                                                        'size-3.5 shrink-0',
+                                                        isFavourite ? 'fill-amber-400 text-amber-400' : 'text-muted-light dark:text-muted-dark'
+                                                    )}
+                                                />
+                                                <span>{isFavourite ? 'Remove from Favourites' : 'Add to Favourites'}</span>
+                                            </DropdownMenuItem>
 
-                                    {/* Toggle Favourite */}
-                                    <DropdownMenuItem
-                                        disabled={isBusy}
-                                        onSelect={(e) => {
-                                            e.preventDefault();
-                                            if (!isBusy) onToggleFavourite?.(problem.id, isFavourite);
-                                        }}
-                                        className={cn(
-                                            'flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-amber-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none',
-                                            isBusy && 'opacity-50 pointer-events-none cursor-not-allowed'
-                                        )}
-                                    >
-                                        <Star
-                                            className={cn(
-                                                'size-3.5 shrink-0',
-                                                isFavourite ? 'fill-amber-400 text-amber-400' : 'text-muted-light dark:text-muted-dark'
-                                            )}
-                                        />
-                                        <span>{isFavourite ? 'Remove from Favourites' : 'Add to Favourites'}</span>
-                                    </DropdownMenuItem>
-
-                                    {/* Toggle Revisit */}
-                                    <DropdownMenuItem
-                                        disabled={isBusy}
-                                        onSelect={(e) => {
-                                            e.preventDefault();
-                                            if (!isBusy) onToggleRevisit?.(problem.id, isRevisit);
-                                        }}
-                                        className={cn(
-                                            'flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-blue-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none',
-                                            isBusy && 'opacity-50 pointer-events-none cursor-not-allowed'
-                                        )}
-                                    >
-                                        <Bookmark
-                                            className={cn(
-                                                'size-3.5 shrink-0',
-                                                isRevisit ? 'fill-blue-500 text-blue-500' : 'text-muted-light dark:text-muted-dark'
-                                            )}
-                                        />
-                                        <span>{isRevisit ? 'Remove from Revisit' : 'Mark for Revisit'}</span>
-                                    </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                disabled={isBusy}
+                                                onSelect={(e) => {
+                                                    e.preventDefault();
+                                                    if (!isBusy) onToggleRevisit?.(problem.id, isRevisit);
+                                                }}
+                                                className={cn(
+                                                    'flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-xs font-medium text-body-light-shade3 dark:text-body-dark hover:text-blue-500 hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2 cursor-pointer transition-colors outline-none select-none',
+                                                    isBusy && 'opacity-50 pointer-events-none cursor-not-allowed'
+                                                )}
+                                            >
+                                                <Bookmark
+                                                    className={cn(
+                                                        'size-3.5 shrink-0',
+                                                        isRevisit ? 'fill-blue-500 text-blue-500' : 'text-muted-light dark:text-muted-dark'
+                                                    )}
+                                                />
+                                                <span>{isRevisit ? 'Remove from Revisit' : 'Mark for Revisit'}</span>
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
 
                                     <DropdownMenuSeparator className="my-1 bg-foreground-light-shade3 dark:bg-foreground-dark-shade1 h-px" />
 

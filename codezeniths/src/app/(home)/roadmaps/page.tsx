@@ -38,8 +38,8 @@ export default function RoadmapsPage() {
                     'Milestone Progress Tracking',
                     'Interactive Skill Trees',
                 ]}
-                buttonText="Explore Problemset"
-                buttonHref="/problemset"
+                buttonText="Explore"
+                buttonHref="/explore"
             />
         </Suspense>
     );

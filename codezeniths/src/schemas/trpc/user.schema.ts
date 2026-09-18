@@ -11,6 +11,7 @@ import {
     LearningStyleSchema,
     GenderSchema,
     ProfileVisibilitySchema,
+    GetUserBookmarksOutputSchema,
 } from '@codezeniths/schemas/db';
 
 
@@ -252,6 +253,10 @@ export const UserMonthlyActivityItemSchema = z.object({
     date: z.string(),
     count: z.number().int(),
     solved: z.boolean(),
+    pointsEarned: z.number().int().default(0),
+    checkedIn: z.boolean().default(false),
+    wasFreezed: z.boolean().default(false),
+    hasRecord: z.boolean().default(false),
 });
 
 export const GetUserMonthlyActivityOutputSchema = z.object({
@@ -554,4 +559,12 @@ export const UpdateUserPreferencesInputSchema = z.object({
 });
 
 export const UpdateUserPreferencesOutputSchema = UserPreferenceSchema;
+
+// ─── getUserBookmarks ─────────────────────────────────────────────────────────
+
+export const GetUserBookmarksTRPCInputSchema = z.object({
+    userId: z.string().uuid().optional(),
+}).optional();
+
+export const GetUserBookmarksTRPCOutputSchema = GetUserBookmarksOutputSchema;
 

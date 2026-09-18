@@ -5,7 +5,6 @@ import {
     GetSingleModuleTRPCOutputSchema,
     GetSingleModuleProgressTRPCInputSchema,
     GetSingleModuleProgressTRPCOutputSchema,
-    GetRecentlySolvedModuleTRPCOutputSchema,
     GetModulesWithTopicsTRPCInputSchema,
     GetModulesWithTopicsTRPCOutputSchema,
     ToggleModuleBookmarkTRPCInputSchema,
@@ -29,10 +28,6 @@ export interface IModuleController {
         ctx: TRPCContext;
         input: z.infer<typeof GetSingleModuleProgressTRPCInputSchema>;
     }): Promise<z.infer<typeof GetSingleModuleProgressTRPCOutputSchema>>;
-
-    getRecentlySolvedModule(args: {
-        ctx: TRPCContext;
-    }): Promise<z.infer<typeof GetRecentlySolvedModuleTRPCOutputSchema>>;
 
     getModulesWithTopics(args: {
         ctx: TRPCContext;

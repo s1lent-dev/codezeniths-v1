@@ -29,6 +29,10 @@ import {
     GetProblemProgressOutputSchema,
     GetRecentlySolvedProblemsInputSchema,
     GetRecentlySolvedProblemsOutputSchema,
+    GetRecentlySolvedContextInputSchema,
+    GetRecentlySolvedContextOutputSchema,
+    GetTrendingProblemsInputSchema,
+    GetTrendingProblemsOutputSchema,
 } from '@codezeniths/schemas/db';
 import { IProblemQueries } from './interfaces/problem.queries.interface';
 import { Prisma } from '@prisma/client';
@@ -866,6 +870,256 @@ export class ProblemQueries implements IProblemQueries {
                     slug: p.problem.slug,
                     solvedAt: p.solvedAt,
                 }));
+        })
+        .build();
+
+    getRecentlySolvedContext = qRPC()
+        .input(GetRecentlySolvedContextInputSchema)
+        .output(GetRecentlySolvedContextOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing getRecentlySolvedContext query', { payload });
+            const { userId } = payload;
+
+            const latestProgress = await prisma.problemProgress.findFirst({
+                where: { userId, status: 'solved' },
+                orderBy: [
+                    { solvedAt: 'desc' },
+                    { updatedAt: 'desc' },
+                ],
+                select: {
+                    solvedAt: true,
+                    problem: {
+                        select: {
+                            id: true,
+                            title: true,
+                            slug: true,
+                            difficulty: true,
+                            tags: {
+                                select: {
+                                    tag: {
+                                        select: {
+                                            id: true,
+                                            name: true,
+                                            slug: true,
+                                        },
+                                    },
+                                },
+                            },
+                            topic: {
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    slug: true,
+                                    description: true,
+                                    level: true,
+                                    problems: {
+                                        select: { id: true },
+                                    },
+                                    module: {
+                                        select: {
+                                            id: true,
+                                            title: true,
+                                            slug: true,
+                                            description: true,
+                                            topics: {
+                                                select: {
+                                                    problems: {
+                                                        select: { id: true },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            if (!latestProgress || !latestProgress.problem) {
+                return {
+                    problem: null,
+                    module: null,
+                    topic: null,
+                    tags: [],
+                };
+            }
+
+            const problem = latestProgress.problem;
+            const topic = problem.topic;
+            const module = topic?.module;
+
+            // 1. Compute module stats if module exists
+            let moduleResult = null;
+            if (module) {
+                const allModuleProblemIds = module.topics.flatMap((t) => t.problems.map((p) => p.id));
+                const problemsCount = allModuleProblemIds.length;
+
+                const moduleSolvedCount = await prisma.problemProgress.count({
+                    where: {
+                        userId,
+                        problemId: { in: allModuleProblemIds },
+                        status: 'solved',
+                    },
+                });
+
+                const problemsSolvedPercentage =
+                    problemsCount > 0 ? parseFloat(((moduleSolvedCount / problemsCount) * 100).toFixed(2)) : 0;
+
+                moduleResult = {
+                    id: module.id,
+                    title: module.title,
+                    slug: module.slug,
+                    description: module.description,
+                    problemsCount,
+                    problemsSolvedCount: moduleSolvedCount,
+                    problemsSolvedPercentage,
+                };
+            }
+
+            // 2. Compute topic stats if topic exists
+            let topicResult = null;
+            if (topic) {
+                const topicProblemIds = topic.problems.map((p) => p.id);
+                const topicProblemsCount = topicProblemIds.length;
+
+                const topicSolvedCount = await prisma.problemProgress.count({
+                    where: {
+                        userId,
+                        problemId: { in: topicProblemIds },
+                        status: 'solved',
+                    },
+                });
+
+                const topicSolvedPercentage =
+                    topicProblemsCount > 0 ? parseFloat(((topicSolvedCount / topicProblemsCount) * 100).toFixed(2)) : 0;
+
+                topicResult = {
+                    id: topic.id,
+                    title: topic.title,
+                    slug: topic.slug,
+                    description: topic.description,
+                    level: topic.level,
+                    problemsCount: topicProblemsCount,
+                    problemsSolvedCount: topicSolvedCount,
+                    problemsSolvedPercentage: topicSolvedPercentage,
+                };
+            }
+
+            // 3. Extract tags
+            const tagsResult = (problem.tags || []).map((pt) => ({
+                id: pt.tag.id,
+                name: pt.tag.name,
+                slug: pt.tag.slug,
+            }));
+
+            return {
+                problem: {
+                    id: problem.id,
+                    title: problem.title,
+                    slug: problem.slug,
+                    difficulty: problem.difficulty,
+                    solvedAt: latestProgress.solvedAt,
+                },
+                module: moduleResult,
+                topic: topicResult,
+                tags: tagsResult,
+            };
+        })
+        .build();
+
+    getTrendingProblems = qRPC()
+        .input(GetTrendingProblemsInputSchema)
+        .output(GetTrendingProblemsOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing getTrendingProblems query', { payload });
+            const { limit = 10, userId } = payload;
+
+            const problems = await prisma.problem.findMany({
+                take: limit,
+                orderBy: [
+                    { favouriteCount: 'desc' },
+                    { order: 'asc' },
+                    { createdAt: 'asc' },
+                ],
+                include: {
+                    tags: {
+                        include: {
+                            tag: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    slug: true,
+                                },
+                            },
+                        },
+                    },
+                    topic: {
+                        select: {
+                            id: true,
+                            title: true,
+                            slug: true,
+                            module: {
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    slug: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            let progressMap = new Map<string, { status: string; favourite: boolean }>();
+            if (userId) {
+                const progresses = await prisma.problemProgress.findMany({
+                    where: {
+                        userId,
+                        problemId: { in: problems.map((p) => p.id) },
+                    },
+                    select: {
+                        problemId: true,
+                        status: true,
+                        favourite: true,
+                    },
+                });
+                progressMap = new Map(progresses.map((pr) => [pr.problemId, pr]));
+            }
+
+            return problems.map((p) => {
+                const userProgress = progressMap.get(p.id);
+                return {
+                    id: p.id,
+                    title: p.title,
+                    slug: p.slug,
+                    difficulty: p.difficulty,
+                    favouriteCount: p.favouriteCount ?? 0,
+                    order: p.order ?? 0,
+                    tags: p.tags.map((t) => ({
+                        id: t.tag.id,
+                        name: t.tag.name,
+                        slug: t.tag.slug,
+                    })),
+                    topic: p.topic
+                        ? {
+                              id: p.topic.id,
+                              title: p.topic.title,
+                              slug: p.topic.slug,
+                          }
+                        : null,
+                    module: p.topic?.module
+                        ? {
+                              id: p.topic.module.id,
+                              title: p.topic.module.title,
+                              slug: p.topic.module.slug,
+                          }
+                        : null,
+                    isSolved: userProgress?.status === 'solved',
+                    isFavourite: userProgress?.favourite ?? false,
+                };
+            });
         })
         .build();
 }

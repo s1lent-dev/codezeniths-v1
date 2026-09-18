@@ -53,7 +53,7 @@ export const ContactConfirmationEmail: React.FC<ContactConfirmationEmailProps> =
         </p>
       </EmailCallout>
 
-      <EmailButton href={`${appUrl}/problemset`} isDark={isDark} variant="primary">
+      <EmailButton href={`${appUrl}/explore`} isDark={isDark} variant="primary">
         Explore CodeZeniths Platform
       </EmailButton>
 

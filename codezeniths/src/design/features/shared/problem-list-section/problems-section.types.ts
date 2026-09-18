@@ -1,7 +1,7 @@
 import { ProblemFilterInput, ProblemSortingInput } from '@codezeniths/schemas/db/queries/shared/problem-filter.schema';
 import { ProblemItem } from '@codezeniths/widgets';
 
-export type PageContext = 'problemset' | 'tags' | 'favourites' | 'topic' | 'playlist';
+export type PageContext = 'problemset' | 'explore' | 'tags' | 'favourites' | 'topic' | 'playlist';
 export type ViewMode = 'infinite' | 'paginated';
 
 export interface ProblemsSectionProps {
@@ -10,6 +10,7 @@ export interface ProblemsSectionProps {
     fixedTopicSlug?: string;
     fixedTagSlug?: string;
     fixedPlaylistSlug?: string;
+    showDirectActions?: boolean;
     className?: string;
 }
 

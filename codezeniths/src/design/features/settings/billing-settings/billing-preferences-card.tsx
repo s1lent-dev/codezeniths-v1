@@ -19,6 +19,7 @@ import {
     Sliders,
     Check,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { PaymentTimingModel } from './useBillingSettings';
 
 interface BillingPreferencesCardProps {
@@ -126,53 +127,119 @@ export const BillingPreferencesCard: React.FC<BillingPreferencesCardProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 animate-pulse">
-                {/* Section Header Skeleton */}
-                <div className="flex items-center gap-3">
-                    <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
-                    <div className="space-y-2 flex-1">
-                        <div className="h-4.5 w-64 rounded bg-secondary/20" />
-                        <div className="h-3 w-80 xs:w-96 rounded bg-secondary/15" />
-                    </div>
-                </div>
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 relative overflow-hidden select-none font-sans group">
+                {/* Sweeping Shimmer Beam */}
+                <motion.div
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{
+                        duration: 1.8,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        repeatDelay: 0.2,
+                    }}
+                    className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                />
 
-                {/* Section 1: Billing Timing Model Skeleton */}
-                <div className="space-y-3 pt-2">
-                    <div className="h-3 w-48 rounded bg-secondary/15" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[1, 2].map((idx) => (
-                            <div
-                                key={idx}
-                                className="border border-foreground-light-shade3 dark:border-foreground-dark-shade1 p-5 rounded-sm bg-primary/3 flex items-center justify-between gap-4"
-                            >
-                                <div className="size-11 rounded-sm bg-secondary/20 shrink-0" />
-                                <div className="space-y-2 min-w-0 flex-1">
-                                    <div className="h-4 w-32 rounded bg-secondary/20" />
-                                    <div className="h-3 w-full rounded bg-secondary/15" />
-                                </div>
-                                <div className="size-5 rounded-xs bg-secondary/20 shrink-0" />
-                            </div>
-                        ))}
+                <div className="space-y-6 sm:space-y-7 relative z-10">
+                    {/* Section Header Skeleton */}
+                    <div className="flex items-center gap-3">
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.8, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                            className="size-10 sm:size-12 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                        />
+                        <div className="space-y-2 flex-1">
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                                className="h-4.5 w-64 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                            />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                                className="h-3 w-80 xs:w-96 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                            />
+                        </div>
                     </div>
-                </div>
 
-                {/* Section 2: Automation Switches Skeleton */}
-                <div className="space-y-3 pt-2">
-                    <div className="h-3 w-48 rounded bg-secondary/15" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[1, 2, 3, 4].map((idx) => (
-                            <div
-                                key={idx}
-                                className="border border-foreground-light-shade3 dark:border-foreground-dark-shade1 p-4.5 rounded-sm bg-primary/3 flex items-center justify-between gap-4"
-                            >
-                                <div className="size-11 rounded-sm bg-secondary/20 shrink-0" />
-                                <div className="space-y-2 min-w-0 flex-1">
-                                    <div className="h-4 w-36 rounded bg-secondary/20" />
-                                    <div className="h-3 w-full rounded bg-secondary/15" />
+                    {/* Section 1: Billing Timing Model Skeleton */}
+                    <div className="space-y-3 pt-2">
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                            className="h-3 w-48 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {[1, 2].map((idx) => (
+                                <div
+                                    key={idx}
+                                    className="border border-foreground-light-shade3 dark:border-foreground-dark-shade1 p-5 rounded-sm bg-primary/3 flex items-center justify-between gap-4"
+                                >
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 }}
+                                        className="size-11 rounded-sm bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
+                                    />
+                                    <div className="space-y-2 min-w-0 flex-1">
+                                        <motion.div
+                                            animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 + 0.05 }}
+                                            className="h-4 w-32 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                        />
+                                        <motion.div
+                                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 + 0.1 }}
+                                            className="h-3 w-full rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                        />
+                                    </div>
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 + 0.1 }}
+                                        className="size-5 rounded-xs bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
+                                    />
                                 </div>
-                                <div className="w-9 h-5 rounded-full bg-secondary/20 shrink-0" />
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Section 2: Automation Switches Skeleton */}
+                    <div className="space-y-3 pt-2">
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                            className="h-3 w-48 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {[1, 2, 3, 4].map((idx) => (
+                                <div
+                                    key={idx}
+                                    className="border border-foreground-light-shade3 dark:border-foreground-dark-shade1 p-4.5 rounded-sm bg-primary/3 flex items-center justify-between gap-4"
+                                >
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.06 }}
+                                        className="size-11 rounded-sm bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
+                                    />
+                                    <div className="space-y-2 min-w-0 flex-1">
+                                        <motion.div
+                                            animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.06 + 0.05 }}
+                                            className="h-4 w-36 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                        />
+                                        <motion.div
+                                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.06 + 0.1 }}
+                                            className="h-3 w-full rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                        />
+                                    </div>
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.06 + 0.1 }}
+                                        className="w-9 h-5 rounded-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </Card>

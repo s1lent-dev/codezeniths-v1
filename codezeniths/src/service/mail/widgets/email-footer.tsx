@@ -21,10 +21,10 @@ export const EmailFooter: React.FC<EmailFooterProps> = ({ isDark = true }) => {
       <Row className="mb-3">
         <Column className="text-center">
           <Link
-            href={`${appUrl}/problemset`}
+            href={`${appUrl}/explore`}
             className={`${mutedClass} text-[12px] no-underline mx-2`}
           >
-            Problemset
+            Explore
           </Link>
           <span className={separatorClass}>•</span>
           <Link

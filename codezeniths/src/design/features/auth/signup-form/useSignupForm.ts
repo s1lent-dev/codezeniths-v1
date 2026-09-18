@@ -126,7 +126,7 @@ export const useSignupForm = () => {
         try {
             await authClient.signIn.social({
                 provider: 'google',
-                callbackURL: '/problemset',
+                callbackURL: '/explore',
                 errorCallbackURL: '/verify-email',
             });
         } catch (err: any) {
@@ -138,7 +138,7 @@ export const useSignupForm = () => {
         try {
             await authClient.signIn.social({
                 provider: 'github',
-                callbackURL: '/problemset',
+                callbackURL: '/explore',
                 errorCallbackURL: '/verify-email',
             });
         } catch (err: any) {

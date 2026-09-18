@@ -31,6 +31,7 @@ import {
 import { searchQueryService } from '@/lib/tanstack/services/search.query-service';
 import { SearchHistoryCategoryFilter } from './search-history-filter-bar';
 import { cn } from '@codezeniths/design/cn';
+import { motion } from 'motion/react';
 import type { UserSearchHistory } from '@codezeniths/schemas/db';
 
 export interface SearchHistoryInfiniteListProps {
@@ -176,21 +177,64 @@ export const SearchHistoryInfiniteList: React.FC<SearchHistoryInfiniteListProps>
 
     if (isLoading) {
         return (
-            <div className="w-full space-y-3">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div className="w-full space-y-2.5 select-none font-sans">
+                {[0, 1, 2, 3, 4, 5].map((i) => (
                     <Card
                         key={i}
-                        className="w-full p-4 rounded-md border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark animate-pulse"
+                        className="w-full p-3.5 sm:p-4 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light dark:bg-foreground-dark shadow-2xs relative overflow-hidden group"
                     >
-                        <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-3.5 flex-1">
-                                <div className="size-10 rounded-md bg-secondary/20 shrink-0" />
-                                <div className="space-y-2 flex-1">
-                                    <div className="h-4 w-48 rounded bg-secondary/20" />
-                                    <div className="h-3 w-28 rounded bg-secondary/15" />
+                        {/* Sweeping Shimmer Beam */}
+                        <motion.div
+                            animate={{ x: ['-100%', '200%'] }}
+                            transition={{
+                                duration: 1.8,
+                                repeat: Infinity,
+                                ease: 'easeInOut',
+                                repeatDelay: 0.2,
+                                delay: i * 0.08,
+                            }}
+                            className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                        />
+
+                        <div className="flex items-center justify-between gap-3 sm:gap-4 relative z-10">
+                            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.05 }}
+                                    className="size-10 rounded-md bg-primary/15 dark:bg-primary/25 shrink-0"
+                                />
+                                <div className="space-y-2 flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <motion.div
+                                            animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.05 + 0.05 }}
+                                            className="h-4 w-36 sm:w-48 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                        />
+                                        <motion.div
+                                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.05 + 0.1 }}
+                                            className="h-3.5 w-14 rounded-full bg-primary/10 dark:bg-primary/20"
+                                        />
+                                    </div>
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.05 + 0.15 }}
+                                        className="h-3 w-28 sm:w-36 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                    />
                                 </div>
                             </div>
-                            <div className="h-6 w-20 rounded bg-secondary/15 shrink-0" />
+                            <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.05 + 0.15 }}
+                                    className="h-3 w-12 sm:w-16 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.05 + 0.2 }}
+                                    className="size-7 rounded-md bg-foreground-light-shade3/50 dark:bg-foreground-dark-shade3/40 shrink-0"
+                                />
+                            </div>
                         </div>
                     </Card>
                 ))}

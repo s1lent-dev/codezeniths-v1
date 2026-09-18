@@ -13,6 +13,7 @@ import {
 } from '@codezeniths/components';
 import { Card } from '@codezeniths/modules';
 import { Zap, Bot, Cpu, Users, Infinity as InfinityIcon, Compass, Code2, Crown, CheckCircle2 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { PlanTier } from './useBillingSettings';
 
 interface CurrentPlanOverviewCardProps {
@@ -28,45 +29,109 @@ export const CurrentPlanOverviewCard: React.FC<CurrentPlanOverviewCardProps> = (
 }) => {
     if (isLoading) {
         return (
-            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 animate-pulse">
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 relative overflow-hidden select-none font-sans group">
+                {/* Sweeping Shimmer Beam */}
+                <motion.div
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{
+                        duration: 1.8,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        repeatDelay: 0.2,
+                    }}
+                    className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                />
+
                 {/* Section Header Skeleton */}
-                <div className="flex items-center gap-3">
-                    <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                <div className="flex items-center gap-3 relative z-10">
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.8, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                        className="size-10 sm:size-12 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                    />
                     <div className="space-y-2 flex-1">
-                        <div className="h-4.5 w-56 rounded bg-secondary/20" />
-                        <div className="h-3 w-72 xs:w-96 rounded bg-secondary/15" />
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.85, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                            className="h-4.5 w-56 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                        />
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                            className="h-3 w-72 xs:w-96 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                        />
                     </div>
                 </div>
 
                 {/* Active Plan Detail Box Skeleton */}
-                <div className="p-4 sm:p-5 rounded-md bg-primary/5 border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-1 sm:mt-2">
+                <div className="p-4 sm:p-5 rounded-md bg-primary/5 border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-1 sm:mt-2 relative z-10">
                     <div className="space-y-2 min-w-0 flex-1">
-                        <div className="h-5 w-48 rounded bg-secondary/20" />
-                        <div className="h-3.5 w-64 xs:w-80 rounded bg-secondary/15" />
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.85, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.08 }}
+                            className="h-5 w-48 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                        />
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.12 }}
+                            className="h-3.5 w-64 xs:w-80 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                        />
                     </div>
-                    <div className="h-9 w-36 rounded-sm bg-primary/15 shrink-0" />
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.8, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 }}
+                        className="h-9 w-36 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                    />
                 </div>
 
                 {/* Quota Meters Skeleton */}
-                <div className="space-y-4 pt-2">
-                    <div className="h-3 w-48 rounded bg-secondary/15" />
+                <div className="space-y-4 pt-2 relative z-10">
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                        className="h-3 w-48 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                    />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {[1, 2, 3, 4].map((idx) => (
+                        {[0, 1, 2, 3].map((idx) => (
                             <div
                                 key={idx}
-                                className="p-4.5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 border border-foreground-light-shade3 dark:border-foreground-dark-shade1 space-y-3"
+                                className="p-4.5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 border border-foreground-light-shade3/60 dark:border-foreground-dark-shade1/60 space-y-3"
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2.5">
-                                        <div className="size-7 rounded-xs bg-secondary/20 shrink-0" />
-                                        <div className="h-3.5 w-32 rounded bg-secondary/20" />
+                                        <motion.div
+                                            animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 + idx * 0.05 }}
+                                            className="size-7 rounded-xs bg-primary/15 dark:bg-primary/25 shrink-0"
+                                        />
+                                        <motion.div
+                                            animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.08 + idx * 0.05 }}
+                                            className="h-3.5 w-32 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                        />
                                     </div>
-                                    <div className="h-3.5 w-16 rounded bg-secondary/15" />
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 + idx * 0.05 }}
+                                        className="h-3.5 w-16 rounded bg-primary/15 dark:bg-primary/25"
+                                    />
                                 </div>
-                                <div className="h-1.5 w-full rounded bg-secondary/20" />
+                                <motion.div
+                                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.12 + idx * 0.05 }}
+                                    className="h-1.5 w-full rounded-full bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
                                 <div className="flex justify-between">
-                                    <div className="h-2.5 w-16 rounded bg-secondary/15" />
-                                    <div className="h-2.5 w-20 rounded bg-secondary/15" />
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 + idx * 0.05 }}
+                                        className="h-2.5 w-16 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                    />
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.18 + idx * 0.05 }}
+                                        className="h-2.5 w-20 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                    />
                                 </div>
                             </div>
                         ))}

@@ -15,7 +15,7 @@ import { MobileSidebarSheet } from '../sidebar/mobile-sidebar-sheet';
 
 export const HomeNavbar = () => {
     const pathname = usePathname();
-    const isProfileRoute = pathname.startsWith('/profile');
+    const isNoSidebarRoute = pathname.startsWith('/profile') || pathname === '/problemset' || pathname.startsWith('/problemset');
 
     const {
         isDesktopSidebarCollapsed,
@@ -41,12 +41,12 @@ export const HomeNavbar = () => {
                         type="button"
                         variant={ButtonVariant.ICON}
                         size={ButtonSize.ICON}
-                        onClick={isProfileRoute ? () => setMobileSidebarOpen(true) : toggleDesktopSidebar}
+                        onClick={isNoSidebarRoute ? () => setMobileSidebarOpen(true) : toggleDesktopSidebar}
                         className="hidden md:flex p-1.5 rounded-lg hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 text-muted-light dark:text-muted-dark hover:text-heading-light dark:hover:text-heading-dark transition-colors cursor-pointer ml-8 lg:ml-12"
-                        title={isProfileRoute ? 'Open Navigation' : (isDesktopSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar')}
-                        aria-label={isProfileRoute ? 'Open Navigation' : 'Toggle Sidebar'}
+                        title={isNoSidebarRoute ? 'Open Navigation' : (isDesktopSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar')}
+                        aria-label={isNoSidebarRoute ? 'Open Navigation' : 'Toggle Sidebar'}
                     >
-                        {isProfileRoute ? (
+                        {isNoSidebarRoute ? (
                             <PanelLeftOpen className="w-5.5 h-5.5" />
                         ) : isDesktopSidebarCollapsed ? (
                             <PanelLeftOpen className="w-5.5 h-5.5" />

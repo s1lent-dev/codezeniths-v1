@@ -532,7 +532,7 @@ export const useCompleteProfileForm = () => {
             setDraft3({});
 
             toast.success('Profile Complete!', 'Welcome to CodeZeniths! Redirecting to home...');
-            router.push('/problemset');
+            router.push('/explore');
             return true;
         } catch (err: any) {
             toast.error('Completion failed', err.message || 'Could not complete onboarding');

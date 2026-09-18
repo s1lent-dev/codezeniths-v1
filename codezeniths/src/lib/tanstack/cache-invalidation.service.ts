@@ -22,6 +22,7 @@ export class CacheInvalidationService {
             queryClient.invalidateQueries({ queryKey: ['user', 'yearlyActivity'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profile'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'bookmarks'] }),
         ]);
     }
 
@@ -225,6 +226,7 @@ export class CacheInvalidationService {
             queryClient.invalidateQueries({ queryKey: ['module'] }),
             queryClient.invalidateQueries({ queryKey: ['topic'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'bookmarks'] }),
         ]);
     }
 
@@ -235,6 +237,7 @@ export class CacheInvalidationService {
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: ['tag'] }),
             queryClient.invalidateQueries({ queryKey: ['user', 'profileDetails'] }),
+            queryClient.invalidateQueries({ queryKey: ['user', 'bookmarks'] }),
         ]);
     }
 }

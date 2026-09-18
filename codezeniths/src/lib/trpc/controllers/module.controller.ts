@@ -6,7 +6,6 @@ import {
     GetSingleModuleTRPCOutputSchema,
     GetSingleModuleProgressTRPCInputSchema,
     GetSingleModuleProgressTRPCOutputSchema,
-    GetRecentlySolvedModuleTRPCOutputSchema,
     GetModulesWithTopicsTRPCInputSchema,
     GetModulesWithTopicsTRPCOutputSchema,
     ToggleModuleBookmarkTRPCInputSchema,
@@ -96,25 +95,6 @@ export class ModuleController implements IModuleController {
                 message: error.message || 'Something went wrong while fetching module progress statistics.',
                 cause: error,
             });
-        }
-    }
-
-    async getRecentlySolvedModule({
-        ctx,
-    }: {
-        ctx: TRPCContext;
-    }): Promise<z.infer<typeof GetRecentlySolvedModuleTRPCOutputSchema>> {
-        logger.info('Executing getRecentlySolvedModule controller');
-        const userId = ctx.user?.id;
-        if (!userId) {
-            return { module: null, lastProblem: null };
-        }
-
-        try {
-            return await ctx.queries.module.getRecentlySolvedModule({ userId });
-        } catch (error: any) {
-            logger.error('Error in getRecentlySolvedModule controller', { error, userId });
-            return { module: null, lastProblem: null };
         }
     }
 

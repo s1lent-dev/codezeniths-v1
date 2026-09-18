@@ -38,8 +38,8 @@ export default function PlaygroundPage() {
                     'Multi-File Workspaces',
                     'Instant Snippet Sharing',
                 ]}
-                buttonText="Explore Problemset"
-                buttonHref="/problemset"
+                buttonText="Explore"
+                buttonHref="/explore"
             />
         </Suspense>
     );

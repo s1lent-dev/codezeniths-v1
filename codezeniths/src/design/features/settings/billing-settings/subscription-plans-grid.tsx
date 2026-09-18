@@ -14,6 +14,7 @@ import {
 import { Card } from '@codezeniths/modules';
 import { cn } from '@codezeniths/design/cn';
 import { Layers, Check, Sparkles, Compass, Code2, Crown, ChevronDown } from 'lucide-react';
+import { motion } from 'motion/react';
 import { BillingCycle, PlanTier } from './useBillingSettings';
 
 interface SubscriptionPlansGridProps {
@@ -284,45 +285,103 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 animate-pulse">
-                {/* Section Header Skeleton */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
-                        <div className="space-y-2 flex-1">
-                            <div className="h-4.5 w-56 rounded bg-secondary/20" />
-                            <div className="h-3 w-72 xs:w-96 rounded bg-secondary/15" />
-                        </div>
-                    </div>
-                    <div className="h-9 w-40 rounded-sm bg-secondary/20 shrink-0" />
-                </div>
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 relative overflow-hidden select-none font-sans group">
+                {/* Sweeping Shimmer Beam */}
+                <motion.div
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{
+                        duration: 1.8,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        repeatDelay: 0.2,
+                    }}
+                    className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                />
 
-                {/* Plan 3-Card Grid Skeleton */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 pt-2 sm:pt-4 mt-4 sm:mt-6">
-                    {[1, 2, 3].map((idx) => (
-                        <div
-                            key={idx}
-                            className="flex flex-col justify-between p-6 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light-shade1/40 dark:bg-foreground-dark-shade1/20 space-y-4"
-                        >
-                            <div className="space-y-4">
-                                <div className="size-10 rounded-sm bg-primary/15" />
-                                <div className="space-y-1.5">
-                                    <div className="h-5 w-32 rounded bg-secondary/20" />
-                                    <div className="h-3 w-full rounded bg-secondary/15" />
-                                </div>
-                                <div className="h-8 w-24 rounded bg-secondary/20" />
-                                <div className="space-y-2 pt-2">
-                                    {[1, 2, 3, 4].map((fIdx) => (
-                                        <div key={fIdx} className="flex items-center gap-2">
-                                            <div className="size-3.5 rounded bg-primary/20 shrink-0" />
-                                            <div className="h-3 w-4/5 rounded bg-secondary/15" />
-                                        </div>
-                                    ))}
-                                </div>
+                <div className="space-y-6 sm:space-y-7 relative z-10">
+                    {/* Section Header Skeleton */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                                className="size-10 sm:size-12 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                            />
+                            <div className="space-y-2 flex-1">
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                                    className="h-4.5 w-56 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                                    className="h-3 w-72 xs:w-96 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                />
                             </div>
-                            <div className="h-9 w-full rounded-sm bg-primary/15 shrink-0 mt-4" />
                         </div>
-                    ))}
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                            className="h-9 w-40 rounded-sm bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
+                        />
+                    </div>
+
+                    {/* Plan 3-Card Grid Skeleton */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 pt-2 sm:pt-4 mt-4 sm:mt-6">
+                        {[1, 2, 3].map((idx) => (
+                            <div
+                                key={idx}
+                                className="flex flex-col justify-between p-6 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 bg-foreground-light-shade1/40 dark:bg-foreground-dark-shade1/20 space-y-4"
+                            >
+                                <div className="space-y-4">
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 }}
+                                        className="size-10 rounded-sm bg-primary/15 dark:bg-primary/25"
+                                    />
+                                    <div className="space-y-1.5">
+                                        <motion.div
+                                            animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 + 0.05 }}
+                                            className="h-5 w-32 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                        />
+                                        <motion.div
+                                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 + 0.1 }}
+                                            className="h-3 w-full rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                        />
+                                    </div>
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 + 0.1 }}
+                                        className="h-8 w-24 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                    />
+                                    <div className="space-y-2 pt-2">
+                                        {[1, 2, 3, 4].map((fIdx) => (
+                                            <div key={fIdx} className="flex items-center gap-2">
+                                                <motion.div
+                                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 + fIdx * 0.04 }}
+                                                    className="size-3.5 rounded bg-primary/20 dark:bg-primary/30 shrink-0"
+                                                />
+                                                <motion.div
+                                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 + fIdx * 0.04 + 0.02 }}
+                                                    className="h-3 w-4/5 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.08 + 0.15 }}
+                                    className="h-9 w-full rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0 mt-4"
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </Card>
         );

@@ -63,7 +63,7 @@ export const useResetPasswordForm = () => {
 
                 if (!otpRes.error) {
                     toast.success('Your password has been successfully updated.');
-                    router.push('/problemset');
+                    router.push('/explore');
                     return;
                 }
             }
@@ -77,7 +77,7 @@ export const useResetPasswordForm = () => {
             if (res.error) throw new Error(res.error.message || 'Failed to reset password');
 
             toast.success('Your password has been successfully updated.');
-            router.push('/problemset');
+            router.push('/explore');
         } catch (error: any) {
             toast.error(error.message || 'Invalid or expired token. Please request a new link.');
         } finally {

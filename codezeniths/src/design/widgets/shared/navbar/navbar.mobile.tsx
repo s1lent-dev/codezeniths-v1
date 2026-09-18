@@ -34,7 +34,7 @@ export const NavbarMobileToggle = () => {
         if (isAuthenticated && user) {
             if (user.isOnboardingComplete) {
                 buttonLabel = 'Home';
-                buttonRoute = '/problemset';
+                buttonRoute = '/explore';
             } else {
                 buttonLabel = 'Complete Profile';
                 buttonRoute = '/complete-profile';
@@ -71,7 +71,7 @@ export const NavbarMobileToggle = () => {
                     className="w-screen bg-transparent border-none shadow-none p-0 flex items-center justify-center pointer-events-none z-50"
                 >
                     <div className="w-[calc(100vw-3rem)] sm:w-[calc(100vw-4rem)] p-2 flex flex-col gap-1 border border-foreground-light-shade3 dark:border-foreground-dark-shade3 bg-background-light dark:bg-background-dark shadow-lg max-h-[80vh] overflow-y-auto pointer-events-auto rounded-md">
-                        <a href="/problemset" className="px-4 py-3 typography-p text-body-light dark:text-body-dark hover:text-primary transition-colors text-left rounded-md hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 w-full block">
+                        <a href="/explore" className="px-4 py-3 typography-p text-body-light dark:text-body-dark hover:text-primary transition-colors text-left rounded-md hover:bg-foreground-light-shade1 dark:hover:bg-foreground-dark-shade1 w-full block">
                             Problem
                         </a>
                         

@@ -14,6 +14,7 @@ import {
     ExperienceLevelSchema,
     LearningGoalSchema,
     LearningStyleSchema,
+    LevelSchema,
 } from '../db.schema';
 
 
@@ -361,4 +362,56 @@ export const GetUserProfileDetailsOutputSchema = z.object({
     profileVisibility: z.enum(['public', 'private']).default('public').optional(),
     globalRank: z.number().int().nullable().optional(),
     rankProgress: UserRankProgressSchema.optional(),
+});
+
+// ─── getUserBookmarks ─────────────────────────────────────────────────────────
+
+export const BookmarkedModuleItemSchema = z.object({
+    id: z.uuidv7(),
+    title: z.string(),
+    slug: z.string(),
+    description: z.string().nullable().optional(),
+    problemsCount: z.number().int(),
+    problemsSolvedCount: z.number().int(),
+    problemsSolvedPercentage: z.number(),
+    bookmarkedAt: z.coerce.date(),
+});
+
+export const BookmarkedTopicItemSchema = z.object({
+    id: z.uuidv7(),
+    title: z.string(),
+    slug: z.string(),
+    description: z.string().nullable().optional(),
+    level: LevelSchema.nullable().optional(),
+    moduleSlug: z.string().nullable().optional(),
+    moduleTitle: z.string().nullable().optional(),
+    problemsCount: z.number().int(),
+    problemsSolvedCount: z.number().int(),
+    problemsSolvedPercentage: z.number(),
+    bookmarkedAt: z.coerce.date(),
+});
+
+export const BookmarkedTagItemSchema = z.object({
+    id: z.uuidv7(),
+    title: z.string(),
+    slug: z.string(),
+    description: z.string().nullable().optional(),
+    level: LevelSchema.nullable().optional(),
+    moduleSlug: z.string().nullable().optional(),
+    moduleTitle: z.string().nullable().optional(),
+    problemsCount: z.number().int(),
+    problemsSolvedCount: z.number().int(),
+    problemsSolvedPercentage: z.number(),
+    bookmarkedAt: z.coerce.date(),
+});
+
+export const GetUserBookmarksInputSchema = z.object({
+    userId: z.uuidv7().optional(),
+});
+
+export const GetUserBookmarksOutputSchema = z.object({
+    modules: z.array(BookmarkedModuleItemSchema),
+    topics: z.array(BookmarkedTopicItemSchema),
+    tags: z.array(BookmarkedTagItemSchema),
+    totalCount: z.number().int(),
 });

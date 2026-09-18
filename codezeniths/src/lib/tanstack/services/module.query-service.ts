@@ -12,7 +12,6 @@ import {
     GetSingleModuleTRPCOutputSchema,
     GetSingleModuleProgressTRPCInputSchema,
     GetSingleModuleProgressTRPCOutputSchema,
-    GetRecentlySolvedModuleTRPCOutputSchema,
     GetModulesWithTopicsTRPCOutputSchema,
     ToggleModuleBookmarkTRPCInputSchema,
     ToggleTopicBookmarkTRPCInputSchema,
@@ -55,17 +54,6 @@ export class ModuleQueryService implements IModuleQueryService {
                 return GetSingleModuleProgressTRPCOutputSchema.parse(raw);
             },
             enabled: options?.enabled,
-            ...CACHE_TIERS.USER_PROGRESS,
-        });
-    }
-
-    getRecentlySolvedModule() {
-        return useQuery({
-            queryKey: queryKeys.module.recentlySolved(),
-            queryFn: async () => {
-                const raw = await trpcClient.module.getRecentlySolvedModule.query();
-                return GetRecentlySolvedModuleTRPCOutputSchema.parse(raw);
-            },
             ...CACHE_TIERS.USER_PROGRESS,
         });
     }

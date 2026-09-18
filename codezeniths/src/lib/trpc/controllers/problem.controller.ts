@@ -13,11 +13,16 @@ import {
     GetProblemProgressTRPCOutputSchema,
     GetRecentlySolvedProblemsTRPCInputSchema,
     GetRecentlySolvedProblemsTRPCOutputSchema,
+    GetRecentlySolvedContextTRPCInputSchema,
+    GetRecentlySolvedContextTRPCOutputSchema,
+    GetTrendingProblemsTRPCInputSchema,
+    GetTrendingProblemsTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { TRPCError } from '@trpc/server';
 import { logger } from '@/service/logging';
 import { z } from 'zod';
 import { problemCatalogueService } from '../utils/problem-catalogue.service';
+import { trendingProblemsService } from '../utils/trending-problems.service';
 
 export class ProblemController implements IProblemController {
     async getProblems({
@@ -336,6 +341,60 @@ export class ProblemController implements IProblemController {
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: error.message || 'Something went wrong while fetching recently solved problems.',
+                cause: error,
+            });
+        }
+    }
+
+    async getRecentlySolvedContext({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input?: z.infer<typeof GetRecentlySolvedContextTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetRecentlySolvedContextTRPCOutputSchema>> {
+        logger.info('Executing getRecentlySolvedContext controller', { input });
+        const targetUserId = input?.userId || ctx.user?.id;
+        if (!targetUserId) {
+            return {
+                problem: null,
+                module: null,
+                topic: null,
+                tags: [],
+            };
+        }
+
+        try {
+            return await ctx.queries.problem.getRecentlySolvedContext({
+                userId: targetUserId,
+            });
+        } catch (error: any) {
+            logger.error('Error in getRecentlySolvedContext controller', { error, userId: targetUserId });
+            return {
+                problem: null,
+                module: null,
+                topic: null,
+                tags: [],
+            };
+        }
+    }
+
+    async getTrendingProblems({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input?: z.infer<typeof GetTrendingProblemsTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetTrendingProblemsTRPCOutputSchema>> {
+        logger.info('Executing getTrendingProblems controller', { input });
+        try {
+            return await trendingProblemsService.getTrendingProblems({ ctx, input });
+        } catch (error: any) {
+            logger.error('Error in getTrendingProblems controller', { error });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error.message || 'Something went wrong while fetching trending problems.',
                 cause: error,
             });
         }

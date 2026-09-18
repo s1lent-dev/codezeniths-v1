@@ -110,9 +110,31 @@ export const StreakCard: React.FC<StreakCardProps> = ({
                             </TooltipTrigger>
                             <TooltipContent
                                 side="bottom"
-                                sideOffset={6}
-                                className="z-50 p-3.5! bg-background-light dark:bg-foreground-dark border border-amber-500/20 dark:border-amber-500/25 shadow-xl rounded-lg text-xs font-sans"
+                                sideOffset={8}
+                                className="relative z-50 p-3.5! bg-background-light dark:bg-foreground-dark border border-amber-500/20 dark:border-amber-500/25 shadow-xl rounded-lg text-xs font-sans [&>svg]:hidden! [&>span>svg]:hidden! [&_[data-radix-tooltip-arrow]]:hidden! [&_[data-radix-popper-arrow]]:hidden! [&_.rotate-45]:hidden!"
                             >
+                                {/* True Dialog Box Top Arrow */}
+                                <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 pointer-events-none z-50">
+                                    <svg
+                                        width="14"
+                                        height="7"
+                                        viewBox="0 0 14 7"
+                                        className="overflow-visible block"
+                                    >
+                                        <polygon
+                                            points="0,7 7,0 14,7"
+                                            className="fill-background-light dark:fill-foreground-dark"
+                                        />
+                                        <path
+                                            d="M0,7 L7,0 L14,7"
+                                            fill="none"
+                                            className="stroke-amber-500/20 dark:stroke-amber-500/25 stroke-[1.5]"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                </div>
+
                                 <div className="flex flex-col gap-2 min-w-[180px]">
                                     <div className="flex items-center gap-1.5 pb-2 border-b border-amber-500/15 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-[11px] tracking-wide">
                                         <CalendarCheck className="size-3.5 text-amber-500 shrink-0" />

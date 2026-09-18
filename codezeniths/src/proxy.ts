@@ -51,18 +51,18 @@ export async function proxy(request: NextRequest) {
         // 2. Authenticated users trying to access Auth routes (Signin/Signup)
         if (isAuthenticated && isAuth) {
             // Redirect to home if profile is complete, otherwise to complete-profile
-            const redirectUrl = isOnboardingComplete ? '/problemset' : '/complete-profile';
+            const redirectUrl = isOnboardingComplete ? '/explore' : '/complete-profile';
             return NextResponse.redirect(new URL(redirectUrl, request.url));
         }
 
-        // 3. Authenticated users with INCOMPLETE profiles trying to access Protected routes (like /problemset)
+        // 3. Authenticated users with INCOMPLETE profiles trying to access Protected routes (like /explore)
         if (isAuthenticated && !isOnboardingComplete && isProtected) {
             return NextResponse.redirect(new URL('/complete-profile', request.url));
         }
 
         // 4. Authenticated users with COMPLETE profiles trying to access Onboarding routes
         if (isAuthenticated && isOnboardingComplete && isOnboarding) {
-            return NextResponse.redirect(new URL('/problemset', request.url));
+            return NextResponse.redirect(new URL('/explore', request.url));
         }
 
         // Fallback: allow the request to proceed

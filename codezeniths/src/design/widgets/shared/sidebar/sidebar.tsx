@@ -16,6 +16,7 @@ import {
     LogOut,
     Command,
     ListMusic,
+    Bookmark,
 } from 'lucide-react';
 import { cn } from '@codezeniths/design/cn';
 import { authClient } from '@codezeniths/lib/auth/auth';
@@ -41,11 +42,12 @@ const sidebarGroups = [
     {
         title: 'HOME',
         items: [
-            { name: 'Problems', href: '/problemset', icon: LayoutDashboard },
+            { name: 'Explore', href: '/explore', icon: LayoutDashboard },
             { name: 'Modules', href: '/modules', icon: BookOpen },
             { name: 'Leaderboards', href: '/leaderboards', icon: Trophy },
             { name: 'Tags', href: '/tags', icon: Tags },
             { name: 'Playlists', href: '/playlists', icon: ListMusic },
+            { name: 'Bookmarks', href: '/bookmarks', icon: Bookmark },
             { name: 'Favourites', href: '/favourites', icon: Heart },
         ]
     },

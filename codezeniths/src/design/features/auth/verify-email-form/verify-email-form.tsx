@@ -122,7 +122,7 @@ export const VerifyEmailForm = () => {
                                     className="w-1/2 sm:w-auto min-w-36 xs:min-w-40 sm:min-w-44 h-11 xs:h-12 sm:h-14 px-4 xs:px-6 sm:px-10 text-sm xs:text-base text-foreground-dark dark:text-foreground-light-shade3 shadow-md mt-2 mx-auto"
                                 >
                                     {user?.emailVerified
-                                        ? (!user.isOnboardingComplete ? 'Complete Profile' : 'Go to Problemset')
+                                        ? (!user.isOnboardingComplete ? 'Complete Profile' : 'Go to Explore')
                                         : 'Go to Sign In'}
                                     <ArrowRight className="ml-2 text-surface-light-shade3" size={18} />
                                 </Button>

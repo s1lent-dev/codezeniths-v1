@@ -13,6 +13,10 @@ import {
     GetProblemProgressTRPCOutputSchema,
     GetRecentlySolvedProblemsTRPCInputSchema,
     GetRecentlySolvedProblemsTRPCOutputSchema,
+    GetRecentlySolvedContextTRPCInputSchema,
+    GetRecentlySolvedContextTRPCOutputSchema,
+    GetTrendingProblemsTRPCInputSchema,
+    GetTrendingProblemsTRPCOutputSchema,
 } from '@/schemas/trpc';
 
 export const problemRouter = createTRPCRouter({
@@ -45,4 +49,14 @@ export const problemRouter = createTRPCRouter({
         .input(GetRecentlySolvedProblemsTRPCInputSchema)
         .output(GetRecentlySolvedProblemsTRPCOutputSchema)
         .query(({ ctx, input }) => ctx.controllers.problem.getRecentlySolvedProblems({ ctx, input })),
+
+    getRecentlySolvedContext: publicProcedure
+        .input(GetRecentlySolvedContextTRPCInputSchema.optional())
+        .output(GetRecentlySolvedContextTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.problem.getRecentlySolvedContext({ ctx, input })),
+
+    getTrendingProblems: publicProcedure
+        .input(GetTrendingProblemsTRPCInputSchema.optional())
+        .output(GetTrendingProblemsTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.problem.getTrendingProblems({ ctx, input })),
 });

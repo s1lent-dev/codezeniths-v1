@@ -229,7 +229,7 @@ export const useForgotPasswordForm = () => {
             toast.success('Your password has been successfully updated.');
             
             // Redirect to home
-            router.push('/problemset');
+            router.push('/explore');
         } catch (error: any) {
             toast.error(error.message || 'Invalid code or something went wrong.');
         } finally {

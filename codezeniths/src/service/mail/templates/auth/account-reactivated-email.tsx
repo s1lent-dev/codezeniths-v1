@@ -38,8 +38,8 @@ export const AccountReactivatedEmail: React.FC<AccountReactivatedEmailProps> = (
         Ready to resume your streak? Dive back into today's featured challenges and community leaderboards.
       </EmailCallout>
 
-      <EmailButton href={`${appUrl}/problemset`} isDark={isDark} variant="primary">
-        Go to Problemset
+      <EmailButton href={`${appUrl}/explore`} isDark={isDark} variant="primary">
+        Go to Explore
       </EmailButton>
     </EmailLayout>
   );

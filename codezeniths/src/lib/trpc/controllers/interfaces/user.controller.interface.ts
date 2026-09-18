@@ -66,6 +66,8 @@ import {
     UpdateUserPhoneNumberOutputSchema,
     UpdateUserPreferencesInputSchema,
     UpdateUserPreferencesOutputSchema,
+    GetUserBookmarksTRPCInputSchema,
+    GetUserBookmarksTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { z } from 'zod';
 
@@ -238,4 +240,9 @@ export interface IUserController {
     deleteAccount(args: {
         ctx: TRPCContext;
     }): Promise<{ success: boolean; message: string }>;
+
+    getUserBookmarks(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetUserBookmarksTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetUserBookmarksTRPCOutputSchema>>;
 }

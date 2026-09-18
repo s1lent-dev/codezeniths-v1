@@ -9,11 +9,12 @@ import { AlertCircle } from 'lucide-react';
 import { cn } from '@codezeniths/design/cn';
 
 export const ProblemsSection: React.FC<ProblemsSectionProps> = ({
-    pageContext = 'problemset',
+    pageContext = 'explore',
     fixedModuleSlug,
     fixedTopicSlug,
     fixedTagSlug,
     fixedPlaylistSlug,
+    showDirectActions,
     className,
 }) => {
     const {
@@ -75,12 +76,13 @@ export const ProblemsSection: React.FC<ProblemsSectionProps> = ({
     return (
         <div className={cn('w-full font-sans', className)}>
             <ProblemList
-                pageContext={pageContext === 'topic' ? 'problemset' : pageContext}
+                pageContext={pageContext === 'topic' ? 'explore' : pageContext}
                 problems={problems}
                 total={total}
                 solvedCount={solvedCount}
                 filters={filters}
                 sorting={sorting}
+                showDirectActions={showDirectActions}
                 onFilterChange={setFilters}
                 onSortingChange={setSorting}
                 onToggleSolved={toggleSolved}

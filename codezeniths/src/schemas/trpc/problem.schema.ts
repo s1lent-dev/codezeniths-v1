@@ -6,6 +6,9 @@ import {
     ProblemFilterInputSchema,
     ProblemSortingInputSchema,
     GetProblemProgressOutputSchema,
+    GetRecentlySolvedContextOutputSchema,
+    GetTrendingProblemsOutputSchema,
+    TrendingProblemItemSchema,
 } from '@codezeniths/schemas/db';
 
 export const GetProblemsTRPCInputSchema = z.discriminatedUnion('mode', [
@@ -151,3 +154,20 @@ export const RecentlySolvedProblemItemTRPCSchema = z.object({
 });
 
 export const GetRecentlySolvedProblemsTRPCOutputSchema = z.array(RecentlySolvedProblemItemTRPCSchema);
+
+// ─── getRecentlySolvedContext ────────────────────────────────────────────────
+
+export const GetRecentlySolvedContextTRPCInputSchema = z.object({
+    userId: z.string().uuid().optional(),
+}).optional();
+
+export const GetRecentlySolvedContextTRPCOutputSchema = GetRecentlySolvedContextOutputSchema;
+
+// ─── getTrendingProblems ─────────────────────────────────────────────────────
+
+export const GetTrendingProblemsTRPCInputSchema = z.object({
+    limit: z.coerce.number().int().min(1).max(20).default(10),
+    userId: z.string().uuid().optional(),
+}).optional();
+
+export const GetTrendingProblemsTRPCOutputSchema = GetTrendingProblemsOutputSchema;

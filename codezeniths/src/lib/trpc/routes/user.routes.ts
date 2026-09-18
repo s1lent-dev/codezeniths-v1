@@ -67,6 +67,8 @@ import {
     UpdateUserPhoneNumberOutputSchema,
     UpdateUserPreferencesInputSchema,
     UpdateUserPreferencesOutputSchema,
+    GetUserBookmarksTRPCInputSchema,
+    GetUserBookmarksTRPCOutputSchema,
 } from "@/schemas/trpc";
 
 export const userRouter = createTRPCRouter({
@@ -251,4 +253,9 @@ export const userRouter = createTRPCRouter({
 
     deleteAccount: protectedProcedure
         .mutation(({ ctx }) => ctx.controllers.user.deleteAccount({ ctx })),
+
+    getUserBookmarks: publicProcedure
+        .input(GetUserBookmarksTRPCInputSchema)
+        .output(GetUserBookmarksTRPCOutputSchema)
+        .query(({ ctx, input }) => ctx.controllers.user.getUserBookmarks({ ctx, input })),
 });

@@ -76,7 +76,7 @@ export const VerifyPhoneForm = () => {
                                     if (!user.isOnboardingComplete) {
                                         router.push('/complete-profile');
                                     } else {
-                                        router.push('/problemset');
+                                        router.push('/explore');
                                     }
                                 } else {
                                     router.push('/sign-in');

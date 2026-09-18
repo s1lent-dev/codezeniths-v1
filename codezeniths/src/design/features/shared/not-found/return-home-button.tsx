@@ -11,7 +11,7 @@ export const ReturnHomeButton = () => {
     const router = useRouter();
     
     const href = isAuthenticated 
-        ? (user?.isOnboardingComplete ? '/problemset' : '/complete-profile') 
+        ? (user?.isOnboardingComplete ? '/explore' : '/complete-profile') 
         : '/';
 
     const handleNavigation = (e: React.MouseEvent) => {

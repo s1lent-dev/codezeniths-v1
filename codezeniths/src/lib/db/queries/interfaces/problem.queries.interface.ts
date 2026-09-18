@@ -22,6 +22,10 @@ import {
     GetProblemProgressOutputSchema,
     GetRecentlySolvedProblemsInputSchema,
     GetRecentlySolvedProblemsOutputSchema,
+    GetRecentlySolvedContextInputSchema,
+    GetRecentlySolvedContextOutputSchema,
+    GetTrendingProblemsInputSchema,
+    GetTrendingProblemsOutputSchema,
 } from '@codezeniths/schemas/db';
 
 export interface IProblemQueries {
@@ -68,4 +72,12 @@ export interface IProblemQueries {
     getRecentlySolvedProblems: (
         payload: z.infer<typeof GetRecentlySolvedProblemsInputSchema>,
     ) => Promise<z.infer<typeof GetRecentlySolvedProblemsOutputSchema>>;
+
+    getRecentlySolvedContext: (
+        payload: z.infer<typeof GetRecentlySolvedContextInputSchema>,
+    ) => Promise<z.infer<typeof GetRecentlySolvedContextOutputSchema>>;
+
+    getTrendingProblems: (
+        payload: z.infer<typeof GetTrendingProblemsInputSchema>,
+    ) => Promise<z.infer<typeof GetTrendingProblemsOutputSchema>>;
 }

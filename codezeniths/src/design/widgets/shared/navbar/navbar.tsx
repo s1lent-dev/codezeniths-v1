@@ -20,6 +20,7 @@ const Navbar = () => {
     const pathname = usePathname();
 
     const isHomeRouteGroup = [
+        '/explore',
         '/problemset',
         '/modules',
         '/tags',

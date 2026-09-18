@@ -44,6 +44,8 @@ import {
     GetUserYearlyActivityOutputSchema,
     GetUserProfileDetailsInputSchema,
     GetUserProfileDetailsOutputSchema,
+    GetUserBookmarksInputSchema,
+    GetUserBookmarksOutputSchema,
 } from '@codezeniths/schemas/db';
 
 export interface IUserQueries {
@@ -175,4 +177,8 @@ export interface IUserQueries {
             resume?: string | null;
         };
     }>;
+
+    getUserBookmarks: (
+        payload: z.infer<typeof GetUserBookmarksInputSchema>
+    ) => Promise<z.infer<typeof GetUserBookmarksOutputSchema>>;
 }

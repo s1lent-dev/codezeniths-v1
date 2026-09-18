@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableRow } from '@codezeniths/modules';
 export interface ProblemRowSkeletonProps {
     index?: number;
     titleWidth?: string;
+    showDirectActions?: boolean;
     className?: string;
 }
 
@@ -16,6 +17,7 @@ const DEFAULT_TITLE_WIDTHS = ['w-2/5', 'w-3/5', 'w-1/2', 'w-4/5', 'w-1/3', 'w-2/
 export const ProblemRowSkeleton: React.FC<ProblemRowSkeletonProps> = ({
     index = 0,
     titleWidth,
+    showDirectActions = false,
     className,
 }) => {
     const selectedTitleWidth = titleWidth ?? DEFAULT_TITLE_WIDTHS[index % DEFAULT_TITLE_WIDTHS.length];
@@ -53,16 +55,41 @@ export const ProblemRowSkeleton: React.FC<ProblemRowSkeletonProps> = ({
             </TableCell>
 
             {/* 3. Action Icons & Difficulty Column Skeleton */}
-            <TableCell className="w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px] pr-2 sm:pr-4 py-2.5 sm:py-3 text-right align-middle rounded-r-md border-0">
-                <div className="flex items-center justify-end gap-1.5 xs:gap-2.5">
+            <TableCell
+                className={cn(
+                    'pr-2 sm:pr-4 py-2.5 sm:py-3 text-right align-middle rounded-r-md border-0',
+                    showDirectActions
+                        ? 'w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]'
+                        : 'w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]'
+                )}
+            >
+                <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+                    {/* Direct Action: Favourite (Star) Bone */}
+                    {showDirectActions && (
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.08 }}
+                            className="size-4 rounded-xs bg-amber-500/20 dark:bg-amber-400/25 shrink-0"
+                        />
+                    )}
+
+                    {/* Direct Action: Bookmark (Revisit) Bone */}
+                    {showDirectActions && (
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.1 }}
+                            className="size-4 rounded-xs bg-blue-500/20 dark:bg-blue-400/25 shrink-0"
+                        />
+                    )}
+
                     {/* External Link Icon Bone */}
                     <motion.div
                         animate={{ opacity: [0.35, 0.75, 0.35] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.1 }}
-                        className="hidden xs:block size-4 rounded-xs bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.12 }}
+                        className="hidden xs:block size-4 rounded-xs bg-foreground-light-shade3 dark:bg-foreground-dark-shade3 shrink-0"
                     />
 
-                    {/* Difficulty Badge Bone with subtle color variations */}
+                    {/* Difficulty Badge Bone */}
                     <motion.div
                         animate={{ opacity: [0.35, 0.8, 0.35] }}
                         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: baseDelay + 0.15 }}
@@ -90,11 +117,13 @@ export const ProblemRowSkeleton: React.FC<ProblemRowSkeletonProps> = ({
 
 export interface ProblemListSkeletonProps {
     rowsCount?: number;
+    showDirectActions?: boolean;
     className?: string;
 }
 
 export const ProblemListSkeleton: React.FC<ProblemListSkeletonProps> = ({
     rowsCount = 6,
+    showDirectActions = false,
     className,
 }) => {
     return (
@@ -173,7 +202,11 @@ export const ProblemListSkeleton: React.FC<ProblemListSkeletonProps> = ({
                 <Table className="w-full table-fixed border-separate border-spacing-y-1.5 border-spacing-x-0">
                     <TableBody>
                         {Array.from({ length: rowsCount }).map((_, index) => (
-                            <ProblemRowSkeleton key={index} index={index} />
+                            <ProblemRowSkeleton
+                                key={index}
+                                index={index}
+                                showDirectActions={showDirectActions}
+                            />
                         ))}
                     </TableBody>
                 </Table>

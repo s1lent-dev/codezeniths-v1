@@ -67,6 +67,8 @@ import {
     UpdateUserPhoneNumberOutputSchema,
     UpdateUserPreferencesInputSchema,
     UpdateUserPreferencesOutputSchema,
+    GetUserBookmarksTRPCInputSchema,
+    GetUserBookmarksTRPCOutputSchema,
 } from '@/schemas/trpc';
 import { redisService } from '@codezeniths/lib/redis';
 import { storageService } from '@/service/storage';
@@ -1197,7 +1199,15 @@ export class UserController implements IUserController {
         const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
         const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
 
-        const activityMap: Record<string, number> = {};
+        const activityMap: Record<
+            string,
+            {
+                problemsSolved: number;
+                pointsEarned: number;
+                checkedIn: boolean;
+                wasFreezed: boolean;
+            }
+        > = {};
 
         let userCreatedAtIso: string | null = null;
 
@@ -1218,7 +1228,13 @@ export class UserController implements IUserController {
 
             activities.forEach((act) => {
                 const dateStr = act.date.toISOString().split('T')[0];
-                activityMap[dateStr] = (activityMap[dateStr] || 0) + act.problemsSolved;
+                const existing = activityMap[dateStr];
+                activityMap[dateStr] = {
+                    problemsSolved: (existing?.problemsSolved || 0) + (act.problemsSolved || 0),
+                    pointsEarned: (existing?.pointsEarned || 0) + (act.pointsEarned || 0),
+                    checkedIn: (existing?.checkedIn ?? false) || Boolean(act.checkedIn),
+                    wasFreezed: (existing?.wasFreezed ?? false) || Boolean(act.wasFreezed),
+                };
             });
         }
 
@@ -1230,7 +1246,12 @@ export class UserController implements IUserController {
             const formattedMonth = month < 10 ? `0${month}` : `${month}`;
             const dateStr = `${year}-${formattedMonth}-${formattedDay}`;
 
-            const count = activityMap[dateStr] || 0;
+            const record = activityMap[dateStr];
+            const count = record?.problemsSolved || 0;
+            const pointsEarned = record?.pointsEarned || 0;
+            const checkedIn = record?.checkedIn ?? false;
+            const wasFreezed = record?.wasFreezed ?? false;
+            const hasRecord = !!record;
             const solved = count > 0;
             if (solved) solvedDaysCount++;
 
@@ -1238,6 +1259,10 @@ export class UserController implements IUserController {
                 date: dateStr,
                 count,
                 solved,
+                pointsEarned,
+                checkedIn,
+                wasFreezed,
+                hasRecord,
             });
         }
 
@@ -1772,6 +1797,37 @@ export class UserController implements IUserController {
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: error?.message || 'Failed to delete user account.',
+            });
+        }
+    }
+
+    async getUserBookmarks({
+        ctx,
+        input,
+    }: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetUserBookmarksTRPCInputSchema>;
+    }): Promise<z.infer<typeof GetUserBookmarksTRPCOutputSchema>> {
+        const userId = input?.userId ?? ctx.user?.id;
+        logger.info('Executing getUserBookmarks controller', { userId });
+
+        if (!userId) {
+            return {
+                modules: [],
+                topics: [],
+                tags: [],
+                totalCount: 0,
+            };
+        }
+
+        try {
+            return await ctx.queries.user.getUserBookmarks({ userId });
+        } catch (error: any) {
+            logger.error('Error in getUserBookmarks controller', { error: error?.message, userId });
+            if (error instanceof TRPCError) throw error;
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error?.message || 'Failed to fetch user bookmarks.',
             });
         }
     }

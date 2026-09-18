@@ -68,7 +68,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     The user {username ? `@${username}` : 'profile'} could not be found or does not exist on Zenith.
                 </p>
                 <div className="mt-6">
-                    <Link href="/problemset">
+                    <Link href="/explore">
                         <Button
                             variant={ButtonVariant.OUTLINE}
                             className="gap-2 border-secondary/25 text-heading-light dark:text-heading-dark"
@@ -145,14 +145,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
                             {/* 3. Navigation Action Buttons */}
                             <div className="flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 mt-8 sm:mt-10 w-full">
-                                <Link href="/problemset">
+                                <Link href="/explore">
                                     <Button
                                         variant={ButtonVariant.DEFAULT}
                                         size={ButtonSize.DEFAULT}
                                         leftIcon={<ArrowLeft className="size-4" />}
                                         className="text-xs font-semibold rounded-md bg-primary text-foreground-dark-shade3 dark:text-foreground-light-shade3 px-5 py-2.5 shadow-sm"
                                     >
-                                        Back to Problemset
+                                        Back to Explore
                                     </Button>
                                 </Link>
                                 <Link href="/leaderboards">

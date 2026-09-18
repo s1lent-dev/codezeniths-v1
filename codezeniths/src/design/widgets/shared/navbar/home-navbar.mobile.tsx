@@ -60,7 +60,7 @@ import { NavbarSearch } from './navbar-search';
 import { cn } from '@codezeniths/design/cn';
 
 const PROFILE_NAV_ITEMS = [
-    { name: 'Problems', href: '/problemset', icon: LayoutDashboard },
+    { name: 'Explore', href: '/explore', icon: LayoutDashboard },
     { name: 'Modules', href: '/modules', icon: BookOpen },
     { name: 'Tags', href: '/tags', icon: Tag },
     { name: 'Leaderboards', href: '/leaderboards', icon: Trophy },

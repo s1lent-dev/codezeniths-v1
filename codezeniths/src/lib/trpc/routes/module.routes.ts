@@ -6,7 +6,6 @@ import {
     GetSingleModuleTRPCOutputSchema,
     GetSingleModuleProgressTRPCInputSchema,
     GetSingleModuleProgressTRPCOutputSchema,
-    GetRecentlySolvedModuleTRPCOutputSchema,
     GetModulesWithTopicsTRPCInputSchema,
     GetModulesWithTopicsTRPCOutputSchema,
     ToggleModuleBookmarkTRPCInputSchema,
@@ -29,10 +28,6 @@ export const moduleRouter = createTRPCRouter({
         .input(GetSingleModuleProgressTRPCInputSchema)
         .output(GetSingleModuleProgressTRPCOutputSchema)
         .query(({ ctx, input }) => ctx.controllers.module.getSingleModuleProgress({ ctx, input })),
-
-    getRecentlySolvedModule: publicProcedure
-        .output(GetRecentlySolvedModuleTRPCOutputSchema)
-        .query(({ ctx }) => ctx.controllers.module.getRecentlySolvedModule({ ctx })),
 
     getModulesWithTopics: publicProcedure
         .input(GetModulesWithTopicsTRPCInputSchema)

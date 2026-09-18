@@ -15,6 +15,7 @@ import {
     Layers,
     Search,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 
 export interface SearchHistoryHeroCardProps {
     totalSearches?: number;
@@ -31,32 +32,68 @@ export const SearchHistoryHeroCard: React.FC<SearchHistoryHeroCardProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <Card className="w-full p-4.5 xs:p-5 sm:p-7 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs animate-pulse">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
+            <Card className="w-full p-4.5 xs:p-5 sm:p-7 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs relative overflow-hidden select-none font-sans group">
+                {/* Sweeping Shimmer Beam */}
+                <motion.div
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{
+                        duration: 1.8,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        repeatDelay: 0.2,
+                    }}
+                    className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                />
+
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6 relative z-10">
                     {/* Left Emblem & Header Skeleton */}
                     <div className="flex items-center gap-4 xs:gap-5 sm:gap-6 min-w-0">
-                        <div className="size-14 xs:size-16 sm:size-18 rounded-md bg-primary/15 shrink-0" />
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.8, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                            className="size-14 xs:size-16 sm:size-18 rounded-md bg-primary/15 dark:bg-primary/25 shrink-0"
+                        />
                         <div className="space-y-2.5 min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                                <div className="h-6 w-36 xs:w-48 rounded bg-secondary/25" />
-                                <div className="h-5 w-28 rounded-full bg-primary/15 hidden sm:block" />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                                    className="h-6 w-36 xs:w-48 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                                    className="h-5 w-28 rounded-full bg-primary/15 dark:bg-primary/25 hidden sm:block"
+                                />
                             </div>
-                            <div className="h-4 w-64 xs:w-80 rounded bg-secondary/15" />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 }}
+                                className="h-4 w-64 xs:w-80 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                            />
                         </div>
                     </div>
 
                     {/* Right 3-Stat Metric Boxes Skeleton */}
                     <div className="grid grid-cols-2 xs:grid-cols-3 gap-2.5 sm:gap-4 shrink-0 w-full lg:w-auto">
-                        {[1, 2, 3].map((idx) => (
+                        {[0, 1, 2].map((idx) => (
                             <div
                                 key={idx}
                                 className={cn(
-                                    'px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-md bg-foreground-light-shade1 dark:bg-foreground-dark-shade1 border border-foreground-light-shade3 dark:border-foreground-dark-shade1 space-y-1.5 min-w-24',
-                                    idx === 3 && 'col-span-2 xs:col-span-1'
+                                    'px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 border border-foreground-light-shade3/60 dark:border-foreground-dark-shade1/60 space-y-2 min-w-24',
+                                    idx === 2 && 'col-span-2 xs:col-span-1'
                                 )}
                             >
-                                <div className="h-3 w-16 rounded bg-secondary/15" />
-                                <div className="h-5 w-12 rounded bg-secondary/20" />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 + idx * 0.05 }}
+                                    className="h-3 w-16 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 + idx * 0.05 }}
+                                    className="h-5 w-12 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                />
                             </div>
                         ))}
                     </div>

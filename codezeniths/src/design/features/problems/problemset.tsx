@@ -4,8 +4,9 @@ import React from 'react';
 import { ModuleSection } from './module-section';
 import { TagsSection } from './tags-section';
 import { CalendarActivitySection } from './calander-activity-section';
-import { CompanySection } from './company-section';
 import { ProblemProgressSection } from './problem-progress-section';
+import { ResumeTopicSection } from './resume-topic-section';
+import { TrendingProblemsSection } from './trending-problems-section';
 import { ProblemsSection } from '../shared/problem-list-section';
 
 export const ProblemsetSection: React.FC = () => {
@@ -21,26 +22,24 @@ export const ProblemsetSection: React.FC = () => {
                 {/* 2. Tags Filter Section */}
                 <TagsSection />
 
-                {/* 3. Mobile & Tablet Activity & Progress Cards (Hidden on desktop lg:) */}
-                {/* Column-wise 768px-1024px, Row-wise 580px-768px, Column-wise < 580px */}
-                <div className="flex flex-col min-[580px]:max-[767px]:flex-row gap-4 w-full min-w-0 lg:hidden">
-                    <div className="flex-1 min-w-0">
-                        <CalendarActivitySection />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <ProblemProgressSection />
-                    </div>
+                {/* 3. Mobile & Tablet Widgets Grid (Hidden on desktop lg:) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full min-w-0 lg:hidden">
+                    <CalendarActivitySection />
+                    <ProblemProgressSection />
+                    <ResumeTopicSection />
+                    <TrendingProblemsSection />
                 </div>
 
                 {/* 4. Problems Table List */}
-                <ProblemsSection pageContext="problemset" />
+                <ProblemsSection pageContext="explore" />
             </div>
 
             {/* Desktop Right Sidebar Section (Only visible on lg: and up) */}
             <div className="hidden lg:block lg:w-82.5 xl:w-90 shrink-0 space-y-6">
                 <CalendarActivitySection />
                 <ProblemProgressSection />
-                <CompanySection />
+                <ResumeTopicSection />
+                <TrendingProblemsSection />
             </div>
         </div>
     );

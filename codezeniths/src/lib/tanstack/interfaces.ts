@@ -68,6 +68,7 @@ export interface IUserQueryService {
     updatePhoneNumber(): any;
     updateUserPreferences(): any;
     deleteAccount(): any;
+    getUserBookmarks(input?: { userId?: string }, options?: { enabled?: boolean }): any;
 }
 
 // ─── Module Query Service Interface ─────────────────────────────────────────────
@@ -76,7 +77,6 @@ export interface IModuleQueryService {
     getModules(): any;
     getSingleModule(input: z.infer<typeof GetSingleModuleTRPCInputSchema>, options?: { enabled?: boolean }): any;
     getSingleModuleProgress(input: z.infer<typeof GetSingleModuleProgressTRPCInputSchema>, options?: { enabled?: boolean }): any;
-    getRecentlySolvedModule(): any;
     getModulesWithTopics(): any;
     toggleModuleBookmark(): any;
     toggleTopicBookmark(): any;
@@ -118,6 +118,8 @@ export interface IProblemQueryService {
     updateProblem(): any;
     getProblemProgress(input?: { userId?: string }, options?: { enabled?: boolean }): any;
     getRecentlySolvedProblems(input?: { userId?: string; limit?: number }, options?: { enabled?: boolean }): any;
+    getRecentlySolvedContext(input?: { userId?: string }, options?: { enabled?: boolean }): any;
+    getTrendingProblems(input?: { limit?: number; userId?: string }, options?: { enabled?: boolean }): any;
 }
 
 // ─── Notification Query Service Interface ────────────────────────────────────────

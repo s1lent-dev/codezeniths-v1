@@ -11,6 +11,7 @@ import {
 } from '@codezeniths/components';
 import { Card } from '@codezeniths/modules';
 import { Database, DownloadCloud, Trash2, AlertTriangle } from 'lucide-react';
+import { motion } from 'motion/react';
 
 interface DataGovernanceCardProps {
     onExportClick: () => void;
@@ -27,31 +28,71 @@ export const DataGovernanceCard: React.FC<DataGovernanceCardProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 animate-pulse">
+            <Card className="w-full p-4.5 xs:p-6 sm:p-8 rounded-md border border-foreground-light-shade3 dark:border-foreground-dark-shade1 ring-0 bg-foreground-light dark:bg-foreground-dark shadow-xs space-y-6 sm:space-y-7 relative overflow-hidden select-none font-sans group">
+                {/* Sweeping Shimmer Beam */}
+                <motion.div
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{
+                        duration: 1.8,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        repeatDelay: 0.2,
+                    }}
+                    className="absolute inset-0 z-20 pointer-events-none bg-linear-to-r from-transparent via-primary/10 dark:via-primary/20 to-transparent w-1/2 -skew-x-12"
+                />
+
                 {/* Section Header Skeleton */}
-                <div className="flex items-center gap-3">
-                    <div className="size-10 sm:size-12 rounded-sm bg-primary/15 shrink-0" />
+                <div className="flex items-center gap-3 relative z-10">
+                    <motion.div
+                        animate={{ opacity: [0.35, 0.8, 0.35] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                        className="size-10 sm:size-12 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                    />
                     <div className="space-y-2 flex-1">
-                        <div className="h-4.5 w-48 rounded bg-secondary/20" />
-                        <div className="h-3 w-64 xs:w-80 rounded bg-secondary/15" />
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.85, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 }}
+                            className="h-4.5 w-48 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                        />
+                        <motion.div
+                            animate={{ opacity: [0.35, 0.75, 0.35] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                            className="h-3 w-64 xs:w-80 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                        />
                     </div>
                 </div>
 
                 {/* Action Rows Skeleton */}
-                <div className="space-y-3.5 sm:space-y-4 pt-4 sm:pt-6">
-                    {[1, 2, 3].map((idx) => (
+                <div className="space-y-3.5 sm:space-y-4 pt-4 sm:pt-6 relative z-10">
+                    {[0, 1, 2].map((idx) => (
                         <div
                             key={idx}
-                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3.5 sm:p-4.5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 border border-foreground-light-shade3 dark:border-foreground-dark-shade1"
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3.5 sm:p-4.5 rounded-md bg-foreground-light-shade1/60 dark:bg-foreground-dark-shade1/40 border border-foreground-light-shade3/60 dark:border-foreground-dark-shade1/60"
                         >
                             <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
-                                <div className="size-10 rounded-sm bg-secondary/20 shrink-0" />
+                                <motion.div
+                                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.05 + idx * 0.06 }}
+                                    className="size-10 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                                />
                                 <div className="space-y-1.5 min-w-0 flex-1">
-                                    <div className="h-4 w-40 rounded bg-secondary/20" />
-                                    <div className="h-3 w-56 xs:w-72 rounded bg-secondary/15" />
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.85, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.08 + idx * 0.06 }}
+                                        className="h-4 w-40 rounded bg-foreground-light-shade3 dark:bg-foreground-dark-shade3"
+                                    />
+                                    <motion.div
+                                        animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.12 + idx * 0.06 }}
+                                        className="h-3 w-56 xs:w-72 rounded bg-foreground-light-shade3/70 dark:bg-foreground-dark-shade3/60"
+                                    />
                                 </div>
                             </div>
-                            <div className="h-8 w-28 rounded-sm bg-secondary/20 shrink-0" />
+                            <motion.div
+                                animate={{ opacity: [0.35, 0.75, 0.35] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.15 + idx * 0.06 }}
+                                className="h-8 w-28 rounded-sm bg-primary/15 dark:bg-primary/25 shrink-0"
+                            />
                         </div>
                     ))}
                 </div>

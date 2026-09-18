@@ -95,7 +95,7 @@ export const SearchResultItem: React.FC<SearchResultItemProps> = ({
     } else if (collection === 'user') {
       router.push(`/profile/${doc.username || doc.id}`);
     } else {
-      router.push(`/problemset/${doc.slug || ''}`);
+      router.push(`/explore/${doc.slug || ''}`);
     }
   };
 

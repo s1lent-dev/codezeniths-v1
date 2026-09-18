@@ -107,27 +107,6 @@ export const GetSingleModuleProgressOutputSchema = z.object({
     }),
 });
 
-// ─── getRecentlySolvedModule ───────────────────────────────────────────────────
-export const GetRecentlySolvedModuleInputSchema = z.object({
-    userId: z.uuidv7(),
-});
-
-export const GetRecentlySolvedModuleOutputSchema = z.object({
-    module: z.object({
-        id: z.uuidv7(),
-        title: z.string(),
-        slug: z.string(),
-        description: z.string().nullable(),
-        problemsCount: z.number().int(),
-        problemsSolvedCount: z.number().int(),
-        problemsSolvedPercentage: z.number(),
-    }).nullable(),
-    lastProblem: z.object({
-        title: z.string(),
-        slug: z.string(),
-    }).nullable(),
-});
-
 // ─── getModulesWithTopics ──────────────────────────────────────────────────────
 export const GetModulesWithTopicsInputSchema = z.object({
     userId: z.uuidv7().optional(),

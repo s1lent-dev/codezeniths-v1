@@ -86,7 +86,7 @@ export function isCheckInEligibleRoute(pathname: string | null): boolean {
 
     // Eligible routes: All home platform pages and profile pages
     const eligiblePrefixes = [
-        '/problemset',
+        '/explore',
         '/modules',
         '/tags',
         '/playlists',

@@ -41,7 +41,7 @@ export const StreakMilestoneEmail: React.FC<StreakMilestoneEmailProps> = ({
         Consistency is what separates great software engineers from the rest. You're building unbeatable problem-solving muscle memory!
       </EmailCallout>
 
-      <EmailButton href={`${appUrl}/problemset`} isDark={isDark} variant="primary">
+      <EmailButton href={`${appUrl}/explore`} isDark={isDark} variant="primary">
         Solve Today's Problem
       </EmailButton>
 

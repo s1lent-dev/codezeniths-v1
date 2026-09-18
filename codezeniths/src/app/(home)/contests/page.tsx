@@ -38,8 +38,8 @@ export default function ContestsPage() {
                     'Global Rating Leaderboards',
                     'Real-Time Elo Adjustments',
                 ]}
-                buttonText="Explore Problemset"
-                buttonHref="/problemset"
+                buttonText="Explore"
+                buttonHref="/explore"
             />
         </Suspense>
     );

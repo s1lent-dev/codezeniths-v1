@@ -38,7 +38,7 @@ export const TagsHeaderSection: React.FC = () => {
                                 { label: `${modulesCount} Core Modules`, dotColor: 'bg-teal' },
                             ]}
                             description="Explore coding problems categorized by algorithmic techniques, data structures, and domain topics. Use filters to hone specific technical skill gaps."
-                            actionHref="/problemset"
+                            actionHref="/explore"
                             actionLabel="Practice"
                         />
                     )}

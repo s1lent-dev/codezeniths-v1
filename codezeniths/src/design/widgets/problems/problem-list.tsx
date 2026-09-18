@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
+import Link from 'next/link';
 import { cn } from '@codezeniths/design/cn';
 import { ProblemRow, ProblemItem } from './problem-row';
 import { ProblemRowSkeleton } from './problem-list-skeleton';
@@ -26,6 +27,8 @@ import {
     RotateCcw,
     Sparkles,
     CheckCircle2,
+    ArrowUpRight,
+    Layers,
 } from 'lucide-react';
 import {
     Button,
@@ -42,7 +45,7 @@ import {
     ScrollArea,
 } from '@codezeniths/components';
 
-export type PageContext = 'problemset' | 'tags' | 'favourites' | 'topic' | 'playlist';
+export type PageContext = 'problemset' | 'explore' | 'tags' | 'favourites' | 'topic' | 'playlist';
 export type ViewMode = 'infinite' | 'paginated';
 
 export interface ProblemListProps {
@@ -52,6 +55,7 @@ export interface ProblemListProps {
     solvedCount?: number;
     filters?: ProblemFilterInput;
     sorting?: ProblemSortingInput;
+    showDirectActions?: boolean;
     onFilterChange?: (filters: ProblemFilterInput) => void;
     onSortingChange?: (sorting: ProblemSortingInput) => void;
     onToggleSolved?: (problemId: string, currentSolved: boolean) => void;
@@ -77,12 +81,13 @@ export interface ProblemListProps {
 const columnHelper = createColumnHelper<ProblemItem>();
 
 export const ProblemList: React.FC<ProblemListProps> = ({
-    pageContext = 'problemset',
+    pageContext = 'explore',
     problems,
     total = problems.length,
     solvedCount = problems.filter((p) => p.status === 'solved').length,
     filters = {},
     sorting = { sortBy: 'name', order: 'asc' },
+    showDirectActions: customShowDirectActions,
     onFilterChange,
     onSortingChange,
     onToggleSolved,
@@ -102,6 +107,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
     onLoadMore,
     className,
 }) => {
+    const showDirectActions = customShowDirectActions ?? (pageContext === 'problemset');
     const [internalViewMode, setInternalViewMode] = useState<ViewMode>('infinite');
     const viewMode = externalViewMode ?? internalViewMode;
 
@@ -655,6 +661,24 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                         <span>Paginated</span>
                                         {viewMode === 'paginated' && <CheckCircle2 className="w-3.5 h-3.5 text-primary" />}
                                     </button>
+
+                                    {/* Explore All Problems Link (when not on the dedicated problemset page) */}
+                                    {pageContext !== 'problemset' && (
+                                        <>
+                                            <div className="my-1 border-t border-foreground-light-shade3 dark:border-foreground-dark-shade3" />
+                                            <Link
+                                                href="/problemset"
+                                                onClick={() => setMenuOpen(false)}
+                                                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-body-light dark:text-body-dark hover:text-primary hover:bg-background-light dark:hover:bg-background-dark cursor-pointer transition-colors"
+                                            >
+                                                <span className="flex items-center gap-1.5 font-medium">
+                                                    <Layers className="size-3.5 text-primary" />
+                                                    Explore All Problems
+                                                </span>
+                                                <ArrowUpRight className="size-3 text-muted-light dark:text-muted-dark" />
+                                            </Link>
+                                        </>
+                                    )}
                                 </div>
                             </PopoverContent>
                         </Popover>
@@ -682,6 +706,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                         key={problem.id}
                                         problem={problem}
                                         index={index}
+                                        showDirectActions={showDirectActions}
                                         isBusy={isProblemBusy?.(problem.id)}
                                         onToggleSolved={onToggleSolved}
                                         onToggleRevisit={onToggleRevisit}
@@ -727,7 +752,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                     <tr style={{ height: `${paddingTop}px` }} className="border-0 p-0 m-0">
                                         <td className="w-12 min-w-[48px] max-w-[48px] p-0 border-0" />
                                         <td className="w-auto p-0 border-0" />
-                                        <td className="w-44 min-w-44 max-w-44 p-0 border-0" />
+                                        <td className={cn("p-0 border-0", showDirectActions ? "w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]" : "w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]")} />
                                     </tr>
                                 )}
                                 {virtualRows.map((virtualRow) => {
@@ -741,6 +766,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                             data-index={virtualRow.index}
                                             problem={problem}
                                             index={virtualRow.index}
+                                            showDirectActions={showDirectActions}
                                             isBusy={isProblemBusy?.(problem.id)}
                                             onToggleSolved={onToggleSolved}
                                             onToggleRevisit={onToggleRevisit}
@@ -752,7 +778,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                     <tr style={{ height: `${paddingBottom}px` }} className="border-0 p-0 m-0">
                                         <td className="w-12 min-w-[48px] max-w-[48px] p-0 border-0" />
                                         <td className="w-auto p-0 border-0" />
-                                        <td className="w-44 min-w-44 max-w-44 p-0 border-0" />
+                                        <td className={cn("p-0 border-0", showDirectActions ? "w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]" : "w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]")} />
                                     </tr>
                                 )}
                                 {/* Infinite Scroll Skeleton Row Placeholders (Zero Layout Shift with Breathing Effect) */}
@@ -762,6 +788,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                             <ProblemRowSkeleton
                                                 key={`fetching-skeleton-${idx}`}
                                                 index={problems.length + idx}
+                                                showDirectActions={showDirectActions}
                                             />
                                         ))}
                                     </>

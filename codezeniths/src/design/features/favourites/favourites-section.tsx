@@ -22,10 +22,10 @@ export const FavouritesSection: React.FC = () => {
                     {error?.message || "We couldn't fetch your favourited problems statistics at this time."}
                 </Typography>
                 <Link
-                    href="/problemset"
+                    href="/explore"
                     className="inline-flex items-center px-4 py-2 rounded-md bg-primary text-white text-xs font-semibold hover:bg-primary-shade2 transition-colors"
                 >
-                    Go to Problemset
+                    Go to Explore
                 </Link>
             </Card>
         );

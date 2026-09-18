@@ -63,7 +63,7 @@ export const useSigninForm = () => {
         try {
             await authClient.signIn.social({
                 provider: 'google',
-                callbackURL: '/problemset',
+                callbackURL: '/explore',
                 errorCallbackURL: '/verify-email',
             });
         } catch (err: any) {
@@ -75,7 +75,7 @@ export const useSigninForm = () => {
         try {
             await authClient.signIn.social({
                 provider: 'github',
-                callbackURL: '/problemset',
+                callbackURL: '/explore',
                 errorCallbackURL: '/verify-email',
             });
         } catch (err: any) {
@@ -118,7 +118,7 @@ export const useSigninForm = () => {
             if (res.error) throw new Error(res.error.message);
 
             toast.success('Signed in successfully!');
-            router.push('/problemset');
+            router.push('/explore');
 
         } catch (error: any) {
             toast.error(error.message || 'Invalid credentials. Please try again.');
@@ -150,7 +150,7 @@ export const useSigninForm = () => {
             setIsSendingMagicLink(true);
             const res = await authClient.signIn.magicLink({
                 email: data.identifier,
-                callbackURL: '/problemset',
+                callbackURL: '/explore',
                 fetchOptions: {
                     headers: { 'x-captcha-response': turnstileToken }
                 }

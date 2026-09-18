@@ -20,12 +20,12 @@ export const queryKeys = {
             ['user', 'monthlyActivity', year ?? new Date().getUTCFullYear(), month ?? (new Date().getUTCMonth() + 1)] as const,
         profileDetails: (usernameOrId?: string) => ['user', 'profileDetails', usernameOrId ?? 'me'] as const,
         onboardingProfile: (userId?: string) => ['user', 'onboardingProfile', userId ?? 'me'] as const,
+        bookmarks: (userId?: string) => ['user', 'bookmarks', userId ?? 'me'] as const,
     },
     module: {
         list: () => ['module', 'list'] as const,
         single: (idOrSlug: string) => ['module', 'single', idOrSlug] as const,
         progress: (idOrSlug: string) => ['module', 'progress', idOrSlug] as const,
-        recentlySolved: () => ['module', 'recentlySolved'] as const,
         listWithTopics: () => ['module', 'listWithTopics'] as const,
     },
     topic: {
@@ -49,6 +49,10 @@ export const queryKeys = {
         progress: (userId?: string) => ['problem', 'progress', userId ?? 'me'] as const,
         recentlySolved: (userId?: string, limit?: number) =>
             ['problem', 'recentlySolved', userId ?? 'me', limit ?? 10] as const,
+        recentlySolvedContext: (userId?: string) =>
+            ['problem', 'recentlySolvedContext', userId ?? 'me'] as const,
+        trending: (limit?: number) =>
+            ['problem', 'trending', limit ?? 10] as const,
         note: (problemId: string, userId?: string) =>
             ['problem', 'note', problemId, userId ?? 'me'] as const,
     },

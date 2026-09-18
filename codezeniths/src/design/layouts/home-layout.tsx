@@ -14,16 +14,18 @@ export interface HomeLayoutProps {
 export const HomeLayout: React.FC<HomeLayoutProps> = ({ children }) => {
     const pathname = usePathname();
     
-    // Exception: /profile/* should not use the sidebar layout
-    const isProfileRoute = pathname.startsWith('/profile');
+    // Exception: /profile/* and /problemset should not use the static sidebar layout
+    const isNoSidebarRoute = pathname.startsWith('/profile') || pathname === '/problemset' || pathname.startsWith('/problemset');
 
-    if (isProfileRoute) {
+    if (isNoSidebarRoute) {
         return (
             <MainLayout mainClassName="flex-col" className="h-screen overflow-hidden" showFooter={false}>
                 <div className="flex flex-1 min-h-0 w-full max-w-[1920px] mx-auto overflow-hidden pt-20">
                     <div className="flex-1 flex flex-col min-w-0 bg-background-light dark:bg-background-dark relative">
                         <ScrollArea className="flex-1 min-h-0">
-                            {children}
+                            <div className="p-3 xs:p-4 sm:p-5 md:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0 overflow-hidden">
+                                {children}
+                            </div>
                         </ScrollArea>
                     </div>
                 </div>

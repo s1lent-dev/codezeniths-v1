@@ -53,6 +53,8 @@ import {
     GetUserYearlyActivityOutputSchema,
     GetUserProfileDetailsInputSchema,
     GetUserProfileDetailsOutputSchema,
+    GetUserBookmarksInputSchema,
+    GetUserBookmarksOutputSchema,
 } from '@codezeniths/schemas/db';
 import { IUserQueries } from './interfaces/user.queries.interface';
 import {
@@ -1406,6 +1408,230 @@ export class UserQueries implements IUserQueries {
             return {
                 success: true,
                 deletedUser: existingUser,
+            };
+        })
+        .build();
+
+    getUserBookmarks = qRPC()
+        .input(GetUserBookmarksInputSchema)
+        .output(GetUserBookmarksOutputSchema)
+        .handler(async (payload) => {
+            logger.info('Executing getUserBookmarks query', { payload });
+            const { userId } = payload;
+
+            if (!userId) {
+                return {
+                    modules: [],
+                    topics: [],
+                    tags: [],
+                    totalCount: 0,
+                };
+            }
+
+            // 1. Fetch module, topic, and tag bookmarks concurrently
+            const [moduleBookmarks, topicBookmarks, tagBookmarks] = await Promise.all([
+                prisma.moduleBookmark.findMany({
+                    where: { userId },
+                    orderBy: { createdAt: 'desc' },
+                    include: {
+                        module: {
+                            include: {
+                                topics: {
+                                    include: {
+                                        problems: {
+                                            select: { id: true },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }),
+                prisma.topicBookmark.findMany({
+                    where: { userId },
+                    orderBy: { createdAt: 'desc' },
+                    include: {
+                        topic: {
+                            include: {
+                                module: {
+                                    select: { title: true, slug: true },
+                                },
+                                problems: {
+                                    select: { id: true },
+                                },
+                            },
+                        },
+                    },
+                }),
+                prisma.tagBookmark.findMany({
+                    where: { userId },
+                    orderBy: { createdAt: 'desc' },
+                    include: {
+                        tag: {
+                            include: {
+                                module: {
+                                    select: { title: true, slug: true },
+                                },
+                                problems: {
+                                    select: { problemId: true },
+                                },
+                            },
+                        },
+                    },
+                }),
+            ]);
+
+            // 2. Collect all distinct problem IDs across all three sets for a single batch progress lookup
+            const allProblemIds = new Set<string>();
+
+            for (const mb of moduleBookmarks) {
+                if (!mb.module) continue;
+                for (const t of mb.module.topics) {
+                    for (const p of t.problems) {
+                        allProblemIds.add(p.id);
+                    }
+                }
+            }
+
+            for (const tb of topicBookmarks) {
+                if (!tb.topic) continue;
+                for (const p of tb.topic.problems) {
+                    allProblemIds.add(p.id);
+                }
+            }
+
+            for (const tb of tagBookmarks) {
+                if (!tb.tag) continue;
+                for (const pt of tb.tag.problems) {
+                    allProblemIds.add(pt.problemId);
+                }
+            }
+
+            // 3. Batch fetch solved problem IDs for user in a single point query
+            const solvedProblemIdSet = new Set<string>();
+            if (allProblemIds.size > 0) {
+                const solvedProgress = await prisma.problemProgress.findMany({
+                    where: {
+                        userId,
+                        problemId: { in: Array.from(allProblemIds) },
+                        status: 'solved',
+                    },
+                    select: { problemId: true },
+                });
+                for (const sp of solvedProgress) {
+                    solvedProblemIdSet.add(sp.problemId);
+                }
+            }
+
+            // 4. Map modules with progress
+            const modules = moduleBookmarks
+                .filter((mb) => mb.module != null)
+                .map((mb) => {
+                    const mod = mb.module;
+                    let problemsCount = 0;
+                    let problemsSolvedCount = 0;
+
+                    for (const t of mod.topics) {
+                        for (const p of t.problems) {
+                            problemsCount++;
+                            if (solvedProblemIdSet.has(p.id)) {
+                                problemsSolvedCount++;
+                            }
+                        }
+                    }
+
+                    const problemsSolvedPercentage =
+                        problemsCount > 0
+                            ? Math.round((problemsSolvedCount / problemsCount) * 100)
+                            : 0;
+
+                    return {
+                        id: mod.id,
+                        title: mod.title,
+                        slug: mod.slug,
+                        description: mod.description,
+                        problemsCount,
+                        problemsSolvedCount,
+                        problemsSolvedPercentage,
+                        bookmarkedAt: mb.createdAt,
+                    };
+                });
+
+            // 5. Map topics with progress
+            const topics = topicBookmarks
+                .filter((tb) => tb.topic != null)
+                .map((tb) => {
+                    const top = tb.topic;
+                    const problemsCount = top.problems.length;
+                    let problemsSolvedCount = 0;
+
+                    for (const p of top.problems) {
+                        if (solvedProblemIdSet.has(p.id)) {
+                            problemsSolvedCount++;
+                        }
+                    }
+
+                    const problemsSolvedPercentage =
+                        problemsCount > 0
+                            ? Math.round((problemsSolvedCount / problemsCount) * 100)
+                            : 0;
+
+                    return {
+                        id: top.id,
+                        title: top.title,
+                        slug: top.slug,
+                        description: top.description,
+                        level: top.level,
+                        moduleSlug: top.module?.slug ?? null,
+                        moduleTitle: top.module?.title ?? null,
+                        problemsCount,
+                        problemsSolvedCount,
+                        problemsSolvedPercentage,
+                        bookmarkedAt: tb.createdAt,
+                    };
+                });
+
+            // 6. Map tags with progress
+            const tags = tagBookmarks
+                .filter((tb) => tb.tag != null)
+                .map((tb) => {
+                    const tag = tb.tag;
+                    const problemsCount = tag.problems.length;
+                    let problemsSolvedCount = 0;
+
+                    for (const pt of tag.problems) {
+                        if (solvedProblemIdSet.has(pt.problemId)) {
+                            problemsSolvedCount++;
+                        }
+                    }
+
+                    const problemsSolvedPercentage =
+                        problemsCount > 0
+                            ? Math.round((problemsSolvedCount / problemsCount) * 100)
+                            : 0;
+
+                    return {
+                        id: tag.id,
+                        title: tag.name,
+                        slug: tag.slug,
+                        description: tag.description,
+                        level: tag.level,
+                        moduleSlug: tag.module?.slug ?? null,
+                        moduleTitle: tag.module?.title ?? null,
+                        problemsCount,
+                        problemsSolvedCount,
+                        problemsSolvedPercentage,
+                        bookmarkedAt: tb.createdAt,
+                    };
+                });
+
+            const totalCount = modules.length + topics.length + tags.length;
+
+            return {
+                modules,
+                topics,
+                tags,
+                totalCount,
             };
         })
         .build();

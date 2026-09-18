@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DifficultySchema, ProgressStatusSchema } from '../db.schema';
+import { DifficultySchema, ProgressStatusSchema, LevelSchema } from '../db.schema';
 import { ProblemFilterInputSchema, ProblemSortingInputSchema } from './shared/problem-filter.schema';
 import { paginatedOutput, cursorOutput } from './shared/pagination.schema';
 
@@ -239,3 +239,94 @@ export const RecentlySolvedProblemItemSchema = z.object({
 });
 
 export const GetRecentlySolvedProblemsOutputSchema = z.array(RecentlySolvedProblemItemSchema);
+
+// ─── getRecentlySolvedContext ────────────────────────────────────────────────
+
+export const GetRecentlySolvedContextInputSchema = z.object({
+    userId: z.uuidv7(),
+});
+
+export const RecentlySolvedProblemContextItemSchema = z.object({
+    id: z.uuidv7(),
+    title: z.string(),
+    slug: z.string(),
+    difficulty: DifficultySchema,
+    solvedAt: z.coerce.date().nullable(),
+});
+
+export const RecentlySolvedModuleContextItemSchema = z.object({
+    id: z.uuidv7(),
+    title: z.string(),
+    slug: z.string(),
+    description: z.string().nullable().optional(),
+    problemsCount: z.number().int(),
+    problemsSolvedCount: z.number().int(),
+    problemsSolvedPercentage: z.number(),
+});
+
+export const RecentlySolvedTopicContextItemSchema = z.object({
+    id: z.uuidv7(),
+    title: z.string(),
+    slug: z.string(),
+    description: z.string().nullable().optional(),
+    level: LevelSchema.nullable().optional(),
+    problemsCount: z.number().int(),
+    problemsSolvedCount: z.number().int(),
+    problemsSolvedPercentage: z.number(),
+});
+
+export const RecentlySolvedTagContextItemSchema = z.object({
+    id: z.uuidv7(),
+    name: z.string(),
+    slug: z.string(),
+});
+
+export const GetRecentlySolvedContextOutputSchema = z.object({
+    problem: RecentlySolvedProblemContextItemSchema.nullable(),
+    module: RecentlySolvedModuleContextItemSchema.nullable(),
+    topic: RecentlySolvedTopicContextItemSchema.nullable(),
+    tags: z.array(RecentlySolvedTagContextItemSchema),
+});
+
+// ─── getTrendingProblems ─────────────────────────────────────────────────────
+
+export const GetTrendingProblemsInputSchema = z.object({
+    limit: z.coerce.number().int().min(1).max(20).default(10),
+    userId: z.uuidv7().optional(),
+});
+
+export const TrendingProblemItemSchema = z.object({
+    id: z.uuidv7(),
+    title: z.string(),
+    slug: z.string(),
+    difficulty: DifficultySchema,
+    favouriteCount: z.number().int().default(0),
+    order: z.number().int().default(0),
+    tags: z.array(
+        z.object({
+            id: z.uuidv7(),
+            name: z.string(),
+            slug: z.string(),
+        })
+    ),
+    topic: z
+        .object({
+            id: z.uuidv7(),
+            title: z.string(),
+            slug: z.string(),
+        })
+        .nullable()
+        .optional(),
+    module: z
+        .object({
+            id: z.uuidv7(),
+            title: z.string(),
+            slug: z.string(),
+        })
+        .nullable()
+        .optional(),
+    isSolved: z.boolean().default(false),
+    isFavourite: z.boolean().default(false),
+});
+
+export const GetTrendingProblemsOutputSchema = z.array(TrendingProblemItemSchema);

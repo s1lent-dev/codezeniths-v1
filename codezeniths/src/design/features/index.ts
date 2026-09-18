@@ -9,5 +9,7 @@ export * from './shared/activity';
 export * from './profile';
 export * from './leaderboards';
 export * from './playlists';
+export * from './bookmarks';
 export * from './settings';
+export * from './problemset';
 

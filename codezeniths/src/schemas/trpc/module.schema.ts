@@ -3,7 +3,6 @@ import {
     GetModulesOutputSchema,
     GetSingleModuleOutputSchema,
     GetSingleModuleProgressOutputSchema,
-    GetRecentlySolvedModuleOutputSchema,
     GetModulesWithTopicsOutputSchema,
 } from '@codezeniths/schemas/db';
 
@@ -32,10 +31,6 @@ export const GetSingleModuleProgressTRPCInputSchema = z.object({
 });
 
 export const GetSingleModuleProgressTRPCOutputSchema = GetSingleModuleProgressOutputSchema;
-
-// ─── getRecentlySolvedModule ───────────────────────────────────────────────────
-
-export const GetRecentlySolvedModuleTRPCOutputSchema = GetRecentlySolvedModuleOutputSchema;
 
 // ─── getModulesWithTopics ──────────────────────────────────────────────────────
 

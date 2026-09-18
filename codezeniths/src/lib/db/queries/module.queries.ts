@@ -10,8 +10,6 @@ import {
     GetSingleModuleOutputSchema,
     GetSingleModuleProgressInputSchema,
     GetSingleModuleProgressOutputSchema,
-    GetRecentlySolvedModuleInputSchema,
-    GetRecentlySolvedModuleOutputSchema,
     GetModulesWithTopicsInputSchema,
     GetModulesWithTopicsOutputSchema,
     ToggleModuleBookmarkInputSchema,
@@ -451,82 +449,6 @@ export class ModuleQueries implements IModuleQueries {
                 problemsSolvedPercentage,
                 problemsCountByDifficulty,
                 problemsSolvedCountByDifficulty,
-            };
-        })
-        .build();
-
-    getRecentlySolvedModule = qRPC()
-        .input(GetRecentlySolvedModuleInputSchema)
-        .output(GetRecentlySolvedModuleOutputSchema)
-        .handler(async (payload) => {
-            logger.info('Executing getRecentlySolvedModule query', { payload });
-            const { userId } = payload;
-
-            const latestProgress = await prisma.problemProgress.findFirst({
-                where: { userId, status: 'solved' },
-                orderBy: { updatedAt: 'desc' },
-                select: {
-                    problem: {
-                        select: {
-                            title: true,
-                            slug: true,
-                            topic: {
-                                select: {
-                                    module: {
-                                        select: {
-                                            id: true,
-                                            title: true,
-                                            slug: true,
-                                            description: true,
-                                            topics: {
-                                                select: {
-                                                    problems: {
-                                                        select: { id: true },
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            });
-
-            if (!latestProgress || !latestProgress.problem?.topic?.module) {
-                return { module: null, lastProblem: null };
-            }
-
-            const targetModule = latestProgress.problem.topic.module;
-            const allModuleProblemIds = targetModule.topics.flatMap((t) => t.problems.map((p) => p.id));
-            const problemsCount = allModuleProblemIds.length;
-
-            const solvedCount = await prisma.problemProgress.count({
-                where: {
-                    userId,
-                    problemId: { in: allModuleProblemIds },
-                    status: 'solved',
-                },
-            });
-
-            const problemsSolvedPercentage =
-                problemsCount > 0 ? parseFloat(((solvedCount / problemsCount) * 100).toFixed(2)) : 0;
-
-            return {
-                module: {
-                    id: targetModule.id,
-                    title: targetModule.title,
-                    slug: targetModule.slug,
-                    description: targetModule.description,
-                    problemsCount,
-                    problemsSolvedCount: solvedCount,
-                    problemsSolvedPercentage,
-                },
-                lastProblem: {
-                    title: latestProgress.problem.title,
-                    slug: latestProgress.problem.slug,
-                },
             };
         })
         .build();

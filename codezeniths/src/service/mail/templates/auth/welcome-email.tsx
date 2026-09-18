@@ -59,7 +59,7 @@ export const WelcomeEmail: React.FC<WelcomeEmailProps> = ({
         </table>
       </EmailCallout>
 
-      <EmailButton href={`${appUrl}/problemset`} isDark={isDark} variant="primary">
+      <EmailButton href={`${appUrl}/explore`} isDark={isDark} variant="primary">
         Start Solving Problems
       </EmailButton>
 

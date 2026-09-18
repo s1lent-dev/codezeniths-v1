@@ -18,7 +18,7 @@ export interface UseProblemsOptions {
 }
 
 export function useProblems({
-    pageContext = 'problemset',
+    pageContext = 'explore',
     fixedModuleSlug,
     fixedTopicSlug,
     fixedTagSlug,
@@ -104,7 +104,7 @@ export function useProblems({
     const { toggleSolved, toggleFavourite, toggleRevisit, isProblemBusy } = useProblemActionManager();
 
     const isScopedContext = Boolean(
-        fixedPlaylistSlug || fixedTopicSlug || fixedTagSlug || fixedModuleSlug || pageContext !== 'problemset'
+        fixedPlaylistSlug || fixedTopicSlug || fixedTagSlug || fixedModuleSlug || pageContext !== 'explore'
     );
 
     // Derive Active Data Set according to viewMode

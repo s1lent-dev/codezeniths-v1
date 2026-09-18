@@ -73,6 +73,8 @@ import {
     UpdateUserPhoneNumberOutputSchema,
     UpdateUserPreferencesInputSchema,
     UpdateUserPreferencesOutputSchema,
+    GetUserBookmarksTRPCInputSchema,
+    GetUserBookmarksTRPCOutputSchema,
 } from '@/schemas/trpc';
 import type { IUserQueryService } from '../interfaces';
 
@@ -582,6 +584,19 @@ export class UserQueryService implements IUserQueryService {
             onSuccess: async () => {
                 queryClient.clear();
             },
+        });
+    }
+
+    getUserBookmarks(input?: { userId?: string }, options?: { enabled?: boolean }) {
+        const validatedInput = GetUserBookmarksTRPCInputSchema.parse(input);
+        return useQuery({
+            queryKey: queryKeys.user.bookmarks(validatedInput?.userId),
+            queryFn: async () => {
+                const raw = await trpcClient.user.getUserBookmarks.query(validatedInput);
+                return GetUserBookmarksTRPCOutputSchema.parse(raw);
+            },
+            enabled: options?.enabled ?? true,
+            ...CACHE_TIERS.USER_PROGRESS,
         });
     }
 }

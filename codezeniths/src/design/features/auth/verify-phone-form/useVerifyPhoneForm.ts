@@ -162,7 +162,7 @@ export const useVerifyPhoneForm = () => {
             if (updatedUser && !updatedUser.isOnboardingComplete) {
                 router.push('/complete-profile');
             } else {
-                router.push('/problemset');
+                router.push('/explore');
             }
         } catch (error: any) {
             toast.error(error.message || 'Invalid SMS verification code.');

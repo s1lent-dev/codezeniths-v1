@@ -5,8 +5,6 @@ import {
     GetSingleModuleOutputSchema,
     GetSingleModuleProgressInputSchema,
     GetSingleModuleProgressOutputSchema,
-    GetRecentlySolvedModuleInputSchema,
-    GetRecentlySolvedModuleOutputSchema,
     GetModulesWithTopicsInputSchema,
     GetModulesWithTopicsOutputSchema,
     ToggleModuleBookmarkInputSchema,
@@ -25,10 +23,6 @@ export interface IModuleQueries {
     getSingleModuleProgress: (
         payload: z.infer<typeof GetSingleModuleProgressInputSchema>,
     ) => Promise<z.infer<typeof GetSingleModuleProgressOutputSchema>>;
-
-    getRecentlySolvedModule: (
-        payload: z.infer<typeof GetRecentlySolvedModuleInputSchema>,
-    ) => Promise<z.infer<typeof GetRecentlySolvedModuleOutputSchema>>;
 
     getModulesWithTopics: (
         payload: z.infer<typeof GetModulesWithTopicsInputSchema>,

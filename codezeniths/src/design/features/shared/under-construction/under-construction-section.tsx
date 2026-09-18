@@ -24,8 +24,8 @@ export const UnderConstructionSection: React.FC<UnderConstructionSectionProps> =
     title,
     description,
     features = [],
-    buttonText = 'Explore Problemset',
-    buttonHref = '/problemset',
+    buttonText = 'Explore',
+    buttonHref = '/explore',
     className,
 }) => {
     return (
