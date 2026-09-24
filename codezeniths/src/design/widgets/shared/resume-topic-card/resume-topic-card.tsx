@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { Target, ArrowRight, Layers } from 'lucide-react';
 import {
@@ -48,9 +48,180 @@ export interface RecentlySolvedTopicData {
     }>;
 }
 
+export interface FeaturedTopicItem {
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    level: TopicLevel;
+    problemsCount: number;
+    problemsSolvedCount: number;
+    problemsSolvedPercentage: number;
+    module: {
+        id: string;
+        title: string;
+        slug: string;
+    };
+    tags: Array<{
+        id: string;
+        name: string;
+        slug: string;
+    }>;
+}
+
+/**
+ * Verified fallback topic from database (Arrays & Strings in module-dsa)
+ */
+export const ACTIVE_FALLBACK_TOPIC: FeaturedTopicItem = {
+    id: '01a03318-b80c-70a9-83c9-f1262d10cf0c',
+    title: 'Arrays & Strings',
+    slug: 'topic-arrays-strings',
+    description: 'Foundational array and string manipulation problems covering traversal, in-place updates, and character-level processing.',
+    level: 'fundamental',
+    problemsCount: 49,
+    problemsSolvedCount: 0,
+    problemsSolvedPercentage: 0,
+    module: {
+        id: '01a03315-4c53-707f-b3e8-1798693f0da4',
+        title: 'Data Structures and Algorithms',
+        slug: 'module-dsa',
+    },
+    tags: [
+        { id: 'tag-arrays', name: 'Arrays', slug: 'tag-arrays' },
+        { id: 'tag-strings', name: 'Strings', slug: 'tag-strings' },
+        { id: 'tag-two-pointers', name: 'Two Pointers', slug: 'tag-two-pointers' },
+    ],
+};
+
+/**
+ * 6 Verified Candidate Featured Topics from the Database
+ */
+export const FEATURED_TOPICS_POOL: FeaturedTopicItem[] = [
+    {
+        id: '01a03318-d4a2-702f-b047-b3328cac3dbd',
+        title: 'Dynamic Programming',
+        slug: 'topic-dynamic-programming',
+        description: 'Breaking problems into overlapping subproblems and caching results to avoid redundant computation.',
+        level: 'advanced',
+        problemsCount: 86,
+        problemsSolvedCount: 0,
+        problemsSolvedPercentage: 0,
+        module: {
+            id: '01a03315-4c53-707f-b3e8-1798693f0da4',
+            title: 'Data Structures and Algorithms',
+            slug: 'module-dsa',
+        },
+        tags: [
+            { id: 'tag-dp', name: 'Dynamic Programming', slug: 'tag-dynamic-programming' },
+            { id: 'tag-memoization', name: 'Memoization', slug: 'tag-memoization' },
+            { id: 'tag-recursion', name: 'Recursion', slug: 'tag-recursion' },
+        ],
+    },
+    {
+        id: '01a03318-c57a-7065-9852-c3a2f3bf9bcf',
+        title: 'Sliding Window',
+        slug: 'topic-sliding-window',
+        description: 'Optimizing contiguous subarray and substring problems by maintaining an efficient dynamic window.',
+        level: 'intermediate',
+        problemsCount: 26,
+        problemsSolvedCount: 0,
+        problemsSolvedPercentage: 0,
+        module: {
+            id: '01a03315-4c53-707f-b3e8-1798693f0da4',
+            title: 'Data Structures and Algorithms',
+            slug: 'module-dsa',
+        },
+        tags: [
+            { id: 'tag-sliding-window', name: 'Sliding Window', slug: 'tag-sliding-window' },
+            { id: 'tag-arrays', name: 'Arrays', slug: 'tag-arrays' },
+            { id: 'tag-two-pointers', name: 'Two Pointers', slug: 'tag-two-pointers' },
+        ],
+    },
+    {
+        id: '01a03318-cfea-70ba-aeb3-3909397f7191',
+        title: 'Recursion & Backtracking',
+        slug: 'topic-recursion-backtracking',
+        description: "Solving problems by exploring choices recursively and undoing decisions that don't lead to a solution.",
+        level: 'intermediate',
+        problemsCount: 38,
+        problemsSolvedCount: 0,
+        problemsSolvedPercentage: 0,
+        module: {
+            id: '01a03315-4c53-707f-b3e8-1798693f0da4',
+            title: 'Data Structures and Algorithms',
+            slug: 'module-dsa',
+        },
+        tags: [
+            { id: 'tag-recursion', name: 'Recursion', slug: 'tag-recursion' },
+            { id: 'tag-backtracking', name: 'Backtracking', slug: 'tag-backtracking' },
+            { id: 'tag-stack', name: 'Stack', slug: 'tag-stack' },
+        ],
+    },
+    {
+        id: '01a03319-2420-70b6-8043-5facb55b2fcc',
+        title: 'System Design Scenarios',
+        slug: 'topic-system-design-scenarios',
+        description: 'Designing real-world system architectures, scalable distributed services, and high-scale scenarios.',
+        level: 'advanced',
+        problemsCount: 78,
+        problemsSolvedCount: 0,
+        problemsSolvedPercentage: 0,
+        module: {
+            id: '01a03315-55d1-70f2-9ede-16e7ee028088',
+            title: 'System Design',
+            slug: 'module-system-design',
+        },
+        tags: [
+            { id: 'tag-system-design', name: 'System Design', slug: 'tag-system-design' },
+            { id: 'tag-scalability', name: 'Scalability', slug: 'tag-scalability' },
+            { id: 'tag-storage', name: 'Storage & Systems', slug: 'tag-storage' },
+        ],
+    },
+    {
+        id: '01a03319-0f62-70b7-b087-43b92f75a6c0',
+        title: 'Functions & Closures',
+        slug: 'topic-functions-closures',
+        description: 'Mastering first-class functions, lexical scope, closures, and higher-order execution in JavaScript.',
+        level: 'fundamental',
+        problemsCount: 16,
+        problemsSolvedCount: 0,
+        problemsSolvedPercentage: 0,
+        module: {
+            id: '01a03315-5460-754a-a92a-fa1f977bfb42',
+            title: 'Javascript Internals',
+            slug: 'module-javascript',
+        },
+        tags: [
+            { id: 'tag-js', name: 'Javascript', slug: 'tag-javascript' },
+            { id: 'tag-functions', name: 'Functions', slug: 'tag-functions' },
+            { id: 'tag-closures', name: 'Closures', slug: 'tag-closures' },
+        ],
+    },
+    {
+        id: '01a03318-efea-70ee-91e8-6e7e17816d86',
+        title: 'Memory Management',
+        slug: 'topic-memory-management',
+        description: 'Virtual memory, paging, segmentation, and page replacement algorithms.',
+        level: 'intermediate',
+        problemsCount: 15,
+        problemsSolvedCount: 0,
+        problemsSolvedPercentage: 0,
+        module: {
+            id: '01a03315-4f36-74d3-b1d6-44431eec49e4',
+            title: 'Operating System',
+            slug: 'module-os',
+        },
+        tags: [
+            { id: 'tag-os', name: 'Operating System', slug: 'tag-os' },
+            { id: 'tag-memory', name: 'Virtual Memory', slug: 'tag-virtual-memory' },
+            { id: 'tag-paging', name: 'Paging', slug: 'tag-paging' },
+        ],
+    },
+];
+
 export interface ResumeTopicCardProps {
     recentTopicData?: RecentlySolvedTopicData | null;
-    featuredTopicData?: any;
+    featuredTopicData?: FeaturedTopicItem | null;
     isLoading?: boolean;
     className?: string;
 }
@@ -144,34 +315,41 @@ export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = ({
     isLoading = false,
     className,
 }) => {
+    const hasRecent = Boolean(recentTopicData?.topic);
     const recentTopic = recentTopicData?.topic;
     const parentModule = recentTopicData?.module;
     const lastProblem = recentTopicData?.lastProblem;
-    const tags = recentTopicData?.tags ?? [];
+    const recentTags = recentTopicData?.tags ?? [];
 
-    const featuredTopic = featuredTopicData
-        ? {
-              id: featuredTopicData.id,
-              title: featuredTopicData.title,
-              slug: featuredTopicData.slug,
-              description: featuredTopicData.description || 'Master core topic patterns and techniques required for coding assessments.',
-              level: featuredTopicData.level || 'intermediate',
-              problemsCount: featuredTopicData.progress?.problemsCount ?? 20,
-              problemsSolvedCount: featuredTopicData.progress?.problemsSolvedCount ?? 0,
-              problemsSolvedPercentage: featuredTopicData.progress?.problemsSolvedPercentage ?? 0,
-          }
-        : null;
+    // Stable random selection among the 6 verified candidate featured topics
+    const randomFeatured = useMemo(() => {
+        const randomIndex = Math.floor(Math.random() * FEATURED_TOPICS_POOL.length);
+        return FEATURED_TOPICS_POOL[randomIndex] || ACTIVE_FALLBACK_TOPIC;
+    }, []);
 
-    const activeTopic = recentTopic || featuredTopic || {
-        id: 'topic-arrays',
-        title: 'Arrays & Hashing',
-        slug: 'arrays-and-hashing',
-        description: 'Master core frequency counting, prefix sums, and two-pointer arrays.',
-        level: 'fundamental',
-        problemsCount: 24,
-        problemsSolvedCount: 0,
-        problemsSolvedPercentage: 0,
-    };
+    // Resolve active topic entity and metadata
+    const activeFeatured = featuredTopicData || randomFeatured || ACTIVE_FALLBACK_TOPIC;
+
+    const activeTopic = hasRecent && recentTopic
+        ? recentTopic
+        : {
+              id: activeFeatured.id,
+              title: activeFeatured.title,
+              slug: activeFeatured.slug,
+              description: activeFeatured.description,
+              level: activeFeatured.level,
+              problemsCount: activeFeatured.problemsCount,
+              problemsSolvedCount: activeFeatured.problemsSolvedCount,
+              problemsSolvedPercentage: activeFeatured.problemsSolvedPercentage,
+          };
+
+    const activeModule = hasRecent && parentModule
+        ? parentModule
+        : activeFeatured.module;
+
+    const activeTags = hasRecent && recentTags.length > 0
+        ? recentTags
+        : activeFeatured.tags;
 
     const levelKey = normalizeTopicLevel(activeTopic.level);
     const theme = TOPIC_LEVEL_THEMES[levelKey];
@@ -180,7 +358,7 @@ export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = ({
         return <ResumeTopicCardSkeleton level={levelKey} className={className} />;
     }
 
-    const moduleSlug = parentModule?.slug || featuredTopicData?.moduleSlug || 'module-dsa';
+    const moduleSlug = activeModule?.slug || 'module-dsa';
     const topicHref = `/modules/${moduleSlug}/${activeTopic.slug}`;
 
     return (
@@ -220,7 +398,7 @@ export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = ({
                         shineColor={theme.shineColor}
                         className={cn('text-xs font-bold tracking-wider', theme.progressText)}
                     >
-                        {recentTopic ? 'Resume Topic' : 'Featured Topic'}
+                        {hasRecent ? 'Resume Topic' : 'Featured Topic'}
                     </Typography>
                 </div>
                 <div
@@ -230,20 +408,20 @@ export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = ({
                     )}
                 >
                     <span className={cn('size-1.5 rounded-full animate-pulse', theme.pulseDot)} />
-                    <span>{recentTopic ? theme.label : 'Recommended'}</span>
+                    <span>{hasRecent ? theme.label : 'Recommended'}</span>
                 </div>
             </div>
 
             {/* Center Content */}
             <div className="my-auto py-3 flex flex-col justify-center gap-5 w-full">
                 <div className="space-y-1">
-                    {parentModule && (
+                    {activeModule && (
                         <Link
-                            href={`/modules/${parentModule.slug}`}
+                            href={`/modules/${activeModule.slug}`}
                             className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-light dark:text-muted-dark hover:text-body-light dark:hover:text-body-dark transition-colors truncate max-w-full"
                         >
                             <Layers className={cn('size-3 shrink-0', theme.iconColor)} />
-                            <span className="truncate">{parentModule.title}</span>
+                            <span className="truncate">{activeModule.title}</span>
                         </Link>
                     )}
                     <Typography
@@ -254,7 +432,7 @@ export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = ({
                         {activeTopic.title}
                     </Typography>
 
-                    {lastProblem ? (
+                    {hasRecent && lastProblem ? (
                         <div className="flex items-center gap-2 pt-0.5 text-xs text-muted-light dark:text-muted-dark truncate">
                             <span className="shrink-0 text-muted-light dark:text-muted-dark">Last solved:</span>
                             <span className="font-semibold text-body-light dark:text-body-dark truncate">
@@ -272,15 +450,15 @@ export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = ({
                             )}
                         </div>
                     ) : (
-                        <p className="text-xs text-muted-light dark:text-muted-dark leading-relaxed line-clamp-1">
+                        <p className="text-xs text-muted-light dark:text-muted-dark leading-relaxed line-clamp-2">
                             {activeTopic.description}
                         </p>
                     )}
 
                     {/* Tag Pills */}
-                    {tags.length > 0 && (
+                    {activeTags.length > 0 && (
                         <div className="flex items-center gap-1.5 pt-1.5 flex-wrap">
-                            {tags.slice(0, 3).map((tag) => (
+                            {activeTags.slice(0, 3).map((tag) => (
                                 <span
                                     key={tag.id}
                                     className={cn('text-[10px] font-mono px-2 py-0.5 rounded-xs border', theme.tag)}
@@ -321,7 +499,7 @@ export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = ({
                         shimmerColor={theme.shimmer}
                         className={cn('px-4 text-xs font-semibold cursor-pointer', theme.button)}
                     >
-                        {recentTopic ? 'Resume' : 'Start'}
+                        {hasRecent ? 'Resume' : 'Start'}
                         <ArrowRight className="size-3.5 ml-1" />
                     </Button>
                 </Link>

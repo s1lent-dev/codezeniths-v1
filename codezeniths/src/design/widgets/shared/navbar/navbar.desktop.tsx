@@ -20,11 +20,11 @@ import { useAuth } from '@/lib/auth/auth';
 export const NavbarMenus = () => {
     return (
         <Container size="none" direction="row" align="center" padded={false} centered={false} gap="2" className="hidden md:flex">
-            {/* Problem: Menubar */}
+            {/* Explore: Menubar */}
             <Menubar className="border-none bg-transparent dark:bg-transparent h-auto p-0">
                 <MenubarMenu>
                     <MenubarTrigger className="px-4 py-2 typography-p text-muted-light dark:text-muted-dark hover:text-body-light hover:dark:text-body-dark rounded-xs transition-colors cursor-pointer bg-transparent dark:bg-transparent data-[state=open]:bg-transparent dark:data-[state=open]:bg-transparent hover:bg-transparent dark:hover:bg-transparent">
-                        <a href="/explore">Problem</a>
+                        <a href="/explore">Explore</a>
                     </MenubarTrigger>
                 </MenubarMenu>
             </Menubar>

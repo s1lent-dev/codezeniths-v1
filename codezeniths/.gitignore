@@ -47,6 +47,7 @@ next-env.d.ts
 # ─── DB Seed Data & Backups ───
 /src/lib/db/seed/data/
 /backups/
+/system-design/
 *.seed.json
 
 # ─── Data & Documentation Files ───
@@ -58,3 +59,4 @@ next-env.d.ts
 !tsconfig.json
 !tsconfig*.json
 !components.json
+!system-design/*.md
