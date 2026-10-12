@@ -27,18 +27,23 @@ export const ActivityCalendarSkeleton: React.FC<ActivityCalendarSkeletonProps> =
             />
 
             {/* Header: Day Title & Nav Controls with Center-Top Emblem Badge Skeleton */}
-            <div className="flex items-center justify-between relative z-10">
-                {/* Left: Active Day Header Skeleton */}
-                <div className="flex items-center gap-2">
+            <div className="flex items-start justify-between relative z-10">
+                {/* Left: Active Day Header & Subtitle Skeleton */}
+                <div className="flex flex-col gap-1.5 min-w-0 ml-1">
                     <motion.div
                         animate={{ opacity: [0.4, 0.9, 0.4] }}
                         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                        className="h-6 w-20 bg-primary/20 dark:bg-primary/30 rounded-md ml-3"
+                        className="h-6 w-24 bg-primary/20 dark:bg-primary/30 rounded-md"
+                    />
+                    <motion.div
+                        animate={{ opacity: [0.3, 0.7, 0.3] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+                        className="h-3.5 w-28 bg-foreground-light-shade3 dark:bg-foreground-dark-shade1 rounded-xs"
                     />
                 </div>
 
                 {/* Right: Nav Controls with Emblem Badge Skeleton */}
-                <div className="flex items-center gap-1 text-muted-light dark:text-muted-dark relative pt-1">
+                <div className="flex items-center gap-1 text-muted-light dark:text-muted-dark relative pt-1 shrink-0">
                     {/* Left Nav Arrow Bone */}
                     <div className="p-1 opacity-40">
                         <ChevronLeft className="w-4.5 h-4.5" />

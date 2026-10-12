@@ -55,6 +55,35 @@ html {
   background: rgba(106, 124, 255, 1);
 }
 
+/* ==================== Autofill / Autocomplete Transparent Reset ==================== */
+/* Prevent WebKit/Blink (Chrome, Edge, Safari) default white/pale-blue background and black text override on autofill */
+:root {
+  --autofill-text-color: var(--color-body-light);
+}
+
+.dark,
+:root.dark {
+  --autofill-text-color: var(--color-body-dark);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus,
+select:-webkit-autofill:active {
+  transition: background-color 5000000s ease-in-out 0s;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  box-shadow: 0 0 0 1000px transparent inset;
+  -webkit-text-fill-color: var(--autofill-text-color);
+}
+
 @theme {
   /* Color Palette */
   --color-primary: #6a7cff;

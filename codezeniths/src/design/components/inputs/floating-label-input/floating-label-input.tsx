@@ -64,6 +64,7 @@ export const FloatingLabelInput = React.forwardRef<HTMLInputElement, FloatingLab
                         // Floating state: when input is focused OR has value (placeholder is not shown)
                         'peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-[10px] sm:peer-focus:text-[11px] peer-focus:text-heading-light dark:peer-focus:text-heading-dark peer-focus:font-medium',
                         'peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:-translate-y-1/2 peer-not-placeholder-shown:text-[10px] sm:peer-not-placeholder-shown:text-[11px] peer-not-placeholder-shown:text-body-light dark:peer-not-placeholder-shown:text-body-dark peer-not-placeholder-shown:font-medium',
+                        'peer-autofill:top-0 peer-autofill:-translate-y-1/2 peer-autofill:text-[10px] sm:peer-autofill:text-[11px] peer-autofill:font-medium',
                         isError && 'peer-focus:text-destructive text-destructive',
                         labelClassName
                     )}
@@ -136,6 +137,7 @@ export const FloatingLabelTextarea = React.forwardRef<HTMLTextAreaElement, Float
                         // Floating state: when textarea is focused OR has value (placeholder is not shown)
                         'peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-[10px] sm:peer-focus:text-[11px] peer-focus:text-heading-light dark:peer-focus:text-heading-dark peer-focus:font-medium',
                         'peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:-translate-y-1/2 peer-not-placeholder-shown:text-[10px] sm:peer-not-placeholder-shown:text-[11px] peer-not-placeholder-shown:text-body-light dark:peer-not-placeholder-shown:text-body-dark peer-not-placeholder-shown:font-medium',
+                        'peer-autofill:top-0 peer-autofill:-translate-y-1/2 peer-autofill:text-[10px] sm:peer-autofill:text-[11px] peer-autofill:font-medium',
                         isError && 'peer-focus:text-destructive text-destructive',
                         labelClassName
                     )}

@@ -12,6 +12,7 @@ import {
     CalendarX,
     Clock,
     ShieldCheck,
+    RotateCcw,
 } from 'lucide-react';
 import { cn } from '@codezeniths/design/cn';
 import { userQueryService } from '@/lib/tanstack/services/user.query-service';
@@ -56,6 +57,18 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
 
     const year = currentDate.getUTCFullYear();
     const month = currentDate.getUTCMonth() + 1; // 1-indexed (1-12)
+
+    const isCurrentMonth = year === currentYearNumber && month === currentMonthNumber;
+    const viewedMonthName = currentDate.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+    const viewedMonthShort = currentDate.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase();
+    const viewedYearShort = String(year).slice(-2);
+
+    const handleResetToToday = () => {
+        if (isCurrentMonth) return;
+        const nextDate = new Date(Date.UTC(currentYearNumber, currentMonthNumber - 1, 1));
+        setCurrentDate(nextDate);
+        onMonthChange?.(currentYearNumber, currentMonthNumber);
+    };
 
     // Query user monthly activity via TanStack Query Service
     const { data: activityData, isLoading } = userQueryService.getUserMonthlyActivity(
@@ -153,17 +166,42 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
         <TooltipProvider delayDuration={150}>
             <div className={cn('w-full space-y-3 font-sans text-heading-light dark:text-heading-dark', className)}>
                 {/* Header: Day Title & Nav Controls with Center-Top Emblem Badge */}
-                <div className="flex items-center justify-between">
-                    {/* Left: Active Day Header */}
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-lg font-bold tracking-tight text-heading-light dark:text-heading-dark ml-3">
-                            Day {currentDayNumber}
-                        </h2>
-                        {isLoading && <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="w-3.5 h-3.5 text-primary" />}
+                <div className="flex items-start justify-between">
+                    {/* Left: Active Day / Month Title & Context Subtitle */}
+                    <div className="flex flex-col gap-0.5 min-w-0 ml-1">
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-lg font-bold tracking-tight text-heading-light dark:text-heading-dark truncate">
+                                {isCurrentMonth ? `Day ${currentDayNumber}` : `${viewedMonthName} ${year}`}
+                            </h2>
+                            {isLoading && <Spinner variant={SpinnerVariant.LOADER_CIRCLE} className="w-3.5 h-3.5 text-primary shrink-0" />}
+                        </div>
+
+                        {/* Context Subtitle: Live Indicator for current month or Jump to Today action for past months */}
+                        {isCurrentMonth ? (
+                            <div className="flex items-center gap-1.5 text-xs text-muted-light dark:text-muted-dark font-medium">
+                                <span className="relative flex h-2 w-2 shrink-0">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                                </span>
+                                <span>{viewedMonthName} {year}</span>
+                                <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 px-1.5 py-0.2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                                    Current
+                                </span>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={handleResetToToday}
+                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary-shade1 transition-colors cursor-pointer group text-left w-fit"
+                            >
+                                <RotateCcw className="w-3 h-3 transition-transform group-hover:-rotate-45" />
+                                <span>Jump to Today</span>
+                            </button>
+                        )}
                     </div>
 
                     {/* Right: Nav Controls with Emblem Badge in the Middle & slightly offset top */}
-                    <div className="flex items-center gap-1 text-muted-light dark:text-muted-dark relative pt-1">
+                    <div className="flex items-center gap-1 text-muted-light dark:text-muted-dark relative pt-1 shrink-0">
                         {/* Left Nav Arrow */}
                         <button
                             type="button"
@@ -171,8 +209,10 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
                             disabled={!canGoPrevMonth}
                             aria-label="Previous Month"
                             className={cn(
-                                'p-1 transition-colors cursor-pointer',
-                                canGoPrevMonth ? 'hover:text-primary' : 'opacity-30 cursor-not-allowed'
+                                'p-1 rounded-md transition-colors cursor-pointer',
+                                canGoPrevMonth
+                                    ? 'hover:text-primary hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2'
+                                    : 'opacity-30 cursor-not-allowed'
                             )}
                         >
                             <ChevronLeft className="w-4.5 h-4.5" />
@@ -180,14 +220,35 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
 
                         {/* Emblem Badge (positioned between arrows & slightly elevated) */}
                         <div className="relative -top-5 mx-0.5 flex items-center justify-center">
-                            <div className="relative w-9 h-9 rounded-lg bg-linear-to-tr from-primary to-purple-shade2 p-0.5 shadow-md">
-                                <div className="w-full h-full bg-slate-900 rounded-[7px] flex flex-col items-center justify-center text-foreground-light-shade3">
-                                    <span className="text-[10px] font-bold leading-tight">{currentDayNumber}</span>
-                                    <span className="text-[7.5px] uppercase tracking-tighter font-medium text-purple-shade2">
-                                        {currentMonthShort}
-                                    </span>
+                            <button
+                                type="button"
+                                onClick={!isCurrentMonth ? handleResetToToday : undefined}
+                                title={!isCurrentMonth ? 'Click to jump to today' : `Day ${currentDayNumber} • ${currentMonthShort}`}
+                                className={cn(
+                                    'relative w-9 h-9 rounded-lg bg-linear-to-tr from-primary to-purple-shade2 p-0.5 shadow-md transition-transform',
+                                    !isCurrentMonth && 'cursor-pointer hover:scale-105 active:scale-95'
+                                )}
+                            >
+                                <div className="w-full h-full bg-slate-900 rounded-[7px] flex flex-col items-center justify-center text-foreground-light-shade3 select-none">
+                                    {isCurrentMonth ? (
+                                        <>
+                                            <span className="text-[10px] font-bold leading-tight">{currentDayNumber}</span>
+                                            <span className="text-[7.5px] uppercase tracking-tighter font-medium text-purple-shade2">
+                                                {currentMonthShort}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="text-[9.5px] font-bold leading-tight tracking-tight uppercase text-purple-shade2">
+                                                {viewedMonthShort}
+                                            </span>
+                                            <span className="text-[7.5px] tracking-tighter font-medium text-foreground-light-shade3/80">
+                                                '{viewedYearShort}
+                                            </span>
+                                        </>
+                                    )}
                                 </div>
-                            </div>
+                            </button>
                         </div>
 
                         {/* Right Nav Arrow */}
@@ -197,8 +258,10 @@ export const ActivityCalendar: React.FC<ActivityCalendarProps> = ({
                             disabled={!canGoNextMonth}
                             aria-label="Next Month"
                             className={cn(
-                                'p-1 transition-colors cursor-pointer',
-                                canGoNextMonth ? 'hover:text-primary' : 'opacity-30 cursor-not-allowed'
+                                'p-1 rounded-md transition-colors cursor-pointer',
+                                canGoNextMonth
+                                    ? 'hover:text-primary hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2'
+                                    : 'opacity-30 cursor-not-allowed'
                             )}
                         >
                             <ChevronRight className="w-4.5 h-4.5" />
