@@ -14,6 +14,7 @@ import {
 import { Card, CardVariant } from '@codezeniths/modules';
 import { HeatmapTooltip } from './heatmap-tooltip';
 import { useActivityHeatmap, DayCell } from './useActivityHeatmap';
+import { ActivityTerrain, ActivityViewToggle, ActivityViewMode } from '@/design/widgets/activity';
 import { cn } from '@codezeniths/design/cn';
 
 export interface ActivityHeatmapProps {
@@ -37,6 +38,9 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
         months,
         isLoading,
     } = useActivityHeatmap(userId, userCreatedAt);
+
+    // View mode: Flat 12-month calendar grid vs 3D Terrain
+    const [viewMode, setViewMode] = useState<ActivityViewMode>('flat');
 
     // Tooltip hover state
     const [tooltipData, setTooltipData] = useState<{
@@ -141,6 +145,12 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
                         </Typography>
                     </div>
 
+                    {/* Morphing Flat / 3D Terrain Toggle */}
+                    <ActivityViewToggle
+                        value={viewMode}
+                        onChange={setViewMode}
+                    />
+
                     {/* In-House Select Component for Year Dropdown */}
                     <div className="relative shrink-0">
                         <Select
@@ -173,52 +183,74 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
                 </div>
             </div>
 
-            {/* ─── 2. HEATMAP GRID: 12 MONTH COLUMNS ───────────────────────── */}
-            <div className="w-full flex items-start justify-between gap-2 sm:gap-2.5 md:gap-3.5 lg:gap-4 py-6 overflow-x-auto">
-                {months.map((month) => (
-                    <div
-                        key={month.monthIndex}
-                        className="flex-1 flex flex-col items-center gap-2 min-w-fit"
-                    >
-                        {/* Month Grid: Columns of Weeks with generous [3px] / [3.5px] spacing */}
-                        <div className="flex gap-0.75 sm:gap-[3.5px]">
-                            {month.weeks.map((weekCol, colIdx) => (
-                                <div key={colIdx} className="flex flex-col gap-0.75 sm:gap-[3.5px]">
-                                    {weekCol.map((day, rowIdx) => {
-                                        if (!day) {
+            {/* ─── 2. HEATMAP VIEW: FLAT 12-MONTH GRID OR 3D TERRAIN ───────────── */}
+            {viewMode === 'terrain' ? (
+                <ActivityTerrain
+                    months={months}
+                    selectedYear={selectedYear}
+                    onCellHover={(cell, pos) => {
+                        if (cell && pos) {
+                            setTooltipData({
+                                dateStr: cell.date,
+                                problemsSolved: cell.problemsSolved,
+                                pointsEarned: cell.pointsEarned,
+                                isBeforeCreation: cell.isBeforeCreation,
+                                isFuture: cell.isFuture,
+                                position: pos,
+                                visible: true,
+                            });
+                        } else {
+                            setTooltipData((prev) => ({ ...prev, visible: false }));
+                        }
+                    }}
+                />
+            ) : (
+                <div className="w-full flex items-start justify-between gap-2 sm:gap-2.5 md:gap-3.5 lg:gap-4 py-6 overflow-x-auto">
+                    {months.map((month) => (
+                        <div
+                            key={month.monthIndex}
+                            className="flex-1 flex flex-col items-center gap-2 min-w-fit"
+                        >
+                            {/* Month Grid: Columns of Weeks with generous [3px] / [3.5px] spacing */}
+                            <div className="flex gap-0.75 sm:gap-[3.5px]">
+                                {month.weeks.map((weekCol, colIdx) => (
+                                    <div key={colIdx} className="flex flex-col gap-0.75 sm:gap-[3.5px]">
+                                        {weekCol.map((day, rowIdx) => {
+                                            if (!day) {
+                                                return (
+                                                    <div
+                                                        key={rowIdx}
+                                                        className="w-[9.5px] h-[9.5px] sm:w-2.75 sm:h-2.75 aspect-square shrink-0 box-border rounded-[1.5px] opacity-0 pointer-events-none"
+                                                    />
+                                                );
+                                            }
                                             return (
                                                 <div
                                                     key={rowIdx}
-                                                    className="w-[9.5px] h-[9.5px] sm:w-2.75 sm:h-2.75 aspect-square shrink-0 box-border rounded-[1.5px] opacity-0 pointer-events-none"
+                                                    onMouseEnter={(e) => handleCellMouseEnter(e, day)}
+                                                    onMouseLeave={handleCellMouseLeave}
+                                                    className={cn(
+                                                        'w-[9.5px] h-[9.5px] sm:w-2.75 sm:h-2.75 aspect-square shrink-0 box-border rounded-[1.5px] border border-secondary/20 transition-all duration-100 cursor-pointer',
+                                                        getCellColorClass(day)
+                                                    )}
                                                 />
                                             );
-                                        }
-                                        return (
-                                            <div
-                                                key={rowIdx}
-                                                onMouseEnter={(e) => handleCellMouseEnter(e, day)}
-                                                onMouseLeave={handleCellMouseLeave}
-                                                className={cn(
-                                                    'w-[9.5px] h-[9.5px] sm:w-2.75 sm:h-2.75 aspect-square shrink-0 box-border rounded-[1.5px] border border-secondary/20 transition-all duration-100 cursor-pointer',
-                                                    getCellColorClass(day)
-                                                )}
-                                            />
-                                        );
-                                    })}
-                                </div>
-                            ))}
-                        </div>
+                                        })}
+                                    </div>
+                                ))}
+                            </div>
 
-                        {/* Centered Month Name Below */}
-                        <Typography
-                            variant={TypographyVariant.SPAN}
-                            className="text-[11px] sm:text-xs font-medium text-muted-light dark:text-muted-dark"
-                        >
-                            {month.monthName}
-                        </Typography>
-                    </div>
-                ))}
-            </div>
+                            {/* Centered Month Name Below */}
+                            <Typography
+                                variant={TypographyVariant.SPAN}
+                                className="text-[11px] sm:text-xs font-medium text-muted-light dark:text-muted-dark"
+                            >
+                                {month.monthName}
+                            </Typography>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* ─── 3. FOOTER LEGEND ─────────────────────────────────────────── */}
             <div className="flex items-center justify-between pt-2 border-t border-secondary/15 text-xs text-muted-light dark:text-muted-dark">
