@@ -139,7 +139,7 @@ describe('activity-terrain.math', () => {
 
     describe('isPointInPolygon', () => {
         it('detects points inside and outside polygon', () => {
-            const poly = [
+            const poly: [number, number][] = [
                 [0, 0],
                 [10, 0],
                 [10, 10],
