@@ -25,12 +25,14 @@ export function getNextViewMode(current: ActivityViewMode): ActivityViewMode {
 export interface ActivityViewToggleProps {
     value: ActivityViewMode;
     onChange: (mode: ActivityViewMode) => void;
+    layoutId?: string;
     className?: string;
 }
 
 export const ActivityViewToggle: React.FC<ActivityViewToggleProps> = ({
     value,
     onChange,
+    layoutId = 'activity-view-indicator',
     className,
 }) => {
     return (
@@ -66,7 +68,7 @@ export const ActivityViewToggle: React.FC<ActivityViewToggleProps> = ({
                     >
                         {isActive && (
                             <motion.div
-                                layoutId="activity-view-indicator"
+                                layoutId={layoutId}
                                 className="absolute inset-0 z-[-1] rounded-full bg-foreground-light dark:bg-foreground-dark border border-secondary/20 shadow-xs"
                                 transition={{
                                     type: 'spring',

@@ -74,4 +74,51 @@ describe('ActivityTerrain internal helpers', () => {
         expect(sorted[0].rowZ).toBe(0);
         expect(sorted[1].rowZ).toBe(6);
     });
+
+    it('correctly navigates across month island gaps without getting trapped', async () => {
+        // Month 0 has 1 week, Month 1 has 1 week with gap = 1.4
+        const weekCol0: (DayCell | null)[] = new Array(7).fill(null);
+        weekCol0[2] = {
+            date: '2026-01-03',
+            dayOfWeek: 2,
+            problemsSolved: 1,
+            pointsEarned: 10,
+            count: 1,
+            level: 1,
+            isFuture: false,
+            isBeforeCreation: false,
+            isInSelectedYear: true,
+        };
+        const weekCol1: (DayCell | null)[] = new Array(7).fill(null);
+        weekCol1[2] = {
+            date: '2026-02-03',
+            dayOfWeek: 2,
+            problemsSolved: 3,
+            pointsEarned: 30,
+            count: 3,
+            level: 2,
+            isFuture: false,
+            isBeforeCreation: false,
+            isInSelectedYear: true,
+        };
+
+        const mockMonths: MonthSegment[] = [
+            { monthIndex: 0, monthName: 'Jan', weeks: [weekCol0] },
+            { monthIndex: 1, monthName: 'Feb', weeks: [weekCol1] },
+        ];
+
+        const layout = buildTerrainLayout(mockMonths);
+        const janCell = layout.cells[0]; // colX = 0, rowZ = 2
+        const febCell = layout.cells[1]; // colX = 2.4, rowZ = 2
+
+        const { findNextNavCell } = await import('./activity-terrain.math');
+
+        // Navigating right from Jan should successfully jump across the 1.4 gap into Feb
+        const nextRight = findNextNavCell(layout.cells, janCell, [1, 0]);
+        expect(nextRight.index).toBe(febCell.index);
+
+        // Navigating left from Feb should jump back into Jan
+        const nextLeft = findNextNavCell(layout.cells, febCell, [-1, 0]);
+        expect(nextLeft.index).toBe(janCell.index);
+    });
 });

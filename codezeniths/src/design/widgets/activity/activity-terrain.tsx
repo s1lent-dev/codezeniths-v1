@@ -20,6 +20,7 @@ import {
     buildTerrainLayout,
     clamp,
     easeOutBack,
+    findNextNavCell,
     isPointInPolygon,
     projectPoint,
     rubber,
@@ -218,7 +219,7 @@ export const ActivityTerrain: React.FC<ActivityTerrainProps> = ({
 
     const drawMonthLabels = useCallback(
         (ctx: CanvasRenderingContext2D, p: Pose, lift: number, palette: ActivityTerrainPalette) => {
-            const alpha = clamp(1 - lift * 1.5, 0, 1);
+            const alpha = clamp(1 - lift * 0.45, 0.45, 0.95);
             if (alpha <= 0.01) return;
 
             ctx.globalAlpha = alpha;
@@ -554,6 +555,7 @@ export const ActivityTerrain: React.FC<ActivityTerrainProps> = ({
 
         if (!drag.moved && Math.hypot(dx, dy) > 4) {
             drag.moved = true;
+            handleHover(null, null); // dismiss tooltip when drag begins
         }
         if (!drag.moved) return;
 
@@ -588,6 +590,8 @@ export const ActivityTerrain: React.FC<ActivityTerrainProps> = ({
             wake();
             return;
         }
+
+        handleHover(null, null); // dismiss tooltip when rotation finishes
 
         const first = drag.samples[0];
         const lastSample = drag.samples.at(-1) ?? first;
@@ -629,10 +633,12 @@ export const ActivityTerrain: React.FC<ActivityTerrainProps> = ({
                 event.preventDefault();
             } else if (event.key === 'ArrowUp') {
                 s.pitch = clamp(s.pitch - 4 * DEG, 0.05, PITCH_LIMIT);
+                s.pitchTarget = s.pitch;
                 wake();
                 event.preventDefault();
             } else if (event.key === 'ArrowDown') {
                 s.pitch = clamp(s.pitch + 4 * DEG, 0.05, PITCH_LIMIT);
+                s.pitchTarget = s.pitch;
                 wake();
                 event.preventDefault();
             }
@@ -647,10 +653,7 @@ export const ActivityTerrain: React.FC<ActivityTerrainProps> = ({
         const current = cells[sim.current.hovered] ?? cells[0];
         if (!current) return;
 
-        const nextColX = current.colX + move[0];
-        const nextRowZ = current.rowZ + move[1];
-
-        const next = cells.find((c) => c.colX === nextColX && c.rowZ === nextRowZ);
+        const next = findNextNavCell(cells, current, move);
         if (next) {
             const rect = canvasRef.current?.getBoundingClientRect();
             const p = getPose();

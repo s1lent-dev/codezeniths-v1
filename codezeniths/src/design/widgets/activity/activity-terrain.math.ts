@@ -227,3 +227,64 @@ export function isPointInPolygon(points: [number, number][], x: number, y: numbe
     }
     return hit;
 }
+
+/**
+ * Safely navigates between cells across month island gaps and null padding days.
+ */
+export function findNextNavCell(
+    cells: TerrainCell[],
+    current: TerrainCell,
+    move: [number, number]
+): TerrainCell {
+    if (!cells.length) return current;
+
+    const [dx, dz] = move;
+
+    if (dx !== 0) {
+        if (dx > 0) {
+            const rightOnSameRow = cells
+                .filter((c) => c.colX > current.colX && c.rowZ === current.rowZ)
+                .sort((a, b) => a.colX - b.colX);
+            if (rightOnSameRow.length > 0) return rightOnSameRow[0];
+
+            const nextCols = cells
+                .filter((c) => c.colX > current.colX)
+                .sort((a, b) => a.colX - b.colX || Math.abs(a.rowZ - current.rowZ) - Math.abs(b.rowZ - current.rowZ));
+            if (nextCols.length > 0) return nextCols[0];
+
+            return cells[Math.min(cells.length - 1, current.index + 1)];
+        } else {
+            const leftOnSameRow = cells
+                .filter((c) => c.colX < current.colX && c.rowZ === current.rowZ)
+                .sort((a, b) => b.colX - a.colX);
+            if (leftOnSameRow.length > 0) return leftOnSameRow[0];
+
+            const prevCols = cells
+                .filter((c) => c.colX < current.colX)
+                .sort((a, b) => b.colX - a.colX || Math.abs(a.rowZ - current.rowZ) - Math.abs(b.rowZ - current.rowZ));
+            if (prevCols.length > 0) return prevCols[0];
+
+            return cells[Math.max(0, current.index - 1)];
+        }
+    }
+
+    if (dz !== 0) {
+        if (dz > 0) {
+            const downInCol = cells
+                .filter((c) => c.colX === current.colX && c.rowZ > current.rowZ)
+                .sort((a, b) => a.rowZ - b.rowZ);
+            if (downInCol.length > 0) return downInCol[0];
+
+            return cells[Math.min(cells.length - 1, current.index + 1)];
+        } else {
+            const upInCol = cells
+                .filter((c) => c.colX === current.colX && c.rowZ < current.rowZ)
+                .sort((a, b) => b.rowZ - a.rowZ);
+            if (upInCol.length > 0) return upInCol[0];
+
+            return cells[Math.max(0, current.index - 1)];
+        }
+    }
+
+    return current;
+}

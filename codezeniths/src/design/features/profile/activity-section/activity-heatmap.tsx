@@ -85,6 +85,11 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
         setTooltipData((prev) => ({ ...prev, visible: false }));
     };
 
+    // Reset tooltip when selected year changes
+    React.useEffect(() => {
+        setTooltipData((prev) => ({ ...prev, visible: false }));
+    }, [selectedYear]);
+
     const getCellColorClass = (cell: DayCell | null) => {
         if (!cell || !cell.isInSelectedYear) {
             return 'opacity-0 pointer-events-none';
