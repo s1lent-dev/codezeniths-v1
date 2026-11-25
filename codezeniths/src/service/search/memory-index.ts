@@ -2,11 +2,15 @@ import { redisService } from '@codezeniths/lib/redis';
 import { RedisStore } from '@codezeniths/lib/redis';
 import { logger } from '@/service/logging';
 
-interface CacheEntry<TDoc = any> {
+export interface CacheEntry<TDoc = any> {
   documents: TDoc[];
   version: string | null;
   lastCheckedAt: number;
+  lastAccessedAt: number;
 }
+
+export const COLLECTION_IDLE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+export const MAX_CACHED_COLLECTIONS = 10;
 
 /**
  * In-Memory Search Cache
@@ -30,6 +34,7 @@ export class MemorySearchIndex {
 
     // Fast path: In-memory cache is valid within the TTL window (0ms, 0 Redis calls)
     if (entry && now - entry.lastCheckedAt < this.VERSION_CHECK_TTL_MS) {
+      entry.lastAccessedAt = now;
       return entry.documents as TDoc[];
     }
 
@@ -47,7 +52,9 @@ export class MemorySearchIndex {
 
         // If version has not changed, extend the TTL window and reuse parsed RAM objects
         if (entry && redisVersion && entry.version === redisVersion) {
-          entry.lastCheckedAt = Date.now();
+          const checkNow = Date.now();
+          entry.lastCheckedAt = checkNow;
+          entry.lastAccessedAt = checkNow;
           return entry.documents as TDoc[];
         }
 
@@ -57,17 +64,25 @@ export class MemorySearchIndex {
         const documents: TDoc[] = documentsRaw ? JSON.parse(documentsRaw) : [];
 
         const activeVersion = redisVersion || Date.now().toString();
+        const hydrateNow = Date.now();
         this.cache.set(collectionName, {
           documents,
           version: activeVersion,
-          lastCheckedAt: Date.now(),
+          lastCheckedAt: hydrateNow,
+          lastAccessedAt: hydrateNow,
         });
+
+        // Automatically run sweepStaleCollections() when collection count exceeds MAX_CACHED_COLLECTIONS
+        if (this.cache.size > MAX_CACHED_COLLECTIONS) {
+          this.sweepStaleCollections();
+        }
 
         return documents;
       } catch (error) {
         logger.warn(`[MemorySearchIndex] Failed to synchronize collection "${collectionName}" from Redis`, { error });
         // Fallback to existing cache if available during network hiccups
         if (entry) {
+          entry.lastAccessedAt = Date.now();
           return entry.documents as TDoc[];
         }
         return [];
@@ -93,11 +108,17 @@ export class MemorySearchIndex {
    * Directly sets or updates in-memory documents for a collection.
    */
   setDocuments<TDoc>(collectionName: string, documents: TDoc[], version?: string): void {
+    const now = Date.now();
     this.cache.set(collectionName, {
       documents,
-      version: version ?? Date.now().toString(),
-      lastCheckedAt: Date.now(),
+      version: version ?? now.toString(),
+      lastCheckedAt: now,
+      lastAccessedAt: now,
     });
+
+    if (this.cache.size > MAX_CACHED_COLLECTIONS) {
+      this.sweepStaleCollections();
+    }
   }
 
   /**
@@ -109,6 +130,59 @@ export class MemorySearchIndex {
       entry.lastCheckedAt = 0;
       entry.version = null;
     }
+  }
+
+  /**
+   * Immediately evicts the specified collection from RAM.
+   * Returns true if the collection existed and was deleted, false otherwise.
+   */
+  evict(collectionName: string): boolean {
+    return this.cache.delete(collectionName);
+  }
+
+  /**
+   * Scans cached collections and evicts those whose idle duration exceeds the threshold.
+   * Defaults to COLLECTION_IDLE_TTL_MS (5 minutes).
+   * Returns the count of evicted collections.
+   */
+  sweepStaleCollections(maxIdleMs: number = COLLECTION_IDLE_TTL_MS): number {
+    const now = Date.now();
+    let evictedCount = 0;
+    for (const [name, entry] of this.cache.entries()) {
+      if (now - entry.lastAccessedAt > maxIdleMs) {
+        this.cache.delete(name);
+        evictedCount++;
+      }
+    }
+    return evictedCount;
+  }
+
+  /**
+   * Returns the number of cached collections currently residing in Node RAM.
+   */
+  get size(): number {
+    return this.cache.size;
+  }
+
+  /**
+   * Returns the number of inflight fetch promises.
+   */
+  get inflightCount(): number {
+    return this.inflight.size;
+  }
+
+  /**
+   * Checks whether a collection is currently present in in-memory RAM.
+   */
+  has(collectionName: string): boolean {
+    return this.cache.has(collectionName);
+  }
+
+  /**
+   * Inspection of a cache entry.
+   */
+  getEntry(collectionName: string): CacheEntry | undefined {
+    return this.cache.get(collectionName);
   }
 
   /**

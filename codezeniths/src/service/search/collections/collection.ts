@@ -41,6 +41,13 @@ export class Collection<TDoc> {
     return this.similarityStrategy.findSimilar(id, documents, opts?.limit ?? 5);
   }
 
+  /**
+   * Evicts this collection immediately from Node RAM.
+   */
+  evictFromMemory(): boolean {
+    return memorySearchIndex.evict(this.definition.name);
+  }
+
   private extractDocumentPrefixes(doc: TDoc): string[] {
     if (!this.definition.autocompleteFields || this.definition.autocompleteFields.length === 0) {
       return [];
