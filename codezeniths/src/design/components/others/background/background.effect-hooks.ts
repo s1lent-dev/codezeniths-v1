@@ -556,7 +556,7 @@ export const useDottedGlow = ({
         let last = performance.now();
         const draw = (now: number) => {
             if (stopped) { return; }
-            if (!isVisible) { raf = requestAnimationFrame(draw); return; }
+            if (!isVisible) { return; }
             const dt = (now - last) / 1000;
             last = now;
             const { width, height } = container.getBoundingClientRect();
@@ -590,7 +590,14 @@ export const useDottedGlow = ({
         };
 
         const handleResize = () => { resize(); regenDots(); };
-        const observer = new IntersectionObserver(([e]) => { isVisible = e?.isIntersecting ?? true; }, { threshold: 0.1 });
+        const observer = new IntersectionObserver(([e]) => {
+            const nextVisible = e?.isIntersecting ?? true;
+            if (!isVisible && nextVisible && !stopped) {
+                last = performance.now();
+                raf = requestAnimationFrame(draw);
+            }
+            isVisible = nextVisible;
+        }, { threshold: 0.1 });
         observer.observe(container);
         window.addEventListener('resize', handleResize);
         raf = requestAnimationFrame(draw);
@@ -604,6 +611,8 @@ export const useDottedGlow = ({
     };
 };
 
+export const useDottedGlowEffect = useDottedGlow;
+
 // ─────────────────────────────────────────────────────────────
 // 13. Canvas Reveal Effect (WebGL / Three.js)
 // ─────────────────────────────────────────────────────────────
@@ -611,7 +620,7 @@ export const useDottedGlow = ({
 export interface UseShaderMaterial3DParams {
     source: string;
     uniforms: ShaderUniforms;
-    maxFps: number;
+    maxFps?: number;
 }
 
 export const useShaderMaterial3D = ({
@@ -633,7 +642,7 @@ export const useShaderMaterial3D = ({
         }
     });
 
-    const getUniforms = useCallback(() => {
+    const material = useMemo(() => {
         const prepared: Record<string, { value: unknown }> = {};
         for (const name in uniforms) {
             const u = uniforms[name]!;
@@ -648,10 +657,7 @@ export const useShaderMaterial3D = ({
         }
         prepared['u_time'] = { value: 0 };
         prepared['u_resolution'] = { value: new THREE.Vector2(size.width * 2, size.height * 2) };
-        return prepared;
-    }, [uniforms, size.width, size.height]);
 
-    const material = useMemo(() => {
         return new THREE.ShaderMaterial({
             vertexShader: `
                 precision mediump float;
@@ -666,13 +672,53 @@ export const useShaderMaterial3D = ({
                 }
             `,
             fragmentShader: source,
-            uniforms: getUniforms(),
+            uniforms: prepared,
             glslVersion: THREE.GLSL3,
             blending: THREE.CustomBlending,
             blendSrc: THREE.SrcAlphaFactor,
             blendDst: THREE.OneFactor,
         });
-    }, [source, getUniforms]);
+        // Material is created once per unique shader source to avoid WebGL shader recompilation and leaks.
+        // Uniforms and resolution are updated in place via useEffect.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [source]);
+
+    useEffect(() => {
+        for (const name in uniforms) {
+            const u = uniforms[name]!;
+            if (material.uniforms[name]) {
+                switch (u.type) {
+                    case 'uniform1f':
+                    case 'uniform1fv':
+                        material.uniforms[name].value = u.value;
+                        break;
+                    case 'uniform2f':
+                        (material.uniforms[name].value as THREE.Vector2).fromArray(u.value as Array<number>);
+                        break;
+                    case 'uniform3f':
+                        (material.uniforms[name].value as THREE.Vector3).fromArray(u.value as Array<number>);
+                        break;
+                    case 'uniform3fv':
+                        material.uniforms[name].value = (u.value as Array<Array<number>>).map((v) => new THREE.Vector3().fromArray(v));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }, [uniforms, material]);
+
+    useEffect(() => {
+        if (material.uniforms['u_resolution']?.value) {
+            (material.uniforms['u_resolution'].value as THREE.Vector2).set(size.width * 2, size.height * 2);
+        }
+    }, [size.width, size.height, material]);
+
+    useEffect(() => {
+        return () => {
+            material.dispose();
+        };
+    }, [material]);
 
     return {
         ref,
