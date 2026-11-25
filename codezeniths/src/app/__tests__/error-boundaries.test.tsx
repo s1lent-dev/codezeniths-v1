@@ -5,6 +5,7 @@ import '@testing-library/jest-dom';
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import ErrorBoundary from '../error';
 import GlobalErrorBoundary from '../global-error';
 
@@ -56,7 +57,6 @@ describe('Next.js Error Boundaries', () => {
       (mockError as Error & { digest?: string }).digest = 'CRITICAL_DIGEST_999';
 
       // 1. Verify HTML structure (root <html> and <body> with Tokyo Night palette)
-      const { renderToStaticMarkup } = require('react-dom/server');
       const staticHtml = renderToStaticMarkup(<GlobalErrorBoundary error={mockError} reset={resetMock} />);
       expect(staticHtml).toContain('<html');
       expect(staticHtml).toContain('<body');
