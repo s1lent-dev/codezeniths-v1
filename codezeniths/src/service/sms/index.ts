@@ -1,4 +1,4 @@
-export { smsService, createSmsService, VonageSmsProvider } from './sms.service';
+export { smsService, createSmsService, VonageSmsProvider, BoundedDedupeMap, MAX_DEDUPE_ENTRIES } from './sms.service';
 export {
   SmsTemplate,
   smsTemplateRegistry,

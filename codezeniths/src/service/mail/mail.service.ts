@@ -102,13 +102,83 @@ export class MailTemplateEngine {
   }
 }
 
-export function createMailService() {
+export const MAX_DEDUPE_ENTRIES = 5000;
+export const DEFAULT_DEDUPE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+export class BoundedDedupeMap {
+  private dedupeMap = new Map<string, number>();
+  private readonly maxEntries: number;
+
+  constructor(maxEntries = MAX_DEDUPE_ENTRIES) {
+    this.maxEntries = maxEntries;
+  }
+
+  isDuplicate(key: string): boolean {
+    const exp = this.dedupeMap.get(key);
+    if (!exp) return false;
+    if (Date.now() > exp) {
+      this.dedupeMap.delete(key);
+      return false;
+    }
+    return true;
+  }
+
+  recordDedupe(key: string, ttlMs = DEFAULT_DEDUPE_TTL_MS): void {
+    if (this.dedupeMap.size >= this.maxEntries) {
+      const now = Date.now();
+      for (const [k, exp] of this.dedupeMap.entries()) {
+        if (now > exp) {
+          this.dedupeMap.delete(k);
+        }
+      }
+      // If still at capacity, delete the oldest 500 entries (FIFO/LRU eviction)
+      if (this.dedupeMap.size >= this.maxEntries) {
+        const iterator = this.dedupeMap.keys();
+        for (let i = 0; i < 500; i++) {
+          const oldestKey = iterator.next().value;
+          if (oldestKey) this.dedupeMap.delete(oldestKey);
+        }
+      }
+    }
+    this.dedupeMap.set(key, Date.now() + ttlMs);
+  }
+
+  delete(key: string): boolean {
+    return this.dedupeMap.delete(key);
+  }
+
+  get size(): number {
+    return this.dedupeMap.size;
+  }
+
+  has(key: string): boolean {
+    return this.dedupeMap.has(key);
+  }
+
+  get(key: string): number | undefined {
+    return this.dedupeMap.get(key);
+  }
+
+  clear(): void {
+    this.dedupeMap.clear();
+  }
+
+  entries(): IterableIterator<[string, number]> {
+    return this.dedupeMap.entries();
+  }
+
+  keys(): IterableIterator<string> {
+    return this.dedupeMap.keys();
+  }
+}
+
+export function createMailService(customDedupeMap?: BoundedDedupeMap) {
   if (!resendClient) {
     resendClient = new Resend(ENV_CONFIG.RESEND_API_KEY);
   }
 
   const provider = new ResendMailProvider();
-  const dedupeMap = new Map<string, number>();
+  const dedupeMap = customDedupeMap || new BoundedDedupeMap();
 
   const executeSend = async (payload: EmailPayload, options?: SendOptions): Promise<MailResult> => {
     const to = Array.isArray(payload.to) ? payload.to.join(',') : payload.to;
@@ -125,12 +195,11 @@ export function createMailService() {
 
     const dKey = options?.dedupeKey;
     if (dKey) {
-      const exp = dedupeMap.get(dKey);
-      if (exp && exp > Date.now()) {
+      if (dedupeMap.isDuplicate(dKey)) {
         logger.info(`Skipped duplicate email to ${to}`, { dedupeKey: dKey });
         return { status: 'skipped-duplicate', dedupeKey: dKey };
       }
-      dedupeMap.set(dKey, Date.now() + 5 * 60 * 1000);
+      dedupeMap.recordDedupe(dKey);
     }
 
     try {
@@ -187,7 +256,8 @@ export function createMailService() {
         from: options?.from,
         replyTo: options?.replyTo,
       }, options);
-    }
+    },
+    dedupeMap,
   };
 }
 

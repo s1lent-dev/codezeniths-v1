@@ -128,6 +128,52 @@ describe('SMS Service Unit Tests', () => {
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
+    it('should actively evict expired dedupeKey and permit re-send after TTL', async () => {
+      vi.useFakeTimers();
+      mockSend.mockResolvedValue({
+        messageUUID: 'VNttl',
+      });
+
+      const service = createSmsService();
+      const options = { dedupeKey: 'sms-ttl-key' };
+
+      const res1 = await service.sendSms({ to: '+12064567891', body: 'Msg 1' }, options);
+      expect(res1).toEqual({ status: 'sent', messageSid: 'VNttl' });
+      expect(mockSend).toHaveBeenCalledTimes(1);
+
+      // Advance time past 5 min TTL
+      vi.advanceTimersByTime(5 * 60 * 1000 + 1000);
+
+      const res2 = await service.sendSms({ to: '+12064567891', body: 'Msg 2' }, options);
+      expect(res2).toEqual({ status: 'sent', messageSid: 'VNttl' });
+      expect(mockSend).toHaveBeenCalledTimes(2);
+    });
+
+    it('should evict dedupeKey if SMS dispatch fails', async () => {
+      mockSend.mockRejectedValue(new Error('Vonage network error'));
+      const service = createSmsService();
+
+      const res = await service.sendSms({ to: '+12064567891', body: 'Fail Msg' }, { dedupeKey: 'sms-fail-key' });
+      expect(res.status).toBe('failed');
+      expect(service.dedupeMap.has('sms-fail-key')).toBe(false);
+    });
+
+    it('should keep SMS service dedupeMap strictly bounded <= 5000', async () => {
+      mockSend.mockResolvedValue({ messageUUID: 'VN-bulk' });
+      const service = createSmsService();
+
+      for (let i = 0; i < 5000; i++) {
+        service.dedupeMap.recordDedupe(`sms-bulk-${i}`, 600_000);
+      }
+      expect(service.dedupeMap.size).toBe(5000);
+
+      const res = await service.sendSms({ to: '+12064567891', body: 'Overflow Msg' }, { dedupeKey: 'sms-overflow' });
+      expect(res.status).toBe('sent');
+      expect(service.dedupeMap.size).toBeLessThanOrEqual(5000);
+      expect(service.dedupeMap.has('sms-bulk-0')).toBe(false);
+      expect(service.dedupeMap.has('sms-overflow')).toBe(true);
+    });
+
     it('should short-circuit SMS dispatch in dry-run mode', async () => {
       (ENV_CONFIG as any).SMS_DRY_RUN = true;
       const service = createSmsService();
