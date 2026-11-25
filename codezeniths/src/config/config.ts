@@ -1,5 +1,3 @@
-import 'server-only';
-
 import { EnvConfig, EnvConfigSchema } from './config.types';
 
 const isProduction = process.env.NODE_ENV === 'production';
