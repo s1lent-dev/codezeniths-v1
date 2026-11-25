@@ -64,6 +64,7 @@ export default function GlobalErrorBoundary({ error, reset }: GlobalErrorProps) 
               Try again
             </button>
 
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
               href="/"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm text-[#a9b1d6] bg-[#222847] hover:bg-[#272e50] border border-[#272e50] hover:text-[#f7f6ff] active:scale-[0.98] transition-all duration-150 cursor-pointer"
