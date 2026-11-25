@@ -102,6 +102,13 @@ export class UserController implements IUserController {
             });
         }
 
+        if (input.userId && input.userId !== ctx.user?.id) {
+            throw new TRPCError({
+                code: 'FORBIDDEN',
+                message: 'You are not authorized to view settings for another account',
+            });
+        }
+
         try {
             const user = await formatUserProfile(await ctx.queries.user.getUserProfile({ id: targetUserId }));
             const preferences = await ctx.queries.user.getUserPreferences({ userId: targetUserId });
@@ -132,6 +139,16 @@ export class UserController implements IUserController {
                 cause: error,
             });
         }
+    }
+
+    async getUserSettings(
+        argsOrInput: { ctx: TRPCContext; input: z.infer<typeof GetSettingsInputSchema> } | z.infer<typeof GetSettingsInputSchema>,
+        maybeCtx?: TRPCContext
+    ): Promise<z.infer<typeof GetSettingsOutputSchema>> {
+        const { ctx, input } = (maybeCtx
+            ? { ctx: maybeCtx, input: argsOrInput as z.infer<typeof GetSettingsInputSchema> }
+            : argsOrInput) as { ctx: TRPCContext; input: z.infer<typeof GetSettingsInputSchema> };
+        return this.getSettings({ ctx, input });
     }
 
     async updateProfile({
@@ -1039,13 +1056,13 @@ export class UserController implements IUserController {
         }
     }
 
-    async extractResumeSkills({
-        ctx,
-        input,
-    }: {
-        ctx: TRPCContext;
-        input: z.infer<typeof ExtractResumeSkillsInputSchema>;
-    }): Promise<z.infer<typeof ExtractResumeSkillsOutputSchema>> {
+    async extractResumeSkills(
+        argsOrInput: { ctx: TRPCContext; input: z.infer<typeof ExtractResumeSkillsInputSchema> } | z.infer<typeof ExtractResumeSkillsInputSchema>,
+        maybeCtx?: TRPCContext
+    ): Promise<z.infer<typeof ExtractResumeSkillsOutputSchema>> {
+        const { ctx, input } = (maybeCtx
+            ? { ctx: maybeCtx, input: argsOrInput as z.infer<typeof ExtractResumeSkillsInputSchema> }
+            : argsOrInput) as { ctx: TRPCContext; input: z.infer<typeof ExtractResumeSkillsInputSchema> };
         logger.info('Executing extractResumeSkills controller', { userId: ctx.user?.id });
 
         const userId = ctx.user?.id;
@@ -1062,8 +1079,8 @@ export class UserController implements IUserController {
             let resumeKey: string | null | undefined = input.resumeKey;
             
             // If the frontend passed a full signed URL, extract the object key
-            if (resumeKey && resumeKey.includes('media/')) {
-                const match = resumeKey.match(/(media\/[^?]+)/);
+            if (resumeKey && (resumeKey.includes('media/') || resumeKey.includes('resumes/'))) {
+                const match = resumeKey.match(/((?:media|resumes)\/[^?]+)/);
                 if (match) {
                     resumeKey = match[1];
                 }
@@ -1074,11 +1091,28 @@ export class UserController implements IUserController {
                 resumeKey = currentUser?.resume;
             }
 
-            if (!resumeKey || !resumeKey.startsWith('media/')) {
+            if (!resumeKey || (!resumeKey.startsWith('media/') && !resumeKey.startsWith('resumes/'))) {
                 throw new TRPCError({
                     code: 'BAD_REQUEST',
                     message: 'No resume found. Please upload a PDF resume first.',
                 });
+            }
+
+            // IDOR Guard: Verify that the target R2 storageKey belongs to the authenticated user
+            const isAuthorizedPrefix =
+                resumeKey.startsWith(`media/${userId}/`) ||
+                resumeKey.startsWith(`media/${userId}`) ||
+                resumeKey.startsWith(`resumes/${userId}/`) ||
+                resumeKey.startsWith(`resumes/${userId}`);
+
+            if (!isAuthorizedPrefix) {
+                const currentUser = await ctx.queries.user.getUserProfile({ id: userId });
+                if (currentUser?.resume !== resumeKey) {
+                    throw new TRPCError({
+                        code: 'FORBIDDEN',
+                        message: 'You are not authorized to process documents belonging to another user',
+                    });
+                }
             }
 
             if (input.jobId) await redisService.client.set(`resume-job:${input.jobId}`, 'fetch', 300);

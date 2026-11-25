@@ -331,7 +331,7 @@ export const GetUserProfileDetailsOutputSchema = z.object({
     firstName: z.string().nullable().optional(),
     lastName: z.string().nullable().optional(),
     username: z.string().nullable(),
-    email: z.string().nullable(),
+    email: z.string().nullable().optional(),
     emailVerified: z.boolean().default(false).optional(),
     phoneNumber: z.string().nullable().optional(),
     phoneNumberVerified: z.boolean().nullable().optional(),

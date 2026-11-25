@@ -77,6 +77,11 @@ export interface IUserController {
         input: z.infer<typeof GetSettingsInputSchema>;
     }): Promise<z.infer<typeof GetSettingsOutputSchema>>;
 
+    getUserSettings?(args: {
+        ctx: TRPCContext;
+        input: z.infer<typeof GetSettingsInputSchema>;
+    }): Promise<z.infer<typeof GetSettingsOutputSchema>>;
+
     updateProfile(args: {
         ctx: TRPCContext;
         input: z.infer<typeof UpdateProfileInputSchema>;
