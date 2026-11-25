@@ -1250,10 +1250,11 @@ export class UserQueries implements IUserQueries {
                     .setCode(ErrorCode.CONFLICT)
                     .build();
             }
-            // In a transaction: delete OAuth accounts and update email (resets emailVerified to false)
+            // In a transaction: preserve credential account by updating its accountId, and update email (resets emailVerified to false)
             const result = await prisma.$transaction(async (tx) => {
-                await tx.account.deleteMany({
-                    where: { userId: id }
+                await tx.account.updateMany({
+                    where: { userId: id, providerId: 'credential' },
+                    data: { accountId: normalizedEmail }
                 });
                 const updated = await tx.user.update({
                     where: { id },
@@ -1268,6 +1269,13 @@ export class UserQueries implements IUserQueries {
             return result;
         })
         .build();
+
+    updateUserEmail = async (idOrPayload: string | { id: string; email: string }, maybeEmail?: string) => {
+        if (typeof idOrPayload === 'string') {
+            return this.updateEmail({ id: idOrPayload, email: maybeEmail! });
+        }
+        return this.updateEmail(idOrPayload);
+    };
 
     updatePhoneNumber = qRPC()
         .input(z.object({ id: z.string().uuid(), phoneNumber: z.string() }))
@@ -1638,4 +1646,22 @@ export class UserQueries implements IUserQueries {
 }
 
 export const userQueries = new UserQueries();
+
+export async function updateUserEmail(
+    id: string,
+    newEmail: string
+): Promise<{ id: string; email: string; emailVerified: boolean }>;
+export async function updateUserEmail(
+    payload: { id: string; email: string }
+): Promise<{ id: string; email: string; emailVerified: boolean }>;
+export async function updateUserEmail(
+    idOrPayload: string | { id: string; email: string },
+    maybeEmail?: string
+) {
+    if (typeof idOrPayload === 'string') {
+        return userQueries.updateEmail({ id: idOrPayload, email: maybeEmail! });
+    }
+    return userQueries.updateEmail(idOrPayload);
+}
+
 
