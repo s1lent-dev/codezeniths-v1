@@ -1,0 +1,926 @@
+/* =============================================================================
+   Nightglass Design System v4.1 — globals.css
+   Modern, elegant, standards-compliant stylesheet for Tailwind CSS v4.
+   Cold midnight luminescence in dark, lavender-silver in light.
+   Electric ultraviolet primary (hue 296), frost-cyan secondary (hue 210).
+
+   Architecture:
+     1. Web Fonts & Plugins
+     2. Custom Variant (@custom-variant dark)
+     3. Mode Layers (:root, .dark, @media color-gamut: p3)
+     4. Consolidated Design System Theme (@theme)
+     5. Base Layer (@layer base: body, scrollbar, autofill, focus)
+     6. Composite Typography Utilities (@utility typography-*)
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   1. WEB FONTS & PLUGINS
+   ----------------------------------------------------------------------------- */
+@import url("https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Fira+Code:wght@300..700&family=Fira+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&family=IBM+Plex+Mono:wght@400;500;600&family=New+Rocker&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* -----------------------------------------------------------------------------
+   2. CUSTOM VARIANTS
+   ----------------------------------------------------------------------------- */
+@custom-variant dark (&:is(.dark *));
+
+/* -----------------------------------------------------------------------------
+   3. MODE PALETTES (OKLCH SOURCE OF TRUTH)
+   ----------------------------------------------------------------------------- */
+
+/* =============================================================================
+   LIGHT MODE: Lavender canvas, near-white cards, midnight violet-indigo ink
+   ============================================================================= */
+:root {
+  color-scheme: light;
+
+  /* ---- background: page-level layers ---- */
+  --background:                  oklch(95.72% 0.023 296.7);  /* canvas: page, app body [ref #f2eeff] */
+  --background-band:             oklch(94.1% 0.031 293.8);   /* alternate full-width section [ref #ece8ff] */
+  --background-shell:            oklch(94.1% 0.031 293.8);   /* app chrome: sidebar, top bar [ref #ece8ff] */
+  --background-sunken:           oklch(92.01% 0.042 293);    /* recessed page-level region [ref #e5e0ff] */
+  --background-deep:             oklch(89.85% 0.053 291.2);  /* deepest: editor, terminal [ref #ddd8ff] */
+  --background-hover:            oklch(92.01% 0.042 293);    /* hover on page-level items [ref #e5e0ff] */
+  --background-selected:         oklch(89.85% 0.053 291.2);  /* selected page-level item [ref #ddd8ff] */
+  --background-active:           oklch(87.4% 0.06 290);      /* pressed page-level item */
+  --background-glass:            color-mix(in oklab, var(--background) 72%, transparent);  /* sticky header with backdrop-blur */
+
+  /* ---- surface: stackable layers on the background ---- */
+  --surface:                     oklch(97.65% 0.012 291.3);  /* card, panel (sits on canvas, sunken, deep) [ref #f7f6ff] */
+  --surface-raised:              oklch(99.6% 0.002 291);     /* card on band or shell, or a card inside a card */
+  --surface-stripe:              oklch(96.4% 0.016 292);     /* zebra alternate row */
+  --surface-well:                oklch(95.72% 0.023 296.7);  /* recessed area inside a surface [ref #f2eeff] */
+  --surface-deep:                oklch(92.01% 0.042 293);    /* deepest recess: log viewer [ref #e5e0ff] */
+  --surface-skeleton:            oklch(95.91% 0.021 294.6);  /* loading placeholder [ref #f2efff] */
+  --surface-skeleton-shine:      oklch(98.6% 0.007 291);     /* loading highlight */
+  --surface-hover:               oklch(95.91% 0.021 294.6);  /* hover on rows, menu items [ref #f2efff] */
+  --surface-selected:            oklch(93.65% 0.028 292.4);  /* selected row or item [ref #eae7fc] */
+  --surface-active:              oklch(91.05% 0.034 291.2);  /* pressed item [ref #e1def7] */
+  --surface-disabled:            oklch(96.4% 0.016 292);     /* disabled control fill */
+  --surface-dialog:              oklch(99.8% 0.001 291);     /* modal, sheet, drawer */
+  --surface-float:               oklch(100% 0 291);          /* popover, menu, dropdown */
+  --surface-input:               oklch(99.8% 0.001 291);     /* input, textarea, select */
+  --surface-input-hover:         oklch(98.6% 0.007 291);     /* input hover */
+  --surface-chip:                oklch(92.01% 0.042 293);    /* neutral chip, tag, badge [ref #e5e0ff] */
+  --surface-chip-hover:          oklch(89.85% 0.053 291.2);  /* clickable chip hover [ref #ddd8ff] */
+  --surface-track:               oklch(92.01% 0.042 293);    /* slider, switch, progress track [ref #e5e0ff] */
+  --surface-highest:             oklch(89.85% 0.053 291.2);  /* reserved top emphasis [ref #ddd8ff] */
+  --surface-overlay-hover:       oklch(95.91% 0.021 294.6);  /* item hover inside float or dialog [ref #f2efff] */
+  --surface-overlay-selected:    oklch(93.65% 0.028 292.4);  /* selected item inside float or dialog [ref #eae7fc] */
+  --surface-overlay-active:      oklch(91.05% 0.034 291.2);  /* pressed item inside float or dialog [ref #e1def7] */
+  --surface-inverse:             var(--ink-heading);         /* tooltip, toast: opposite of the mode */
+  --surface-glass:               color-mix(in oklab, var(--surface) 72%, transparent);  /* frosted toolbar with backdrop-blur */
+
+  /* ---- ink: neutral text and icons ---- */
+  --ink-heading:                 oklch(19.5% 0.075 277);     /* titles and key numbers */
+  --ink-base:                    oklch(26% 0.07 277);        /* default UI text */
+  --ink-body:                    oklch(36% 0.045 272);       /* long-form reading */
+  --ink-muted:                   oklch(45% 0.05 276);        /* captions, metadata */
+  --ink-subtle:                  oklch(50% 0.046 277);       /* placeholders, timestamps */
+  --ink-disabled:                oklch(72% 0.02 280);        /* disabled text */
+  --ink-inverse:                 var(--background);          /* text on surface-inverse */
+
+  /* ---- line: neutral borders ---- */
+  --line-subtle:                 color-mix(in oklab, var(--ink-heading) 6%, transparent);   /* hairline dividers */
+  --line:                        color-mix(in oklab, var(--ink-heading) 12%, transparent);  /* default border */
+  --line-strong:                 color-mix(in oklab, var(--ink-heading) 50%, transparent);  /* input and control boundaries */
+  --line-hover:                  color-mix(in oklab, var(--ink-heading) 62%, transparent);  /* hover border */
+  --line-disabled:               color-mix(in oklab, var(--ink-heading) 6%, transparent);
+  --line-inverse:                color-mix(in oklab, var(--ink-inverse) 16%, transparent);
+
+  /* ---- shadow + scrim ---- */
+  --shadow-tint:                 oklch(30% 0.09 282 / 22%);  /* separates white layers on lavender */
+  --scrim:                       oklch(20% 0.05 282 / 45%);
+  --scrim-subtle:                oklch(20% 0.05 282 / 22%);
+
+  /* ---- primary: ultraviolet (hue 296) ---- */
+  --primary:                     oklch(54% 0.22 296);        /* solid */
+  --primary-on:                  oklch(90.707% 0.06992 303.524); /* text/icon on solid */
+  --primary-ink:                 oklch(36.5% 0.15 296);      /* text/icon on tint, or coloured text (900) */
+
+  /* ---- secondary: frost cyan (hue 210) ---- */
+  --secondary:                   oklch(63% 0.11 210);        /* solid */
+  --secondary-on:                oklch(90.707% 0.05238 227.921); /* text/icon on solid */
+  --secondary-ink:               oklch(37.5% 0.078 215);     /* text/icon on tint, or coloured text (900) */
+
+  /* ---- status: success, warning, destructive, info ---- */
+  --success:                     oklch(88.41% 0.193 162.41);
+  --success-on:                  oklch(26.2% 0.051 172.6);
+  --success-ink:                 oklch(37.8% 0.077 168.9);
+
+  --warning:                     oklch(78.39% 0.106 75.43);
+  --warning-on:                  oklch(27.9% 0.077 45.6);
+  --warning-ink:                 oklch(41.4% 0.112 45.9);
+
+  --destructive:                 oklch(66.77% 0.22 21.34);
+  --destructive-on:              oklch(25.8% 0.092 26);
+  --destructive-ink:             oklch(39.6% 0.141 25.7);
+
+  --info:                        oklch(82% 0.105 235.72);
+  --info-on:                     oklch(29.3% 0.066 243.2);
+  --info-ink:                    oklch(39.1% 0.09 240.9);
+
+  /* ---- accents: orange, olive, teal, purple ---- */
+  --orange:                      oklch(68% 0.17 54);
+  --orange-on:                   oklch(26.6% 0.079 36.3);
+  --orange-ink:                  oklch(40.8% 0.123 38.2);
+
+  --olive:                       oklch(76% 0.17 130);
+  --olive-on:                    oklch(27.4% 0.072 132.1);
+  --olive-ink:                   oklch(40.5% 0.101 131.1);
+
+  --teal:                        oklch(68% 0.119 180);
+  --teal-on:                     oklch(27.7% 0.046 192.5);
+  --teal-ink:                    oklch(38.6% 0.063 188.4);
+
+  --purple:                      oklch(70% 0.18 322);
+  --purple-on:                   oklch(28.5% 0.13 322);
+  --purple-ink:                  oklch(38.5% 0.17 322);
+
+  /* ---- chart series ---- */
+  --chart-1:                     var(--primary);
+  --chart-2:                     var(--orange);
+  --chart-3:                     var(--secondary);
+  --chart-4:                     var(--purple);
+  --chart-5:                     var(--success);
+  --chart-6:                     var(--warning);
+  --chart-7:                     var(--info);
+  --chart-8:                     var(--olive);
+
+  /* ---- glass and glow ---- */
+  --glass:                       oklch(100% 0 0 / 55%);      /* frosted fill */
+  --glass-strong:                oklch(100% 0 0 / 74%);      /* glass carrying text */
+  --glass-line:                  oklch(54% 0.22 296 / 18%);
+  --glass-edge:                  oklch(100% 0 0 / 95%);      /* top inner highlight */
+  --glow-primary:                oklch(66.5% 0.20 296 / 45%);
+  --glow-secondary:              oklch(78% 0.12 210 / 40%);
+  --glow-frost:                  oklch(82% 0.105 235.7 / 40%);
+
+  /* ---- scrollbar and autofill ---- */
+  --scrollbar-thumb:             color-mix(in oklab, var(--primary) 70%, transparent);
+  --scrollbar-thumb-hover:       var(--primary);
+  --autofill-text-color:         var(--ink-base);
+}
+
+/* =============================================================================
+   DARK MODE: Midnight indigo ladder (+2.0 L per tier), lavender-silver ink
+   Source of truth: canvas oklch(23.4% 0.041 274.6)
+   ============================================================================= */
+.dark {
+  color-scheme: dark;
+
+  /* ---- background: page-level layers ---- */
+  --background:                  oklch(23.4% 0.041 274.6);   /* canvas: page, app body */
+  --background-band:             oklch(25.4% 0.045 274.6);   /* alternate full-width section (+2.0) */
+  --background-shell:            oklch(25.4% 0.045 274.6);   /* app chrome: sidebar, top bar (+2.0) */
+  --background-sunken:           oklch(21.4% 0.038 274.6);   /* recessed page-level region (-2.0) */
+  --background-deep:             oklch(19.6% 0.035 274.8);   /* deepest: editor, terminal (-1.8) */
+  --background-hover:            oklch(27.2% 0.048 274.4);   /* hover on page-level items */
+  --background-selected:         oklch(29.0% 0.051 274.2);   /* selected page-level item */
+  --background-active:           oklch(30.8% 0.054 274);     /* pressed page-level item */
+  --background-glass:            color-mix(in oklab, var(--background) 72%, transparent);
+
+  /* ---- surface: stackable layers on the background ---- */
+  --surface:                     oklch(25.4% 0.045 274.6);   /* card on canvas, sunken, deep (+2.0) */
+  --surface-raised:              oklch(27.5% 0.048 274.4);   /* card on band/shell, or card in a card */
+  --surface-stripe:              oklch(24.3% 0.043 274.6);   /* zebra alternate row */
+  --surface-well:                oklch(23.4% 0.041 274.6);   /* recess inside a surface */
+  --surface-deep:                oklch(21.2% 0.038 274.8);   /* deepest recess: log viewer */
+  --surface-skeleton:            oklch(27.0% 0.048 274.4);   /* loading placeholder */
+  --surface-skeleton-shine:      oklch(28.8% 0.050 274.2);   /* loading highlight */
+  --surface-hover:               oklch(27.2% 0.048 274.4);   /* hover on rows, menu items */
+  --surface-selected:            oklch(29.0% 0.051 274.2);   /* selected row or item */
+  --surface-active:              oklch(30.8% 0.054 274);     /* pressed item */
+  --surface-disabled:            oklch(24.0% 0.042 274.6);   /* disabled control fill */
+  --surface-dialog:              oklch(29.5% 0.052 274.2);   /* modal, sheet, drawer */
+  --surface-float:               oklch(31.5% 0.055 274);     /* popover, menu, dropdown */
+  --surface-input:               oklch(22.4% 0.040 274.6);   /* input, textarea, select */
+  --surface-input-hover:         oklch(24.0% 0.042 274.6);   /* input hover */
+  --surface-chip:                oklch(31.5% 0.055 274);     /* neutral chip, tag, badge */
+  --surface-chip-hover:          oklch(33.4% 0.058 273.8);   /* clickable chip hover */
+  --surface-track:               oklch(22.4% 0.040 274.6);   /* slider, switch, progress track */
+  --surface-highest:             oklch(38.5% 0.067 273.5);   /* reserved top emphasis */
+  --surface-overlay-hover:       oklch(33.4% 0.058 273.8);   /* item hover inside float or dialog */
+  --surface-overlay-selected:    oklch(35.2% 0.061 273.6);   /* selected item inside float or dialog */
+  --surface-overlay-active:      oklch(37.0% 0.064 273.5);   /* pressed item inside float or dialog */
+  --surface-inverse:             var(--ink-heading);         /* tooltip, toast */
+  --surface-glass:               color-mix(in oklab, var(--surface) 72%, transparent);
+
+  /* ---- ink: neutral text and icons ---- */
+  --ink-heading:                 oklch(97.5% 0.012 282);     /* titles and key numbers */
+  --ink-base:                    oklch(93% 0.03 276);        /* default UI text */
+  --ink-body:                    oklch(84% 0.024 268);       /* long-form reading */
+  --ink-muted:                   oklch(79% 0.038 274);       /* captions, metadata */
+  --ink-subtle:                  oklch(72.5% 0.038 274);     /* placeholders, timestamps */
+  --ink-disabled:                oklch(52% 0.035 278);       /* disabled text */
+  --ink-inverse:                 var(--background);          /* text on surface-inverse */
+
+  /* ---- line: neutral borders ---- */
+  --line-subtle:                 color-mix(in oklab, var(--ink-heading) 6%, transparent);
+  --line:                        color-mix(in oklab, var(--ink-heading) 12%, transparent);
+  --line-strong:                 color-mix(in oklab, var(--ink-heading) 42%, transparent);
+  --line-hover:                  color-mix(in oklab, var(--ink-heading) 54%, transparent);
+  --line-disabled:               color-mix(in oklab, var(--ink-heading) 6%, transparent);
+  --line-inverse:                color-mix(in oklab, var(--ink-inverse) 16%, transparent);
+
+  /* ---- shadow + scrim ---- */
+  --shadow-tint:                 oklch(5% 0.04 280 / 55%);   /* cool-black shadow */
+  --scrim:                       oklch(8% 0.05 280 / 62%);
+  --scrim-subtle:                oklch(8% 0.05 280 / 36%);
+
+  /* ---- primary: ultraviolet (hue 296) ---- */
+  --primary:                     oklch(66.5% 0.2 296);       /* solid */
+  --primary-on:                  oklch(27.703% 0.09024 297.336); /* text/icon on solid */
+  --primary-ink:                 oklch(90.707% 0.06992 303.524); /* text/icon on tint, or coloured text (100) */
+
+  /* ---- secondary: frost cyan (hue 210) ---- */
+  --secondary:                   oklch(82% 0.115 210);       /* solid */
+  --secondary-on:                oklch(30.458% 0.04613 231.348); /* text/icon on solid */
+  --secondary-ink:               oklch(90.707% 0.05238 227.921); /* text/icon on tint, or coloured text (100) */
+
+  /* ---- status: success, warning, destructive, info ---- */
+  --success:                     oklch(88.41% 0.193 162.41);
+  --success-on:                  oklch(26.2% 0.051 172.6);
+  --success-ink:                 oklch(95% 0.052 163.1);
+
+  --warning:                     oklch(78.39% 0.106 75.43);
+  --warning-on:                  oklch(27.9% 0.077 45.6);
+  --warning-ink:                 oklch(96.2% 0.059 95.6);
+
+  --destructive:                 oklch(66.77% 0.22 21.34);
+  --destructive-on:              oklch(25.8% 0.092 26);
+  --destructive-ink:             oklch(93.6% 0.032 17.7);
+
+  --info:                        oklch(82% 0.105 235.72);
+  --info-on:                     oklch(29.3% 0.066 243.2);
+  --info-ink:                    oklch(95.1% 0.026 236.8);
+
+  /* ---- accents: orange, olive, teal, purple ---- */
+  --orange:                      oklch(68% 0.17 54);
+  --orange-on:                   oklch(26.6% 0.079 36.3);
+  --orange-ink:                  oklch(95.4% 0.038 75.2);
+
+  --olive:                       oklch(76% 0.17 130);
+  --olive-on:                    oklch(27.4% 0.072 132.1);
+  --olive-ink:                   oklch(96.7% 0.067 122.3);
+
+  --teal:                        oklch(68% 0.119 180);
+  --teal-on:                     oklch(27.7% 0.046 192.5);
+  --teal-ink:                    oklch(95.3% 0.051 180.8);
+
+  --purple:                      oklch(70% 0.18 322);
+  --purple-on:                   oklch(28.5% 0.13 322);
+  --purple-ink:                  oklch(94.6% 0.033 322);
+
+  /* ---- chart series ---- */
+  --chart-1:                     var(--primary);
+  --chart-2:                     var(--orange);
+  --chart-3:                     var(--secondary);
+  --chart-4:                     var(--purple);
+  --chart-5:                     var(--success);
+  --chart-6:                     var(--warning);
+  --chart-7:                     var(--info);
+  --chart-8:                     var(--olive);
+
+  /* ---- glass and glow ---- */
+  --glass:                       oklch(100% 0 0 / 7%);       /* frosted fill */
+  --glass-strong:                oklch(100% 0 0 / 12%);      /* glass carrying text */
+  --glass-line:                  oklch(90% 0.05 280 / 14%);
+  --glass-edge:                  oklch(100% 0 0 / 26%);      /* top inner highlight */
+  --glow-primary:                oklch(66.5% 0.20 296 / 36%);
+  --glow-secondary:              oklch(82% 0.115 210 / 26%);
+  --glow-frost:                  oklch(82% 0.105 235.7 / 20%);
+
+  /* ---- scrollbar and autofill ---- */
+  --scrollbar-thumb:             color-mix(in oklab, var(--primary) 65%, transparent);
+  --scrollbar-thumb-hover:       var(--primary);
+  --autofill-text-color:         var(--ink-base);
+}
+
+/* =============================================================================
+   WIDE GAMUT (P3): Brighter brand colors and glows on wide-gamut displays
+   ============================================================================= */
+@media (color-gamut: p3) {
+  :root {
+    --primary:                   oklch(54% 0.25 296);
+    --secondary:                 oklch(63% 0.13 210);
+    --glow-primary:              oklch(66.5% 0.21 296 / 45%);
+    --glow-secondary:            oklch(78% 0.14 210 / 40%);
+  }
+  .dark {
+    --primary:                   oklch(66.5% 0.22 296);
+    --glow-primary:              oklch(66.5% 0.22 296 / 36%);
+    --secondary:                 oklch(82% 0.14 210);
+    --glow-secondary:            oklch(82% 0.14 210 / 26%);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   4. CONSOLIDATED MASTER THEME REGISTRATION
+   Single unified @theme block defining all design tokens and role utilities
+   ----------------------------------------------------------------------------- */
+@theme {
+  /* ---- Glass and Blur ---- */
+  --blur-glass: 22px;
+  --blur-glass-strong: 32px;
+
+  /* ---- Font Families ---- */
+    /* ---- Font Families ---- */
+  --font-sans:    "Fira Sans", system-ui, sans-serif;        /* UI structure: headings h1–h6, nav, tabs, sidebar, buttons, chips, badges, form labels, card titles (job/project/person names), table headers, modal titles */
+  --font-body:    "Andika", system-ui, sans-serif;           /* reading & writing: feed posts, comments, chat messages, bios, job descriptions, proposals, cover letters, reviews, inputs/textareas, helper text, empty states */
+  --font-serif:   "Fraunces", Georgia, serif;                /* accent only (use sparingly): landing hero lines, testimonials, pull quotes, onboarding welcome, milestone moments ("You're hired") — never body, buttons or nav */
+  --font-mono:    "Fira Code", ui-monospace, monospace;      /* real code: code blocks, inline code, snippets in posts/profiles/portfolios, code editors, terminal and API snippets */
+  --font-mono-ui: "IBM Plex Mono", ui-monospace, monospace;  /* data & numbers: rates, budgets, salary ranges, bids, timestamps ("posted 3h ago"), counters and stats, IDs and invoice refs, small status tags */
+  --font-logo:    "New Rocker", cursive;                     /* brand wordmark only: header/footer logo, favicon, splash/loading screen — never headings, buttons or UI text */
+
+  /* ---- Breakpoints: 7-Tier Mobile-First Ladder (360px to 1920px) ---- */
+  --breakpoint-2xs: 360px;
+  --breakpoint-xxs: 360px;
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --breakpoint-xxl: 1536px;
+  --breakpoint-3xl: 1920px;
+  --breakpoint-xxxl: 1920px;
+
+  /* ---- Font Weights: 50 extrathin up to 950 extrablack ---- */
+  --font-weight-extrathin: 50;
+  --font-weight-hairline: 50;
+  --font-weight-thin: 100;
+  --font-weight-extralight: 200;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+  --font-weight-superbold: 900;
+  --font-weight-extrablack: 950;
+
+  /* ---- Fluid Responsive Typography Hierarchy (17 Tiers) ---- */
+  --text-fineprint: clamp(0.625rem, 0.6rem + 0.1vw, 0.6875rem);
+  --text-fineprint--line-height: 0.875rem;
+  --text-fineprint--letter-spacing: 0.02em;
+  --text-fineprint--font-weight: 400;
+
+  --text-span: 0.75rem;
+  --text-span--line-height: 1rem;
+  --text-span--letter-spacing: 0.01em;
+  --text-span--font-weight: 400;
+
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.125rem;
+  --text-caption--letter-spacing: 0.005em;
+  --text-caption--font-weight: 400;
+
+  --text-subtext: 0.875rem;
+  --text-subtext--line-height: 1.25rem;
+  --text-subtext--letter-spacing: 0em;
+  --text-subtext--font-weight: 400;
+
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.25rem;
+  --text-label--letter-spacing: 0.005em;
+  --text-label--font-weight: 500;
+
+  --text-p: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --text-p--line-height: 1.375rem;
+  --text-p--letter-spacing: 0em;
+  --text-p--font-weight: 400;
+
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-base--letter-spacing: 0em;
+  --text-base--font-weight: 400;
+
+  --text-lead: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+  --text-lead--line-height: 1.625rem;
+  --text-lead--letter-spacing: -0.005em;
+  --text-lead--font-weight: 400;
+
+  --text-subheading: clamp(1.25rem, 1.2rem + 0.3vw, 1.375rem);
+  --text-subheading--line-height: 1.75rem;
+  --text-subheading--letter-spacing: -0.01em;
+  --text-subheading--font-weight: 500;
+
+  --text-heading: clamp(1.375rem, 1.3rem + 0.35vw, 1.5rem);
+  --text-heading--line-height: 1.875rem;
+  --text-heading--letter-spacing: -0.015em;
+  --text-heading--font-weight: 500;
+
+  --text-h6: 1.125rem;
+  --text-h6--line-height: 1.625rem;
+  --text-h6--letter-spacing: -0.005em;
+  --text-h6--font-weight: 500;
+
+  --text-h5: clamp(1.25rem, 1.2rem + 0.3vw, 1.375rem);
+  --text-h5--line-height: 1.75rem;
+  --text-h5--letter-spacing: -0.01em;
+  --text-h5--font-weight: 500;
+
+  --text-h4: clamp(1.5rem, 1.4rem + 0.4vw, 1.75rem);
+  --text-h4--line-height: 2.125rem;
+  --text-h4--letter-spacing: -0.015em;
+  --text-h4--font-weight: 500;
+
+  --text-h3: clamp(1.75rem, 1.6rem + 0.6vw, 2.125rem);
+  --text-h3--line-height: 2.5rem;
+  --text-h3--letter-spacing: -0.02em;
+  --text-h3--font-weight: 500;
+
+  --text-h2: clamp(2rem, 1.8rem + 1vw, 2.625rem);
+  --text-h2--line-height: 3rem;
+  --text-h2--letter-spacing: -0.025em;
+  --text-h2--font-weight: 600;
+
+  --text-h1: clamp(2.375rem, 2.1rem + 1.4vw, 3.25rem);
+  --text-h1--line-height: 3.75rem;
+  --text-h1--letter-spacing: -0.03em;
+  --text-h1--font-weight: 600;
+
+  --text-display: clamp(2.75rem, 2.2rem + 2.5vw, 4.5rem);
+  --text-display--line-height: 5rem;
+  --text-display--letter-spacing: -0.035em;
+  --text-display--font-weight: 700;
+
+  /* ---- Spacing Scale: Standard 4px / 8px geometric grid ---- */
+  --spacing-0: 0rem;          /* 0px - flush reset */
+  --spacing-px: 0.0625rem;     /* 1px - hairline borders and optical nudges */
+  --spacing-0-5: 0.125rem;     /* 2px - micro icon gap, dot indicators */
+  --spacing-1: 0.25rem;        /* 4px - compact tag padding, inline badge */
+  --spacing-1-5: 0.375rem;     /* 6px - dense table cell, tight button vertical */
+  --spacing-2: 0.5rem;         /* 8px - standard input vertical, button inner icon gap */
+  --spacing-2-5: 0.625rem;     /* 10px - comfortable input vertical padding */
+  --spacing-3: 0.75rem;        /* 12px - button horizontal padding, compact card */
+  --spacing-4: 1rem;           /* 16px - core baseline: mobile gutter, card padding */
+  --spacing-5: 1.25rem;        /* 20px - intermediate card, drawer content gap */
+  --spacing-6: 1.5rem;         /* 24px - standard desktop card padding, modal content */
+  --spacing-8: 2rem;           /* 32px - modal dialog outer padding, component gap */
+  --spacing-10: 2.5rem;        /* 40px - section margin, hero card inner padding */
+  --spacing-12: 3rem;          /* 48px - standard section separator, header bottom */
+  --spacing-16: 4rem;          /* 64px - major landing section padding, split-row gap */
+  --spacing-20: 5rem;          /* 80px - large marketing section spacer */
+  --spacing-24: 6rem;          /* 96px - hero container top/bottom padding */
+  --spacing-32: 8rem;          /* 128px - ultra-wide display margins */
+  --spacing-40: 10rem;         /* 160px - fullscreen hero viewport bottom spacer */
+
+  /* ---- Border Radius: Optical Nested Ladder ---- */
+  --radius-none: 0rem;
+  --radius-2xs: 0.125rem;
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-xxl: 1.5rem;
+  --radius-3xl: 2rem;
+  --radius-xxxl: 2rem;
+  --radius-full: 9999px;
+
+  /* ---- Semantic Z-Index Master Ladder (18 Tiers) ---- */
+  --z-index-behind: -1;
+  --z-index-base: 0;
+  --z-index-raised: 1;
+  --z-index-surface: 5;
+  --z-index-decor: 10;
+  --z-index-sticky: 20;
+  --z-index-header: 30;
+  --z-index-sidebar: 40;
+  --z-index-mobile-backdrop: 45;
+  --z-index-mobile-nav: 50;
+  --z-index-dropdown: 60;
+  --z-index-select: 65;
+  --z-index-popover: 70;
+  --z-index-hovercard: 75;
+  --z-index-scrim: 80;
+  --z-index-dialog: 90;
+  --z-index-sheet: 90;
+  --z-index-drawer: 90;
+  --z-index-nested-dropdown: 100;
+  --z-index-nested-popover: 110;
+  --z-index-command-scrim: 120;
+  --z-index-command: 130;
+  --z-index-alert-scrim: 140;
+  --z-index-alert: 150;
+  --z-index-tooltip: 160;
+  --z-index-toast: 170;
+  --z-index-top-loader: 180;
+  --z-index-lockout: 190;
+  --z-index-max: 9999;
+
+  /* ---- Box Shadows & Glows ---- */
+  --shadow-float: 0 12px 32px -8px var(--shadow-tint), inset 0 1px 0 var(--glass-edge);
+  --shadow-dialog: 0 24px 64px -12px var(--shadow-tint), inset 0 1px 0 var(--glass-edge);
+  --shadow-glow-primary: 0 0 24px color-mix(in oklab, var(--primary) 45%, transparent);
+  --shadow-glow-secondary: 0 0 24px color-mix(in oklab, var(--secondary) 45%, transparent);
+
+  /* ---- Semantic Color Utilities Mapped to Mode Variables ---- */
+
+  /* background */
+  --color-background: var(--background);
+  --color-background-band: var(--background-band);
+  --color-background-shell: var(--background-shell);
+  --color-background-sunken: var(--background-sunken);
+  --color-background-deep: var(--background-deep);
+  --color-background-hover: var(--background-hover);
+  --color-background-selected: var(--background-selected);
+  --color-background-active: var(--background-active);
+  --color-background-glass: var(--background-glass);
+
+  /* surface */
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-stripe: var(--surface-stripe);
+  --color-surface-well: var(--surface-well);
+  --color-surface-deep: var(--surface-deep);
+  --color-surface-skeleton: var(--surface-skeleton);
+  --color-surface-skeleton-shine: var(--surface-skeleton-shine);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-selected: var(--surface-selected);
+  --color-surface-active: var(--surface-active);
+  --color-surface-disabled: var(--surface-disabled);
+  --color-surface-dialog: var(--surface-dialog);
+  --color-surface-float: var(--surface-float);
+  --color-surface-input: var(--surface-input);
+  --color-surface-input-hover: var(--surface-input-hover);
+  --color-surface-chip: var(--surface-chip);
+  --color-surface-chip-hover: var(--surface-chip-hover);
+  --color-surface-track: var(--surface-track);
+  --color-surface-highest: var(--surface-highest);
+  --color-surface-overlay-hover: var(--surface-overlay-hover);
+  --color-surface-overlay-selected: var(--surface-overlay-selected);
+  --color-surface-overlay-active: var(--surface-overlay-active);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-surface-glass: var(--surface-glass);
+
+  /* ink */
+  --color-ink-heading: var(--ink-heading);
+  --color-ink-base: var(--ink-base);
+  --color-ink-body: var(--ink-body);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-ink-disabled: var(--ink-disabled);
+  --color-ink-inverse: var(--ink-inverse);
+
+  /* line */
+  --color-line-subtle: var(--line-subtle);
+  --color-line-strong: var(--line-strong);
+  --color-line-hover: var(--line-hover);
+  --color-line-disabled: var(--line-disabled);
+  --color-line-inverse: var(--line-inverse);
+  --color-line: var(--line);
+  --color-focus: color-mix(in oklab, var(--primary) 70%, transparent);
+
+  /* scrim */
+  --color-scrim: var(--scrim);
+  --color-scrim-subtle: var(--scrim-subtle);
+
+  /* glass & glow */
+  --color-glass: var(--glass);
+  --color-glass-strong: var(--glass-strong);
+  --color-glass-line: var(--glass-line);
+  --color-glass-edge: var(--glass-edge);
+  --color-glow-primary: var(--glow-primary);
+  --color-glow-secondary: var(--glow-secondary);
+  --color-glow-frost: var(--glow-frost);
+  --color-glass-tint: color-mix(in oklab, var(--primary) 16%, transparent);
+
+  /* primary */
+  --color-primary: var(--primary);
+  --color-primary-on: var(--primary-on);
+  --color-primary-ink: var(--primary-ink);
+  --color-primary-tint: color-mix(in oklab, var(--primary) 15%, transparent);
+  --color-primary-tint-hover: color-mix(in oklab, var(--primary) 22%, transparent);
+  --color-primary-line: color-mix(in oklab, var(--primary) 32%, transparent);
+  --color-primary-hover: color-mix(in oklab, var(--primary) 88%, var(--ink-heading));
+  --color-primary-active: color-mix(in oklab, var(--primary) 78%, var(--ink-heading));
+  --color-primary-tint-active: color-mix(in oklab, var(--primary) 30%, transparent);
+  --color-primary-ink-hover: color-mix(in oklab, var(--primary-ink) 85%, var(--ink-heading));
+  --color-primary-ink-strong: color-mix(in oklab, var(--primary-ink) 78%, var(--ink-heading));
+  --color-primary-line-strong: color-mix(in oklab, var(--primary) 55%, transparent);
+  --color-primary-on-subtle: color-mix(in oklab, var(--primary-on) 72%, transparent);
+  --color-primary-glow: color-mix(in oklab, var(--primary) 40%, transparent);
+
+  /* secondary */
+  --color-secondary: var(--secondary);
+  --color-secondary-on: var(--secondary-on);
+  --color-secondary-ink: var(--secondary-ink);
+  --color-secondary-tint: color-mix(in oklab, var(--secondary) 15%, transparent);
+  --color-secondary-tint-hover: color-mix(in oklab, var(--secondary) 22%, transparent);
+  --color-secondary-line: color-mix(in oklab, var(--secondary) 32%, transparent);
+  --color-secondary-hover: color-mix(in oklab, var(--secondary) 88%, var(--ink-heading));
+  --color-secondary-active: color-mix(in oklab, var(--secondary) 78%, var(--ink-heading));
+  --color-secondary-tint-active: color-mix(in oklab, var(--secondary) 30%, transparent);
+  --color-secondary-ink-hover: color-mix(in oklab, var(--secondary-ink) 85%, var(--ink-heading));
+  --color-secondary-ink-strong: color-mix(in oklab, var(--secondary-ink) 78%, var(--ink-heading));
+  --color-secondary-line-strong: color-mix(in oklab, var(--secondary) 55%, transparent);
+  --color-secondary-on-subtle: color-mix(in oklab, var(--secondary-on) 72%, transparent);
+  --color-secondary-glow: color-mix(in oklab, var(--secondary) 40%, transparent);
+
+  /* success */
+  --color-success: var(--success);
+  --color-success-on: var(--success-on);
+  --color-success-ink: var(--success-ink);
+  --color-success-tint: color-mix(in oklab, var(--success) 15%, transparent);
+  --color-success-tint-hover: color-mix(in oklab, var(--success) 22%, transparent);
+  --color-success-line: color-mix(in oklab, var(--success) 32%, transparent);
+  --color-success-hover: color-mix(in oklab, var(--success) 88%, var(--ink-heading));
+  --color-success-active: color-mix(in oklab, var(--success) 78%, var(--ink-heading));
+  --color-success-tint-active: color-mix(in oklab, var(--success) 30%, transparent);
+  --color-success-ink-hover: color-mix(in oklab, var(--success-ink) 85%, var(--ink-heading));
+  --color-success-ink-strong: color-mix(in oklab, var(--success-ink) 78%, var(--ink-heading));
+  --color-success-line-strong: color-mix(in oklab, var(--success) 55%, transparent);
+  --color-success-on-subtle: color-mix(in oklab, var(--success-on) 72%, transparent);
+  --color-success-glow: color-mix(in oklab, var(--success) 40%, transparent);
+
+  /* warning */
+  --color-warning: var(--warning);
+  --color-warning-on: var(--warning-on);
+  --color-warning-ink: var(--warning-ink);
+  --color-warning-tint: color-mix(in oklab, var(--warning) 15%, transparent);
+  --color-warning-tint-hover: color-mix(in oklab, var(--warning) 22%, transparent);
+  --color-warning-line: color-mix(in oklab, var(--warning) 32%, transparent);
+  --color-warning-hover: color-mix(in oklab, var(--warning) 88%, var(--ink-heading));
+  --color-warning-active: color-mix(in oklab, var(--warning) 78%, var(--ink-heading));
+  --color-warning-tint-active: color-mix(in oklab, var(--warning) 30%, transparent);
+  --color-warning-ink-hover: color-mix(in oklab, var(--warning-ink) 85%, var(--ink-heading));
+  --color-warning-ink-strong: color-mix(in oklab, var(--warning-ink) 78%, var(--ink-heading));
+  --color-warning-line-strong: color-mix(in oklab, var(--warning) 55%, transparent);
+  --color-warning-on-subtle: color-mix(in oklab, var(--warning-on) 72%, transparent);
+  --color-warning-glow: color-mix(in oklab, var(--warning) 40%, transparent);
+
+  /* destructive */
+  --color-destructive: var(--destructive);
+  --color-destructive-on: var(--destructive-on);
+  --color-destructive-ink: var(--destructive-ink);
+  --color-destructive-tint: color-mix(in oklab, var(--destructive) 15%, transparent);
+  --color-destructive-tint-hover: color-mix(in oklab, var(--destructive) 22%, transparent);
+  --color-destructive-line: color-mix(in oklab, var(--destructive) 32%, transparent);
+  --color-destructive-hover: color-mix(in oklab, var(--destructive) 88%, var(--ink-heading));
+  --color-destructive-active: color-mix(in oklab, var(--destructive) 78%, var(--ink-heading));
+  --color-destructive-tint-active: color-mix(in oklab, var(--destructive) 30%, transparent);
+  --color-destructive-ink-hover: color-mix(in oklab, var(--destructive-ink) 85%, var(--ink-heading));
+  --color-destructive-ink-strong: color-mix(in oklab, var(--destructive-ink) 78%, var(--ink-heading));
+  --color-destructive-line-strong: color-mix(in oklab, var(--destructive) 55%, transparent);
+  --color-destructive-on-subtle: color-mix(in oklab, var(--destructive-on) 72%, transparent);
+  --color-destructive-glow: color-mix(in oklab, var(--destructive) 40%, transparent);
+
+  /* info */
+  --color-info: var(--info);
+  --color-info-on: var(--info-on);
+  --color-info-ink: var(--info-ink);
+  --color-info-tint: color-mix(in oklab, var(--info) 15%, transparent);
+  --color-info-tint-hover: color-mix(in oklab, var(--info) 22%, transparent);
+  --color-info-line: color-mix(in oklab, var(--info) 32%, transparent);
+  --color-info-hover: color-mix(in oklab, var(--info) 88%, var(--ink-heading));
+  --color-info-active: color-mix(in oklab, var(--info) 78%, var(--ink-heading));
+  --color-info-tint-active: color-mix(in oklab, var(--info) 30%, transparent);
+  --color-info-ink-hover: color-mix(in oklab, var(--info-ink) 85%, var(--ink-heading));
+  --color-info-ink-strong: color-mix(in oklab, var(--info-ink) 78%, var(--ink-heading));
+  --color-info-line-strong: color-mix(in oklab, var(--info) 55%, transparent);
+  --color-info-on-subtle: color-mix(in oklab, var(--info-on) 72%, transparent);
+  --color-info-glow: color-mix(in oklab, var(--info) 40%, transparent);
+
+  /* accents */
+  --color-orange: var(--orange);
+  --color-orange-on: var(--orange-on);
+  --color-orange-ink: var(--orange-ink);
+  --color-orange-tint: color-mix(in oklab, var(--orange) 15%, transparent);
+  --color-orange-tint-hover: color-mix(in oklab, var(--orange) 22%, transparent);
+  --color-orange-line: color-mix(in oklab, var(--orange) 32%, transparent);
+
+  --color-olive: var(--olive);
+  --color-olive-on: var(--olive-on);
+  --color-olive-ink: var(--olive-ink);
+  --color-olive-tint: color-mix(in oklab, var(--olive) 15%, transparent);
+  --color-olive-tint-hover: color-mix(in oklab, var(--olive) 22%, transparent);
+  --color-olive-line: color-mix(in oklab, var(--olive) 32%, transparent);
+
+  --color-teal: var(--teal);
+  --color-teal-on: var(--teal-on);
+  --color-teal-ink: var(--teal-ink);
+  --color-teal-tint: color-mix(in oklab, var(--teal) 15%, transparent);
+  --color-teal-tint-hover: color-mix(in oklab, var(--teal) 22%, transparent);
+  --color-teal-line: color-mix(in oklab, var(--teal) 32%, transparent);
+
+  --color-purple: var(--purple);
+  --color-purple-on: var(--purple-on);
+  --color-purple-ink: var(--purple-ink);
+  --color-purple-tint: color-mix(in oklab, var(--purple) 15%, transparent);
+  --color-purple-tint-hover: color-mix(in oklab, var(--purple) 22%, transparent);
+  --color-purple-line: color-mix(in oklab, var(--purple) 32%, transparent);
+
+  /* chart series */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+  --color-chart-8: var(--chart-8);
+}
+
+/* -----------------------------------------------------------------------------
+   5. BASE LAYER & COMPONENT RESETS
+   ----------------------------------------------------------------------------- */
+@layer base {
+  html, body {
+    background-color: var(--background);
+    color: var(--ink-base);
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);   /* Fira Sans for all headings */
+  }
+
+  .font-serif {
+    font-variation-settings: "SOFT" 100, "WONK" 0;  /* soft, friendly Fraunces */
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--primary) 70%, transparent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+
+  /* ==================== Custom Scrollbar (Primary-leaning) ==================== */
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  .dark html,
+  :root.dark {
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+
+  /* ==================== Autofill / Autocomplete Transparent Reset ==================== */
+  /* Prevent WebKit/Blink (Chrome, Edge, Safari) default white/pale-blue background and black text override on autofill */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  textarea:-webkit-autofill:active,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus,
+  select:-webkit-autofill:active {
+    transition: background-color 5000000s ease-in-out 0s;
+    -webkit-box-shadow: 0 0 0 1000px transparent inset;
+    box-shadow: 0 0 0 1000px transparent inset;
+    -webkit-text-fill-color: var(--autofill-text-color);
+    caret-color: var(--autofill-text-color);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   6. COMPOSITE TYPOGRAPHY UTILITIES
+   ----------------------------------------------------------------------------- */
+@utility typography-fineprint {
+  font-size: var(--text-fineprint);
+  line-height: var(--text-fineprint--line-height);
+  letter-spacing: var(--text-fineprint--letter-spacing);
+  font-weight: var(--text-fineprint--font-weight);
+}
+@utility typography-span {
+  font-size: var(--text-span);
+  line-height: var(--text-span--line-height);
+  letter-spacing: var(--text-span--letter-spacing);
+  font-weight: var(--text-span--font-weight);
+}
+@utility typography-caption {
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  letter-spacing: var(--text-caption--letter-spacing);
+  font-weight: var(--text-caption--font-weight);
+}
+@utility typography-subtext {
+  font-size: var(--text-subtext);
+  line-height: var(--text-subtext--line-height);
+  letter-spacing: var(--text-subtext--letter-spacing);
+  font-weight: var(--text-subtext--font-weight);
+}
+@utility typography-label {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+}
+@utility typography-p {
+  font-size: var(--text-p);
+  line-height: var(--text-p--line-height);
+  letter-spacing: var(--text-p--letter-spacing);
+  font-weight: var(--text-p--font-weight);
+}
+@utility typography-base {
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+  letter-spacing: var(--text-base--letter-spacing);
+  font-weight: var(--text-base--font-weight);
+}
+@utility typography-lead {
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  letter-spacing: var(--text-lead--letter-spacing);
+  font-weight: var(--text-lead--font-weight);
+}
+@utility typography-subheading {
+  font-size: var(--text-subheading);
+  line-height: var(--text-subheading--line-height);
+  letter-spacing: var(--text-subheading--letter-spacing);
+  font-weight: var(--text-subheading--font-weight);
+}
+@utility typography-heading {
+  font-size: var(--text-heading);
+  line-height: var(--text-heading--line-height);
+  letter-spacing: var(--text-heading--letter-spacing);
+  font-weight: var(--text-heading--font-weight);
+}
+@utility typography-h6 {
+  font-size: var(--text-h6);
+  line-height: var(--text-h6--line-height);
+  letter-spacing: var(--text-h6--letter-spacing);
+  font-weight: var(--text-h6--font-weight);
+}
+@utility typography-h5 {
+  font-size: var(--text-h5);
+  line-height: var(--text-h5--line-height);
+  letter-spacing: var(--text-h5--letter-spacing);
+  font-weight: var(--text-h5--font-weight);
+}
+@utility typography-h4 {
+  font-size: var(--text-h4);
+  line-height: var(--text-h4--line-height);
+  letter-spacing: var(--text-h4--letter-spacing);
+  font-weight: var(--text-h4--font-weight);
+}
+@utility typography-h3 {
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
+  letter-spacing: var(--text-h3--letter-spacing);
+  font-weight: var(--text-h3--font-weight);
+}
+@utility typography-h2 {
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+  letter-spacing: var(--text-h2--letter-spacing);
+  font-weight: var(--text-h2--font-weight);
+}
+@utility typography-h1 {
+  font-size: var(--text-h1);
+  line-height: var(--text-h1--line-height);
+  letter-spacing: var(--text-h1--letter-spacing);
+  font-weight: var(--text-h1--font-weight);
+}
+@utility typography-display {
+  font-size: var(--text-display);
+  line-height: var(--text-display--line-height);
+  letter-spacing: var(--text-display--letter-spacing);
+  font-weight: var(--text-display--font-weight);
+}

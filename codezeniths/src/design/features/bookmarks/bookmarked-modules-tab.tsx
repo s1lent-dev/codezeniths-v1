@@ -51,7 +51,7 @@ export const BookmarkedModulesTab: React.FC<BookmarkedModulesTabProps> = ({
             {/* Controls Bar: Capsule Search Input & Capsule Sort Selector */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-1">
                 {/* Search Input */}
-                <div className="relative w-full max-w-xs sm:max-w-sm">
+                <div className="relative w-full sm:max-w-xs md:max-w-sm">
                     <Search className="size-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-light dark:text-muted-dark pointer-events-none" />
                     <input
                         type="text"
@@ -73,7 +73,7 @@ export const BookmarkedModulesTab: React.FC<BookmarkedModulesTabProps> = ({
                 </div>
 
                 {/* Sort Control */}
-                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
                     <span className="text-xs font-medium text-muted-light dark:text-muted-dark whitespace-nowrap hidden xs:inline">
                         Sort by:
                     </span>
@@ -81,7 +81,7 @@ export const BookmarkedModulesTab: React.FC<BookmarkedModulesTabProps> = ({
                         value={sortBy}
                         onValueChange={(val) => onSortChange(val as BookmarksSortBy)}
                     >
-                        <SelectTrigger className="w-38 sm:w-44 h-9.5 rounded-full text-xs font-medium bg-foreground-light dark:bg-foreground-dark border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-2xs cursor-pointer focus:ring-1 focus:ring-primary">
+                        <SelectTrigger className="w-full sm:w-44 h-9.5 rounded-full text-xs font-medium bg-foreground-light dark:bg-foreground-dark border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-2xs cursor-pointer focus:ring-1 focus:ring-primary">
                             <SelectValue placeholder="Sort by" />
                         </SelectTrigger>
                         <SelectContent
@@ -165,7 +165,7 @@ export const BookmarkedModulesTab: React.FC<BookmarkedModulesTabProps> = ({
                 </div>
             ) : (
                 /* Module Cards Grid */
-                <Grid cols={3} gap="lg" className="w-full">
+                <Grid cols={3} className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
                     {modules.map((module) => (
                         <BookmarkCard
                             key={module.id}

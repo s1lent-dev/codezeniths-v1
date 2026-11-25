@@ -1,0 +1,32 @@
+@import "../../globals.css";
+
+/* Reset margin and set base font */
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure smooth scrolling across the lab */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base body background & text using role tokens */
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background);
+  color: var(--ink-base);
+}
+
+/* When a pane is forced into dark mode in side-by-side view */
+.force-dark {
+  color-scheme: dark;
+}
+
+/* When a pane is forced into light mode in side-by-side view */
+.force-light {
+  color-scheme: light;
+}

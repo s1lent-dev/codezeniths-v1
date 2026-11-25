@@ -309,7 +309,7 @@ export function normalizeTopicLevel(level?: string | null): TopicLevel {
     return 'intermediate';
 }
 
-export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = ({
+export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = React.memo(({
     recentTopicData,
     featuredTopicData,
     isLoading = false,
@@ -321,14 +321,8 @@ export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = ({
     const lastProblem = recentTopicData?.lastProblem;
     const recentTags = recentTopicData?.tags ?? [];
 
-    // Stable random selection among the 6 verified candidate featured topics
-    const randomFeatured = useMemo(() => {
-        const randomIndex = Math.floor(Math.random() * FEATURED_TOPICS_POOL.length);
-        return FEATURED_TOPICS_POOL[randomIndex] || ACTIVE_FALLBACK_TOPIC;
-    }, []);
-
-    // Resolve active topic entity and metadata
-    const activeFeatured = featuredTopicData || randomFeatured || ACTIVE_FALLBACK_TOPIC;
+    // Deterministic featured topic fallback to prevent hydration mismatch and re-render flicker
+    const activeFeatured = featuredTopicData || FEATURED_TOPICS_POOL[0] || ACTIVE_FALLBACK_TOPIC;
 
     const activeTopic = hasRecent && recentTopic
         ? recentTopic
@@ -506,4 +500,6 @@ export const ResumeTopicCard: React.FC<ResumeTopicCardProps> = ({
             </div>
         </Card>
     );
-};
+});
+
+ResumeTopicCard.displayName = 'ResumeTopicCard';

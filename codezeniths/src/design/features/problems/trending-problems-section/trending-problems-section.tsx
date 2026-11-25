@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Flame, Star, CheckCircle2, TrendingUp, ChevronDown } from 'lucide-react';
 import {
@@ -23,18 +23,22 @@ const RANK_BADGES: Record<number, string> = {
     3: 'bg-orange-600/15 text-orange-600 dark:text-orange-400 border-orange-600/30 font-bold',
 };
 
-export const TrendingProblemsSection: React.FC<TrendingProblemsSectionProps> = ({
+export const TrendingProblemsSection: React.FC<TrendingProblemsSectionProps> = React.memo(({
     className,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const { data: trendingProblems, isLoading } = problemQueryService.getTrendingProblems({ limit: 10 });
+
+    const displayedProblems = useMemo(() => {
+        const allProblems = trendingProblems || [];
+        return isExpanded ? allProblems : allProblems.slice(0, 5);
+    }, [trendingProblems, isExpanded]);
 
     if (isLoading) {
         return <TrendingProblemsSkeleton className={className} />;
     }
 
     const allProblems = trendingProblems || [];
-    const displayedProblems = isExpanded ? allProblems : allProblems.slice(0, 5);
 
     return (
         <Card
@@ -167,4 +171,6 @@ export const TrendingProblemsSection: React.FC<TrendingProblemsSectionProps> = (
             </div>
         </Card>
     );
-};
+});
+
+TrendingProblemsSection.displayName = 'TrendingProblemsSection';

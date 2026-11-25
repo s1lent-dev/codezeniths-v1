@@ -10,7 +10,6 @@ import {
     ProblemSortingInput,
 } from '@codezeniths/schemas/db/queries/shared/problem-filter.schema';
 import { useDebounce } from '@/hooks/performance-hooks/useDebounce';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import {
     useReactTable,
     getCoreRowModel,
@@ -159,7 +158,6 @@ export const ProblemList: React.FC<ProblemListProps> = ({
 
         const mainViewport =
             sentinelRef.current?.closest('[data-slot="scroll-area-viewport"]') ||
-            scrollAreaRef.current?.querySelector('[data-slot="scroll-area-viewport"]') ||
             null;
 
         if (!sentinelRef.current) return;
@@ -179,7 +177,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
 
         observer.observe(sentinelRef.current);
         return () => observer.disconnect();
-    }, [viewMode, hasNextPage, isFetchingNextPage, onLoadMore, problems.length]);
+    }, [viewMode, hasNextPage, isFetchingNextPage, onLoadMore]);
 
     // Columns setup for TanStack Table
     const columns = [
@@ -194,75 +192,6 @@ export const ProblemList: React.FC<ProblemListProps> = ({
         columns,
         getCoreRowModel: getCoreRowModel(),
     });
-
-    const tableContainerRef = useRef<HTMLDivElement>(null);
-    const [scrollMargin, setScrollMargin] = useState(0);
-
-    // Dynamically calculate the table's offset from the scroll container top
-    useEffect(() => {
-        const updateScrollMargin = () => {
-            if (!tableContainerRef.current) return;
-            const scrollViewport =
-                sentinelRef.current?.closest('[data-slot="scroll-area-viewport"]') ||
-                scrollAreaRef.current?.querySelector('[data-slot="scroll-area-viewport"]');
-
-            if (scrollViewport) {
-                const tableRect = tableContainerRef.current.getBoundingClientRect();
-                const viewportRect = scrollViewport.getBoundingClientRect();
-                const offset = tableRect.top - viewportRect.top + scrollViewport.scrollTop;
-                setScrollMargin(Math.max(0, offset));
-            }
-        };
-
-        updateScrollMargin();
-        window.addEventListener('resize', updateScrollMargin);
-        return () => window.removeEventListener('resize', updateScrollMargin);
-    }, [problems.length, viewMode]);
-
-    // Virtualizer for Virtualized View using @tanstack/react-virtual
-    const rowVirtualizer = useVirtualizer({
-        count: problems.length,
-        getScrollElement: () =>
-            sentinelRef.current?.closest('[data-slot="scroll-area-viewport"]') ||
-            scrollAreaRef.current?.querySelector('[data-slot="scroll-area-viewport"]') ||
-            null,
-        estimateSize: () => 58,
-        scrollMargin,
-        getItemKey: (index) => problems[index]?.id || index,
-        overscan: 10,
-    });
-
-    const virtualRows = rowVirtualizer.getVirtualItems();
-    const paddingTop =
-        virtualRows.length > 0 ? Math.max(0, virtualRows[0].start - scrollMargin) : 0;
-    const paddingBottom =
-        virtualRows.length > 0
-            ? Math.max(0, rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end)
-            : 0;
-
-    // Virtualization Diagnostic Logger (Fires strictly when visible index range changes)
-    const prevIndicesRef = useRef<string>('');
-    useEffect(() => {
-        if (viewMode === 'infinite' && virtualRows.length > 0) {
-            const indicesStr = virtualRows.map((vr) => vr.index).join(', ');
-            if (indicesStr !== prevIndicesRef.current) {
-                prevIndicesRef.current = indicesStr;
-                console.log(
-                    `[Virtualization Status] Rendering ${virtualRows.length} visible rows (indices: ${indicesStr}) out of ${problems.length} total loaded problems.`
-                );
-            }
-        }
-    }, [viewMode, virtualRows, problems.length]);
-
-    // Handle scroll event for infinite scrolling
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        if (viewMode !== 'infinite' || !hasNextPage || isFetchingNextPage) return;
-        const target = e.currentTarget;
-        const scrollBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
-        if (scrollBottom < 60) {
-            onLoadMore?.();
-        }
-    };
 
     // Filter submit / clear helpers
     const handleSearchSubmit = (e: React.FormEvent) => {
@@ -336,7 +265,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                 <ScrollArea className="h-80 pr-2">
                                     <div className="space-y-3 text-xs p-2">
                                         {/* Module Filter */}
-                                        {pageContext !== 'tags' && pageContext !== 'favourites' && modulesOptions.length > 0 && (
+                                        {pageContext !== 'tags' && pageContext !== 'favourites' && pageContext !== 'topic' && modulesOptions.length > 0 && (
                                             <div>
                                                 <label className="text-muted-light dark:text-muted-dark font-medium block mb-1">Module</label>
                                                 <Select
@@ -365,7 +294,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                         )}
 
                                         {/* Topic Filter */}
-                                        {pageContext !== 'tags' && pageContext !== 'favourites' && topicsOptions.length > 0 && (
+                                        {pageContext !== 'tags' && pageContext !== 'favourites' && pageContext !== 'topic' && topicsOptions.length > 0 && (
                                             <div>
                                                 <label className="text-muted-light dark:text-muted-dark font-medium block mb-1">Topic</label>
                                                 <Select
@@ -393,7 +322,7 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                         )}
 
                                         {/* Tag Filter */}
-                                        {pageContext !== 'tags' && pageContext !== 'favourites' && tagsOptions.length > 0 && (
+                                        {pageContext !== 'tags' && pageContext !== 'favourites' && pageContext !== 'topic' && tagsOptions.length > 0 && (
                                             <div>
                                                 <label className="text-muted-light dark:text-muted-dark font-medium block mb-1">Tag</label>
                                                 <Select
@@ -744,43 +673,22 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                         )}
                     </div>
                 ) : (
-                    /* Infinite Scroll View Mode (Virtualized Table Rows with 100% Uniform Widths) */
-                    <div ref={tableContainerRef} className="space-y-4">
+                    /* Infinite Scroll View Mode (Zero Layout Shift with Smooth Appending Rows) */
+                    <div className="space-y-4">
                         <Table className="w-full table-fixed border-separate border-spacing-y-1.5 border-spacing-x-0">
                             <TableBody>
-                                {paddingTop > 0 && (
-                                    <tr style={{ height: `${paddingTop}px` }} className="border-0 p-0 m-0">
-                                        <td className="w-10 sm:w-12 min-w-[40px] sm:min-w-[48px] max-w-[40px] sm:max-w-[48px] p-0 border-0" />
-                                        <td className="w-auto p-0 border-0" />
-                                        <td className={cn("p-0 border-0", showDirectActions ? "w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]" : "w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]")} />
-                                    </tr>
-                                )}
-                                {virtualRows.map((virtualRow) => {
-                                    const problem = problems[virtualRow.index];
-                                    if (!problem) return null;
-
-                                    return (
-                                        <ProblemRow
-                                            key={problem.id}
-                                            ref={rowVirtualizer.measureElement}
-                                            data-index={virtualRow.index}
-                                            problem={problem}
-                                            index={virtualRow.index}
-                                            showDirectActions={showDirectActions}
-                                            isBusy={isProblemBusy?.(problem.id)}
-                                            onToggleSolved={onToggleSolved}
-                                            onToggleRevisit={onToggleRevisit}
-                                            onToggleFavourite={onToggleFavourite}
-                                        />
-                                    );
-                                })}
-                                {paddingBottom > 0 && (
-                                    <tr style={{ height: `${paddingBottom}px` }} className="border-0 p-0 m-0">
-                                        <td className="w-10 sm:w-12 min-w-[40px] sm:min-w-[48px] max-w-[40px] sm:max-w-[48px] p-0 border-0" />
-                                        <td className="w-auto p-0 border-0" />
-                                        <td className={cn("p-0 border-0", showDirectActions ? "w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]" : "w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]")} />
-                                    </tr>
-                                )}
+                                {problems.map((problem, index) => (
+                                    <ProblemRow
+                                        key={problem.id}
+                                        problem={problem}
+                                        index={index}
+                                        showDirectActions={showDirectActions}
+                                        isBusy={isProblemBusy?.(problem.id)}
+                                        onToggleSolved={onToggleSolved}
+                                        onToggleRevisit={onToggleRevisit}
+                                        onToggleFavourite={onToggleFavourite}
+                                    />
+                                ))}
                                 {/* Infinite Scroll Skeleton Row Placeholders (Zero Layout Shift with Breathing Effect) */}
                                 {viewMode === 'infinite' && isFetchingNextPage && (
                                     <>

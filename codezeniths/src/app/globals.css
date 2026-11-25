@@ -1650,3 +1650,38 @@ select:-webkit-autofill:active {
   }
 }
 
+/* ==================== Skeleton Ecosystem Keyframes ==================== */
+@keyframes skeleton-breathe {
+  0%, 100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes skeleton-shimmer-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[skeleton-"] {
+    animation: none !important;
+  }
+}
+
+

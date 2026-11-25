@@ -110,9 +110,9 @@ export const BookmarkCard: React.FC<BookmarkCardProps> = ({
                     borderEffect: CardBorderEffect.GRADIENT_HOVER,
                 }}
                 className={cn(
-                    'group rounded-md bg-foreground-light dark:bg-foreground-dark',
+                    'group rounded-lg sm:rounded-md bg-foreground-light dark:bg-foreground-dark',
                     'hover:bg-linear-to-r hover:from-primary/8 hover:via-primary/2 hover:to-transparent',
-                    'p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:shadow-lg hover:shadow-primary/5',
+                    'p-4 xs:p-5 sm:p-6 flex flex-col justify-between shadow-xs hover:shadow-lg hover:shadow-primary/5',
                     'h-full cursor-pointer transition-all duration-300 relative overflow-hidden',
                     'border border-foreground-light-shade3 dark:border-foreground-dark-shade1',
                     'hover:border-primary/40 dark:hover:border-primary/40',
@@ -120,7 +120,7 @@ export const BookmarkCard: React.FC<BookmarkCardProps> = ({
                 )}
             >
                 {/* Top Subtle Ambient Glow */}
-                <div className="absolute top-0 right-0 w-36 h-36 bg-primary/5 dark:bg-primary/10 rounded-full blur-2xl pointer-events-none group-hover:bg-primary/10 dark:group-hover:bg-primary/15 transition-all duration-500" />
+                <div className="hidden sm:block absolute top-0 right-0 w-36 h-36 bg-primary/5 dark:bg-primary/10 rounded-full blur-2xl pointer-events-none group-hover:bg-primary/10 dark:group-hover:bg-primary/15 transition-all duration-500" />
 
                 <div className="space-y-4 relative z-10">
                     {/* Top Row: Left Type & Level Badges + Right Bookmark Action Button */}
@@ -186,7 +186,7 @@ export const BookmarkCard: React.FC<BookmarkCardProps> = ({
                             <Typography
                                 variant={TypographyVariant.H3}
                                 weight={TypographyWeight.BOLD}
-                                className="text-base sm:text-lg text-body-light-shade3 dark:text-body-dark group-hover:text-heading-light dark:group-hover:text-heading-dark transition-colors leading-tight truncate"
+                                className="text-sm xs:text-base sm:text-lg text-body-light-shade3 dark:text-body-dark group-hover:text-heading-light dark:group-hover:text-heading-dark transition-colors leading-tight truncate"
                             >
                                 {data.title}
                             </Typography>
@@ -197,7 +197,7 @@ export const BookmarkCard: React.FC<BookmarkCardProps> = ({
                                 {data.moduleTitle && (
                                     <>
                                         <span className="size-1 rounded-full bg-muted-light/60 dark:bg-muted-dark/60 shrink-0" />
-                                        <span className="text-[11px] text-muted-light/90 dark:text-muted-dark/90 truncate max-w-[130px] flex items-center gap-1">
+                                        <span className="text-[11px] text-muted-light/90 dark:text-muted-dark/90 truncate max-w-[100px] xs:max-w-[130px] sm:max-w-[160px] flex items-center gap-1">
                                             <Layers className="size-3 shrink-0 text-muted-light dark:text-muted-dark" />
                                             <span className="truncate">{data.moduleTitle}</span>
                                         </span>

@@ -82,7 +82,7 @@ export const ProblemsSection: React.FC<ProblemsSectionProps> = ({
     return (
         <div className={cn('w-full font-sans', className)}>
             <ProblemList
-                pageContext={pageContext === 'topic' ? 'explore' : pageContext}
+                pageContext={pageContext}
                 problems={problems}
                 total={total}
                 solvedCount={solvedCount}

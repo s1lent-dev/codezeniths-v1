@@ -35,7 +35,7 @@ export const ProblemsetSection: React.FC = () => {
             </div>
 
             {/* Desktop Right Sidebar Section (Only visible on lg: and up) */}
-            <div className="hidden lg:block lg:w-82.5 xl:w-90 shrink-0 space-y-6">
+            <div className="hidden lg:block lg:w-82.5 xl:w-90 shrink-0 space-y-6 sticky top-24 self-start">
                 <CalendarActivitySection />
                 <ProblemProgressSection />
                 <ResumeTopicSection />

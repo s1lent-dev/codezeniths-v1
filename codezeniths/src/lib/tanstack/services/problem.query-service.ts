@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useInfiniteQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient, QueryClient, keepPreviousData } from '@tanstack/react-query';
 import { trpcClient } from '@/lib/trpc/trpc/trpc.client';
 import { queryKeys } from '../query-keys';
 import { CACHE_TIERS } from '../cache-config';
@@ -223,6 +223,7 @@ export class ProblemQueryService implements IProblemQueryService {
                 return GetRecentlySolvedContextTRPCOutputSchema.parse(raw);
             },
             enabled: options?.enabled ?? true,
+            placeholderData: keepPreviousData,
             ...CACHE_TIERS.USER_PROGRESS,
         });
     }
@@ -239,6 +240,7 @@ export class ProblemQueryService implements IProblemQueryService {
                 return GetTrendingProblemsTRPCOutputSchema.parse(raw);
             },
             enabled: options?.enabled ?? true,
+            placeholderData: keepPreviousData,
             ...CACHE_TIERS.USER_PROGRESS,
         });
     }

@@ -26,7 +26,7 @@ export const BookmarksCardSkeleton: React.FC<BookmarksCardSkeletonProps> = ({
             <Card
                 variant={CardVariant.FLAT}
                 className={cn(
-                    'rounded-md bg-foreground-light dark:bg-foreground-dark p-6 sm:p-7 flex flex-col justify-between h-full border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-xs overflow-hidden relative group',
+                    'rounded-lg sm:rounded-md bg-foreground-light dark:bg-foreground-dark p-4 xs:p-5 sm:p-6 flex flex-col justify-between h-full border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-xs overflow-hidden relative group',
                     className
                 )}
             >
@@ -120,7 +120,7 @@ export const BookmarksGridSkeleton: React.FC<{ count?: number; className?: strin
     className,
 }) => {
     return (
-        <Grid cols={3} gap="lg" className={cn('w-full', className)}>
+        <Grid cols={3} className={cn('grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full', className)}>
             {Array.from({ length: count }).map((_, i) => (
                 <BookmarksCardSkeleton key={i} index={i} />
             ))}

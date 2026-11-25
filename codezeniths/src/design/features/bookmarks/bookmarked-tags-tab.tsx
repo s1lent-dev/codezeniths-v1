@@ -63,7 +63,7 @@ export const BookmarkedTagsTab: React.FC<BookmarkedTagsTabProps> = ({
             {/* Controls Bar: Capsule Search Input + Capsule Level Filter Tabber + Capsule Sort Selector */}
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pb-1">
                 {/* Search Input */}
-                <div className="relative w-full max-w-xs sm:max-w-sm">
+                <div className="relative w-full sm:max-w-xs md:max-w-sm">
                     <Search className="size-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-light dark:text-muted-dark pointer-events-none" />
                     <input
                         type="text"
@@ -85,9 +85,9 @@ export const BookmarkedTagsTab: React.FC<BookmarkedTagsTabProps> = ({
                 </div>
 
                 {/* Right: Level Filter Capsule Tabber + Sort Select */}
-                <div className="flex flex-wrap items-center justify-between md:justify-end gap-2.5 sm:gap-3 shrink-0">
+                <div className="flex flex-wrap items-center justify-between md:justify-end gap-2.5 sm:gap-3 shrink-0 w-full md:w-auto">
                     {/* Level Filter Capsule Tabber */}
-                    <div className="inline-flex items-center gap-1 p-1 rounded-full bg-foreground-light dark:bg-foreground-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-2xs overflow-x-auto scrollbar-none">
+                    <div className="inline-flex items-center gap-1 p-1 rounded-full bg-foreground-light dark:bg-foreground-dark border border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-2xs max-w-full overflow-x-auto scrollbar-none">
                         {levelOptions.map((opt) => {
                             const isActive = levelFilter === opt.id;
                             return (
@@ -96,7 +96,7 @@ export const BookmarkedTagsTab: React.FC<BookmarkedTagsTabProps> = ({
                                     type="button"
                                     onClick={() => onLevelFilterChange(opt.id)}
                                     className={cn(
-                                        'px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer select-none whitespace-nowrap',
+                                        'px-2.5 xs:px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer select-none whitespace-nowrap',
                                         isActive
                                             ? 'bg-primary text-white shadow-xs'
                                             : 'text-muted-light dark:text-muted-dark hover:text-body-light-shade3 dark:hover:text-body-dark hover:bg-foreground-light-shade2 dark:hover:bg-foreground-dark-shade2'
@@ -117,7 +117,7 @@ export const BookmarkedTagsTab: React.FC<BookmarkedTagsTabProps> = ({
                             value={sortBy}
                             onValueChange={(val) => onSortChange(val as BookmarksSortBy)}
                         >
-                            <SelectTrigger className="w-38 sm:w-44 h-9.5 rounded-full text-xs font-medium bg-foreground-light dark:bg-foreground-dark border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-2xs cursor-pointer focus:ring-1 focus:ring-primary">
+                            <SelectTrigger className="w-36 xs:w-38 sm:w-44 h-9.5 rounded-full text-xs font-medium bg-foreground-light dark:bg-foreground-dark border-foreground-light-shade3 dark:border-foreground-dark-shade1 shadow-2xs cursor-pointer focus:ring-1 focus:ring-primary">
                                 <SelectValue placeholder="Sort by" />
                             </SelectTrigger>
                             <SelectContent
@@ -202,7 +202,7 @@ export const BookmarkedTagsTab: React.FC<BookmarkedTagsTabProps> = ({
                     </div>
                 ) : (
                     /* Tag Cards Grid */
-                    <Grid cols={3} gap="lg" className="w-full">
+                    <Grid cols={3} className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
                         {tags.map((tag) => (
                             <BookmarkCard
                                 key={tag.id}
