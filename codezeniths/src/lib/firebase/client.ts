@@ -11,7 +11,7 @@ import {
   onMessage,
   Unsubscribe,
 } from 'firebase/messaging';
-import { ENV_CONFIG } from '@/config/config';
+import { CLIENT_ENV_CONFIG } from '@/config/client.config';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@codezeniths/modules';
 import { registerServiceWorker } from './worker/register-sw';
@@ -51,13 +51,13 @@ class FcmClientService {
 
     if (!this.app) {
       const firebaseConfig = {
-        apiKey: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_API_KEY,
-        authDomain: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-        projectId: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-        storageBucket: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-        appId: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_APP_ID,
-        measurementId: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+        apiKey: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_API_KEY,
+        authDomain: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+        projectId: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        storageBucket: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+        appId: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_APP_ID,
+        measurementId: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
       };
 
       this.app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
@@ -92,7 +92,7 @@ class FcmClientService {
     const swRegistration = await registerServiceWorker();
 
     await register(messaging, {
-      vapidKey: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY,
+      vapidKey: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY,
       ...(swRegistration ? { serviceWorkerRegistration: swRegistration } : {}),
     });
   }

@@ -23,7 +23,7 @@ export async function proxy(request: NextRequest) {
         const { data: sessionData, error } = await betterFetch<BetterAuthSession>(
             "/api/auth/get-session",
             {
-                baseURL: ENV_CONFIG.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+                baseURL: request.nextUrl.origin || ENV_CONFIG.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
                 headers: {
                     cookie: request.headers.get("cookie") || "",
                 },

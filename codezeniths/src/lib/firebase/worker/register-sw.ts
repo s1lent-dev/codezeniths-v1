@@ -1,8 +1,8 @@
-import { ENV_CONFIG } from '@/config/config';
+import { CLIENT_ENV_CONFIG } from '@/config/client.config';
 
 /**
  * Registers the Firebase Messaging Service Worker using client configuration
- * from ENV_CONFIG. Credentials are passed as query parameters so the config
+ * from CLIENT_ENV_CONFIG. Credentials are passed as query parameters so the config
  * doesn't need to be hardcoded into the static `/firebase-messaging-sw.js`
  * file.
  *
@@ -21,13 +21,13 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
 
   try {
     const queryParams = new URLSearchParams({
-      apiKey: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_API_KEY,
-      authDomain: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-      projectId: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      storageBucket: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-      appId: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_APP_ID,
-      measurementId: ENV_CONFIG.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || '',
+      apiKey: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_API_KEY,
+      authDomain: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      projectId: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      storageBucket: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+      appId: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_APP_ID,
+      measurementId: CLIENT_ENV_CONFIG.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || '',
     });
 
     const swUrl = `/firebase-messaging-sw.js?${queryParams.toString()}`;

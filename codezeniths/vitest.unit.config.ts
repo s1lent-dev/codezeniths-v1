@@ -4,6 +4,7 @@ import path from 'path';
 export default defineConfig({
   resolve: {
     alias: {
+      'server-only': path.resolve(__dirname, './node_modules/server-only/empty.js'),
       '@': path.resolve(__dirname, './src'),
       '@codezeniths/components': path.resolve(__dirname, './src/design/components/index.ts'),
       '@codezeniths/modules': path.resolve(__dirname, './src/design/modules'),
