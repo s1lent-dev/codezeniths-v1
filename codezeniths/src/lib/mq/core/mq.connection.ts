@@ -20,12 +20,24 @@ export interface IRestartableConsumer {
     restart(): Promise<void>;
 }
 
-class ConnectionManager {
+export class ConnectionManager {
     private connection: amqp.ChannelModel | null = null;
     private connecting: Promise<amqp.ChannelModel> | null = null;
     private reconnectTimer: NodeJS.Timeout | null = null;
     private readonly consumers = new Set<IRestartableConsumer>();
     private destroyed = false;
+
+    getConsumerCount(): number {
+        return this.consumers.size;
+    }
+
+    isConnected(): boolean {
+        return this.connection !== null;
+    }
+
+    isDestroyed(): boolean {
+        return this.destroyed;
+    }
 
     registerConsumer(consumer: IRestartableConsumer): void {
         this.consumers.add(consumer);
@@ -108,7 +120,14 @@ class ConnectionManager {
             try { await (this.connection as any).close(); } catch { /* ignore */ }
             this.connection = null;
         }
+        this.consumers.clear();
     }
 }
 
-export const mqConnectionManager = new ConnectionManager();
+const globalForMq = globalThis as unknown as { __mqConnectionManager?: ConnectionManager };
+
+export const mqConnectionManager = globalForMq.__mqConnectionManager ?? new ConnectionManager();
+
+if (process.env.NODE_ENV !== 'production') {
+    globalForMq.__mqConnectionManager = mqConnectionManager;
+}
