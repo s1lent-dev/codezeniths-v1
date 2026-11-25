@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
-import { usePathname } from 'next/navigation';
+import React, { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import MainLayout from './main-layout';
 import { Sidebar } from '@codezeniths/widgets';
 import { cn } from '@codezeniths/design/cn';
 import { ScrollArea } from '@codezeniths/components';
+import { useAuth } from '@/lib/auth/auth';
 
 export interface HomeLayoutProps {
     children: React.ReactNode;
@@ -13,9 +14,21 @@ export interface HomeLayoutProps {
 
 export const HomeLayout: React.FC<HomeLayoutProps> = ({ children }) => {
     const pathname = usePathname();
-    
+    const router = useRouter();
+    const { user, isLoading } = useAuth();
+
+    useEffect(() => {
+        if (!isLoading && user && user.isOnboardingComplete === false) {
+            router.replace('/complete-profile');
+        }
+    }, [user, isLoading, router]);
+
     // Exception: /profile/* and /problemset should not use the static sidebar layout
     const isNoSidebarRoute = pathname.startsWith('/profile') || pathname === '/problemset' || pathname.startsWith('/problemset');
+
+    if (!isLoading && user && user.isOnboardingComplete === false) {
+        return null;
+    }
 
     if (isNoSidebarRoute) {
         return (

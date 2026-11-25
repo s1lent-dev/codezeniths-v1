@@ -15,6 +15,10 @@ export default async function ProfileRedirectPage() {
         redirect('/sign-in');
     }
 
+    if (user.isOnboardingComplete === false) {
+        redirect('/complete-profile');
+    }
+
     if (user.username) {
         redirect(`/profile/${encodeURIComponent(user.username)}`);
     }

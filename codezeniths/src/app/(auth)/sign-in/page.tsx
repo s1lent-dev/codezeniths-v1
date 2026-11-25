@@ -1,8 +1,10 @@
 import { Signin } from '@/design/features/auth/signin-form';
-import React from 'react';
+import React, { Suspense } from 'react';
 
 export default function SignInPage() {
     return (
-        <Signin />
+        <Suspense fallback={null}>
+            <Signin />
+        </Suspense>
     );
 }

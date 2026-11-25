@@ -42,6 +42,8 @@ export function isOnboardingRoute(pathname: string): boolean {
 
 export const protectedRoutes = [
     '/explore',
+    '/problemset',
+    '/bookmarks',
     '/modules',
     '/tags',
     '/favourites',

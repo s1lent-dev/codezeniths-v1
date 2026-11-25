@@ -1,11 +1,25 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth/auth';
 import { Section, Container, Background, BackgroundVariant } from '@codezeniths/components';
 import { CompleteProfileForm } from './complete-profile-form';
 import { motion } from 'motion/react';
 
 export const CompleteProfile = () => {
+    const router = useRouter();
+    const { user, isLoading } = useAuth();
+
+    useEffect(() => {
+        if (!isLoading && user && user.isOnboardingComplete === true) {
+            router.replace('/explore');
+        }
+    }, [user, isLoading, router]);
+
+    if (!isLoading && user && user.isOnboardingComplete === true) {
+        return null;
+    }
     return (
         <Section className="relative w-full flex-1 my-auto flex flex-col items-center justify-center py-6 xs:py-8 sm:py-12 md:py-16 bg-background-light dark:bg-background-dark overflow-visible mt-20">
             <Container size="3xl" className="mx-auto px-2 xs:px-3 sm:px-6 lg:px-8 relative w-full h-full flex items-center justify-center">

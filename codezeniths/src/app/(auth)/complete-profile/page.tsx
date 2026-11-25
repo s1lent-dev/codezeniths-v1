@@ -1,4 +1,5 @@
 import { CompleteProfile } from '@/design/features/auth/complete-profile-form';
+import React, { Suspense } from 'react';
 
 export const metadata = {
     title: 'Complete Profile | CodeZeniths',
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function CompleteProfilePage() {
-    return <CompleteProfile />;
+    return (
+        <Suspense fallback={null}>
+            <CompleteProfile />
+        </Suspense>
+    );
 }

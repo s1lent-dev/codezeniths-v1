@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { isPublicRoute, isAuthRoute, isOnboardingRoute, isProtectedRoute } from '@/lib/routes';
-import { betterFetch } from '@better-fetch/fetch';
-import type { BetterAuthSession } from '@/lib/auth/auth.types';
+import { isAuthRoute, isOnboardingRoute, isProtectedRoute } from '@/lib/routes';
+import { getSessionCookie } from 'better-auth/cookies';
 
 export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Fast fail for static assets and ALL api routes to prevent deadlocks
+    // 1. Fast-pass static assets & API routes to prevent deadlocks and unnecessary overhead
     if (
         pathname.startsWith('/_next') ||
         pathname.startsWith('/api') ||
@@ -18,60 +17,34 @@ export async function proxy(request: NextRequest) {
     }
 
     try {
-        // Use betterFetch as recommended by Better Auth docs for middleware
-        const { data: sessionData, error } = await betterFetch<BetterAuthSession>(
-            "/api/auth/get-session",
-            {
-                baseURL: request.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-                headers: {
-                    cookie: request.headers.get("cookie") || "",
-                },
-            }
-        );
-
-        const session = sessionData?.session;
-        const user = sessionData?.user;
-        
-        const isAuthenticated = !!session;
-        const isOnboardingComplete = user?.isOnboardingComplete === true;
+        // 2. High-performance, zero-network edge check for session token existence
+        const sessionCookie = getSessionCookie(request);
+        const isAuthenticated = Boolean(sessionCookie);
 
         const isAuth = isAuthRoute(pathname);
-        const isOnboarding = isOnboardingRoute(pathname);
-        const isPublic = isPublicRoute(pathname) || pathname === '/';
         const isProtected = isProtectedRoute(pathname);
+        const isOnboarding = isOnboardingRoute(pathname);
 
-        // 1. Unauthenticated users trying to access protected or onboarding routes
+        // 3. Unauthenticated users trying to access protected or onboarding routes
         if (!isAuthenticated && (isProtected || isOnboarding)) {
             const loginUrl = new URL('/sign-in', request.url);
             loginUrl.searchParams.set('callbackUrl', pathname);
             return NextResponse.redirect(loginUrl);
         }
 
-        // 2. Authenticated users trying to access Auth routes (Signin/Signup)
+        // 4. Authenticated users trying to access auth pages (/sign-in, /sign-up)
         if (isAuthenticated && isAuth) {
-            // Redirect to home if profile is complete, otherwise to complete-profile
-            const redirectUrl = isOnboardingComplete ? '/explore' : '/complete-profile';
-            return NextResponse.redirect(new URL(redirectUrl, request.url));
-        }
-
-        // 3. Authenticated users with INCOMPLETE profiles trying to access Protected routes (like /explore)
-        if (isAuthenticated && !isOnboardingComplete && isProtected) {
-            return NextResponse.redirect(new URL('/complete-profile', request.url));
-        }
-
-        // 4. Authenticated users with COMPLETE profiles trying to access Onboarding routes
-        if (isAuthenticated && isOnboardingComplete && isOnboarding) {
             return NextResponse.redirect(new URL('/explore', request.url));
         }
 
-        // Fallback: allow the request to proceed
+        // 5. Fallback: allow request to proceed cleanly
         return NextResponse.next();
     } catch (error) {
         console.error('[PROXY ERROR]', error);
-        
+
         const isProtected = isProtectedRoute(pathname);
         const isOnboarding = isOnboardingRoute(pathname);
-        
+
         if (isProtected || isOnboarding) {
             return NextResponse.redirect(new URL('/sign-in', request.url));
         }

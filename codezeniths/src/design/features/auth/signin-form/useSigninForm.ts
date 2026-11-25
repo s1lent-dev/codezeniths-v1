@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@codezeniths/modules';
 import { authClient } from '@/lib/auth/auth';
 import { userQueryService } from '@/lib/tanstack/services/user.query-service';
@@ -12,6 +12,7 @@ import { SigninSchema, SigninFormValues } from './signin.types';
 export const useSigninForm = () => {
     const toast = useToast();
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const form = useForm<SigninFormValues>({
         resolver: zodResolver(SigninSchema),
@@ -118,7 +119,11 @@ export const useSigninForm = () => {
             if (res.error) throw new Error(res.error.message);
 
             toast.success('Signed in successfully!');
-            router.push('/explore');
+            const callbackUrl = searchParams.get('callbackUrl');
+            const targetUrl = callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('//')
+                ? callbackUrl
+                : '/explore';
+            router.push(targetUrl);
 
         } catch (error: any) {
             toast.error(error.message || 'Invalid credentials. Please try again.');
