@@ -10,6 +10,7 @@ import {
     ProblemSortingInput,
 } from '@codezeniths/schemas/db/queries/shared/problem-filter.schema';
 import { useDebounce } from '@/hooks/performance-hooks/useDebounce';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import {
     useReactTable,
     getCoreRowModel,
@@ -192,6 +193,60 @@ export const ProblemList: React.FC<ProblemListProps> = ({
         columns,
         getCoreRowModel: getCoreRowModel(),
     });
+
+    const tableContainerRef = useRef<HTMLDivElement>(null);
+    const [scrollMargin, setScrollMargin] = useState(0);
+
+    // Dynamically calculate the table's offset from the scroll container top (only on mount & viewport resize)
+    useEffect(() => {
+        const updateScrollMargin = () => {
+            if (!tableContainerRef.current) return;
+            const scrollViewport =
+                sentinelRef.current?.closest('[data-slot="scroll-area-viewport"]') ||
+                scrollAreaRef.current?.querySelector('[data-slot="scroll-area-viewport"]');
+
+            if (scrollViewport) {
+                const tableRect = tableContainerRef.current.getBoundingClientRect();
+                const viewportRect = scrollViewport.getBoundingClientRect();
+                const offset = tableRect.top - viewportRect.top + scrollViewport.scrollTop;
+                setScrollMargin(Math.max(0, offset));
+            }
+        };
+
+        updateScrollMargin();
+        window.addEventListener('resize', updateScrollMargin);
+        return () => window.removeEventListener('resize', updateScrollMargin);
+    }, [viewMode]);
+
+    // High-performance virtualizer with fixed 58px row sizing and deterministic offsets
+    const rowVirtualizer = useVirtualizer({
+        count: problems.length,
+        getScrollElement: () =>
+            sentinelRef.current?.closest('[data-slot="scroll-area-viewport"]') ||
+            scrollAreaRef.current?.querySelector('[data-slot="scroll-area-viewport"]') ||
+            null,
+        estimateSize: () => 58,
+        scrollMargin,
+        getItemKey: (index) => problems[index]?.id || index,
+        overscan: 8,
+    });
+
+    const virtualRows = rowVirtualizer.getVirtualItems();
+    const totalSize = rowVirtualizer.getTotalSize();
+
+    // Local top padding inside table (virtualRows[0].start includes scrollMargin, so subtract it)
+    const paddingTop =
+        virtualRows.length > 0 ? Math.max(0, virtualRows[0].start - scrollMargin) : 0;
+
+    // Local bottom end inside table (virtualRows[last].end includes scrollMargin, so subtract it)
+    const lastItemLocalEnd =
+        virtualRows.length > 0
+            ? virtualRows[virtualRows.length - 1].end - scrollMargin
+            : 0;
+
+    // Local bottom padding guarantees: paddingTop + renderedItemsHeight + paddingBottom === totalSize
+    const paddingBottom =
+        virtualRows.length > 0 ? Math.max(0, totalSize - lastItemLocalEnd) : 0;
 
     // Filter submit / clear helpers
     const handleSearchSubmit = (e: React.FormEvent) => {
@@ -673,23 +728,47 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                         )}
                     </div>
                 ) : (
-                    /* Infinite Scroll View Mode (Zero Layout Shift with Smooth Appending Rows) */
-                    <div className="space-y-4">
+                    /* Infinite Scroll View Mode (Zero Layout Shift Virtualized Table with Fixed 58px Sizing) */
+                    <div ref={tableContainerRef} className="space-y-4">
                         <Table className="w-full table-fixed border-separate border-spacing-y-1.5 border-spacing-x-0">
                             <TableBody>
-                                {problems.map((problem, index) => (
-                                    <ProblemRow
-                                        key={problem.id}
-                                        problem={problem}
-                                        index={index}
-                                        showDirectActions={showDirectActions}
-                                        isBusy={isProblemBusy?.(problem.id)}
-                                        onToggleSolved={onToggleSolved}
-                                        onToggleRevisit={onToggleRevisit}
-                                        onToggleFavourite={onToggleFavourite}
-                                    />
-                                ))}
-                                {/* Infinite Scroll Skeleton Row Placeholders (Zero Layout Shift with Breathing Effect) */}
+                                {paddingTop > 0 && (
+                                    <tr style={{ height: `${paddingTop}px` }} className="border-0 p-0 m-0">
+                                        <td
+                                            colSpan={3}
+                                            className="p-0 border-0 m-0"
+                                            style={{ height: `${paddingTop}px`, padding: 0, border: 0 }}
+                                        />
+                                    </tr>
+                                )}
+                                {virtualRows.map((virtualRow) => {
+                                    const problem = problems[virtualRow.index];
+                                    if (!problem) return null;
+
+                                    return (
+                                        <ProblemRow
+                                            key={problem.id}
+                                            data-index={virtualRow.index}
+                                            problem={problem}
+                                            index={virtualRow.index}
+                                            showDirectActions={showDirectActions}
+                                            isBusy={isProblemBusy?.(problem.id)}
+                                            onToggleSolved={onToggleSolved}
+                                            onToggleRevisit={onToggleRevisit}
+                                            onToggleFavourite={onToggleFavourite}
+                                        />
+                                    );
+                                })}
+                                {paddingBottom > 0 && (
+                                    <tr style={{ height: `${paddingBottom}px` }} className="border-0 p-0 m-0">
+                                        <td
+                                            colSpan={3}
+                                            className="p-0 border-0 m-0"
+                                            style={{ height: `${paddingBottom}px`, padding: 0, border: 0 }}
+                                        />
+                                    </tr>
+                                )}
+                                {/* Infinite Scroll Skeleton Row Placeholders */}
                                 {viewMode === 'infinite' && isFetchingNextPage && (
                                     <>
                                         {Array.from({ length: 3 }).map((_, idx) => (
