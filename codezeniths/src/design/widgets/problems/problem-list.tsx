@@ -731,14 +731,17 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                     /* Infinite Scroll View Mode (Zero Layout Shift Virtualized Table with Fixed 58px Sizing) */
                     <div ref={tableContainerRef} className="space-y-4">
                         <Table className="w-full table-fixed border-separate border-spacing-y-1.5 border-spacing-x-0">
+                            <colgroup>
+                                <col className="w-10 sm:w-12 min-w-[40px] sm:min-w-[48px] max-w-[40px] sm:max-w-[48px]" />
+                                <col className="w-auto" />
+                                <col className={cn(showDirectActions ? "w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]" : "w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]")} />
+                            </colgroup>
                             <TableBody>
                                 {paddingTop > 0 && (
                                     <tr style={{ height: `${paddingTop}px` }} className="border-0 p-0 m-0">
-                                        <td
-                                            colSpan={3}
-                                            className="p-0 border-0 m-0"
-                                            style={{ height: `${paddingTop}px`, padding: 0, border: 0 }}
-                                        />
+                                        <td className="w-10 sm:w-12 min-w-[40px] sm:min-w-[48px] max-w-[40px] sm:max-w-[48px] p-0 border-0" />
+                                        <td className="w-auto p-0 border-0 min-w-0" />
+                                        <td className={cn("p-0 border-0", showDirectActions ? "w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]" : "w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]")} />
                                     </tr>
                                 )}
                                 {virtualRows.map((virtualRow) => {
@@ -761,11 +764,9 @@ export const ProblemList: React.FC<ProblemListProps> = ({
                                 })}
                                 {paddingBottom > 0 && (
                                     <tr style={{ height: `${paddingBottom}px` }} className="border-0 p-0 m-0">
-                                        <td
-                                            colSpan={3}
-                                            className="p-0 border-0 m-0"
-                                            style={{ height: `${paddingBottom}px`, padding: 0, border: 0 }}
-                                        />
+                                        <td className="w-10 sm:w-12 min-w-[40px] sm:min-w-[48px] max-w-[40px] sm:max-w-[48px] p-0 border-0" />
+                                        <td className="w-auto p-0 border-0 min-w-0" />
+                                        <td className={cn("p-0 border-0", showDirectActions ? "w-36 xs:w-44 sm:w-56 min-w-[144px] xs:min-w-[176px] sm:min-w-[224px] max-w-[224px]" : "w-24 xs:w-28 sm:w-36 min-w-[96px] xs:min-w-[112px] sm:min-w-[144px] max-w-[144px]")} />
                                     </tr>
                                 )}
                                 {/* Infinite Scroll Skeleton Row Placeholders */}
